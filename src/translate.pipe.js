@@ -37,7 +37,7 @@ var TranslatePipe = (function () {
         this.updateValue(query);
         // subscribe to onLanguageChange event, in case the language changes
         this.translate.currentLoader.onLanguageChange.observer({
-            next: function (res) {
+            next: function () {
                 _this.updateValue(query);
             }
         });

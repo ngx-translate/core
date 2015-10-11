@@ -15,7 +15,7 @@ export class TranslatePipe implements PipeTransform {
         this.translate = translate;
     }
 
-    updateValue(key) {
+    updateValue(key: string) {
         this.translate.get(key).toPromise().then((res: string) => {
             this.value = res;
         });
@@ -37,7 +37,7 @@ export class TranslatePipe implements PipeTransform {
 
         // subscribe to onLanguageChange event, in case the language changes
         this.translate.currentLoader.onLanguageChange.observer({
-            next: res => {
+            next: () => {
                 this.updateValue(query);
             }
         });

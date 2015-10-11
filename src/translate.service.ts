@@ -9,8 +9,8 @@ interface SFLoaderParams {
 }
 
 interface Observable {
-    subscribe(next: Function, error: Function, dispose: Function);
-    unsubscribe();
+    subscribe(next: Function, error: Function, dispose: Function): any;
+    unsubscribe(): any;
     toPromise(): Promise<any>;
 }
 
@@ -35,7 +35,7 @@ class TranslateStaticLoader implements TranslateLoader {
         this.sfLoaderParams.suffix = suffix;
     }
 
-    public getTranslation(language): Observable {
+    public getTranslation(language: string): Observable {
         return this.http.get(`${this.sfLoaderParams.prefix}/${language}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
     }
@@ -74,7 +74,7 @@ export class TranslateService {
         } else { // we have this language, return an observable
             this.currentLanguage = language;
 
-            return Rx.Observable.create(observer => {
+            return Rx.Observable.create((observer: any) => {
                 observer.next();
                 observer.complete();
             });
@@ -102,14 +102,14 @@ export class TranslateService {
     get(key: string): Observable {
         // check if we are loading a new translation to use
         if (this.pending) {
-            return Rx.Observable.create(observer => {
+            return Rx.Observable.create((observer: any) => {
                 this.pending.toPromise().then((res: any) => {
                     observer.next(res[key] || '');
                     observer.complete();
                 });
             });
         } else {
-            return Rx.Observable.create(observer => {
+            return Rx.Observable.create((observer: any) => {
                 observer.next(this.translations[this.currentLanguage][key] || key);
                 observer.complete();
             });
