@@ -1,0 +1,30 @@
+{
+  "name": "ng2-translate",
+  "version": "0.0.1",
+  "description": "An implementation of angular translate for Angular 2",
+  "scripts": {
+    "tsd": "tsd link --config tsd.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocombe/ng2-translate.git"
+  },
+  "keywords": [
+    "angular",
+    "angular2",
+    "translate",
+    "i18n"
+  ],
+  "author": "Olivier Combe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ocombe/ng2-translate/issues"
+  },
+  "homepage": "https://github.com/ocombe/ng2-translate#readme",
+  "dependencies": {
+    "angular2": "~2.0.0-alpha.40"
+  },
+  "devDependencies": {
+    "tsd": "^0.6.5"
+  }
+}
