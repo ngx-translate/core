@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
         "noImplicitAny": true,
-        "module": "system",
+        "module": "commonjs",
         "target": "ES5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": true
+        "sourceMap": false
     },
     "exclude": [
         "node_modules"
