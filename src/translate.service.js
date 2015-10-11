@@ -16,22 +16,44 @@ var angular2_1 = require('angular2/angular2');
 var http_1 = require('angular2/http');
 var TranslateService = (function () {
     function TranslateService(http) {
+        this.defaultLanguage = 'en';
         this.translations = {};
+        this.method = 'static';
+        this.sfLoaderParams = { prefix: 'i18n/', suffix: '.json' };
         this.http = http;
-        var userLang = navigator.language.split('-')[0]; // use navigator lang if available
-        this.language = /(fr|en)/gi.test(userLang) ? userLang : 'en';
-        this.getTranslations(this.language);
     }
+    TranslateService.prototype.setDefault = function (language) {
+        this.defaultLanguage = language;
+    };
+    //todo use RxJS
+    TranslateService.prototype.use = function (language) {
+        var _this = this;
+        if (typeof this.translations[language] === "undefined") {
+            return this.getTranslations(language).then(function () {
+                return _this.currentLanguage = language;
+            });
+        }
+        else {
+            return Promise.resolve(this.currentLanguage = language);
+        }
+    };
+    TranslateService.prototype.useStaticFilesLoader = function (prefix, suffix) {
+        this.sfLoaderParams.prefix = prefix;
+        this.sfLoaderParams.suffix = suffix;
+    };
     TranslateService.prototype.getTranslations = function (language) {
         var _this = this;
-        this.pending = this.http.get("i18n/" + language + ".json")
-            .map(function (res) { return res.json(); }).toPromise().then(function (res) {
-            _this.translations = res;
-            _this.pending = undefined;
-            return res;
-        });
+        if (this.method === 'static') {
+            this.pending = this.http.get(this.sfLoaderParams.prefix + "/" + language + this.sfLoaderParams.suffix)
+                .map(function (res) { return res.json(); }).toPromise().then(function (res) {
+                _this.translations[language] = res;
+                _this.pending = undefined;
+                return res;
+            });
+        }
         return this.pending;
     };
+    //todo use RxJS
     TranslateService.prototype.get = function (key) {
         if (this.pending) {
             return this.pending.then(function (res) {
@@ -39,7 +61,7 @@ var TranslateService = (function () {
             });
         }
         else {
-            return Promise.resolve(this.translations[key] || key);
+            return Promise.resolve(this.translations[this.currentLanguage][key] || key);
         }
     };
     TranslateService = __decorate([
