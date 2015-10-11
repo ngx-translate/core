@@ -15,9 +15,9 @@ var http_1 = require('angular2/http');
 var Rx = require('@reactivex/rxjs/dist/cjs/Rx');
 var TranslateStaticLoader = (function () {
     function TranslateStaticLoader(http) {
+        this.onLanguageChange = new angular2_1.EventEmitter();
         this.sfLoaderParams = { prefix: 'i18n/', suffix: '.json' };
         this.http = http;
-        this.onLanguageChange = new angular2_1.EventEmitter();
     }
     TranslateStaticLoader.prototype.useStaticFilesLoader = function (prefix, suffix) {
         this.sfLoaderParams.prefix = prefix;
@@ -35,8 +35,8 @@ var TranslateStaticLoader = (function () {
 })();
 var TranslateService = (function () {
     function TranslateService(http) {
-        this.defaultLanguage = 'en';
         this.translations = {};
+        this.defaultLanguage = 'en';
         this.method = 'static';
         this.staticLoader = new TranslateStaticLoader(http);
         this.currentLoader = this.staticLoader;
@@ -75,6 +75,9 @@ var TranslateService = (function () {
         });
         return observable;
     };
+    TranslateService.prototype.setTranslation = function (language, translation) {
+        this.translations[language] = translation;
+    };
     TranslateService.prototype.get = function (key) {
         var _this = this;
         // check if we are loading a new translation to use
@@ -92,6 +95,10 @@ var TranslateService = (function () {
                 observer.complete();
             });
         }
+    };
+    TranslateService.prototype.set = function (key, value, language) {
+        if (language === void 0) { language = this.currentLanguage; }
+        this.translations[language][key] = value;
     };
     TranslateService = __decorate([
         angular2_1.Injectable(), 

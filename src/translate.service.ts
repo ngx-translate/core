@@ -23,13 +23,11 @@ interface TranslateLoader {
 @Injectable()
 class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
-    public onLanguageChange: any;
-    sfLoaderParams: SFLoaderParams = {prefix: 'i18n/', suffix: '.json'};
+    public onLanguageChange: EventEmitter = new EventEmitter();
+    private sfLoaderParams: SFLoaderParams = {prefix: 'i18n/', suffix: '.json'};
 
     constructor(http: Http) {
         this.http = http;
-
-        this.onLanguageChange = new EventEmitter();
     }
 
     public useStaticFilesLoader(prefix: string, suffix: string) {
@@ -47,9 +45,9 @@ class TranslateStaticLoader implements TranslateLoader {
 export class TranslateService {
     private pending: any;
     private staticLoader: any;
-    currentLanguage: string;
-    defaultLanguage: string = 'en';
-    translations: any = {};
+    private translations: any = {};
+    private currentLanguage: string;
+    private defaultLanguage: string = 'en';
     method: string = 'static';
     currentLoader: any;
 
@@ -97,6 +95,10 @@ export class TranslateService {
         return observable;
     }
 
+    setTranslation(language: string, translation: Object) {
+        this.translations[language] = translation;
+    }
+
     get(key: string): Observable {
         // check if we are loading a new translation to use
         if (this.pending) {
@@ -112,5 +114,9 @@ export class TranslateService {
                 observer.complete();
             });
         }
+    }
+
+    set(key: string, value: string, language: string = this.currentLanguage) {
+        this.translations[language][key] = value;
     }
 }
