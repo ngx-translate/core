@@ -43,11 +43,14 @@ export class AppComponent {
         var userLang = navigator.language.split('-')[0]; // use navigator lang if available
         userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
         
-        translate.setDefault('en'); // optional, default is "en"
-        translate.use(userLang); // the lang to use, if the lang isn't available, it will use the loader defined to get them
+         // optional, default is "en"
+        translate.setDefault('en');
+         // the lang to use, if the lang isn't available, it will use the loader defined to get them
+        translate.use(userLang);
         
         // if you manually want to get new translations, you can call this:
-        translate.getTranslations(userLang); // use the loader defined (static by default) to get the translations 
+        // use the loader defined (static by default) to get the translations
+        translate.getTranslations(userLang);
     }
 }
 ```
