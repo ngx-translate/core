@@ -1,6 +1,6 @@
 {
   "name": "ng2-translate",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "tsd": "tsd link --config tsd.json"
