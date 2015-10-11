@@ -15,16 +15,31 @@ export class TranslatePipe implements PipeTransform {
         this.translate = translate;
     }
 
+    updateValue(key) {
+        this.translate.get(key).toPromise().then((res: string) => {
+            this.value = res;
+        });
+    }
+
     transform(query: string, args: any[]): any {
         if (query.length === 0) {
             return query;
         }
+        // if we ask another time for the same key, return the last value
         if (this.lastKey && query === this.lastKey) {
             return this.value;
         }
+        // store the query, in case it changes
         this.lastKey = query;
-        this.translate.get(query).then((res: string) => {
-            this.value = res;
+
+        // set the value
+        this.updateValue(query);
+
+        // subscribe to onLanguageChange event, in case the language changes
+        this.translate.currentLoader.onLanguageChange.observer({
+            next: res => {
+                this.updateValue(query);
+            }
         });
 
         return this.value;

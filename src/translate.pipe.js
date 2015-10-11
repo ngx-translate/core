@@ -16,17 +16,30 @@ var TranslatePipe = (function () {
         this.value = '';
         this.translate = translate;
     }
+    TranslatePipe.prototype.updateValue = function (key) {
+        var _this = this;
+        this.translate.get(key).toPromise().then(function (res) {
+            _this.value = res;
+        });
+    };
     TranslatePipe.prototype.transform = function (query, args) {
         var _this = this;
         if (query.length === 0) {
             return query;
         }
+        // if we ask another time for the same key, return the last value
         if (this.lastKey && query === this.lastKey) {
             return this.value;
         }
+        // store the query, in case it changes
         this.lastKey = query;
-        this.translate.get(query).then(function (res) {
-            _this.value = res;
+        // set the value
+        this.updateValue(query);
+        // subscribe to onLanguageChange event, in case the language changes
+        this.translate.currentLoader.onLanguageChange.observer({
+            next: function (res) {
+                _this.updateValue(query);
+            }
         });
         return this.value;
     };

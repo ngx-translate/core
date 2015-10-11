@@ -7,7 +7,7 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-Then you need to add the reference to the typescript definitions if you want the type completion. Add this to your tsd.d.ts file (change the route if necessary):
+Then you need to add the reference to the typescript definitions if you want the type completion. Add this to your tsd.d.ts file (change the path if necessary):
 ```js
 /// <reference path="./node_modules/ng2-translate/index.d.ts" />
 ```
