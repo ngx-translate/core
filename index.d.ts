@@ -1,4 +1,6 @@
-/// <reference path="index.ts" />;
+/// <reference path="index.js.ts" />;
+
 declare module 'ng2-translate' {
-    export * from 'index';
+    import index = require("index");
+    export = index;
 }
