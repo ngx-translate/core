@@ -57,7 +57,7 @@ export class AppComponent {
 
 For now, only the static loader is available. You can configure it like this:
 ```js
-var prefix = 'assets/i118n/';
+var prefix = 'assets/i18n/';
 var suffix = '.json';
 translate.useStaticFilesLoader(prefix, suffix);
 ```
