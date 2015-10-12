@@ -50,7 +50,7 @@ export class AppComponent {
         
         // if you manually want to get new translations, you can call this:
         // use the loader defined (static by default) to get the translations
-        translate.getTranslations(userLang);
+        translate.getTranslation(userLang);
     }
 }
 ```
