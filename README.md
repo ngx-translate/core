@@ -71,4 +71,5 @@ Then put your translations in a json file that looks like this (for `en.json`):
 
 ## FAQ
 > Typescript gives me the error `TS2304: Cannot find name 'require'.`
+
 You need to install the typescript definitions for node: `tsd install node --save`
