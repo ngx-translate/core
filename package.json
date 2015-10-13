@@ -5,6 +5,12 @@
   "scripts": {
     "tsd": "tsd link --config tsd.json"
   },
+  "main": "index.js",
+  "typescript": {
+    "definition": [
+      "index.d.ts"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ocombe/ng2-translate.git"
