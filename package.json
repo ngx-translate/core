@@ -10,7 +10,7 @@
   "main": "index.js",
   "typescript": {
     "definition": [
-      "index.d.ts"
+      "ng2-translate.d.ts"
     ]
   },
   "repository": {
