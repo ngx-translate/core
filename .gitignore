@@ -33,3 +33,9 @@ Desktop.ini
 
 # Mac crap
 .DS_Store
+
+# ignore generated files
+index.js
+index.d.ts
+src/**/*.js
+src/**/*.d.ts

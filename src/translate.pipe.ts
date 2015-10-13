@@ -1,3 +1,4 @@
+/// <reference path="../typings/tsd.d.ts" />
 import {PipeTransform, Pipe, Injectable} from 'angular2/angular2';
 import {TranslateService} from "./translate.service";
 

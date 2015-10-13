@@ -7,6 +7,12 @@
   "installed": {
     "node/node.d.ts": {
       "commit": "3fc1377ce29dd9670975cb68615edf1b819fc4a5"
+    },
+    "es6-shim/es6-shim.d.ts": {
+      "commit": "14ab703f435375194360cdba3abab61afc879c18"
+    },
+    "jasmine/jasmine.d.ts": {
+      "commit": "14ab703f435375194360cdba3abab61afc879c18"
     }
   }
 }

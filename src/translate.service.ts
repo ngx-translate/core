@@ -1,3 +1,4 @@
+/// <reference path="../typings/tsd.d.ts" />
 import {Injectable, EventEmitter} from 'angular2/angular2';
 import {Http, Response, Headers, Request} from 'angular2/http';
 // doc: https://github.com/ReactiveX/RxJS/blob/master/doc/operator-creation.md
@@ -8,7 +9,7 @@ interface SFLoaderParams {
     suffix: string;
 }
 
-interface Observable {
+export interface Observable {
     subscribe(next: Function, error: Function, dispose: Function): any;
     unsubscribe(): any;
     toPromise(): Promise<any>;

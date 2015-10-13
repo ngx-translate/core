@@ -3,7 +3,15 @@
   "version": "0.0.3",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
-    "tsd": "tsd link --config tsd.json"
+    "tsd": "tsd link --config tsd.json",
+    "build": "tsc",
+    "prepublish": "npm run build"
+  },
+  "main": "index.js",
+  "typescript": {
+    "definition": [
+      "ng2-translate.d.ts"
+    ]
   },
   "repository": {
     "type": "git",

@@ -5,8 +5,14 @@
         "target": "ES5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": false
+        "sourceMap": false,
+        "declaration": true
     },
+    "files": [
+        "index.ts",
+        "src/translate.pipe.ts",
+        "src/translate.service.ts"
+    ],
     "exclude": [
         "node_modules"
     ]
