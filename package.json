@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
-    "tsd": "tsd link --config tsd.json"
+    "prepublish": "tsc"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,5 @@
   "dependencies": {
     "angular2": "~2.0.0-alpha.40"
   },
-  "devDependencies": {
-    "tsd": "^0.6.5"
-  }
+  "typings": "./index.d.ts"
 }

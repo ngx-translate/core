@@ -5,8 +5,12 @@
         "target": "ES5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": false
+        "sourceMap": false,
+        "declaration": true
     },
+    "files": [
+        "index.ts"
+    ],
     "exclude": [
         "node_modules"
     ]

@@ -1,7 +1,2 @@
-import {TranslatePipe} from './src/translate.pipe';
-import {TranslateService} from './src/translate.service';
-
-export {
-    TranslatePipe,
-    TranslateService
-};
+export * from './src/translate.pipe';
+export * from './src/translate.service';

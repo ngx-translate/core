@@ -7,6 +7,10 @@ manifest.mf
 build.xml
 node_modules/*
 npm-debug.log
+src/*.js
+src/*.d.ts
+index.js
+index.d.ts
 
 #################
 ## JetBrains
@@ -33,3 +37,4 @@ Desktop.ini
 
 # Mac crap
 .DS_Store
+
