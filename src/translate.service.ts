@@ -1,23 +1,17 @@
 import {Injectable, EventEmitter} from 'angular2/angular2';
 import {Http, Response, Headers, Request} from 'angular2/http';
 // doc: https://github.com/ReactiveX/RxJS/blob/master/doc/operator-creation.md
-var Rx = require('@reactivex/rxjs/dist/cjs/Rx');
+import {Observable} from '@reactivex/rxjs/dist/cjs/Rx';
 
 interface SFLoaderParams {
     prefix: string;
     suffix: string;
 }
 
-export interface Observable {
-    subscribe(next: Function, error: Function, dispose: Function): any;
-    unsubscribe(): any;
-    toPromise(): Promise<any>;
-}
-
 interface TranslateLoader {
     onLanguageChange: EventEmitter;
 
-    getTranslation(language: string): Observable;
+    getTranslation(language: string): Observable<any>;
 }
 
 @Injectable()
@@ -35,7 +29,7 @@ class TranslateStaticLoader implements TranslateLoader {
         this.sfLoaderParams.suffix = suffix;
     }
 
-    public getTranslation(language: string): Observable {
+    public getTranslation(language: string): Observable<any> {
         return this.http.get(`${this.sfLoaderParams.prefix}/${language}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
     }
@@ -60,7 +54,7 @@ export class TranslateService {
         this.defaultLanguage = language;
     }
 
-    use(language: string): Observable {
+    use(language: string): Observable<any> {
         // check if this language is available
         if (typeof this.translations[language] === "undefined") {
             // not available, ask for it
@@ -74,14 +68,14 @@ export class TranslateService {
         } else { // we have this language, return an observable
             this.currentLanguage = language;
 
-            return Rx.Observable.create((observer: any) => {
+            return Observable.create((observer: any) => {
                 observer.next();
                 observer.complete();
             });
         }
     }
 
-    getTranslation(language: string): Observable {
+    getTranslation(language: string): Observable<any> {
         var observable = this.currentLoader.getTranslation(language);
 
         observable.toPromise().then((res: Object) => {
@@ -99,17 +93,17 @@ export class TranslateService {
         this.translations[language] = translation;
     }
 
-    get(key: string): Observable {
+    get(key: string) {
         // check if we are loading a new translation to use
         if (this.pending) {
-            return Rx.Observable.create((observer: any) => {
+            return Observable.create((observer: any) => {
                 this.pending.toPromise().then((res: any) => {
                     observer.next(res[key] || '');
                     observer.complete();
                 });
             });
         } else {
-            return Rx.Observable.create((observer: any) => {
+            return Observable.create((observer: any) => {
                 observer.next(this.translations[this.currentLanguage][key] || key);
                 observer.complete();
             });
