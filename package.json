@@ -25,7 +25,7 @@
     "@reactivex/rxjs": "^5.0.0-alpha.4",
     "angular2": "~2.0.0-alpha.42"
   },
-  "typings": "./index.d.ts",
+  "typings": "./ng2-translate.d.ts",
   "devDependencies": {
     "typescript": "^1.6.2"
   }

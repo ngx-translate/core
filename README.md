@@ -7,14 +7,11 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-If you use SystemJS to load your files, update your config with this:
+If you use SystemJS to load your files, you might have to update your config with this:
 ```js
 System.config({
     packages: {
         "/ng2-translate": {"defaultExtension": "js"}
-    },
-    map: {
-        'ng2-translate': 'ng2-translate/index.js'
     }
 });
 ```
@@ -22,7 +19,7 @@ System.config({
 Finally, you can use ng2-translate in your Angular 2 project:
 ```js
 import {Component, Injectable} from 'angular2/angular2';
-import {TranslateService, TranslatePipe} from 'ng2-translate';
+import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 
 @Injectable()
 @Component({

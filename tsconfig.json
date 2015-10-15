@@ -9,7 +9,7 @@
         "declaration": true
     },
     "files": [
-        "index.ts"
+        "ng2-translate.ts"
     ],
     "exclude": [
         "node_modules"
