@@ -3,7 +3,8 @@
   "version": "0.0.5",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "install": "tsc"
   },
   "repository": {
     "type": "git",
