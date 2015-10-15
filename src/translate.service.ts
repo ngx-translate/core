@@ -8,7 +8,7 @@ interface SFLoaderParams {
     suffix: string;
 }
 
-interface Observable {
+export interface Observable {
     subscribe(next: Function, error: Function, dispose: Function): any;
     unsubscribe(): any;
     toPromise(): Promise<any>;
