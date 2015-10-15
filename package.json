@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
-    "prepublish": "tsc"
+    "postinstall": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/ocombe/ng2-translate#readme",
   "dependencies": {
-    "angular2": "~2.0.0-alpha.40"
+    "angular2": "~2.0.0-alpha.40",
+    "typescript": "^1.6.2"
   },
   "typings": "./index.d.ts"
 }
