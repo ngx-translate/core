@@ -1,6 +1,6 @@
 {
   "name": "ng2-translate",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "prepublish": "tsc"
