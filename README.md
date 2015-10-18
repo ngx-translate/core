@@ -1,5 +1,7 @@
 # ng2-translate
-An implementation of angular translate for Angular 2
+An implementation of angular translate for Angular 2.
+
+Simple example using ng2-translate: https://github.com/ocombe/ng2-play/tree/ng2-translate-test
 
 ## Installation
 First you need to install the npm module:
@@ -7,7 +9,7 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-If you use SystemJS to load your files, you might have to update your config with this:
+If you use SystemJS to load your files, you might have to update your config with this if you don't use `defaultJSExtensions: true`:
 ```js
 System.config({
     packages: {
@@ -16,7 +18,7 @@ System.config({
 });
 ```
 
-Finally, you can use ng2-translate in your Angular 2 project:
+Finally, you can use ng2-translate in your Angular 2 project (be sure that you've loaded the angular2/http bundle as well):
 ```js
 import {Component, Injectable} from 'angular2/angular2';
 import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
@@ -24,7 +26,7 @@ import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 @Injectable()
 @Component({
     selector: 'app',
-    bindings: [TranslateService],
+    providers: [TranslateService],
     template: `
         <div>{{ 'HELLO' | translate }} world</div>
     `,
@@ -61,7 +63,9 @@ Then put your translations in a json file that looks like this (for `en.json`):
 }
 ```
 
-## FAQ
-> Typescript gives me the error `TS2304: Cannot find name 'require'.`
-
-You need to install the typescript definitions for node: `tsd install node --save`
+But you can also define your translations manually instead of using `getTranslation`:
+```js
+translate.setTranslation('en', {
+    'HELLO': 'hello'
+});
+```
