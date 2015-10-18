@@ -7,10 +7,9 @@ manifest.mf
 build.xml
 node_modules/*
 npm-debug.log
-src/*.js
-src/*.d.ts
-ng2-translate.js
-ng2-translate.d.ts
+*.js
+*.map
+*.d.ts
 
 #################
 ## JetBrains
