@@ -18,15 +18,25 @@ System.config({
 });
 ```
 
-Finally, you can use ng2-translate in your Angular 2 project (be sure that you've loaded the angular2/http bundle as well):
+Finally, you can use ng2-translate in your Angular 2 project (be sure that you've loaded the angular2/http bundle as well).
+It is recommended to instantiate `TranslateService` in the bootstrap of your application and to never add it to the "providers" property of your components, this way you will keep it as a singleton.
+If you add it to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized.
+
 ```js
+import {HTTP_PROVIDERS} from 'angular2/http';
+
+bootstrap(AppComponent, [
+    HTTP_PROVIDERS,
+    TranslateService
+]);
+
+
 import {Component, Injectable} from 'angular2/angular2';
 import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 
 @Injectable()
 @Component({
     selector: 'app',
-    providers: [TranslateService],
     template: `
         <div>{{ 'HELLO' | translate }} world</div>
     `,
