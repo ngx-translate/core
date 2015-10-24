@@ -9,15 +9,12 @@ interface SFLoaderParams {
 }
 
 interface TranslateLoader {
-    onLanguageChange: EventEmitter;
-
-    getTranslation(language: string): Observable<any>;
+    getTranslation(lang: string): Observable<any>;
 }
 
 @Injectable()
 class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
-    public onLanguageChange: EventEmitter = new EventEmitter();
     private sfLoaderParams: SFLoaderParams = {prefix: 'i18n/', suffix: '.json'};
 
     constructor(http: Http) {
@@ -29,8 +26,8 @@ class TranslateStaticLoader implements TranslateLoader {
         this.sfLoaderParams.suffix = suffix;
     }
 
-    public getTranslation(language: string): Observable<any> {
-        return this.http.get(`${this.sfLoaderParams.prefix}/${language}${this.sfLoaderParams.suffix}`)
+    public getTranslation(lang: string): Observable<any> {
+        return this.http.get(`${this.sfLoaderParams.prefix}/${lang}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
     }
 }
@@ -107,11 +104,11 @@ export class TranslateService {
     private pending: any;
     private staticLoader: any;
     private translations: any = {};
-    private currentLanguage: string;
-    private defaultLanguage: string = 'en';
+    private defaultLang: string = 'en';
     private parser: TranslateParser;
-    method: string = 'static';
-    currentLoader: any;
+    public currentLang: string;
+    public currentLoader: any;
+    public onLangChange: EventEmitter = new EventEmitter();
 
     constructor(http: Http) {
         this.staticLoader = new TranslateStaticLoader(http);
@@ -119,44 +116,50 @@ export class TranslateService {
         this.parser = new TranslateParser();
     }
 
-    setDefault(language: string) {
-        this.defaultLanguage = language;
+    setDefault(lang: string) {
+        this.defaultLang = lang;
     }
 
-    use(language: string): Observable<any> {
-        // check if this language is available
-        if(typeof this.translations[language] === "undefined") {
-            // not available, ask for it
-            this.pending = this.getTranslation(language);
+    private changeLang(lang: string) {
+        this.currentLang = lang;
+        this.onLangChange.next(this.translations[lang]);
+    }
 
-            this.pending.subscribe(() => {
-                this.currentLanguage = language;
+    use(lang: string): Observable<any> {
+        // check if this language is available
+        if(typeof this.translations[lang] === "undefined") {
+            // not available, ask for it
+            this.pending = this.getTranslation(lang);
+
+            this.pending.subscribe((res: any) => {
+                this.changeLang(lang);
             });
 
             return this.pending;
         } else { // we have this language, return an observable
-            this.currentLanguage = language;
+            this.changeLang(lang);
 
-            return Observable.of(this.translations[language]);
+            return Observable.of(this.translations[lang]);
         }
     }
 
-    getTranslation(language: string): Observable<any> {
-        var observable = this.currentLoader.getTranslation(language);
+    getTranslation(lang: string): Observable<any> {
+        var observable = this.currentLoader.getTranslation(lang);
 
         observable.subscribe((res: Object) => {
-            this.translations[language] = res;
+            this.translations[lang] = res;
             this.pending = undefined;
-            if(this.currentLoader.onLanguageChange) {
-                this.currentLoader.onLanguageChange.next(res);
-            }
         });
 
         return observable;
     }
 
-    setTranslation(language: string, translation: Object) {
-        this.translations[language] = translation;
+    setTranslation(lang: string, translation: Object) {
+        this.translations[lang] = translation;
+    }
+
+    getLangs() {
+        return Object.keys(this.translations);
     }
 
     get(key: string, interpolateParams?: Object): Observable<string> {
@@ -164,11 +167,11 @@ export class TranslateService {
         if(this.pending) {
             return this.pending.map((res: any) => this.parser.interpolate(res[key], interpolateParams) || key);
         } else {
-            return Observable.of(this.parser.interpolate(this.translations[this.currentLanguage][key], interpolateParams) || key);
+            return Observable.of(this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) || key);
         }
     }
 
-    set(key: string, value: string, language: string = this.currentLanguage) {
-        this.translations[language][key] = value;
+    set(key: string, value: string, lang: string = this.currentLang) {
+        this.translations[lang][key] = value;
     }
 }
