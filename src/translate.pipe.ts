@@ -15,8 +15,8 @@ export class TranslatePipe implements PipeTransform {
         this.translate = translate;
     }
 
-    updateValue(key: string) {
-        this.translate.get(key).subscribe((res: string) => {
+    updateValue(key: string, interpolateParams?: Object) {
+        this.translate.get(key, interpolateParams).subscribe((res: string) => {
             this.value = res;
         });
     }
@@ -29,16 +29,31 @@ export class TranslatePipe implements PipeTransform {
         if (this.lastKey && query === this.lastKey) {
             return this.value;
         }
+
+        var interpolateParams: Object;
+        if(args.length && args[0] !== null) {
+            if(typeof args[0] === 'string' && args[0].length) {
+                // we accept objects written in the template such as {n:1}, which is why we might need to change it to real JSON objects such as {"n":1}
+                try {
+                    interpolateParams = JSON.parse(args[0].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '));
+                } catch(e) {
+                    throw new SyntaxError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`);
+                }
+            } else if(typeof args[0] === 'object' && !Array.isArray(args[0])) {
+                interpolateParams = args[0];
+            }
+        }
+
         // store the query, in case it changes
         this.lastKey = query;
 
         // set the value
-        this.updateValue(query);
+        this.updateValue(query, interpolateParams);
 
         // subscribe to onLanguageChange event, in case the language changes
         this.translate.currentLoader.onLanguageChange.observer({
             next: () => {
-                this.updateValue(query);
+                this.updateValue(query, interpolateParams);
             }
         });
 

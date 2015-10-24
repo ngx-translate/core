@@ -38,7 +38,7 @@ import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 @Component({
     selector: 'app',
     template: `
-        <div>{{ 'HELLO' | translate }} world</div>
+        <div>{{ 'HELLO_WORLD' | translate:'{value: "world"}' }} world</div>
     `,
     pipes: [TranslatePipe]
 })
@@ -49,12 +49,9 @@ export class AppComponent {
         
          // optional, default is "en"
         translate.setDefault('en');
-         // the lang to use, if the lang isn't available, it will use the loader defined to get them
-        translate.use(userLang);
         
-        // if you manually want to get new translations, you can call this:
-        // use the loader defined (static by default) to get the translations
-        translate.getTranslation(userLang);
+         // the lang to use, if the lang isn't available, it will use the current loader to get them
+        translate.use(userLang);
     }
 }
 ```
@@ -69,13 +66,18 @@ translate.useStaticFilesLoader(prefix, suffix);
 Then put your translations in a json file that looks like this (for `en.json`):
 ```json
 {
-    "HELLO": "Hello"
+    "HELLO_WORLD": "hello {{value}}"
 }
+```
+
+An then you can get new translations like this:
+```js
+    translate.getTranslation(userLang);
 ```
 
 But you can also define your translations manually instead of using `getTranslation`:
 ```js
 translate.setTranslation('en', {
-    'HELLO': 'hello'
+    "HELLO_WORLD": "hello {{value}}"
 });
 ```
