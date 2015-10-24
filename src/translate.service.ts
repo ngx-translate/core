@@ -60,7 +60,7 @@ export class TranslateService {
             // not available, ask for it
             this.pending = this.getTranslation(language);
 
-            this.pending.toPromise().then(() => {
+            this.pending.subscribe(() => {
                 this.currentLanguage = language;
             });
 
@@ -68,17 +68,14 @@ export class TranslateService {
         } else { // we have this language, return an observable
             this.currentLanguage = language;
 
-            return Observable.create((observer: any) => {
-                observer.next();
-                observer.complete();
-            });
+            return Observable.of(this.translations[language]);
         }
     }
 
     getTranslation(language: string): Observable<any> {
         var observable = this.currentLoader.getTranslation(language);
 
-        observable.toPromise().then((res: Object) => {
+        observable.subscribe((res: Object) => {
             this.translations[language] = res;
             this.pending = undefined;
             if (this.currentLoader.onLanguageChange) {
@@ -93,20 +90,12 @@ export class TranslateService {
         this.translations[language] = translation;
     }
 
-    get(key: string) {
+    get(key: string): Observable<string> {
         // check if we are loading a new translation to use
         if (this.pending) {
-            return Observable.create((observer: any) => {
-                this.pending.toPromise().then((res: any) => {
-                    observer.next(res[key] || '');
-                    observer.complete();
-                });
-            });
+            return this.pending.map((res: any) => res[key] || '');
         } else {
-            return Observable.create((observer: any) => {
-                observer.next(this.translations[this.currentLanguage][key] || key);
-                observer.complete();
-            });
+            return Observable.of(this.translations[this.currentLanguage][key] || key);
         }
     }
 

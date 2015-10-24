@@ -16,7 +16,7 @@ export class TranslatePipe implements PipeTransform {
     }
 
     updateValue(key: string) {
-        this.translate.get(key).toPromise().then((res: string) => {
+        this.translate.get(key).subscribe((res: string) => {
             this.value = res;
         });
     }
