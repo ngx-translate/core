@@ -52,7 +52,7 @@ export class TranslatePipe implements PipeTransform {
 
         // subscribe to onLangChange event, in case the language changes
         this.translate.onLangChange.observer({
-            next: () => {
+            next: (params: {lang: string, translations: any}) => {
                 this.updateValue(query, interpolateParams);
             }
         });

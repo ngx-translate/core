@@ -18,7 +18,7 @@ System.config({
 });
 ```
 
-Finally, you can use ng2-translate in your Angular 2 project (be sure that you've loaded the angular2/http bundle as well).
+Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the angular2/http bundle as well).
 It is recommended to instantiate `TranslateService` in the bootstrap of your application and to never add it to the "providers" property of your components, this way you will keep it as a singleton.
 If you add it to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized.
 
@@ -48,7 +48,7 @@ export class AppComponent {
         userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
         
          // optional, default is "en"
-        translate.setDefault('en');
+        translate.setDefaultLang('en');
         
          // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use(userLang);
@@ -81,3 +81,45 @@ translate.setTranslation('en', {
     "HELLO_WORLD": "hello {{value}}"
 });
 ```
+
+## API
+### TranslateService
+#### Properties:
+- `currentLang`: The lang currently used
+- `currentLoader`: An instance of the loader currently used (static loader by default)
+- `onLangChange`: An EventEmitter to listen to lang changes events
+    
+    example:
+	```js
+    onLangChange.observer({
+      next: (params: {lang: string, translations: any}) => {
+        // do something
+      }
+    });
+    ```
+    
+#### Methods:
+- `useStaticFilesLoader()`: Use a static files loader
+- `setDefaultLang(lang: string)`: Sets the default language to use ('en' by default)
+- `use(lang: string): Observable<any>`: Changes the lang currently used
+- `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
+- `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
+- `getLangs()`: Returns an array of currently available langs
+- `get(key: string, interpolateParams?: Object): Observable<string>`: Gets the translated value of a key
+- `set(key: string, value: string, lang?: string)`: 
+
+### TranslatePipe
+You can call the TranslatePipe with some optional parameters that will be transpolated into the translation for the given key.
+
+Example:
+```html
+<p>Say {{ 'HELLO_WORLD' | translate:'{value: "world"}' }}</p>
+```
+
+With the given translation: `"HELLO_WORLD": "hello {{value}}"`.
+
+### Parser
+#### Methods:
+- `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
+	
+    `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`

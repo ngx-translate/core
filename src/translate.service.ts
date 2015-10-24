@@ -2,11 +2,7 @@ import {Injectable, EventEmitter} from 'angular2/angular2';
 import {Http, Response, Headers, Request} from 'angular2/http';
 // doc: https://github.com/ReactiveX/RxJS/blob/master/doc/operator-creation.md
 import {Observable} from '@reactivex/rxjs/dist/cjs/Rx';
-
-interface SFLoaderParams {
-    prefix: string;
-    suffix: string;
-}
+import {Parser} from "./translate.parser";
 
 interface TranslateLoader {
     getTranslation(lang: string): Observable<any>;
@@ -15,17 +11,27 @@ interface TranslateLoader {
 @Injectable()
 class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
-    private sfLoaderParams: SFLoaderParams = {prefix: 'i18n/', suffix: '.json'};
+    private sfLoaderParams = {prefix: 'i18n/', suffix: '.json'};
 
     constructor(http: Http) {
         this.http = http;
     }
 
-    public useStaticFilesLoader(prefix: string, suffix: string) {
+    /**
+     * Defines the prefix & suffix used for getTranslation
+     * @param prefix
+     * @param suffix
+     */
+    public configure(prefix: string, suffix: string) {
         this.sfLoaderParams.prefix = prefix;
         this.sfLoaderParams.suffix = suffix;
     }
 
+    /**
+     * Gets the translations from the server
+     * @param lang
+     * @returns {any}
+     */
     public getTranslation(lang: string): Observable<any> {
         return this.http.get(`${this.sfLoaderParams.prefix}/${lang}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
@@ -33,99 +39,63 @@ class TranslateStaticLoader implements TranslateLoader {
 }
 
 @Injectable()
-export class TranslateParser {
-    templateMatcher: RegExp = /{{([^{}]*)}}/g;
-
-    /**
-     * Flattens an object
-     * { key1: { keyA: 'valueI' }} ==> { 'key1.keyA': 'valueI' }
-     * @param target
-     * @returns {any}
-     */
-    private flattenObject(target: Object): Object {
-        var delimiter = '.';
-        var maxDepth: number;
-        var currentDepth = 1;
-        var output: any = {};
-
-        function step(object: any, prev?: string) {
-            Object.keys(object).forEach(function (key) {
-                var value = object[key];
-                var isarray = Array.isArray(value);
-                var type = Object.prototype.toString.call(value);
-                var isobject = (
-                    type === "[object Object]" ||
-                    type === "[object Array]"
-                );
-
-                var newKey = prev
-                    ? prev + delimiter + key
-                    : key;
-
-                maxDepth = currentDepth + 1;
-
-                if(!isarray && isobject && Object.keys(value).length && currentDepth < maxDepth) {
-                    ++currentDepth;
-                    return step(value, newKey)
-                }
-
-                output[newKey] = value
-            })
-        }
-
-        step(target);
-
-        return output;
-    }
-
-    /**
-     * Interpolates a string to replace parameters
-     * "This is a {{ param }}" ==> "This is a value"
-     * @param expr
-     * @param params
-     * @returns {string}
-     */
-    interpolate(expr: string, params?: any): string {
-        if(!params) {
-            return expr;
-        } else {
-            params = this.flattenObject(params);
-        }
-
-        return expr.replace(this.templateMatcher, function (substring: string, b: string): string {
-            var r = params[b];
-            return typeof r !== 'undefined' ? r : substring;
-        });
-    }
-}
-
-@Injectable()
 export class TranslateService {
     private pending: any;
-    private staticLoader: any;
     private translations: any = {};
     private defaultLang: string = 'en';
-    private parser: TranslateParser;
+    private parser: Parser = new Parser();
+
+    /**
+     * The lang currently used
+     */
     public currentLang: string;
+
+    /**
+     * An instance of the loader currently used
+     */
     public currentLoader: any;
+
+    /**
+     * An EventEmitter to listen to lang changes events
+     * onLangChange.observer({
+     *   next: (params: {lang: string, translations: any}) => {
+     *     // do something
+     *   }
+     * });
+     * @type {ng.EventEmitter}
+     */
     public onLangChange: EventEmitter = new EventEmitter();
 
-    constructor(http: Http) {
-        this.staticLoader = new TranslateStaticLoader(http);
-        this.currentLoader = this.staticLoader;
-        this.parser = new TranslateParser();
+    constructor(private http: Http) {
+        this.useStaticFilesLoader();
     }
 
-    setDefault(lang: string) {
+    /**
+     * Use a static files loader
+     */
+    public useStaticFilesLoader() {
+        this.currentLoader = new TranslateStaticLoader(this.http);
+    }
+
+    /**
+     * Sets the default language to use ('en' by default)
+     * @param lang
+     */
+    public setDefaultLang(lang: string) {
         this.defaultLang = lang;
     }
 
     private changeLang(lang: string) {
         this.currentLang = lang;
-        this.onLangChange.next(this.translations[lang]);
+        this.onLangChange.next({lang: lang, translations: this.translations[lang]});
     }
 
-    use(lang: string): Observable<any> {
+    /**
+     * Changes the lang currently used
+     * @param lang
+     * @returns {Observable<*>}
+     */
+    public use(lang: string): Observable<any> {
         // check if this language is available
         if(typeof this.translations[lang] === "undefined") {
             // not available, ask for it
@@ -143,7 +113,12 @@ export class TranslateService {
         }
     }
 
-    getTranslation(lang: string): Observable<any> {
+    /**
+     * Gets an object of translations for a given language with the current loader
+     * @param lang
+     * @returns {Observable<*>}
+     */
+    public getTranslation(lang: string): Observable<any> {
         var observable = this.currentLoader.getTranslation(lang);
 
         observable.subscribe((res: Object) => {
@@ -154,15 +129,30 @@ export class TranslateService {
         return observable;
     }
 
-    setTranslation(lang: string, translation: Object) {
-        this.translations[lang] = translation;
+    /**
+     * Manually sets an object of translations for a given language
+     * @param lang
+     * @param translations
+     */
+    public setTranslation(lang: string, translations: Object) {
+        this.translations[lang] = translations;
     }
 
-    getLangs() {
+    /**
+     * Returns an array of currently available langs
+     * @returns {any}
+     */
+    public getLangs() {
         return Object.keys(this.translations);
     }
 
-    get(key: string, interpolateParams?: Object): Observable<string> {
+    /**
+     * Gets the translated value of a key
+     * @param key
+     * @param interpolateParams
+     * @returns {any}
+     */
+    public get(key: string, interpolateParams?: Object): Observable<string> {
         // check if we are loading a new translation to use
         if(this.pending) {
             return this.pending.map((res: any) => this.parser.interpolate(res[key], interpolateParams) || key);
@@ -171,7 +161,13 @@ export class TranslateService {
         }
     }
 
-    set(key: string, value: string, lang: string = this.currentLang) {
+    /**
+     * Sets the translated value of a key
+     * @param key
+     * @param value
+     * @param lang
+     */
+    public set(key: string, value: string, lang: string = this.currentLang) {
         this.translations[lang][key] = value;
     }
 }
