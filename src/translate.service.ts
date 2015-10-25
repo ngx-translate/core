@@ -48,7 +48,7 @@ export class TranslateService {
     /**
      * The lang currently used
      */
-    public currentLang: string;
+    public currentLang: string = this.defaultLang;
 
     /**
      * An instance of the loader currently used
@@ -168,7 +168,7 @@ export class TranslateService {
         if(this.pending) {
             return this.pending.map((res: any) => this.parser.interpolate(res[key], interpolateParams) || key);
         } else {
-            return Observable.of(this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) || key);
+            return Observable.of(this.translations && this.translations[this.currentLang] ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key);
         }
     }
 
