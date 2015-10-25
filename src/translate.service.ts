@@ -99,13 +99,13 @@ export class TranslateService {
         // check if this language is available
         if(typeof this.translations[lang] === "undefined") {
             // not available, ask for it
-            this.pending = this.getTranslation(lang);
+            var pending = this.getTranslation(lang);
 
-            this.pending.subscribe((res: any) => {
+            pending.subscribe((res: any) => {
                 this.changeLang(lang);
             });
 
-            return this.pending;
+            return pending;
         } else { // we have this language, return an observable
             this.changeLang(lang);
 
@@ -121,12 +121,22 @@ export class TranslateService {
     public getTranslation(lang: string): Observable<any> {
         var observable = this.currentLoader.getTranslation(lang);
 
-        observable.subscribe((res: Object) => {
-            this.translations[lang] = res;
-            this.pending = undefined;
+        // todo use share() on observable instead of this hack once Angular 2 has been updated to RxJS 5.0.0.alpha-6 and remove this
+        this.pending = Observable.create((subscriber: any) => {
+            var timeoutId = setTimeout(() => {
+                if(typeof observable === 'undefined') {
+                    clearTimeout(timeoutId);
+                    subscriber.next(this.translations[lang]);
+                }
+            }, 30);
         });
 
-        return observable;
+        observable.subscribe((res: Object) => {
+            this.translations[lang] = res;
+            observable = undefined;
+        });
+
+        return this.pending;
     }
 
     /**
