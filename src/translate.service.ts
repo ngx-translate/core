@@ -134,6 +134,7 @@ export class TranslateService {
         observable.subscribe((res: Object) => {
             this.translations[lang] = res;
             observable = undefined;
+            this.pending = undefined;
         });
 
         return this.pending;
