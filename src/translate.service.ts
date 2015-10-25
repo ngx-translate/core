@@ -123,9 +123,9 @@ export class TranslateService {
 
         // todo use share() on observable instead of this hack once Angular 2 has been updated to RxJS 5.0.0.alpha-6 and remove this
         this.pending = Observable.create((subscriber: any) => {
-            var timeoutId = setTimeout(() => {
+            var intervalId = setInterval(() => {
                 if(typeof observable === 'undefined') {
-                    clearTimeout(timeoutId);
+                    clearTimeout(intervalId);
                     subscriber.next(this.translations[lang]);
                 }
             }, 30);
