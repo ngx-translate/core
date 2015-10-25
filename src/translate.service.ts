@@ -11,7 +11,7 @@ interface TranslateLoader {
 @Injectable()
 class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
-    private sfLoaderParams = {prefix: 'i18n/', suffix: '.json'};
+    private sfLoaderParams = {prefix: 'i18n', suffix: '.json'};
 
     constructor(http: Http) {
         this.http = http;
