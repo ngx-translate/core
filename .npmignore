@@ -8,6 +8,7 @@ build.xml
 node_modules/*
 npm-debug.log
 *.ts
+!*.d.ts
 
 #################
 ## JetBrains
