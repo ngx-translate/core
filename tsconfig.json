@@ -5,7 +5,7 @@
         "target": "ES5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "declaration": true
     },
     "files": [
