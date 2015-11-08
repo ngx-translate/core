@@ -1,5 +1,5 @@
 export class Parser {
-    templateMatcher: RegExp = /{{([^{}]*)}}/g;
+    templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
     /**
      * Flattens an object
