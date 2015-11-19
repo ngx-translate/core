@@ -24,8 +24,8 @@
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "dependencies": {
-    "@reactivex/rxjs": "^5.0.0-alpha.4",
-    "angular2": "~2.0.0-alpha.42"
+    "@reactivex/rxjs": "^5.0.0-alpha.6",
+    "angular2": "^2.0.0-alpha.46"
   },
   "devDependencies": {
     "typescript": "^1.6.2"

@@ -51,10 +51,8 @@ export class TranslatePipe implements PipeTransform {
         this.updateValue(query, interpolateParams);
 
         // subscribe to onLangChange event, in case the language changes
-        this.translate.onLangChange.observer({
-            next: (params: {lang: string, translations: any}) => {
-                this.updateValue(query, interpolateParams);
-            }
+        this.translate.onLangChange.subscribe((params: {lang: string, translations: any}) => {
+            this.updateValue(query, interpolateParams);
         });
 
         return this.value;

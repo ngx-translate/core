@@ -91,11 +91,9 @@ translate.setTranslation('en', {
     
     example:
 	```js
-    onLangChange.observer({
-      next: (params: {lang: string, translations: any}) => {
-        // do something
-      }
-    });
+    onLangChange.subscribe((params: {lang: string, translations: any}) => {
+	  // do something
+	});
     ```
     
 #### Methods:

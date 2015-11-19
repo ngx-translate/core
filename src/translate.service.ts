@@ -5,7 +5,7 @@ import {Observable} from '@reactivex/rxjs/dist/cjs/Rx';
 import {Parser} from "./translate.parser";
 
 interface TranslateLoader {
-    getTranslation(lang: string): Observable<any>;
+    getTranslation(lang: string): any;
 }
 
 @Injectable()
@@ -32,7 +32,7 @@ class TranslateStaticLoader implements TranslateLoader {
      * @param lang
      * @returns {any}
      */
-    public getTranslation(lang: string): Observable<any> {
+    public getTranslation(lang: string): any {
         return this.http.get(`${this.sfLoaderParams.prefix}/${lang}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
     }
@@ -57,14 +57,12 @@ export class TranslateService {
 
     /**
      * An EventEmitter to listen to lang changes events
-     * onLangChange.observer({
-     *   next: (params: {lang: string, translations: any}) => {
+     * onLangChange.subscribe((params: {lang: string, translations: any}) => {
      *     // do something
-     *   }
      * });
      * @type {ng.EventEmitter}
      */
-    public onLangChange: EventEmitter = new EventEmitter();
+    public onLangChange: EventEmitter<any> = new EventEmitter();
 
     constructor(private http: Http) {
         this.useStaticFilesLoader();
@@ -118,22 +116,11 @@ export class TranslateService {
      * @param lang
      * @returns {Observable<*>}
      */
-    public getTranslation(lang: string): Observable<any> {
-        var observable = this.currentLoader.getTranslation(lang);
+    public getTranslation(lang: string): any {
+        this.pending = this.currentLoader.getTranslation(lang).share();
 
-        // todo use share() on observable instead of this hack once Angular 2 has been updated to RxJS 5.0.0.alpha-6 and remove this
-        this.pending = Observable.create((subscriber: any) => {
-            var intervalId = setInterval(() => {
-                if(typeof observable === 'undefined') {
-                    clearTimeout(intervalId);
-                    subscriber.next(this.translations[lang]);
-                }
-            }, 30);
-        });
-
-        observable.subscribe((res: Object) => {
+        this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
-            observable = undefined;
             this.pending = undefined;
         });
 
