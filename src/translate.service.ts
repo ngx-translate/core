@@ -13,7 +13,8 @@ class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
     private sfLoaderParams = {prefix: 'i18n', suffix: '.json'};
 
-    constructor(http: Http) {
+    constructor(http: Http, prefix: string, suffix: string) {
+        this.configure(prefix, suffix);
         this.http = http;
     }
 
@@ -23,8 +24,8 @@ class TranslateStaticLoader implements TranslateLoader {
      * @param suffix
      */
     public configure(prefix: string, suffix: string) {
-        this.sfLoaderParams.prefix = prefix;
-        this.sfLoaderParams.suffix = suffix;
+        this.sfLoaderParams.prefix = prefix ? prefix : this.sfLoaderParams.prefix;
+        this.sfLoaderParams.suffix = suffix ? suffix : this.sfLoaderParams.suffix;
     }
 
     /**
@@ -71,8 +72,8 @@ export class TranslateService {
     /**
      * Use a static files loader
      */
-    public useStaticFilesLoader() {
-        this.currentLoader = new TranslateStaticLoader(this.http);
+    public useStaticFilesLoader(prefix?: string, suffix?: string) {
+        this.currentLoader = new TranslateStaticLoader(this.http, prefix, suffix);
     }
 
     /**
