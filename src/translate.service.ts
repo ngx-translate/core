@@ -1,8 +1,8 @@
 import {Injectable, EventEmitter} from 'angular2/angular2';
-import {Http, Response, Headers, Request} from 'angular2/http';
+import {Http, Response} from 'angular2/http';
 // doc: https://github.com/ReactiveX/RxJS/blob/master/doc/operator-creation.md
 import {Observable} from '@reactivex/rxjs/dist/cjs/Rx';
-import {Parser} from "./translate.parser";
+import {Parser} from './translate.parser';
 
 interface TranslateLoader {
     getTranslation(lang: string): any;
@@ -14,8 +14,8 @@ class TranslateStaticLoader implements TranslateLoader {
     private sfLoaderParams = {prefix: 'i18n', suffix: '.json'};
 
     constructor(http: Http, prefix: string, suffix: string) {
-        this.configure(prefix, suffix);
         this.http = http;
+        this.configure(prefix, suffix);
     }
 
     /**
@@ -41,11 +41,6 @@ class TranslateStaticLoader implements TranslateLoader {
 
 @Injectable()
 export class TranslateService {
-    private pending: any;
-    private translations: any = {};
-    private defaultLang: string = 'en';
-    private parser: Parser = new Parser();
-
     /**
      * The lang currently used
      */
@@ -64,6 +59,11 @@ export class TranslateService {
      * @type {ng.EventEmitter}
      */
     public onLangChange: EventEmitter<any> = new EventEmitter();
+
+    private pending: any;
+    private translations: any = {};
+    private defaultLang: string = 'en';
+    private parser: Parser = new Parser();
 
     constructor(private http: Http) {
         this.useStaticFilesLoader();
@@ -84,11 +84,6 @@ export class TranslateService {
         this.defaultLang = lang;
     }
 
-    private changeLang(lang: string) {
-        this.currentLang = lang;
-        this.onLangChange.next({lang: lang, translations: this.translations[lang]});
-    }
-
     /**
      * Changes the lang currently used
      * @param lang
@@ -96,7 +91,7 @@ export class TranslateService {
      */
     public use(lang: string): Observable<any> {
         // check if this language is available
-        if(typeof this.translations[lang] === "undefined") {
+        if(typeof this.translations[lang] === 'undefined') {
             // not available, ask for it
             var pending = this.getTranslation(lang);
 
@@ -156,7 +151,8 @@ export class TranslateService {
         if(this.pending) {
             return this.pending.map((res: any) => this.parser.interpolate(res[key], interpolateParams) || key);
         } else {
-            return Observable.of(this.translations && this.translations[this.currentLang] ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key);
+            return Observable.of(this.translations && this.translations[this.currentLang]
+              ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key);
         }
     }
 
@@ -169,4 +165,10 @@ export class TranslateService {
     public set(key: string, value: string, lang: string = this.currentLang) {
         this.translations[lang][key] = value;
     }
+
+    private changeLang(lang: string) {
+      this.currentLang = lang;
+      this.onLangChange.next({lang: lang, translations: this.translations[lang]});
+    }
+
 }
