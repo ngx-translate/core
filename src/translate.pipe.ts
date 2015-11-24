@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable} from 'angular2/angular2';
-import {TranslateService} from "./translate.service";
+import {TranslateService} from './translate.service';
 
 @Injectable()
 @Pipe({
@@ -17,7 +17,7 @@ export class TranslatePipe implements PipeTransform {
 
     updateValue(key: string, interpolateParams?: Object) {
         this.translate.get(key, interpolateParams).subscribe((res: string) => {
-            this.value = res;
+            this.value = res ? res : key;
         });
     }
 
@@ -33,7 +33,8 @@ export class TranslatePipe implements PipeTransform {
         var interpolateParams: Object;
         if(args.length && args[0] !== null) {
             if(typeof args[0] === 'string' && args[0].length) {
-                // we accept objects written in the template such as {n:1}, which is why we might need to change it to real JSON objects such as {"n":1}
+                // we accept objects written in the template such as {n:1},
+                // which is why we might need to change it to real JSON objects such as {"n":1}
                 try {
                     interpolateParams = JSON.parse(args[0].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '));
                 } catch(e) {

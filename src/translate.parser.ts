@@ -1,6 +1,27 @@
 export class Parser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
+
+    /**
+     * Interpolates a string to replace parameters
+     * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
+     * @param expr
+     * @param params
+     * @returns {string}
+     */
+    interpolate(expr: string, params?: any): string {
+      if(!params) {
+        return expr;
+      } else {
+        params = this.flattenObject(params);
+      }
+
+      return expr.replace(this.templateMatcher, function (substring: string, b: string): string {
+        var r = params[b];
+        return typeof r !== 'undefined' ? r : substring;
+      });
+    }
+
     /**
      * Flattens an object
      * { key1: { keyA: 'valueI' }} ==> { 'key1.keyA': 'valueI' }
@@ -22,11 +43,11 @@ export class Parser {
 
                 if(!Array.isArray(value) && typeof value === 'object' && Object.keys(value).length && currentDepth < maxDepth) {
                     ++currentDepth;
-                    return step(value, newKey)
+                    return step(value, newKey);
                 }
 
-                output[newKey] = value
-            })
+                output[newKey] = value;
+            });
         }
 
         step(target);
@@ -34,23 +55,4 @@ export class Parser {
         return output;
     }
 
-    /**
-     * Interpolates a string to replace parameters
-     * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
-     * @param expr
-     * @param params
-     * @returns {string}
-     */
-    interpolate(expr: string, params?: any): string {
-        if(!params) {
-            return expr;
-        } else {
-            params = this.flattenObject(params);
-        }
-
-        return expr.replace(this.templateMatcher, function (substring: string, b: string): string {
-            var r = params[b];
-            return typeof r !== 'undefined' ? r : substring;
-        });
-    }
 }
