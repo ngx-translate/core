@@ -1,13 +1,13 @@
 {
   "name": "ng2-translate",
-  "version": "1.1.6",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ocombe/ng2-translate.git"
+    "url": "https://github.com/ocombe/ng2-translate.git"
   },
   "keywords": [
     "angular",
@@ -28,6 +28,7 @@
     "angular2": "^2.0.0-alpha.46"
   },
   "devDependencies": {
+    "semantic-release": "^4.3.5",
     "typescript": "^1.6.2"
   }
 }
