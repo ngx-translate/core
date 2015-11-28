@@ -2,6 +2,7 @@
   "name": "ng2-translate",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
+    "commit": "git-cz",
     "prepublish": "tsc",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -28,7 +29,12 @@
     "angular2": "^2.0.0-alpha.46"
   },
   "devDependencies": {
+    "commitizen": "^2.4.6",
+    "cz-conventional-changelog": "^1.1.4",
     "semantic-release": "^4.3.5",
     "typescript": "^1.6.2"
+  },
+  "czConfig": {
+    "path": "node_modules/cz-conventional-changelog"
   }
 }
