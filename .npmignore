@@ -9,6 +9,7 @@ node_modules/*
 npm-debug.log
 *.ts
 !*.d.ts
+tests
 
 #################
 ## JetBrains
