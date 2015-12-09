@@ -25,9 +25,9 @@ module.exports = function(config) {
             'node_modules/systemjs/dist/system.src.js',
             'node_modules/reflect-metadata/Reflect.js',
 
-            { pattern: 'node_modules/angular2/**/*.js', included: false, watched: false },
-            { pattern: 'node_modules/@reactivex/rxjs/dist/**/*.js', included: false, watched: false },
-            { pattern: 'node_modules/systemjs/dist/system-polyfills.js', included: false, watched: false }, // PhantomJS2 (and possibly others) might require it
+            { pattern: 'node_modules/angular2/**/*.js', included: false, watched: false, served: true },
+            { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false, served: true },
+            { pattern: 'node_modules/systemjs/dist/system-polyfills.js', included: false, watched: false, served: true }, // PhantomJS2 (and possibly others) might require it
 
             { pattern: 'src/**/*.js', included: false, watched: true }, // source files
             { pattern: 'tests/**/*.spec.js', included: false, watched: true }, // test files
@@ -75,7 +75,7 @@ module.exports = function(config) {
         singleRun: true,
 
         // Concurrency level
-        // how many browser should be started simultaneous
+        // how many browser should be started simultanous
         concurrency: Infinity
     })
 };
