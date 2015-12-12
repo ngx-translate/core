@@ -10,9 +10,9 @@ __karma__.loaded = function() {};
 System.config({
     baseURL: '/base/',
     defaultJSExtensions: true,
-    paths: {
-        'angular2/*': 'node_modules/angular2/*.js',
-        'rxjs/*': 'node_modules/rxjs/*.js'
+    map: {
+        'angular2': 'node_modules/angular2',
+        'rxjs': 'node_modules/rxjs'
     }
 });
 
