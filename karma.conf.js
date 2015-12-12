@@ -7,11 +7,9 @@ module.exports = function(config) {
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: './',
 
-
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['jasmine'],
-
 
         // list of files / patterns to load in the browser
         files: [
@@ -29,18 +27,27 @@ module.exports = function(config) {
             { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false, served: true },
             { pattern: 'node_modules/systemjs/dist/system-polyfills.js', included: false, watched: false, served: true }, // PhantomJS2 (and possibly others) might require it
 
-            { pattern: 'src/**/*.js', included: false, watched: true }, // source files
-            { pattern: 'tests/**/*.spec.js', included: false, watched: true }, // test files
+            { pattern: 'src/**/*.ts', included: false, watched: true }, // source files
+            { pattern: 'tests/**/*.ts', included: false, watched: true }, // test files
 
             'karma-test-shim.js'
         ],
-
 
         // list of files to exclude
         exclude: [
             'node_modules/angular2/**/*_spec.js'
         ],
 
+        preprocessors: {
+            '**/*.ts': ['typescript']
+        },
+
+        typescriptPreprocessor: {
+            options: require('./tsconfig.json').compilerOptions,
+            typings: [
+                "node_modules/angular2/typings/jasmine/jasmine.d.ts"
+            ]
+        },
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
@@ -51,24 +58,19 @@ module.exports = function(config) {
         // web server port
         port: 9876,
 
-
         // enable / disable colors in the output (reporters and logs)
         colors: true,
-
 
         // level of logging
         // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
         logLevel: config.LOG_INFO,
 
-
         // enable / disable watching file and executing tests whenever any file changes
         autoWatch: false,
-
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome'],
-
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits

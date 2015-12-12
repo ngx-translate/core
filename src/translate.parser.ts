@@ -26,7 +26,7 @@ export class Parser {
      * Flattens an object
      * { key1: { keyA: 'valueI' }} ==> { 'key1.keyA': 'valueI' }
      * @param target
-     * @returns {any}
+     * @returns {Object}
      */
     private flattenObject(target: Object): Object {
         var delimiter = '.';
