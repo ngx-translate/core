@@ -26,8 +26,12 @@
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "dependencies": {
-    "rxjs": "5.0.0-alpha.11",
-    "angular2": "2.0.0-alpha.48"
+    "angular2": "2.0.0-alpha.52",
+    "es6-promise": "^3.0.2",
+    "es6-shim": "^0.33.3",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-alpha.14",
+    "zone.js": "0.5.8"
   },
   "devDependencies": {
     "commitizen": "~2.4.6",
@@ -40,7 +44,7 @@
     "karma-jasmine": "~0.3.6",
     "semantic-release": "~4.3.5",
     "systemjs": "~0.19.6",
-    "typescript": "~1.6.2"
+    "typescript": "~1.7.3"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
