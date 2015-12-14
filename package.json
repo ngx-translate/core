@@ -26,7 +26,7 @@
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "dependencies": {
-    "angular2": "2.0.0-alpha.52",
+    "angular2": "2.0.0-alpha.53",
     "es6-promise": "^3.0.2",
     "es6-shim": "^0.33.3",
     "reflect-metadata": "0.1.2",
