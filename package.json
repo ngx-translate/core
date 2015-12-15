@@ -26,17 +26,16 @@
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "dependencies": {
-    "angular2": "2.0.0-alpha.53",
+    "angular2": "~2.0.0-beta.0",
     "es6-promise": "^3.0.2",
     "es6-shim": "^0.33.3",
     "reflect-metadata": "0.1.2",
-    "rxjs": "5.0.0-alpha.14",
-    "zone.js": "0.5.8"
+    "rxjs": "5.0.0-beta.0",
+    "zone.js": "~0.5.10"
   },
   "devDependencies": {
     "commitizen": "~2.4.6",
     "cz-conventional-changelog": "~1.1.4",
-    "es6-shim": "~0.33.13",
     "jasmine-core": "~2.3.4",
     "karma": "~0.13.15",
     "karma-chrome-launcher": "~0.2.2",

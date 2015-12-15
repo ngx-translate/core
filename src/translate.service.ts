@@ -65,6 +65,7 @@ export class TranslateService {
     private pending: any;
     private translations: any = {};
     private defaultLang: string = 'en';
+    private langs: Array<string>;
     private parser: Parser = new Parser();
 
     constructor(private http: Http) {
@@ -119,6 +120,7 @@ export class TranslateService {
 
         this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
+            this.updateLangs();
             this.pending = undefined;
         });
 
@@ -132,6 +134,7 @@ export class TranslateService {
      */
     public setTranslation(lang: string, translations: Object) {
         this.translations[lang] = translations;
+        this.updateLangs();
     }
 
     /**
@@ -139,7 +142,14 @@ export class TranslateService {
      * @returns {any}
      */
     public getLangs() {
-        return Object.keys(this.translations);
+        return this.langs;
+    }
+
+    /**
+     * Update the list of available langs
+     */
+    private updateLangs() {
+        this.langs = Object.keys(this.translations);
     }
 
     /**
@@ -166,6 +176,7 @@ export class TranslateService {
      */
     public set(key: string, value: string, lang: string = this.currentLang) {
         this.translations[lang][key] = value;
+        this.updateLangs();
     }
 
     private changeLang(lang: string) {

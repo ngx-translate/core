@@ -6,8 +6,12 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "declaration": true
+        "declaration": true,
+        "moduleResolution": "node"
     },
+    "files": [
+        "ng2-translate.ts"
+    ],
     "exclude": [
         "node_modules"
     ]
