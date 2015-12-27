@@ -3,6 +3,7 @@ import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable'
 import 'rxjs/add/observable/fromArray.js';
 import 'rxjs/add/operator/share.js';
+import 'rxjs/add/operator/map.js';
 
 import {Parser} from './translate.parser';
 
