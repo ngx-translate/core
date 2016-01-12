@@ -174,24 +174,22 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any}
      */
-    public getAll = function (keys : Array<string>, interpolateParams?: Object) {
+    public getAll = function (keys : Array<string>, interpolateParams?: Object) : Observable<Object> {
         // check if we are loading a new translation to use
         if (this.pending) {
             return this.pending.map((res: any) => {
-		var result:Object = {};
-		for(i:number = 0; i < keys.length; i++){
-			var key = keys[i];
-			result[key] = this.parser.interpolate(res[key], interpolateParams) || key;
-		}
-	     return result;
-            });
-        }
+            var result:any = {};
+            for (var key of keys) {
+                result[key] = this.parser.interpolate(res[key], interpolateParams) || key;
+            }
+            return result;
+                });
+            }
         else {
-		result:Object = {};
-		for(i:number = 0; i < keys.length; i++){
-			var key = keys[i];
-                	result[key] =  this.translations && this.translations[this.currentLang] ? 
-                       			this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams)  : key|| key;
+		    var result:any = {};
+            for (var key of keys) {
+                    result[key] =  this.translations && this.translations[this.currentLang] ? 
+                                this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams)  : key|| key;
             }
             return Observable.of(result);
         }
