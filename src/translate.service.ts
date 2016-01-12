@@ -168,6 +168,35 @@ export class TranslateService {
               ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key);
         }
     }
+    /**
+     * Gets the translated values of a list of keys
+     * @param key
+     * @param interpolateParams
+     * @returns {any}
+     */
+    public getAll = function (keys, interpolateParams) {
+        var _this = this;
+        // check if we are loading a new translation to use
+        if (this.pending) {
+            return this.pending.map(function (res) {
+				var result = {};
+					for(var i=0; i < keys.length; i++){
+						var key = keys[i];
+						result[key] = _this.parser.interpolate(res[key], interpolateParams) || key;
+					}
+			     return result;
+            });
+        }
+        else {
+			var result = {};
+			for(var i=0; i < keys.length; i++){
+				var key = keys[i];
+                result[key] =  this.translations && this.translations[this.currentLang] ? 
+                                        this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams)  : key|| key;
+            }
+            return Observable_1.Observable.of(result);
+        }
+    };
 
     /**
      * Sets the translated value of a key
