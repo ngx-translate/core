@@ -105,7 +105,7 @@ translate.setTranslation('en', {
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
 - `getLangs()`: Returns an array of currently available langs
-- `get(key: string, interpolateParams?: Object): Observable<string>`: Gets the translated value of a key
+- `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
 - `set(key: string, value: string, lang?: string)`: 
 
 ### TranslatePipe

@@ -154,18 +154,39 @@ export class TranslateService {
     }
 
     /**
-     * Gets the translated value of a key
+     * Gets the translated value of a key (or an array of keys)
      * @param key
      * @param interpolateParams
-     * @returns {any}
+     * @returns {any} the translated key, or an object of translated keys
      */
-    public get(key: string, interpolateParams?: Object): Observable<string> {
+    public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
         // check if we are loading a new translation to use
         if(this.pending) {
-            return this.pending.map((res: any) => this.parser.interpolate(res[key], interpolateParams) || key);
+            return this.pending.map((res: any) => {
+                var result: any,
+                    getTranslation = (key: any) => this.parser.interpolate(res[key], interpolateParams) || key;
+                if(key instanceof Array) {
+                    result = {};
+                    for (var k of key) {
+                        result[k] = getTranslation(k);
+                    }
+                } else {
+                    result = getTranslation(key);
+                }
+                return result;
+            });
         } else {
-            return Observable.of(this.translations && this.translations[this.currentLang]
-              ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key);
+            var result: any,
+                getTranslation = (key: any) => this.translations && this.translations[this.currentLang] ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key;
+            if(key instanceof Array) {
+                result = {};
+                for (var k of key) {
+                    result[k] = getTranslation(k);
+                }
+            } else {
+                result = getTranslation(key);
+            }
+            return Observable.of(result);
         }
     }
 
@@ -181,8 +202,8 @@ export class TranslateService {
     }
 
     private changeLang(lang: string) {
-      this.currentLang = lang;
-      this.onLangChange.next({lang: lang, translations: this.translations[lang]});
+        this.currentLang = lang;
+        this.onLangChange.next({lang: lang, translations: this.translations[lang]});
     }
 
 }
