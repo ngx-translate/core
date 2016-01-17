@@ -3,6 +3,7 @@
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "test": "tsc && karma start",
+    "test-watch": "tsc && karma start --no-single-run --auto-watch",
     "commit": "git-cz",
     "prepublish": "tsc",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
@@ -25,12 +26,12 @@
   "main": "ng2-translate.js",
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
-  "dependencies": {
+  "peerDependencies": {
     "angular2": "~2.0.0-beta.0",
-    "es6-promise": "^3.0.2",
-    "es6-shim": "^0.33.3",
-    "reflect-metadata": "0.1.2",
-    "rxjs": "5.0.0-beta.0",
+    "es6-promise": "~3.0.2",
+    "es6-shim": "~0.33.3",
+    "reflect-metadata": "~0.1.2",
+    "rxjs": "~5.0.0-beta.0",
     "zone.js": "~0.5.10"
   },
   "devDependencies": {
@@ -44,7 +45,14 @@
     "karma-typescript-preprocessor": "0.0.21",
     "semantic-release": "~4.3.5",
     "systemjs": "~0.19.6",
-    "typescript": "~1.7.3"
+    "typescript": "~1.7.3",
+
+    "angular2": "~2.0.0-beta.0",
+    "es6-promise": "~3.0.2",
+    "es6-shim": "~0.33.3",
+    "reflect-metadata": "~0.1.2",
+    "rxjs": "~5.0.0-beta.0",
+    "zone.js": "~0.5.10"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"

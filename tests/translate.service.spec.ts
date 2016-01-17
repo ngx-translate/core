@@ -1,7 +1,7 @@
 import {it, beforeEachProviders, inject} from "angular2/testing";
-import {provide} from "angular2/core";
+import {provide, Injector} from "angular2/core";
 import {
-    BaseRequestOptions, Http, ResponseOptions, Response, HTTP_PROVIDERS, Connection,
+    ResponseOptions, Response, HTTP_PROVIDERS, Connection,
     XHRBackend
 } from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
@@ -10,29 +10,44 @@ import {TranslateService} from '../src/translate.service';
 export function main() {
 
     describe('TranslateService', () => {
-        beforeEachProviders(() => [
-            BaseRequestOptions,
-            HTTP_PROVIDERS,
-            // Provide a mocked (fake) backend for Http
-            provide(XHRBackend, {useClass: MockBackend}),
-            TranslateService
-        ]);
+        let injector: Injector;
+        let backend: MockBackend;
+        let translate: TranslateService;
+        var connection: MockConnection; // this will be set when a new connection is emitted from the backend.
 
-
-        it('is defined', () => {
-            expect(TranslateService).toBeDefined();
-        });
-
-        // this test is async, and yet it works thanks to Zone \o/
-        it('should be able to get translations for the view', inject([XHRBackend, Http, TranslateService], (xhrBackend, http, translate) => {
-            var connection: MockConnection; //this will be set when a new connection is emitted from the backend.
-            xhrBackend.connections.subscribe((c: MockConnection) => connection = c);
-
+        var prepareStaticTranslate = () => {
             // this will load translate json files from src/public/i18n
             translate.useStaticFilesLoader();
 
             // the lang to use, if the lang isn't available, it will use the current loader to get them
             translate.use('en');
+        };
+
+        var mockBackendResponse = (response: string) => {
+            connection.mockRespond(new Response(new ResponseOptions({body: response})));
+        };
+
+        beforeEach(() => {
+            injector = Injector.resolveAndCreate([
+                HTTP_PROVIDERS,
+                // Provide a mocked (fake) backend for Http
+                provide(XHRBackend, {useClass: MockBackend}),
+                TranslateService
+            ]);
+            backend = injector.get(XHRBackend);
+            translate = injector.get(TranslateService);
+            // sets the connection when someone tries to access the backend with an xhr request
+            backend.connections.subscribe((c: MockConnection) => connection = c);
+        });
+
+        it('is defined', () => {
+            expect(TranslateService).toBeDefined();
+            expect(translate).toBeDefined();
+            expect(translate instanceof TranslateService).toBeTruthy();
+        });
+
+        it('should be able to get translations', () => {
+            prepareStaticTranslate();
 
             // this will request the translation from the backend because we use a static files loader for TranslateService
             translate.get('TEST').subscribe((res: string) => {
@@ -40,7 +55,64 @@ export function main() {
             });
 
             // mock response after the xhr request, otherwise it will be undefined
-            connection.mockRespond(new Response(new ResponseOptions({body: '{"TEST": "This is a test"}'})));
-        }));
+            mockBackendResponse('{"TEST": "This is a test", "TEST2": "This is another test"}');
+
+            // this will request the translation from downloaded translations without making a request to the backend
+            translate.get('TEST2').subscribe((res: string) => {
+                expect(res).toEqual('This is another test');
+            });
+        });
+
+        it("should return the key when it doesn't find a translation", () => {
+            prepareStaticTranslate();
+
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('TEST');
+            });
+
+            mockBackendResponse('{}');
+        });
+
+        it('should be able to get translations with params', () => {
+            prepareStaticTranslate();
+
+            translate.get('TEST', {param: 'with param'}).subscribe((res: string) => {
+                expect(res).toEqual('This is a test with param');
+            });
+
+            mockBackendResponse('{"TEST": "This is a test {{param}}"}');
+        });
+
+        it('should be able to get translations with nested params', () => {
+            prepareStaticTranslate();
+
+            translate.get('TEST', {param: {value: 'with param'}}).subscribe((res: string) => {
+                expect(res).toEqual('This is a test with param');
+            });
+
+            mockBackendResponse('{"TEST": "This is a test {{param.value}}"}');
+        });
+
+        it('should throw if you forget the key', () => {
+            prepareStaticTranslate();
+
+            expect(() => {
+                translate.get(undefined);
+            }).toThrowError('Parameter "key" required');
+        });
+
+        it('should be able to get translations with nested keys', () => {
+            prepareStaticTranslate();
+
+            translate.get('TEST.TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+
+            mockBackendResponse('{"TEST": {"TEST": "This is a test"}, "TEST2": {"TEST2": {"TEST2": "This is another test"}}}');
+
+            translate.get('TEST2.TEST2.TEST2').subscribe((res: string) => {
+                expect(res).toEqual('This is another test');
+            });
+        });
     });
 }

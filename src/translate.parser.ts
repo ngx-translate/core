@@ -9,17 +9,17 @@ export class Parser {
      * @param params
      * @returns {string}
      */
-    interpolate(expr: string, params?: any): string {
-      if(!params) {
-        return expr;
-      } else {
-        params = this.flattenObject(params);
-      }
+    public interpolate(expr: string, params?: any): string {
+        if(!params) {
+            return expr;
+        } else {
+            params = this.flattenObject(params);
+        }
 
-      return expr.replace(this.templateMatcher, function (substring: string, b: string): string {
-        var r = params[b];
-        return typeof r !== 'undefined' ? r : substring;
-      });
+        return expr.replace(this.templateMatcher, function (substring: string, b: string): string {
+            var r = params[b];
+            return typeof r !== 'undefined' ? r : substring;
+        });
     }
 
     /**
@@ -28,7 +28,7 @@ export class Parser {
      * @param target
      * @returns {Object}
      */
-    private flattenObject(target: Object): Object {
+    public flattenObject(target: Object): Object {
         var delimiter = '.';
         var maxDepth: number;
         var currentDepth = 1;

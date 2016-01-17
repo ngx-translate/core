@@ -20,5 +20,10 @@ export function main() {
             expect(parser.interpolate("This is a {{ key1.key2 }}", {key1: {key2: "value2"}})).toEqual("This is a value2");
             expect(parser.interpolate("This is a {{ key1.key2.key3 }}", {key1: {key2: {key3: "value3"}}})).toEqual("This is a value3");
         });
+
+        it('should be able to flatten objects', () => {
+            expect(parser.flattenObject({key1: {key2: "value2"}})).toEqual({"key1.key2": "value2"});
+            expect(parser.flattenObject({key1: {key2: {key3: "value3"}}})).toEqual({"key1.key2.key3": "value3"});
+        });
     });
 }

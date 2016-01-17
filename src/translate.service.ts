@@ -160,33 +160,30 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
+        if(!key) {
+            throw new Error('Parameter "key" required');
+        }
+        var getParsedResult = (translations: any, key: any) => {
+            if(!translations) {
+                return key;
+            }
+            if(key instanceof Array) {
+                let result: any = {};
+                for (var k of key) {
+                    result[k] = getParsedResult(translations, k);
+                }
+                return result;
+            }
+            return this.parser.interpolate(translations[key], interpolateParams) || key
+        };
         // check if we are loading a new translation to use
         if(this.pending) {
             return this.pending.map((res: any) => {
-                var result: any,
-                    getTranslation = (key: any) => this.parser.interpolate(res[key], interpolateParams) || key;
-                if(key instanceof Array) {
-                    result = {};
-                    for (var k of key) {
-                        result[k] = getTranslation(k);
-                    }
-                } else {
-                    result = getTranslation(key);
-                }
-                return result;
+                return getParsedResult(this.parser.flattenObject(res), key);
             });
         } else {
-            var result: any,
-                getTranslation = (key: any) => this.translations && this.translations[this.currentLang] ? this.parser.interpolate(this.translations[this.currentLang][key], interpolateParams) : key || key;
-            if(key instanceof Array) {
-                result = {};
-                for (var k of key) {
-                    result[k] = getTranslation(k);
-                }
-            } else {
-                result = getTranslation(key);
-            }
-            return Observable.of(result);
+            let translations = this.parser.flattenObject(this.translations[this.currentLang]);
+            return Observable.of(getParsedResult(translations, key));
         }
     }
 

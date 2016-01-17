@@ -123,3 +123,5 @@ With the given translation: `"HELLO_WORLD": "hello {{value}}"`.
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
 	
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
+- `flattenObject(target: Object): Object`:  Flattens an object
+     `{ key1: { keyA: 'valueI' }}` ==> `{ 'key1.keyA': 'valueI' }`
