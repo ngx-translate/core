@@ -1,5 +1,5 @@
-import {Injectable, EventEmitter, Injector} from 'angular2/core';
-import {Http, Response, HTTP_PROVIDERS} from 'angular2/http';
+import {Injectable, EventEmitter} from 'angular2/core';
+import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable'
 import 'rxjs/add/observable/fromArray.js';
 import 'rxjs/add/operator/share.js';
@@ -68,13 +68,8 @@ export class TranslateService {
     private defaultLang: string = 'en';
     private langs: Array<string>;
     private parser: Parser = new Parser();
-    private http: Http;
 
-    constructor() {
-        // We make sure that HTTP_PROVIDERS has been created & instantiated
-        // because sometimes it hasn't been provided in bootstrap
-        var injector = Injector.resolveAndCreate([HTTP_PROVIDERS]);
-        this.http = injector.get(Http);
+    constructor(private http: Http) {
         this.useStaticFilesLoader();
     }
 
