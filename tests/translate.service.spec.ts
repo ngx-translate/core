@@ -15,12 +15,12 @@ export function main() {
         let translate: TranslateService;
         var connection: MockConnection; // this will be set when a new connection is emitted from the backend.
 
-        var prepareStaticTranslate = () => {
+        var prepareStaticTranslate = (lang: string = 'en') => {
             // this will load translate json files from src/public/i18n
             translate.useStaticFilesLoader();
 
             // the lang to use, if the lang isn't available, it will use the current loader to get them
-            translate.use('en');
+            translate.use(lang);
         };
 
         var mockBackendResponse = (response: string) => {
@@ -38,6 +38,13 @@ export function main() {
             translate = injector.get(TranslateService);
             // sets the connection when someone tries to access the backend with an xhr request
             backend.connections.subscribe((c: MockConnection) => connection = c);
+        });
+
+        afterEach(() => {
+            injector = undefined;
+            backend = undefined;
+            translate = undefined;
+            connection = undefined;
         });
 
         it('is defined', () => {
@@ -61,6 +68,19 @@ export function main() {
             translate.get('TEST2').subscribe((res: string) => {
                 expect(res).toEqual('This is another test');
             });
+        });
+
+        it("should fallback to the default language", () => {
+            prepareStaticTranslate("fr");
+
+            translate.setDefaultLang('en');
+            translate.setTranslation('en', {"TEST": "This is a test"});
+
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+
+            mockBackendResponse('{}');
         });
 
         it("should return the key when it doesn't find a translation", () => {
@@ -112,6 +132,17 @@ export function main() {
 
             translate.get('TEST2.TEST2.TEST2').subscribe((res: string) => {
                 expect(res).toEqual('This is another test');
+            });
+        });
+
+        it("shouldn't do a request to the backend if you set the translation yourself", (done: Function) => {
+            translate.setTranslation('en', {"TEST": "This is a test"});
+            prepareStaticTranslate();
+
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+                expect(connection).not.toBeDefined();
+                done();
             });
         });
     });

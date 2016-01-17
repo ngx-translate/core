@@ -49,7 +49,7 @@ export class AppComponent {
         var userLang = navigator.language.split('-')[0]; // use navigator lang if available
         userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
         
-         // optional, default is "en"
+         // this language will be used as a fallback when a translation isn't found in the current language
         translate.setDefaultLang('en');
         
          // the lang to use, if the lang isn't available, it will use the current loader to get them
@@ -100,7 +100,7 @@ translate.setTranslation('en', {
     
 #### Methods:
 - `useStaticFilesLoader()`: Use a static files loader
-- `setDefaultLang(lang: string)`: Sets the default language to use ('en' by default)
+- `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language

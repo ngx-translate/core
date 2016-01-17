@@ -65,7 +65,7 @@ export class TranslateService {
 
     private pending: any;
     private translations: any = {};
-    private defaultLang: string = 'en';
+    private defaultLang: string;
     private langs: Array<string>;
     private parser: Parser = new Parser();
 
@@ -81,7 +81,7 @@ export class TranslateService {
     }
 
     /**
-     * Sets the default language to use ('en' by default)
+     * Sets the default language to use as a fallback
      * @param lang
      */
     public setDefaultLang(lang: string) {
@@ -163,6 +163,7 @@ export class TranslateService {
         if(!key) {
             throw new Error('Parameter "key" required');
         }
+
         var getParsedResult = (translations: any, key: any) => {
             if(!translations) {
                 return key;
@@ -174,15 +175,23 @@ export class TranslateService {
                 }
                 return result;
             }
-            return this.parser.interpolate(translations[key], interpolateParams) || key
+            var res: string = this.parser.interpolate(translations[key], interpolateParams);
+
+            if(typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
+                let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
+                res = this.parser.interpolate(translations[key], interpolateParams);
+            }
+
+            return res || key;
         };
+
         // check if we are loading a new translation to use
         if(this.pending) {
             return this.pending.map((res: any) => {
                 return getParsedResult(this.parser.flattenObject(res), key);
             });
         } else {
-            let translations = this.parser.flattenObject(this.translations[this.currentLang]);
+            let translations: any = this.parser.flattenObject(this.translations[this.currentLang]);
             return Observable.of(getParsedResult(translations, key));
         }
     }
@@ -200,7 +209,7 @@ export class TranslateService {
 
     private changeLang(lang: string) {
         this.currentLang = lang;
-        this.onLangChange.next({lang: lang, translations: this.translations[lang]});
+        this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
 }
