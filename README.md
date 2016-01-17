@@ -25,11 +25,8 @@ It is recommended to instantiate `TranslateService` in the bootstrap of your app
 If you add it to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized.
 
 ```js
-import {HTTP_PROVIDERS} from 'angular2/http';
-
 bootstrap(AppComponent, [
-    HTTP_PROVIDERS,
-    TranslateService
+    TranslateService // not required, but recommanded to have 1 unique instance of your service
 ]);
 
 
