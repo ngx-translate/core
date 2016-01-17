@@ -13,7 +13,7 @@ export function main() {
         let injector: Injector;
         let backend: MockBackend;
         let translate: TranslateService;
-        var connection: MockConnection; // this will be set when a new connection is emitted from the backend.
+        let connection: MockConnection; // this will be set when a new connection is emitted from the backend.
 
         var prepareStaticTranslate = (lang: string = 'en') => {
             // this will load translate json files from src/public/i18n
@@ -91,6 +91,12 @@ export function main() {
             });
 
             mockBackendResponse('{}');
+        });
+
+        it("should return the key when you haven't defined any translation", () => {
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('TEST');
+            });
         });
 
         it('should be able to get translations with params', () => {

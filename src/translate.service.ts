@@ -165,9 +165,8 @@ export class TranslateService {
         }
 
         var getParsedResult = (translations: any, key: any) => {
-            if(!translations) {
-                return key;
-            }
+            var res: string;
+
             if(key instanceof Array) {
                 let result: any = {};
                 for (var k of key) {
@@ -175,7 +174,10 @@ export class TranslateService {
                 }
                 return result;
             }
-            var res: string = this.parser.interpolate(translations[key], interpolateParams);
+
+            if(translations) {
+                res = this.parser.interpolate(translations[key], interpolateParams);
+            }
 
             if(typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
                 let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
@@ -191,7 +193,12 @@ export class TranslateService {
                 return getParsedResult(this.parser.flattenObject(res), key);
             });
         } else {
-            let translations: any = this.parser.flattenObject(this.translations[this.currentLang]);
+            let translations: any;
+
+            if(this.translations[this.currentLang]) {
+                translations = this.parser.flattenObject(this.translations[this.currentLang]);
+            }
+
             return Observable.of(getParsedResult(translations, key));
         }
     }
