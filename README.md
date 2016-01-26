@@ -40,11 +40,13 @@ import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 @Component({
     selector: 'app',
     template: `
-        <div>{{ 'HELLO_WORLD' | translate:'{value: "world"}' }} world</div>
+        <div>{{ 'HELLO' | translate:{value: param} }}</div>
     `,
     pipes: [TranslatePipe]
 })
 export class AppComponent {
+    param: string = "world";
+    
     constructor(translate: TranslateService) {
         var userLang = navigator.language.split('-')[0]; // use navigator lang if available
         userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
@@ -68,7 +70,7 @@ translate.useStaticFilesLoader(prefix, suffix);
 Then put your translations in a json file that looks like this (for `en.json`):
 ```json
 {
-    "HELLO_WORLD": "hello {{value}}"
+    "HELLO": "hello {{value}}"
 }
 ```
 
@@ -80,7 +82,7 @@ An then you can get new translations like this:
 But you can also define your translations manually instead of using `getTranslation`:
 ```js
 translate.setTranslation('en', {
-    "HELLO_WORLD": "hello {{value}}"
+    "HELLO": "hello {{value}}"
 });
 ```
 
@@ -113,10 +115,10 @@ You can call the TranslatePipe with some optional parameters that will be transp
 
 Example:
 ```html
-<p>Say {{ 'HELLO_WORLD' | translate:'{value: "world"}' }}</p>
+<p>Say {{ 'HELLO' | translate:{value: "world"} }}</p>
 ```
 
-With the given translation: `"HELLO_WORLD": "hello {{value}}"`.
+With the given translation: `"HELLO": "hello {{value}}"`.
 
 ### Parser
 #### Methods:
