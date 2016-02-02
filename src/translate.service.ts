@@ -1,9 +1,9 @@
 import {Injectable, EventEmitter} from 'angular2/core';
 import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable'
-import 'rxjs/add/observable/fromArray.js';
-import 'rxjs/add/operator/share.js';
-import 'rxjs/add/operator/map.js';
+import 'rxjs/add/observable/fromArray';
+import 'rxjs/add/operator/share';
+import 'rxjs/add/operator/map';
 
 import {Parser} from './translate.parser';
 
