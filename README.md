@@ -26,15 +26,14 @@ If you add it to the "providers" property of a component it will instantiate a n
 
 ```js
 import {HTTP_PROVIDERS} from 'angular2/http';
+import {Component, Injectable} from 'angular2/core';
+import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
+import {bootstrap} from 'angular2/platform/browser';
 
 bootstrap(AppComponent, [
     HTTP_PROVIDERS,
     TranslateService // not required, but recommended to have 1 unique instance of your service
 ]);
-
-
-import {Component, Injectable} from 'angular2/angular2';
-import {TranslateService, TranslatePipe} from 'ng2-translate/ng2-translate';
 
 @Injectable()
 @Component({
