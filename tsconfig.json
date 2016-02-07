@@ -10,7 +10,10 @@
         "moduleResolution": "node"
     },
     "files": [
-        "ng2-translate.ts"
+        "ng2-translate.ts",
+        "src/translate.pipe.ts",
+        "src/translate.parser.ts",
+        "src/translate.service.ts"
     ],
     "exclude": [
         "node_modules"

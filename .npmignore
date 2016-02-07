@@ -8,8 +8,6 @@ build.xml
 node_modules/*
 npm-debug.log
 coverage
-*.ts
-!*.d.ts
 tests
 
 #################
