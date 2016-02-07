@@ -10,6 +10,7 @@ npm-debug.log
 coverage
 *.ts
 !*.d.ts
+!bundles
 tests
 
 #################
