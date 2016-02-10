@@ -1,3 +1,55 @@
+System.registerDynamic("src/translate.directive", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
+  ;
+  var global = this,
+      __define = global.define;
+  global.define = undefined;
+  var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+        d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+      r = Reflect.decorate(decorators, target, key, desc);
+    else
+      for (var i = decorators.length - 1; i >= 0; i--)
+        if (d = decorators[i])
+          r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+  };
+  var __metadata = (this && this.__metadata) || function(k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+      return Reflect.metadata(k, v);
+  };
+  var core_1 = $__require('angular2/core');
+  var translate_service_1 = $__require('./translate.service');
+  var TranslateDirective = (function() {
+    function TranslateDirective(translateService, ref) {
+      this.translateService = translateService;
+      this.ref = ref;
+    }
+    TranslateDirective.prototype.ngOnInit = function() {
+      var _this = this;
+      this.key = this.translate ? this.translate : this.ref.nativeElement.innerHTML;
+      this.updateValue(this.key);
+      this.translateService.onLangChange.subscribe(function() {
+        _this.updateValue(_this.key);
+      });
+    };
+    TranslateDirective.prototype.updateValue = function(key) {
+      var _this = this;
+      this.translateService.get(key, this.interpolateParams).subscribe(function(res) {
+        _this.ref.nativeElement.innerHTML = res;
+      });
+    };
+    __decorate([core_1.Input(), __metadata('design:type', String)], TranslateDirective.prototype, "translate", void 0);
+    __decorate([core_1.Input('translate-values'), __metadata('design:type', Object)], TranslateDirective.prototype, "interpolateParams", void 0);
+    TranslateDirective = __decorate([core_1.Injectable(), core_1.Directive({selector: '[translate]'}), __metadata('design:paramtypes', [translate_service_1.TranslateService, core_1.ElementRef])], TranslateDirective);
+    return TranslateDirective;
+  })();
+  exports.TranslateDirective = TranslateDirective;
+  global.define = __define;
+  return module.exports;
+});
+
 System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
   ;
   var global = this,
@@ -272,7 +324,7 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate", ["./src/translate.directive", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   ;
   var global = this,
       __define = global.define;
@@ -282,13 +334,16 @@ System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translat
       if (!exports.hasOwnProperty(p))
         exports[p] = m[p];
   }
+  var translate_directive_1 = $__require('./src/translate.directive');
   var translate_pipe_1 = $__require('./src/translate.pipe');
   var translate_service_1 = $__require('./src/translate.service');
+  __export($__require('./src/translate.directive'));
   __export($__require('./src/translate.pipe'));
   __export($__require('./src/translate.service'));
   __export($__require('./src/translate.parser'));
   Object.defineProperty(exports, "__esModule", {value: true});
   exports.default = {
+    directives: [translate_directive_1.TranslateDirective],
     pipes: [translate_pipe_1.TranslatePipe],
     providers: [translate_service_1.TranslateService]
   };
