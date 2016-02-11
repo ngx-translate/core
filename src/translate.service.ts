@@ -6,6 +6,7 @@ import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
 
 import {Parser} from './translate.parser';
+import {MissingTranslationHandler} from './missingtranslationhandler.interface';
 
 interface TranslateLoader {
     getTranslation(lang: string): any;
@@ -68,6 +69,11 @@ export class TranslateService {
     private defaultLang: string;
     private langs: Array<string>;
     private parser: Parser = new Parser();
+    
+    /**
+     * Handler for missing translations
+     */
+    private missingTranslationHandler: MissingTranslationHandler;
 
     constructor(private http: Http) {
         this.useStaticFilesLoader();
@@ -183,6 +189,10 @@ export class TranslateService {
                 let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
                 res = this.parser.interpolate(translations[key], interpolateParams);
             }
+            
+            if (!res && this.missingTranslationHandler) {
+              this.missingTranslationHandler.handle(key);
+            }
 
             return res || key;
         };
@@ -217,6 +227,10 @@ export class TranslateService {
     private changeLang(lang: string) {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    }
+    
+    public setMissingTranslationHandler(handler: MissingTranslationHandler) {
+        this.missingTranslationHandler = handler;
     }
 
 }

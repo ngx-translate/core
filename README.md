@@ -126,3 +126,31 @@ With the given translation: `"HELLO": "hello {{value}}"`.
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
 - `flattenObject(target: Object): Object`:  Flattens an object
      `{ key1: { keyA: 'valueI' }}` ==> `{ 'key1.keyA': 'valueI' }`
+     
+     
+### Missing Translation Handler
+#### Methods:
+- `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
+used when the requested translation is not available
+
+#### Example:
+Create an Missing Translation Handler
+```js
+import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
+
+export class MyMissingTranslationHandler implements MissingTranslationHandler {
+  
+  handle(key: string) {
+      console.log(key);
+  }
+}
+```
+
+Set the Missing Translation Handler
+```js
+constructor(translate: TranslateService) {
+  ...
+  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
+  ...
+}  
+```
