@@ -189,6 +189,9 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
           var translations_1 = _this.parser.flattenObject(_this.translations[_this.defaultLang]);
           res = _this.parser.interpolate(translations_1[key], interpolateParams);
         }
+        if (!res && _this.missingTranslationHandler) {
+          _this.missingTranslationHandler.handle(key);
+        }
         return res || key;
       };
       if (this.pending) {
@@ -216,6 +219,9 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         lang: lang,
         translations: this.translations[lang]
       });
+    };
+    TranslateService.prototype.setMissingTranslationHandler = function(handler) {
+      this.missingTranslationHandler = handler;
     };
     TranslateService = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [http_1.Http])], TranslateService);
     return TranslateService;
@@ -272,7 +278,13 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("src/missingtranslationhandler.interface", [], false, function(__require, __exports, __module) {
+  var _retrieveGlobal = System.get("@@global-helpers").prepareGlobal(__module.id, null, null);
+  (function() {})();
+  return _retrieveGlobal();
+});
+
+System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser", "./src/missingtranslationhandler.interface"], true, function($__require, exports, module) {
   ;
   var global = this,
       __define = global.define;
@@ -287,6 +299,7 @@ System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translat
   __export($__require('./src/translate.pipe'));
   __export($__require('./src/translate.service'));
   __export($__require('./src/translate.parser'));
+  __export($__require('./src/missingtranslationhandler.interface'));
   Object.defineProperty(exports, "__esModule", {value: true});
   exports.default = {
     pipes: [translate_pipe_1.TranslatePipe],

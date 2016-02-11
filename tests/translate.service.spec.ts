@@ -5,7 +5,7 @@ import {
     XHRBackend
 } from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
-import {TranslateService} from '../src/translate.service';
+import {TranslateService, MissingTranslationHandler} from '../src/translate.service';
 
 export function main() {
 
@@ -149,6 +149,36 @@ export function main() {
                 expect(res).toEqual('This is a test');
                 expect(connection).not.toBeDefined();
                 done();
+            });
+        });
+        
+        function prepareMissingTranslationHandler() {
+          class Missing implements MissingTranslationHandler {
+                handle(key: string) {}
+            }
+            let handler = new Missing();
+            spyOn(handler, 'handle');
+            
+            translate.setMissingTranslationHandler(handler);
+            
+            return handler;
+        }
+        
+        it('should use the MissingTranslationHandler when the key does not exist', () => {
+            prepareStaticTranslate();
+            let handler = prepareMissingTranslationHandler();
+            
+            translate.get('nonExistingKey').subscribe(() => {
+                expect(handler.handle).toHaveBeenCalledWith('nonExistingKey');
+            });
+        });
+        
+        it('should not call the MissingTranslationHandler when the key exists', () => {
+            let handler = prepareMissingTranslationHandler();
+            prepareStaticTranslate();
+            
+            translate.get('TEST').subscribe(() => {
+                expect(handler.handle).not.toHaveBeenCalled();
             });
         });
     });
