@@ -29,7 +29,6 @@ module.exports = function(config) {
 
             { pattern: 'src/**/*.ts', included: false, watched: true }, // source files
             { pattern: 'tests/**/*.ts', included: false, watched: true }, // test files
-
             'karma-test-shim.js'
         ],
 
@@ -45,7 +44,7 @@ module.exports = function(config) {
         typescriptPreprocessor: {
             options: require('./tsconfig.json').compilerOptions,
             typings: [
-                "node_modules/angular2/typings/jasmine/jasmine.d.ts"
+                "typings/main.d.ts"
             ]
         },
 

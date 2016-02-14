@@ -4,6 +4,7 @@
   "scripts": {
     "test": "tsc && karma start",
     "test-watch": "tsc && karma start --no-single-run --auto-watch",
+    "typings": "typings install",
     "commit": "git-cz",
     "prepublish": "tsc && node make.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
@@ -35,7 +36,7 @@
     "zone.js": "~0.5.10"
   },
   "devDependencies": {
-    "angular2": "2.0.0-beta.3",
+    "angular2": "2.0.0-beta.6",
     "commitizen": "~2.5.0",
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "~3.0.2",
@@ -53,7 +54,8 @@
     "systemjs-builder": "^0.15.6",
     "tsd": "^0.6.5",
     "typescript": "~1.7.3",
-    "zone.js": "0.5.11"
+    "typings": "^0.6.8",
+    "zone.js": "0.5.14"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"

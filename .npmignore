@@ -11,6 +11,8 @@ coverage
 *.ts
 !*.d.ts
 tests
+typings
+typings.json
 
 #################
 ## JetBrains

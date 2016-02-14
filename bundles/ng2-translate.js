@@ -278,13 +278,7 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-System.registerDynamic("src/missingtranslationhandler.interface", [], false, function(__require, __exports, __module) {
-  var _retrieveGlobal = System.get("@@global-helpers").prepareGlobal(__module.id, null, null);
-  (function() {})();
-  return _retrieveGlobal();
-});
-
-System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser", "./src/missingtranslationhandler.interface"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   ;
   var global = this,
       __define = global.define;
@@ -299,7 +293,6 @@ System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translat
   __export($__require('./src/translate.pipe'));
   __export($__require('./src/translate.service'));
   __export($__require('./src/translate.parser'));
-  __export($__require('./src/missingtranslationhandler.interface'));
   Object.defineProperty(exports, "__esModule", {value: true});
   exports.default = {
     pipes: [translate_pipe_1.TranslatePipe],

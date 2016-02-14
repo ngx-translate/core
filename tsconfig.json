@@ -10,6 +10,7 @@
         "moduleResolution": "node"
     },
     "files": [
+        "typings/main.d.ts",
         "ng2-translate.ts",
         "./src/translate.service.ts",
         "./src/translate.parser.ts",

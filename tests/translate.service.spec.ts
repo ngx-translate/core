@@ -1,4 +1,4 @@
-import {it, beforeEachProviders, inject} from "angular2/testing";
+import {it} from "angular2/testing";
 import {provide, Injector} from "angular2/core";
 import {
     ResponseOptions, Response, HTTP_PROVIDERS, Connection,
