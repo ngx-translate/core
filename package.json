@@ -4,9 +4,8 @@
   "scripts": {
     "test": "tsc && karma start",
     "test-watch": "tsc && karma start --no-single-run --auto-watch",
-    "typings": "typings install",
     "commit": "git-cz",
-    "prepublish": "tsc && node make.js",
+    "prepublish": "typings install && tsc && node make.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
