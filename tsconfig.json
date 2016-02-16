@@ -5,7 +5,7 @@
         "target": "ES5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": true,
+        "inlineSourceMap": true,
         "declaration": true,
         "moduleResolution": "node"
     },
