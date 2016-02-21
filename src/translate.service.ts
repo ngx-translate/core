@@ -132,6 +132,10 @@ export class TranslateService {
             this.translations[lang] = res;
             this.updateLangs();
             this.pending = undefined;
+        }, (err: any) => {
+            throw err;
+        }, () => {
+            this.pending = undefined;
         });
 
         return this.pending;
