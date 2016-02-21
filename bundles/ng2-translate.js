@@ -1,4 +1,5 @@
 System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
+  "use strict";
   ;
   var global = this,
       __define = global.define;
@@ -64,13 +65,14 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       pure: false
     }), __metadata('design:paramtypes', [translate_service_1.TranslateService])], TranslatePipe);
     return TranslatePipe;
-  })();
+  }());
   exports.TranslatePipe = TranslatePipe;
   global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/fromArray", "rxjs/add/operator/share", "rxjs/add/operator/map", "./translate.parser"], true, function($__require, exports, module) {
+  "use strict";
   ;
   var global = this,
       __define = global.define;
@@ -118,7 +120,7 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     };
     TranslateStaticLoader = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [http_1.Http, String, String])], TranslateStaticLoader);
     return TranslateStaticLoader;
-  })();
+  }());
   var TranslateService = (function() {
     function TranslateService(http) {
       this.http = http;
@@ -154,6 +156,10 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         _this.translations[lang] = res;
         _this.updateLangs();
         _this.pending = undefined;
+      }, function(err) {
+        throw err;
+      }, function() {
+        _this.pending = undefined;
       });
       return this.pending;
     };
@@ -176,8 +182,9 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         var res;
         if (key instanceof Array) {
           var result = {};
-          for (var _i = 0; _i < key.length; _i++) {
-            var k = key[_i];
+          for (var _i = 0,
+              key_1 = key; _i < key_1.length; _i++) {
+            var k = key_1[_i];
             result[k] = getParsedResult(translations, k);
           }
           return result;
@@ -199,7 +206,7 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
           return getParsedResult(_this.parser.flattenObject(res), key);
         });
       } else {
-        var translations;
+        var translations = void 0;
         if (this.translations[this.currentLang]) {
           translations = this.parser.flattenObject(this.translations[this.currentLang]);
         }
@@ -225,13 +232,14 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     };
     TranslateService = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [http_1.Http])], TranslateService);
     return TranslateService;
-  })();
+  }());
   exports.TranslateService = TranslateService;
   global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.parser", [], true, function($__require, exports, module) {
+  "use strict";
   ;
   var global = this,
       __define = global.define;
@@ -272,13 +280,14 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
       return output;
     };
     return Parser;
-  })();
+  }());
   exports.Parser = Parser;
   global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+  "use strict";
   ;
   var global = this,
       __define = global.define;
