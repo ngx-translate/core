@@ -45,14 +45,14 @@ bootstrap(AppComponent, [
 })
 export class AppComponent {
     param: string = "world";
-    
+
     constructor(translate: TranslateService) {
         var userLang = navigator.language.split('-')[0]; // use navigator lang if available
         userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
-        
+
          // this language will be used as a fallback when a translation isn't found in the current language
         translate.setDefaultLang('en');
-        
+
          // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use(userLang);
     }
@@ -61,7 +61,7 @@ export class AppComponent {
 
 For now, only the static loader is available. You can configure it like this:
 ```js
-var prefix = 'assets/i18n/';
+var prefix = 'assets/i18n';
 var suffix = '.json';
 translate.useStaticFilesLoader(prefix, suffix);
 ```
@@ -91,14 +91,14 @@ translate.setTranslation('en', {
 - `currentLang`: The lang currently used
 - `currentLoader`: An instance of the loader currently used (static loader by default)
 - `onLangChange`: An EventEmitter to listen to lang changes events
-    
+
     example:
 	```js
     onLangChange.subscribe((params: {lang: string, translations: any}) => {
 	  // do something
 	});
     ```
-    
+
 #### Methods:
 - `useStaticFilesLoader()`: Use a static files loader
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
@@ -107,7 +107,7 @@ translate.setTranslation('en', {
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
-- `set(key: string, value: string, lang?: string)`: 
+- `set(key: string, value: string, lang?: string)`:
 
 ### TranslatePipe
 You can call the TranslatePipe with some optional parameters that will be transpolated into the translation for the given key.
@@ -122,12 +122,12 @@ With the given translation: `"HELLO": "hello {{value}}"`.
 ### Parser
 #### Methods:
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
-	
+
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
 - `flattenObject(target: Object): Object`:  Flattens an object
      `{ key1: { keyA: 'valueI' }}` ==> `{ 'key1.keyA': 'valueI' }`
-     
-     
+
+
 ### Missing Translation Handler
 #### Methods:
 - `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
@@ -139,7 +139,7 @@ Create an Missing Translation Handler
 import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
-  
+
   handle(key: string) {
       console.log(key);
   }
