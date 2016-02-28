@@ -146,28 +146,6 @@ export class AppComponent {
 }
 ```
 
-#### Example:
-Create an Missing Translation Handler
-```js
-import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
-
-export class MyMissingTranslationHandler implements MissingTranslationHandler {
-
-  handle(key: string) {
-      console.log(key);
-  }
-}
-```
-
-Set the Missing Translation Handler
-```js
-constructor(translate: TranslateService) {
-  ...
-  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
-  ...
-}  
-```
-
 ### TranslatePipe
 You can call the TranslatePipe with some optional parameters that will be transpolated into the translation for the given key.
 
