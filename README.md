@@ -110,6 +110,8 @@ translate.setTranslation('en', {
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
+- `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
+used when the requested translation is not available
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys)
@@ -118,10 +120,10 @@ translate.setTranslation('en', {
 #### Write & use your own loader
 If you want to write your own loader, you need to create a class that implements `TranslateLoader`.
 The only required method is `getTranslation` that must return an `Observable`. If your loader is synchronous, just use `Observable.of` to create an observable from your static value.
+
+##### Example
 ```js
 class CustomLoader implements TranslateLoader {
-	constructor() {}
-	
     getTranslation(lang: string): Observable<any> {
         return Observable.of({"KEY": "Value"});
     }
@@ -146,6 +148,31 @@ export class AppComponent {
 }
 ```
 
+#### How to handle missing translations
+You can use the method `setMissingTranslationHandler` to define a handler that will be called when the requested translation is not available.
+The only required method is `handle` where you can do whatever you want. Just don't forget that it will be called synchronously from the `get` & `instant` methods.
+
+##### Example:
+Create a Missing Translation Handler
+```js
+import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
+
+export class MyMissingTranslationHandler implements MissingTranslationHandler {
+  handle(key: string) {
+      console.log(key);
+  }
+}
+```
+
+Set the Missing Translation Handler
+```js
+constructor(translate: TranslateService) {
+  ...
+  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
+  ...
+}  
+```
+
 ### TranslatePipe
 You can call the TranslatePipe with some optional parameters that will be transpolated into the translation for the given key.
 
@@ -164,30 +191,3 @@ With the given translation: `"HELLO": "hello {{value}}"`.
 - `flattenObject(target: Object): Object`:  Flattens an object
      `{ key1: { keyA: 'valueI' }}` ==> `{ 'key1.keyA': 'valueI' }`
 
-
-### Missing Translation Handler
-#### Methods:
-- `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
-used when the requested translation is not available
-
-#### Example:
-Create an Missing Translation Handler
-```js
-import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
-
-export class MyMissingTranslationHandler implements MissingTranslationHandler {
-
-  handle(key: string) {
-      console.log(key);
-  }
-}
-```
-
-Set the Missing Translation Handler
-```js
-constructor(translate: TranslateService) {
-  ...
-  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
-  ...
-}  
-```
