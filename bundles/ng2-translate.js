@@ -28,6 +28,60 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       this.value = '';
       this.translate = translate;
     }
+    TranslatePipe.prototype.isRegExp = function(value) {
+      return toString.call(value) === '[object RegExp]';
+    };
+    TranslatePipe.prototype.equals = function(o1, o2) {
+      if (o1 === o2)
+        return true;
+      if (o1 === null || o2 === null)
+        return false;
+      if (o1 !== o1 && o2 !== o2)
+        return true;
+      var t1 = typeof o1,
+          t2 = typeof o2,
+          length,
+          key,
+          keySet;
+      if (t1 == t2 && t1 == 'object') {
+        if (lang_1.isArray(o1)) {
+          if (!lang_1.isArray(o2))
+            return false;
+          if ((length = o1.length) == o2.length) {
+            for (key = 0; key < length; key++) {
+              if (!this.equals(o1[key], o2[key]))
+                return false;
+            }
+            return true;
+          }
+        } else if (lang_1.isDate(o1)) {
+          if (!lang_1.isDate(o2))
+            return false;
+          return this.equals(o1.getTime(), o2.getTime());
+        } else if (this.isRegExp(o1)) {
+          if (!this.isRegExp(o2))
+            return false;
+          return o1.toString() == o2.toString();
+        } else {
+          if (lang_1.isArray(o2) || lang_1.isDate(o2) || this.isRegExp(o2))
+            return false;
+          keySet = Object.create(null);
+          for (key in o1) {
+            if (key.charAt(0) === '$' || lang_1.isFunction(o1[key]))
+              continue;
+            if (!this.equals(o1[key], o2[key]))
+              return false;
+            keySet[key] = true;
+          }
+          for (key in o2) {
+            if (!(key in keySet) && key.charAt(0) !== '$' && typeof o2[key] !== 'undefined' && !lang_1.isFunction(o2[key]))
+              return false;
+          }
+          return true;
+        }
+      }
+      return false;
+    };
     TranslatePipe.prototype.updateValue = function(key, interpolateParams) {
       var _this = this;
       this.translate.get(key, interpolateParams).subscribe(function(res) {
@@ -39,7 +93,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       if (query.length === 0) {
         return query;
       }
-      if (this.lastKey && query === this.lastKey) {
+      if (this.equals(query, this.lastKey) && this.equals(args, this.lastParams)) {
         return this.value;
       }
       var interpolateParams;
@@ -55,6 +109,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
         }
       }
       this.lastKey = query;
+      this.lastParams = args;
       this.updateValue(query, interpolateParams);
       this._dispose();
       this.onLangChange = this.translate.onLangChange.subscribe(function(params) {

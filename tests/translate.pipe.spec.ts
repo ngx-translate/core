@@ -56,6 +56,20 @@ export function main() {
             expect(translatePipe.transform('TEST', ['{"param": "with param"}'])).toEqual("This is a test with param");
         });
 
+        it('should update the value if the parameters change', () => {
+            translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
+            translate.use('en');
+
+            spyOn(translatePipe, 'updateValue').and.callThrough();
+
+            expect(translatePipe.transform('TEST', [{param: "with param"}])).toEqual("This is a test with param");
+            // same value, shouldn't call 'updateValue' again
+            expect(translatePipe.transform('TEST', [{param: "with param"}])).toEqual("This is a test with param");
+            // different param, should call 'updateValue'
+            expect(translatePipe.transform('TEST', [{param: "with param2"}])).toEqual("This is a test with param2");
+            expect(translatePipe.updateValue).toHaveBeenCalledTimes(2);
+        });
+
         it("should throw if you don't give an object parameter", () => {
             translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
             translate.use('en');
