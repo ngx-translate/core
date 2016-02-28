@@ -181,6 +181,40 @@ export class TranslateService {
     }
 
     /**
+     * Returns the parsed result of the translations
+     * @param translations
+     * @param key
+     * @param interpolateParams
+     * @returns {any}
+     */
+    private getParsedResult(translations: any, key: any, interpolateParams?: Object): string {
+        var res: string;
+
+        if(key instanceof Array) {
+            let result: any = {};
+            for (var k of key) {
+                result[k] = this.getParsedResult(translations, k, interpolateParams);
+            }
+            return result;
+        }
+
+        if(translations) {
+            res = this.parser.interpolate(translations[key], interpolateParams);
+        }
+
+        if(typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
+            let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
+            res = this.parser.interpolate(translations[key], interpolateParams);
+        }
+
+        if(!res && this.missingTranslationHandler) {
+            this.missingTranslationHandler.handle(key);
+        }
+
+        return res || key;
+    }
+
+    /**
      * Gets the translated value of a key (or an array of keys)
      * @param key
      * @param interpolateParams
@@ -191,37 +225,10 @@ export class TranslateService {
             throw new Error('Parameter "key" required');
         }
 
-        var getParsedResult = (translations: any, key: any) => {
-            var res: string;
-
-            if(key instanceof Array) {
-                let result: any = {};
-                for (var k of key) {
-                    result[k] = getParsedResult(translations, k);
-                }
-                return result;
-            }
-
-            if(translations) {
-                res = this.parser.interpolate(translations[key], interpolateParams);
-            }
-
-            if(typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
-                let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
-                res = this.parser.interpolate(translations[key], interpolateParams);
-            }
-
-            if(!res && this.missingTranslationHandler) {
-                this.missingTranslationHandler.handle(key);
-            }
-
-            return res || key;
-        };
-
         // check if we are loading a new translation to use
         if(this.pending) {
             return this.pending.map((res: any) => {
-                return getParsedResult(this.parser.flattenObject(res), key);
+                return this.getParsedResult(this.parser.flattenObject(res), key, interpolateParams);
             });
         } else {
             let translations: any;
@@ -230,8 +237,30 @@ export class TranslateService {
                 translations = this.parser.flattenObject(this.translations[this.currentLang]);
             }
 
-            return Observable.of(getParsedResult(translations, key));
+            return Observable.of(this.getParsedResult(translations, key, interpolateParams));
         }
+    }
+
+    /**
+     * Returns a translation instantly from the internal state of loaded translation.
+     * All rules regarding the current language, the preferred language of even fallback languages will be used except any promise handling.
+     * @param key
+     * @param interpolateParams
+     * @returns {string}
+     */
+    public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
+        if(!key) {
+            throw new Error('Parameter "key" required');
+        }
+
+        // check if we are loading a new translation to use
+        let translations: any;
+
+        if(this.translations[this.currentLang]) {
+            translations = this.parser.flattenObject(this.translations[this.currentLang]);
+        }
+
+        return this.getParsedResult(translations, key, interpolateParams);
     }
 
     /**

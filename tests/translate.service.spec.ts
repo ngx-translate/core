@@ -74,6 +74,19 @@ export function main() {
             });
         });
 
+        it('should be able to get an array translations', () => {
+            var translations = {"TEST": "This is a test", "TEST2": "This is another test2"};
+            prepareStaticTranslate();
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get(['TEST', 'TEST2']).subscribe((res: string) => {
+                expect(res).toEqual(translations);
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(JSON.stringify(translations));
+        });
+
         it("should fallback to the default language", () => {
             prepareStaticTranslate("fr");
 
@@ -155,6 +168,28 @@ export function main() {
                 done();
             });
         });
+
+        it('should be able to get instant translations', () => {
+            translate.setTranslation('en', {"TEST": "This is a test"});
+            prepareStaticTranslate();
+
+            expect(translate.instant('TEST')).toEqual('This is a test');
+        });
+
+        it('should be able to get instant translations of an array', () => {
+            var translations = {"TEST": "This is a test", "TEST2": "This is a test2"};
+            translate.setTranslation('en', translations);
+            prepareStaticTranslate();
+
+            expect(translate.instant(['TEST', 'TEST2'])).toEqual(translations);
+        });
+
+        it('should return the key if instant translations are not available', () => {
+            translate.setTranslation('en', {"TEST": "This is a test"});
+            prepareStaticTranslate();
+
+            expect(translate.instant('TEST2')).toEqual('TEST2');
+        });
         
         function prepareMissingTranslationHandler() {
           class Missing implements MissingTranslationHandler {
@@ -184,6 +219,14 @@ export function main() {
             translate.get('TEST').subscribe(() => {
                 expect(handler.handle).not.toHaveBeenCalled();
             });
+        });
+
+        it('should use the MissingTranslationHandler when the key does not exist & we use instant translation', () => {
+            prepareStaticTranslate();
+            let handler = prepareMissingTranslationHandler();
+
+            translate.instant('nonExistingKey');
+            expect(handler.handle).toHaveBeenCalledWith('nonExistingKey');
         });
     });
 

@@ -265,45 +265,55 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     TranslateService.prototype.updateLangs = function() {
       this.langs = Object.keys(this.translations);
     };
+    TranslateService.prototype.getParsedResult = function(translations, key, interpolateParams) {
+      var res;
+      if (key instanceof Array) {
+        var result = {};
+        for (var _i = 0,
+            key_1 = key; _i < key_1.length; _i++) {
+          var k = key_1[_i];
+          result[k] = this.getParsedResult(translations, k, interpolateParams);
+        }
+        return result;
+      }
+      if (translations) {
+        res = this.parser.interpolate(translations[key], interpolateParams);
+      }
+      if (typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
+        var translations_1 = this.parser.flattenObject(this.translations[this.defaultLang]);
+        res = this.parser.interpolate(translations_1[key], interpolateParams);
+      }
+      if (!res && this.missingTranslationHandler) {
+        this.missingTranslationHandler.handle(key);
+      }
+      return res || key;
+    };
     TranslateService.prototype.get = function(key, interpolateParams) {
       var _this = this;
       if (!key) {
         throw new Error('Parameter "key" required');
       }
-      var getParsedResult = function(translations, key) {
-        var res;
-        if (key instanceof Array) {
-          var result = {};
-          for (var _i = 0,
-              key_1 = key; _i < key_1.length; _i++) {
-            var k = key_1[_i];
-            result[k] = getParsedResult(translations, k);
-          }
-          return result;
-        }
-        if (translations) {
-          res = _this.parser.interpolate(translations[key], interpolateParams);
-        }
-        if (typeof res === 'undefined' && _this.defaultLang && _this.defaultLang !== _this.currentLang) {
-          var translations_1 = _this.parser.flattenObject(_this.translations[_this.defaultLang]);
-          res = _this.parser.interpolate(translations_1[key], interpolateParams);
-        }
-        if (!res && _this.missingTranslationHandler) {
-          _this.missingTranslationHandler.handle(key);
-        }
-        return res || key;
-      };
       if (this.pending) {
         return this.pending.map(function(res) {
-          return getParsedResult(_this.parser.flattenObject(res), key);
+          return _this.getParsedResult(_this.parser.flattenObject(res), key, interpolateParams);
         });
       } else {
         var translations = void 0;
         if (this.translations[this.currentLang]) {
           translations = this.parser.flattenObject(this.translations[this.currentLang]);
         }
-        return Observable_1.Observable.of(getParsedResult(translations, key));
+        return Observable_1.Observable.of(this.getParsedResult(translations, key, interpolateParams));
       }
+    };
+    TranslateService.prototype.instant = function(key, interpolateParams) {
+      if (!key) {
+        throw new Error('Parameter "key" required');
+      }
+      var translations;
+      if (this.translations[this.currentLang]) {
+        translations = this.parser.flattenObject(this.translations[this.currentLang]);
+      }
+      return this.getParsedResult(translations, key, interpolateParams);
     };
     TranslateService.prototype.set = function(key, value, lang) {
       if (lang === void 0) {

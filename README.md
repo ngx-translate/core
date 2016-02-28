@@ -112,7 +112,8 @@ translate.setTranslation('en', {
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
-- `set(key: string, value: string, lang?: string)`:
+- `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys)
+- `set(key: string, value: string, lang?: string)`: set the translated value of a key
 
 #### Write & use your own loader
 If you want to write your own loader, you need to create a class that implements `TranslateLoader`.
