@@ -5,7 +5,11 @@ import {
     XHRBackend
 } from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
-import {TranslateService, MissingTranslationHandler} from '../src/translate.service';
+import {
+    TranslateService, MissingTranslationHandler, TranslateStaticLoader,
+    TranslateLoader
+} from '../src/translate.service';
+import {Observable} from "rxjs/Observable";
 
 export function main() {
 
@@ -181,5 +185,92 @@ export function main() {
                 expect(handler.handle).not.toHaveBeenCalled();
             });
         });
+    });
+
+    describe('TranslateLoader', () => {
+        let injector: Injector;
+        let backend: MockBackend;
+        let translate: TranslateService;
+        let connection: MockConnection; // this will be set when a new connection is emitted from the backend.
+
+        var prepare = (loaderClass: Function) => {
+            injector = Injector.resolveAndCreate([
+                HTTP_PROVIDERS,
+                // Provide a mocked (fake) backend for Http
+                provide(XHRBackend, {useClass: MockBackend}),
+                provide(TranslateLoader, {useClass: loaderClass}),
+                TranslateService
+            ]);
+            backend = injector.get(XHRBackend);
+            translate = injector.get(TranslateService);
+            // sets the connection when someone tries to access the backend with an xhr request
+            backend.connections.subscribe((c: MockConnection) => connection = c);
+        };
+
+        it('should be able to provide TranslateStaticLoader', () => {
+            prepare(TranslateStaticLoader);
+
+            expect(translate).toBeDefined();
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof TranslateStaticLoader).toBeTruthy();
+
+            // the lang to use, if the lang isn't available, it will use the current loader to get them
+            translate.use('en');
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            connection.mockRespond(new Response(new ResponseOptions({body: '{"TEST": "This is a test"}'})));
+        });
+
+        it('should be able to provide any TranslateLoader', () => {
+            class CustomLoader implements TranslateLoader {
+                getTranslation(lang: string): Observable<any> {
+                    return Observable.of({"TEST": "This is a test"});
+                }
+            }
+            prepare(CustomLoader);
+
+            expect(translate).toBeDefined();
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
+
+            // the lang to use, if the lang isn't available, it will use the current loader to get them
+            translate.use('en');
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+        });
+
+        it('should be able to change the loader', () => {
+            class CustomLoader implements TranslateLoader {
+                getTranslation(lang: string): Observable<any> {
+                    return Observable.of({"TEST": "This is a test"});
+                }
+            }
+            prepare(TranslateStaticLoader);
+
+            expect(translate).toBeDefined();
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof TranslateStaticLoader).toBeTruthy();
+
+            translate.useLoader(new CustomLoader());
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
+
+            // the lang to use, if the lang isn't available, it will use the current loader to get them
+            translate.use('en');
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+        });
+
     });
 }

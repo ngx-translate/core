@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter} from 'angular2/core';
+import {Injectable, EventEmitter, Optional} from 'angular2/core';
 import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable'
 import 'rxjs/add/observable/fromArray';
@@ -7,20 +7,21 @@ import 'rxjs/add/operator/map';
 
 import {Parser} from './translate.parser';
 
-export interface MissingTranslationHandler {
-    handle(key: string): void;
-}
-
-interface TranslateLoader {
-    getTranslation(lang: string): any;
+export abstract class MissingTranslationHandler {
+    abstract handle(key: string): void;
 }
 
 @Injectable()
-class TranslateStaticLoader implements TranslateLoader {
+export abstract class TranslateLoader {
+    abstract getTranslation(lang: string): Observable<any>;
+}
+
+@Injectable()
+export class TranslateStaticLoader implements TranslateLoader {
     private http: Http;
     private sfLoaderParams = {prefix: 'i18n', suffix: '.json'};
 
-    constructor(http: Http, prefix: string, suffix: string) {
+    constructor(http: Http, @Optional() prefix: string, @Optional() suffix: string) {
         this.http = http;
         this.configure(prefix, suffix);
     }
@@ -40,7 +41,7 @@ class TranslateStaticLoader implements TranslateLoader {
      * @param lang
      * @returns {any}
      */
-    public getTranslation(lang: string): any {
+    public getTranslation(lang: string): Observable<any> {
         return this.http.get(`${this.sfLoaderParams.prefix}/${lang}${this.sfLoaderParams.suffix}`)
             .map((res: Response) => res.json());
     }
@@ -56,7 +57,7 @@ export class TranslateService {
     /**
      * An instance of the loader currently used
      */
-    public currentLoader: any;
+    public currentLoader: TranslateLoader;
 
     /**
      * An EventEmitter to listen to lang changes events
@@ -72,14 +73,26 @@ export class TranslateService {
     private defaultLang: string;
     private langs: Array<string>;
     private parser: Parser = new Parser();
-    
+
     /**
      * Handler for missing translations
      */
     private missingTranslationHandler: MissingTranslationHandler;
 
-    constructor(private http: Http) {
-        this.useStaticFilesLoader();
+    constructor(private http: Http, @Optional() loader: TranslateLoader) {
+        if(loader !== null) {
+            this.currentLoader = loader;
+        } else {
+            this.useStaticFilesLoader();
+        }
+    }
+
+    /**
+     * Use a translations loader
+     * @param loader
+     */
+    public useLoader(loader: TranslateLoader) {
+        this.currentLoader = loader;
     }
 
     /**
@@ -103,11 +116,14 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public use(lang: string): Observable<any> {
+        var pending: Observable<any>;
         // check if this language is available
         if(typeof this.translations[lang] === 'undefined') {
             // not available, ask for it
-            var pending = this.getTranslation(lang);
+            pending = this.getTranslation(lang);
+        }
 
+        if(typeof pending !== 'undefined') {
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
             });
@@ -125,13 +141,11 @@ export class TranslateService {
      * @param lang
      * @returns {Observable<*>}
      */
-    public getTranslation(lang: string): any {
+    public getTranslation(lang: string): Observable<any> {
         this.pending = this.currentLoader.getTranslation(lang).share();
-
         this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
             this.updateLangs();
-            this.pending = undefined;
         }, (err: any) => {
             throw err;
         }, () => {
@@ -196,9 +210,9 @@ export class TranslateService {
                 let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
                 res = this.parser.interpolate(translations[key], interpolateParams);
             }
-            
-            if (!res && this.missingTranslationHandler) {
-              this.missingTranslationHandler.handle(key);
+
+            if(!res && this.missingTranslationHandler) {
+                this.missingTranslationHandler.handle(key);
             }
 
             return res || key;
@@ -235,7 +249,7 @@ export class TranslateService {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
-    
+
     public setMissingTranslationHandler(handler: MissingTranslationHandler) {
         this.missingTranslationHandler = handler;
     }

@@ -1,4 +1,4 @@
-System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
   "use strict";
   ;
   var global = this,
@@ -22,6 +22,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   };
   var core_1 = $__require('angular2/core');
   var translate_service_1 = $__require('./translate.service');
+  var lang_1 = $__require('angular2/src/facade/lang');
   var TranslatePipe = (function() {
     function TranslatePipe(translate) {
       this.value = '';
@@ -55,10 +56,20 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       }
       this.lastKey = query;
       this.updateValue(query, interpolateParams);
-      this.translate.onLangChange.subscribe(function(params) {
+      this._dispose();
+      this.onLangChange = this.translate.onLangChange.subscribe(function(params) {
         _this.updateValue(query, interpolateParams);
       });
       return this.value;
+    };
+    TranslatePipe.prototype._dispose = function() {
+      if (lang_1.isPresent(this.onLangChange)) {
+        this.onLangChange.unsubscribe();
+        this.onLangChange = undefined;
+      }
+    };
+    TranslatePipe.prototype.ngOnDestroy = function() {
+      this._dispose();
     };
     TranslatePipe = __decorate([core_1.Injectable(), core_1.Pipe({
       name: 'translate',
@@ -93,6 +104,11 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
       return Reflect.metadata(k, v);
   };
+  var __param = (this && this.__param) || function(paramIndex, decorator) {
+    return function(target, key) {
+      decorator(target, key, paramIndex);
+    };
+  };
   var core_1 = $__require('angular2/core');
   var http_1 = $__require('angular2/http');
   var Observable_1 = $__require('rxjs/Observable');
@@ -100,6 +116,17 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
   $__require('rxjs/add/operator/share');
   $__require('rxjs/add/operator/map');
   var translate_parser_1 = $__require('./translate.parser');
+  var MissingTranslationHandler = (function() {
+    function MissingTranslationHandler() {}
+    return MissingTranslationHandler;
+  }());
+  exports.MissingTranslationHandler = MissingTranslationHandler;
+  var TranslateLoader = (function() {
+    function TranslateLoader() {}
+    TranslateLoader = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [])], TranslateLoader);
+    return TranslateLoader;
+  }());
+  exports.TranslateLoader = TranslateLoader;
   var TranslateStaticLoader = (function() {
     function TranslateStaticLoader(http, prefix, suffix) {
       this.sfLoaderParams = {
@@ -118,18 +145,26 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         return res.json();
       });
     };
-    TranslateStaticLoader = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [http_1.Http, String, String])], TranslateStaticLoader);
+    TranslateStaticLoader = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __param(2, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, String, String])], TranslateStaticLoader);
     return TranslateStaticLoader;
   }());
+  exports.TranslateStaticLoader = TranslateStaticLoader;
   var TranslateService = (function() {
-    function TranslateService(http) {
+    function TranslateService(http, loader) {
       this.http = http;
       this.currentLang = this.defaultLang;
       this.onLangChange = new core_1.EventEmitter();
       this.translations = {};
       this.parser = new translate_parser_1.Parser();
-      this.useStaticFilesLoader();
+      if (loader !== null) {
+        this.currentLoader = loader;
+      } else {
+        this.useStaticFilesLoader();
+      }
     }
+    TranslateService.prototype.useLoader = function(loader) {
+      this.currentLoader = loader;
+    };
     TranslateService.prototype.useStaticFilesLoader = function(prefix, suffix) {
       this.currentLoader = new TranslateStaticLoader(this.http, prefix, suffix);
     };
@@ -138,8 +173,11 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     };
     TranslateService.prototype.use = function(lang) {
       var _this = this;
+      var pending;
       if (typeof this.translations[lang] === 'undefined') {
-        var pending = this.getTranslation(lang);
+        pending = this.getTranslation(lang);
+      }
+      if (typeof pending !== 'undefined') {
         pending.subscribe(function(res) {
           _this.changeLang(lang);
         });
@@ -155,7 +193,6 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
       this.pending.subscribe(function(res) {
         _this.translations[lang] = res;
         _this.updateLangs();
-        _this.pending = undefined;
       }, function(err) {
         throw err;
       }, function() {
@@ -230,7 +267,7 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     TranslateService.prototype.setMissingTranslationHandler = function(handler) {
       this.missingTranslationHandler = handler;
     };
-    TranslateService = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [http_1.Http])], TranslateService);
+    TranslateService = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, TranslateLoader])], TranslateService);
     return TranslateService;
   }());
   exports.TranslateService = TranslateService;
