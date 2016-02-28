@@ -1,15 +1,17 @@
-import {PipeTransform, Pipe, Injectable} from 'angular2/core';
+import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy} from 'angular2/core';
 import {TranslateService} from './translate.service';
+import {isPresent} from "angular2/src/facade/lang";
 
 @Injectable()
 @Pipe({
     name: 'translate',
     pure: false // required to update the value when the promise is resolved
 })
-export class TranslatePipe implements PipeTransform {
+export class TranslatePipe implements PipeTransform, OnDestroy {
     translate: TranslateService;
     value: string = '';
     lastKey: string;
+    onLangChange: EventEmitter<any>;
 
     constructor(translate: TranslateService) {
         this.translate = translate;
@@ -51,11 +53,29 @@ export class TranslatePipe implements PipeTransform {
         // set the value
         this.updateValue(query, interpolateParams);
 
+        // if there is a subscription to onLangChange, clean it
+        this._dispose();
+
         // subscribe to onLangChange event, in case the language changes
-        this.translate.onLangChange.subscribe((params: {lang: string, translations: any}) => {
+        this.onLangChange = this.translate.onLangChange.subscribe((params: {lang: string, translations: any}) => {
             this.updateValue(query, interpolateParams);
         });
 
         return this.value;
+    }
+
+    /**
+     * Clean any existing subscription to onLangChange events
+     * @private
+     */
+    _dispose() {
+        if(isPresent(this.onLangChange)) {
+            this.onLangChange.unsubscribe();
+            this.onLangChange = undefined;
+        }
+    }
+
+    ngOnDestroy(): any {
+        this._dispose();
     }
 }
