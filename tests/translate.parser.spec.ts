@@ -21,9 +21,12 @@ export function main() {
             expect(parser.interpolate("This is a {{ key1.key2.key3 }}", {key1: {key2: {key3: "value3"}}})).toEqual("This is a value3");
         });
 
-        it('should be able to flatten objects', () => {
-            expect(parser.flattenObject({key1: {key2: "value2"}})).toEqual({"key1.key2": "value2"});
-            expect(parser.flattenObject({key1: {key2: {key3: "value3"}}})).toEqual({"key1.key2.key3": "value3"});
+        it('should get the addressed value', () => {
+            expect(parser.getValue({key1: {key2: "value2"}}, 'key1.key2')).toEqual("value2");
+            expect(parser.getValue({key1: {key2: "value"}}, 'keyWrong.key2')).not.toBeDefined();
+            expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.key3')).toEqual("value3");
+            expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.keyWrong.key3')).not.toBeDefined();
+            expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.keyWrong')).not.toBeDefined();
         });
     });
 }

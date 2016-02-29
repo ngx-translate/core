@@ -199,12 +199,11 @@ export class TranslateService {
         }
 
         if(translations) {
-            res = this.parser.interpolate(translations[key], interpolateParams);
+            res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
         }
 
         if(typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
-            let translations: any = this.parser.flattenObject(this.translations[this.defaultLang]);
-            res = this.parser.interpolate(translations[key], interpolateParams);
+            res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
         if(!res && this.missingTranslationHandler) {
@@ -228,16 +227,10 @@ export class TranslateService {
         // check if we are loading a new translation to use
         if(this.pending) {
             return this.pending.map((res: any) => {
-                return this.getParsedResult(this.parser.flattenObject(res), key, interpolateParams);
+                return this.getParsedResult(res, key, interpolateParams);
             });
         } else {
-            let translations: any;
-
-            if(this.translations[this.currentLang]) {
-                translations = this.parser.flattenObject(this.translations[this.currentLang]);
-            }
-
-            return Observable.of(this.getParsedResult(translations, key, interpolateParams));
+            return Observable.of(this.getParsedResult(this.translations[this.currentLang], key, interpolateParams));
         }
     }
 
@@ -253,14 +246,7 @@ export class TranslateService {
             throw new Error('Parameter "key" required');
         }
 
-        // check if we are loading a new translation to use
-        let translations: any;
-
-        if(this.translations[this.currentLang]) {
-            translations = this.parser.flattenObject(this.translations[this.currentLang]);
-        }
-
-        return this.getParsedResult(translations, key, interpolateParams);
+        return this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
     }
 
     /**
