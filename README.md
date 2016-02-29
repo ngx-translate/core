@@ -188,6 +188,5 @@ With the given translation: `"HELLO": "hello {{value}}"`.
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
 
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
-- `flattenObject(target: Object): Object`:  Flattens an object
-     `{ key1: { keyA: 'valueI' }}` ==> `{ 'key1.keyA': 'valueI' }`
-
+- `getValue(target: any, key: stirng): any`:  Gets a value from an object by composed key
+     `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
