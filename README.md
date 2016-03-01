@@ -114,8 +114,6 @@ translate.setTranslation('en', {
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
-- `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
-used when the requested translation is not available
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys)
