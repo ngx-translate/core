@@ -2,7 +2,7 @@
     "compilerOptions": {
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "ES5",
+        "target": "es5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "inlineSourceMap": true,
@@ -13,11 +13,8 @@
     "files": [
         "typings/main.d.ts",
         "ng2-translate.ts",
-        "./src/translate.service.ts",
-        "./src/translate.parser.ts",
-        "./src/translate.pipe.ts"
-    ],
-    "exclude": [
-        "node_modules"
+        "tests/translate.parser.spec.ts",
+        "tests/translate.service.spec.ts",
+        "tests/translate.pipe.spec.ts"
     ]
 }

@@ -11,29 +11,13 @@ export abstract class MissingTranslationHandler {
     abstract handle(key: string): void;
 }
 
-@Injectable()
 export abstract class TranslateLoader {
     abstract getTranslation(lang: string): Observable<any>;
 }
 
-@Injectable()
 export class TranslateStaticLoader implements TranslateLoader {
-    private http: Http;
-    private sfLoaderParams = {prefix: 'i18n', suffix: '.json'};
 
-    constructor(http: Http, @Optional() prefix: string, @Optional() suffix: string) {
-        this.http = http;
-        this.configure(prefix, suffix);
-    }
-
-    /**
-     * Defines the prefix & suffix used for getTranslation
-     * @param prefix
-     * @param suffix
-     */
-    public configure(prefix: string, suffix: string) {
-        this.sfLoaderParams.prefix = prefix ? prefix : this.sfLoaderParams.prefix;
-        this.sfLoaderParams.suffix = suffix ? suffix : this.sfLoaderParams.suffix;
+    constructor(private http: Http, private prefix: string = 'i18n', private suffix: string = '.json') {
     }
 
     /**
@@ -42,7 +26,7 @@ export class TranslateStaticLoader implements TranslateLoader {
      * @returns {any}
      */
     public getTranslation(lang: string): Observable<any> {
-        return this.http.get(`${this.sfLoaderParams.prefix}/${lang}${this.sfLoaderParams.suffix}`)
+        return this.http.get(`${this.prefix}/${lang}${this.suffix}`)
             .map((res: Response) => res.json());
     }
 }
@@ -53,11 +37,6 @@ export class TranslateService {
      * The lang currently used
      */
     public currentLang: string = this.defaultLang;
-
-    /**
-     * An instance of the loader currently used
-     */
-    public currentLoader: TranslateLoader;
 
     /**
      * An EventEmitter to listen to lang changes events
@@ -74,33 +53,9 @@ export class TranslateService {
     private langs: Array<string>;
     private parser: Parser = new Parser();
 
-    /**
-     * Handler for missing translations
-     */
-    private missingTranslationHandler: MissingTranslationHandler;
-
-    constructor(private http: Http, @Optional() loader: TranslateLoader) {
-        if(loader !== null) {
-            this.currentLoader = loader;
-        } else {
-            this.useStaticFilesLoader();
-        }
-    }
-
-    /**
-     * Use a translations loader
-     * @param loader
-     */
-    public useLoader(loader: TranslateLoader) {
-        this.currentLoader = loader;
-    }
-
-    /**
-     * Use a static files loader
-     */
-    public useStaticFilesLoader(prefix?: string, suffix?: string) {
-        this.currentLoader = new TranslateStaticLoader(this.http, prefix, suffix);
-    }
+    constructor(private http: Http,
+        public currentLoader: TranslateLoader,
+        @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
 
     /**
      * Sets the default language to use as a fallback
@@ -263,10 +218,6 @@ export class TranslateService {
     private changeLang(lang: string) {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
-    }
-
-    public setMissingTranslationHandler(handler: MissingTranslationHandler) {
-        this.missingTranslationHandler = handler;
     }
 
 }

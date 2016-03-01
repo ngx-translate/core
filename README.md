@@ -34,12 +34,15 @@ bootstrap(AppComponent, [
     HTTP_PROVIDERS,
     // not required if you use TranslateStaticLoader (default)
     // use this if you want to use another loader
-    provide(TranslateLoader, {useClass: TranslateStaticLoader}),
-    // not required, but recommended to have 1 unique instance of your service
-    TranslateService
+    // or to configure TranslateStaticLoader
+    provide(TranslateLoader, {
+        useFactory: (http: Http) => new TranslateStaticLoader(http),
+        deps: [Http]
+    }),
+    // recommended to have 1 unique instance of your service
+    NG_TRANSLATE_PROVIDERS
 ]);
 
-@Injectable()
 @Component({
     selector: 'app',
     template: `
@@ -67,7 +70,10 @@ For now, only the static loader is available. You can configure it like this:
 ```js
 var prefix = 'assets/i18n';
 var suffix = '.json';
-translate.useStaticFilesLoader(prefix, suffix);
+provide(TranslateLoader, {
+    useFactory: (http: Http) => new TranslateStaticLoader(http, prefix, suffix),
+    deps: [Http]
+})
 ```
 
 Then put your translations in a json file that looks like this (for `en.json`):
@@ -104,8 +110,6 @@ translate.setTranslation('en', {
     ```
 
 #### Methods:
-- `useStaticFilesLoader()`: Use a static files loader
-- `useLoader(loader: TranslateLoader)`: Use a different loader
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
@@ -139,17 +143,8 @@ bootstrap(AppComponent, [
 ]);
 ```
 
-Or you can just use the `useLoader` method:
-```js
-export class AppComponent {
-    constructor(translate: TranslateService, myLoader: CustomLoader) {
-        translate.useLoader(myLoader);
-    }
-}
-```
-
 #### How to handle missing translations
-You can use the method `setMissingTranslationHandler` to define a handler that will be called when the requested translation is not available.
+You can setup a provider for `MissingTranslationHandler` to define a handler that will be called when the requested translation is not available.
 The only required method is `handle` where you can do whatever you want. Just don't forget that it will be called synchronously from the `get` & `instant` methods.
 
 ##### Example:
@@ -164,13 +159,9 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 }
 ```
 
-Set the Missing Translation Handler
+Setup the Missing Translation Handler in bootstrap
 ```js
-constructor(translate: TranslateService) {
-  ...
-  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
-  ...
-}  
+provide(MissingTranslationHandler, { useClass: MyMissingTranslationHandler })
 ```
 
 ### TranslatePipe
