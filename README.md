@@ -21,13 +21,15 @@ System.config({
 ```
 
 Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the angular2/http bundle as well).
-It is recommended to instantiate `TranslateService` in the bootstrap of your application and to never add it to the "providers" property of your components, this way you will keep it as a singleton.
-If you add it to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized.
+It is recommended to use `NG_TRANSLATE_PROVIDERS` in the bootstrap of your application and to never add `TranslateService` to the "providers" property of your components, this way you will keep it as a singleton.
+`NG_TRANSLATE_PROVIDERS` provides a default configuration for the static translation file loader.
+If you add `TranslateService` to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized with the language to use or the default language.
 
 ```js
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {Component, Injectable, provide} from 'angular2/core';
-import {TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
+import {NG_TRANSLATE_PROVIDERS, TranslateService, TranslatePipe,
+    TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 import {bootstrap} from 'angular2/platform/browser';
 
 bootstrap(AppComponent, [
@@ -66,12 +68,10 @@ export class AppComponent {
 }
 ```
 
-For now, only the static loader is available. You can configure it like this:
+For now, only the static loader is available. You can configure it like this during bootstrap:
 ```js
-var prefix = 'assets/i18n';
-var suffix = '.json';
 provide(TranslateLoader, {
-    useFactory: (http: Http) => new TranslateStaticLoader(http, prefix, suffix),
+    useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
     deps: [Http]
 })
 ```
@@ -85,7 +85,7 @@ Then put your translations in a json file that looks like this (for `en.json`):
 
 An then you can get new translations like this:
 ```js
-    translate.getTranslation(userLang);
+translate.getTranslation(userLang);
 ```
 
 But you can also define your translations manually instead of using `getTranslation`:
