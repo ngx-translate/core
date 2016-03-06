@@ -49,7 +49,7 @@ export class TranslateService {
      * });
      * @type {ng.EventEmitter<LangChangeEvent>}
      */
-    public onLangChange = new EventEmitter<LangChangeEvent>();
+    public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
 
     private pending: any;
     private translations: any = {};
@@ -223,6 +223,10 @@ export class TranslateService {
         this.updateLangs();
     }
 
+    /**
+     * Changes the current lang
+     * @param lang
+     */
     private changeLang(lang: string) {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});

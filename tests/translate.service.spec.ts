@@ -8,7 +8,8 @@ import {MockBackend, MockConnection} from "angular2/http/testing";
 import {
     TRANSLATE_PROVIDERS,
     TranslateService, MissingTranslationHandler, TranslateLoader,
-    TranslateStaticLoader
+    TranslateStaticLoader,
+    LangChangeEvent
 } from './../ng2-translate';
 import {Observable} from "rxjs/Observable";
 
@@ -183,6 +184,16 @@ export function main() {
             translate.use('en');
 
             expect(translate.instant('TEST2')).toEqual('TEST2');
+        });
+
+        it('should trigger an event when the lang changes', () => {
+            var tr = {"TEST": "This is a test"};
+            translate.setTranslation('en', tr);
+            translate.onLangChange.subscribe((event: LangChangeEvent) => {
+                expect(event.lang).toBe('en');
+                expect(event.translations).toEqual(tr);
+            });
+            translate.use('en');
         });
     });
         

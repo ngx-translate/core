@@ -90,11 +90,11 @@ translate.setTranslation('en', {
 #### Properties:
 - `currentLang`: The lang currently used
 - `currentLoader`: An instance of the loader currently used (static loader by default)
-- `onLangChange`: An EventEmitter to listen to lang changes events
+- `onLangChange`: An EventEmitter to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
     example:
 	```js
-    onLangChange.subscribe((params: {lang: string, translations: any}) => {
+    onLangChange.subscribe(event: LangChangeEvent) => {
 	  // do something
 	});
     ```

@@ -112,7 +112,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       this.lastParams = args;
       this.updateValue(query, interpolateParams);
       this._dispose();
-      this.onLangChange = this.translate.onLangChange.subscribe(function(params) {
+      this.onLangChange = this.translate.onLangChange.subscribe(function(event) {
         _this.updateValue(query, interpolateParams);
       });
       return this.value;

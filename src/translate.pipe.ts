@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy} from 'angular2/core';
-import {TranslateService} from './translate.service';
+import {TranslateService, LangChangeEvent} from './translate.service';
 import {isPresent, isArray, isDate, isFunction} from "angular2/src/facade/lang";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     value: string = '';
     lastKey: string;
     lastParams: any[];
-    onLangChange: EventEmitter<any>;
+    onLangChange: EventEmitter<LangChangeEvent>;
 
     constructor(translate: TranslateService) {
         this.translate = translate;
@@ -133,7 +133,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         this._dispose();
 
         // subscribe to onLangChange event, in case the language changes
-        this.onLangChange = this.translate.onLangChange.subscribe((params: {lang: string, translations: any}) => {
+        this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
             this.updateValue(query, interpolateParams);
         });
 
