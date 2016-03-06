@@ -205,16 +205,24 @@ export function main() {
         let missingTranslationHandler: MissingTranslationHandler;
         
         class Missing implements MissingTranslationHandler {
-            handle(key: string) {}
+            handle(key: string) {
+                return "handled";
+            }
         }
 
-        beforeEach(() => {
+        class MissingObs implements MissingTranslationHandler {
+            handle(key: string): Observable<any> {
+                return Observable.of(`handled: ${key}`);
+            }
+        }
+
+        let prepare = ((handlerClass: Function) => {
             injector = Injector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
                 TRANSLATE_PROVIDERS,
-                provide(MissingTranslationHandler, { useClass: Missing })
+                provide(MissingTranslationHandler, { useClass: handlerClass })
             ]);
             backend = injector.get(XHRBackend);
             translate = injector.get(TranslateService);
@@ -232,11 +240,31 @@ export function main() {
         });
 
         it('should use the MissingTranslationHandler when the key does not exist', () => {
+            prepare(Missing);
             translate.use('en');
-            spyOn(missingTranslationHandler, 'handle');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
             
-            translate.get('nonExistingKey').subscribe(() => {
+            translate.get('nonExistingKey').subscribe((res: string) => {
                 expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
+                expect(res).toEqual('handled');
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should return the key when using MissingTranslationHandler & the handler returns nothing', () => {
+            class MissingUndef implements MissingTranslationHandler {
+                handle(key: string) {}
+            }
+
+            prepare(MissingUndef);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            translate.get('nonExistingKey').subscribe((res: string) => {
+                expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
+                expect(res).toEqual('nonExistingKey');
             });
 
             // mock response after the xhr request, otherwise it will be undefined
@@ -244,8 +272,9 @@ export function main() {
         });
         
         it('should not call the MissingTranslationHandler when the key exists', () => {
+            prepare(Missing);
             translate.use('en');
-            spyOn(missingTranslationHandler, 'handle');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
             
             translate.get('TEST').subscribe(() => {
                 expect(missingTranslationHandler.handle).not.toHaveBeenCalled();
@@ -256,11 +285,66 @@ export function main() {
         });
 
         it('should use the MissingTranslationHandler when the key does not exist & we use instant translation', () => {
+            prepare(Missing);
             translate.use('en');
-            spyOn(missingTranslationHandler, 'handle');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
 
-            translate.instant('nonExistingKey');
+            expect(translate.instant('nonExistingKey')).toEqual('handled');
             expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
+        });
+
+        it('should wait for the MissingTranslationHandler when it returns an observable & we use get', () => {
+            prepare(MissingObs);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            translate.get('nonExistingKey').subscribe((res: string) => {
+                expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
+                expect(res).toEqual('handled');
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should wait for the MissingTranslationHandler when it returns an observable & we use get with an array', () => {
+            let translations = {nonExistingKey1: 'handled: nonExistingKey1', nonExistingKey2: 'handled: nonExistingKey2', nonExistingKey3: 'handled: nonExistingKey3'};
+
+            prepare(MissingObs);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            translate.get(Object.keys(translations)).subscribe((res: string) => {
+                expect(missingTranslationHandler.handle).toHaveBeenCalledTimes(3);
+                expect(res).toEqual(translations);
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should not wait for the MissingTranslationHandler when it returns an observable & we use instant', () => {
+            prepare(MissingObs);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            expect(translate.instant('nonExistingKey')).toEqual('nonExistingKey');
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should not wait for the MissingTranslationHandler when it returns an observable & we use instant with an array', () => {
+            let translations = {nonExistingKey1: 'handled: nonExistingKey1', nonExistingKey2: 'handled: nonExistingKey2', nonExistingKey3: 'handled: nonExistingKey3'};
+
+            prepare(MissingObs);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            expect(translate.instant(Object.keys(translations))).toEqual({nonExistingKey1: 'nonExistingKey1', nonExistingKey2: 'nonExistingKey2', nonExistingKey3: 'nonExistingKey3'});
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
     });
 

@@ -28,9 +28,6 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       this.value = '';
       this.translate = translate;
     }
-    TranslatePipe.prototype.isRegExp = function(value) {
-      return toString.call(value) === '[object RegExp]';
-    };
     TranslatePipe.prototype.equals = function(o1, o2) {
       if (o1 === o2)
         return true;
@@ -54,28 +51,21 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
             }
             return true;
           }
-        } else if (lang_1.isDate(o1)) {
-          if (!lang_1.isDate(o2))
-            return false;
-          return this.equals(o1.getTime(), o2.getTime());
-        } else if (this.isRegExp(o1)) {
-          if (!this.isRegExp(o2))
-            return false;
-          return o1.toString() == o2.toString();
         } else {
-          if (lang_1.isArray(o2) || lang_1.isDate(o2) || this.isRegExp(o2))
+          if (lang_1.isArray(o2)) {
             return false;
+          }
           keySet = Object.create(null);
           for (key in o1) {
-            if (key.charAt(0) === '$' || lang_1.isFunction(o1[key]))
-              continue;
-            if (!this.equals(o1[key], o2[key]))
+            if (!this.equals(o1[key], o2[key])) {
               return false;
+            }
             keySet[key] = true;
           }
           for (key in o2) {
-            if (!(key in keySet) && key.charAt(0) !== '$' && typeof o2[key] !== 'undefined' && !lang_1.isFunction(o2[key]))
+            if (!(key in keySet) && typeof o2[key] !== 'undefined') {
               return false;
+            }
           }
           return true;
         }
@@ -137,7 +127,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   return module.exports;
 });
 
-System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/fromArray", "rxjs/add/operator/share", "rxjs/add/operator/map", "./translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/fromArray", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var global = this,
@@ -170,6 +160,8 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
   $__require('rxjs/add/observable/fromArray');
   $__require('rxjs/add/operator/share');
   $__require('rxjs/add/operator/map');
+  $__require('rxjs/add/operator/merge');
+  $__require('rxjs/add/operator/toArray');
   var translate_parser_1 = $__require('./translate.parser');
   var MissingTranslationHandler = (function() {
     function MissingTranslationHandler() {}
@@ -256,11 +248,35 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     TranslateService.prototype.getParsedResult = function(translations, key, interpolateParams) {
       var res;
       if (key instanceof Array) {
-        var result = {};
+        var result = {},
+            observables = false;
         for (var _i = 0,
             key_1 = key; _i < key_1.length; _i++) {
           var k = key_1[_i];
           result[k] = this.getParsedResult(translations, k, interpolateParams);
+          if (typeof result[k].subscribe === 'function') {
+            observables = true;
+          }
+        }
+        if (observables) {
+          var mergedObs;
+          for (var _a = 0,
+              key_2 = key; _a < key_2.length; _a++) {
+            var k = key_2[_a];
+            var obs = typeof result[k].subscribe === 'function' ? result[k] : Observable_1.Observable.of(result[k]);
+            if (typeof mergedObs === 'undefined') {
+              mergedObs = obs;
+            } else {
+              mergedObs = mergedObs.merge(obs);
+            }
+          }
+          return mergedObs.toArray().map(function(arr) {
+            var obj = {};
+            arr.forEach(function(value, index) {
+              obj[key[index]] = value;
+            });
+            return obj;
+          });
         }
         return result;
       }
@@ -271,7 +287,7 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
       }
       if (!res && this.missingTranslationHandler) {
-        this.missingTranslationHandler.handle(key);
+        res = this.missingTranslationHandler.handle(key);
       }
       return res || key;
     };
@@ -281,18 +297,46 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         throw new Error('Parameter "key" required');
       }
       if (this.pending) {
-        return this.pending.map(function(res) {
-          return _this.getParsedResult(res, key, interpolateParams);
+        return Observable_1.Observable.create(function(observer) {
+          var onComplete = function(res) {
+            observer.next(res);
+            observer.complete();
+          };
+          _this.pending.subscribe(function(res) {
+            var res = _this.getParsedResult(res, key, interpolateParams);
+            if (typeof res.subscribe === 'function') {
+              res.subscribe(onComplete);
+            } else {
+              onComplete(res);
+            }
+          });
         });
       } else {
-        return Observable_1.Observable.of(this.getParsedResult(this.translations[this.currentLang], key, interpolateParams));
+        var res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+        if (typeof res.subscribe === 'function') {
+          return res;
+        } else {
+          return Observable_1.Observable.of(res);
+        }
       }
     };
     TranslateService.prototype.instant = function(key, interpolateParams) {
       if (!key) {
         throw new Error('Parameter "key" required');
       }
-      return this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+      var res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+      if (typeof res.subscribe !== 'undefined') {
+        if (key instanceof Array) {
+          var obj = {};
+          key.forEach(function(value, index) {
+            obj[key[index]] = key[index];
+          });
+          return obj;
+        }
+        return key;
+      } else {
+        return res;
+      }
     };
     TranslateService.prototype.set = function(key, value, lang) {
       if (lang === void 0) {

@@ -1,9 +1,12 @@
 import {Injectable, EventEmitter, Optional} from 'angular2/core';
 import {Http, Response} from 'angular2/http';
 import {Observable} from 'rxjs/Observable'
+import {Observer} from "rxjs/Observer";
 import 'rxjs/add/observable/fromArray';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/merge';
+import 'rxjs/add/operator/toArray';
 
 import {Parser} from './translate.parser';
 
@@ -13,7 +16,15 @@ export interface LangChangeEvent {
 }
 
 export abstract class MissingTranslationHandler {
-    abstract handle(key: string): void;
+    /**
+     * A function that handles missing translations.
+     * @param key the missing key
+     * @returns {any} a value or an observable
+     * If it returns a value, then this value is used.
+     * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
+     * If it doesn't return then the key will be used as a value
+     */
+    abstract handle(key: string): any;
 }
 
 export abstract class TranslateLoader {
@@ -60,7 +71,7 @@ export class TranslateService {
      *
      * @param http The Angular 2 http provider
      * @param currentLoader An instance of the loader currently used
-     * @param missingTranslationHandler A handler for missing translations
+     * @param missingTranslationHandler A handler for missing translations.
      */
     constructor(private http: Http, public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
 
@@ -149,13 +160,35 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any}
      */
-    private getParsedResult(translations: any, key: any, interpolateParams?: Object): string {
-        var res: string;
+    private getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
+        var res: string|Observable<string>;
 
         if(key instanceof Array) {
-            let result: any = {};
-            for (var k of key) {
+            let result: any = {},
+                observables: boolean = false;
+            for (let k of key) {
                 result[k] = this.getParsedResult(translations, k, interpolateParams);
+                if(typeof result[k].subscribe === 'function') {
+                    observables = true;
+                }
+            }
+            if(observables) {
+                var mergedObs: any;
+                for (let k of key) {
+                    let obs = typeof result[k].subscribe === 'function' ? result[k] : Observable.of(result[k]);
+                    if(typeof mergedObs === 'undefined') {
+                        mergedObs = obs;
+                    } else {
+                        mergedObs = mergedObs.merge(obs);
+                    }
+                }
+                return mergedObs.toArray().map((arr: Array<string>) => {
+                    var obj: any = {};
+                    arr.forEach((value: string, index: number) => {
+                        obj[key[index]] = value;
+                    });
+                    return obj;
+                });
             }
             return result;
         }
@@ -169,7 +202,7 @@ export class TranslateService {
         }
 
         if(!res && this.missingTranslationHandler) {
-            this.missingTranslationHandler.handle(key);
+            res = this.missingTranslationHandler.handle(key);
         }
 
         return res || key;
@@ -185,14 +218,29 @@ export class TranslateService {
         if(!key) {
             throw new Error('Parameter "key" required');
         }
-
         // check if we are loading a new translation to use
         if(this.pending) {
-            return this.pending.map((res: any) => {
-                return this.getParsedResult(res, key, interpolateParams);
+            return Observable.create((observer: Observer<string>) => {
+                var onComplete = (res: string) => {
+                    observer.next(res);
+                    observer.complete();
+                };
+                this.pending.subscribe((res: any) => {
+                    var res = this.getParsedResult(res, key, interpolateParams);
+                    if(typeof res.subscribe === 'function') {
+                        res.subscribe(onComplete);
+                    } else {
+                        onComplete(res);
+                    }
+                });
             });
         } else {
-            return Observable.of(this.getParsedResult(this.translations[this.currentLang], key, interpolateParams));
+            var res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+            if(typeof res.subscribe === 'function') {
+                return res;
+            } else {
+                return Observable.of(res);
+            }
         }
     }
 
@@ -208,7 +256,19 @@ export class TranslateService {
             throw new Error('Parameter "key" required');
         }
 
-        return this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+        var res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+        if(typeof res.subscribe !== 'undefined') {
+            if(key instanceof Array) {
+                var obj: any = {};
+                key.forEach((value: string, index: number) => {
+                    obj[key[index]] = key[index];
+                });
+                return obj;
+            }
+            return key;
+        } else {
+            return res;
+        }
     }
 
     /**

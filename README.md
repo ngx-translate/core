@@ -130,7 +130,8 @@ provide(TranslateLoader, {useClass: CustomLoader})
 #### How to handle missing translations
 You can setup a provider for `MissingTranslationHandler` in the bootstrap of your application (recommended), or in the `providers` property of a component.
 It will be called when the requested translation is not available.
-The only required method is `handle` where you can do whatever you want. Just don't forget that it will be called synchronously from the `get` & `instant` methods.
+The only required method is `handle` where you can do whatever you want. If this method returns a value or an observable (that should return a string), then this will be used.
+Just don't forget that it will be called synchronously from the `instant` method.
 
 ##### Example:
 Create a Missing Translation Handler
@@ -139,7 +140,7 @@ import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
   handle(key: string) {
-      console.log(key);
+      return 'some value';
   }
 }
 ```
