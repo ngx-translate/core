@@ -300,7 +300,7 @@ export function main() {
 
             translate.get('nonExistingKey').subscribe((res: string) => {
                 expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
-                expect(res).toEqual('handled');
+                expect(res).toEqual('handled: nonExistingKey');
             });
 
             // mock response after the xhr request, otherwise it will be undefined
