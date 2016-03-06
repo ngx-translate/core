@@ -7,10 +7,16 @@ export * from './src/translate.pipe';
 export * from './src/translate.service';
 export * from './src/translate.parser';
 
-export const NG_TRANSLATE_PROVIDERS: any = [
+export const TRANSLATE_PROVIDERS: any = [
     provide(TranslateLoader, {
         useFactory: (http: Http) => new TranslateStaticLoader(http),
         deps: [Http]
     }),
     TranslateService
 ];
+
+// for angular-cli
+export default {
+    pipes: [TranslatePipe],
+    providers: [TranslateService]
+}

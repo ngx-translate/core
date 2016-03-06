@@ -6,7 +6,7 @@ import {
 } from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
 import {
-    NG_TRANSLATE_PROVIDERS,
+    TRANSLATE_PROVIDERS,
     TranslateService, MissingTranslationHandler, TranslateLoader,
     TranslateStaticLoader
 } from './../ng2-translate';
@@ -30,7 +30,7 @@ export function main() {
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
-                NG_TRANSLATE_PROVIDERS
+                TRANSLATE_PROVIDERS
             ]);
             backend = injector.get(XHRBackend);
             translate = injector.get(TranslateService);
@@ -184,6 +184,69 @@ export function main() {
 
             expect(translate.instant('TEST2')).toEqual('TEST2');
         });
+
+        function prepareMissingTranslationHandler() {
+            class Missing implements MissingTranslationHandler {
+                handle(key: string) {}
+            }
+            let handler = new Missing();
+            spyOn(handler, 'handle');
+
+            translate.setMissingTranslationHandler(handler);
+
+            return handler;
+        }
+
+        it('should use the MissingTranslationHandler when the key does not exist', () => {
+            translate.use('en');
+            let handler = prepareMissingTranslationHandler();
+
+            translate.get('nonExistingKey').subscribe(() => {
+                expect(handler.handle).toHaveBeenCalledWith('nonExistingKey');
+            });
+        });
+
+        it('should not call the MissingTranslationHandler when the key exists', () => {
+            translate.use('en');
+            let handler = prepareMissingTranslationHandler();
+
+            translate.get('TEST').subscribe(() => {
+                expect(handler.handle).not.toHaveBeenCalled();
+            });
+        });
+
+        it('should use the MissingTranslationHandler when the key does not exist & we use instant translation', () => {
+            translate.use('en');
+            let handler = prepareMissingTranslationHandler();
+
+            translate.instant('nonExistingKey');
+            expect(handler.handle).toHaveBeenCalledWith('nonExistingKey');
+        });
+
+        it('should be able to change the loader', () => {
+            class CustomLoader implements TranslateLoader {
+                getTranslation(lang: string): Observable<any> {
+                    return Observable.of({"TEST": "This is a test"});
+                }
+            }
+            translate.use('en');
+
+            expect(translate).toBeDefined();
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof TranslateStaticLoader).toBeTruthy();
+
+            translate.useLoader(new CustomLoader());
+            expect(translate.currentLoader).toBeDefined();
+            expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
+
+            // the lang to use, if the lang isn't available, it will use the current loader to get them
+            translate.use('en');
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+            });
+        });
     });
         
     describe('MissingTranslationHandler', () => {
@@ -202,7 +265,7 @@ export function main() {
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
-                NG_TRANSLATE_PROVIDERS,
+                TRANSLATE_PROVIDERS,
                 provide(MissingTranslationHandler, { useClass: Missing })
             ]);
             backend = injector.get(XHRBackend);
@@ -271,7 +334,7 @@ export function main() {
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
-                NG_TRANSLATE_PROVIDERS
+                TRANSLATE_PROVIDERS
             ]);
             prepare(injector);
 
@@ -301,7 +364,7 @@ export function main() {
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
-                NG_TRANSLATE_PROVIDERS,
+                TRANSLATE_PROVIDERS,
                 provide(TranslateLoader, { useClass: CustomLoader })
             ]);
             prepare(injector);

@@ -1,6 +1,6 @@
 import {TranslatePipe} from '../src/translate.pipe';
 import {MockConnection, MockBackend} from "angular2/src/http/backends/mock_backend";
-import {NG_TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
+import {TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
 import {XHRBackend, HTTP_PROVIDERS} from "angular2/http";
 import {provide, Injector} from "angular2/core";
 
@@ -17,7 +17,7 @@ export function main() {
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
-                NG_TRANSLATE_PROVIDERS,
+                TRANSLATE_PROVIDERS,
                 TranslatePipe
             ]);
             backend = injector.get(XHRBackend);

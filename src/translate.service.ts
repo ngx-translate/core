@@ -16,7 +16,6 @@ export abstract class TranslateLoader {
 }
 
 export class TranslateStaticLoader implements TranslateLoader {
-
     constructor(private http: Http, private prefix: string = 'i18n', private suffix: string = '.json') {
     }
 
@@ -53,9 +52,21 @@ export class TranslateService {
     private langs: Array<string>;
     private parser: Parser = new Parser();
 
-    constructor(private http: Http,
-        public currentLoader: TranslateLoader,
-        @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
+    /**
+     *
+     * @param http The Angular 2 http provider
+     * @param currentLoader An instance of the loader currently used
+     * @param missingTranslationHandler A handler for missing translations
+     */
+    constructor(private http: Http, public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
+    
+    /**
+     * Use a translations loader
+     * @param loader
+     */
+    public useLoader(loader: TranslateLoader) {
+        this.currentLoader = loader;
+    }
 
     /**
      * Sets the default language to use as a fallback
@@ -218,6 +229,10 @@ export class TranslateService {
     private changeLang(lang: string) {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    }
+
+    public setMissingTranslationHandler(handler: MissingTranslationHandler) {
+        this.missingTranslationHandler = handler;
     }
 
 }

@@ -13,6 +13,9 @@
     "files": [
         "typings/main.d.ts",
         "ng2-translate.ts",
+        "./src/translate.pipe.ts",
+        "./src/translate.service.ts",
+        "./src/translate.parser.ts",
         "tests/translate.parser.spec.ts",
         "tests/translate.service.spec.ts",
         "tests/translate.pipe.spec.ts"
