@@ -1,9 +1,9 @@
 System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var define;
-  var global = this;
-  var GLOBAL = this;
+  var global = this,
+      __define = global.define;
+  global.define = undefined;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -133,15 +133,16 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     return TranslatePipe;
   }());
   exports.TranslatePipe = TranslatePipe;
+  global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/fromArray", "rxjs/add/operator/share", "rxjs/add/operator/map", "./translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var define;
-  var global = this;
-  var GLOBAL = this;
+  var global = this,
+      __define = global.define;
+  global.define = undefined;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -177,50 +178,41 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
   exports.MissingTranslationHandler = MissingTranslationHandler;
   var TranslateLoader = (function() {
     function TranslateLoader() {}
-    TranslateLoader = __decorate([core_1.Injectable(), __metadata('design:paramtypes', [])], TranslateLoader);
     return TranslateLoader;
   }());
   exports.TranslateLoader = TranslateLoader;
   var TranslateStaticLoader = (function() {
     function TranslateStaticLoader(http, prefix, suffix) {
-      this.sfLoaderParams = {
-        prefix: 'i18n',
-        suffix: '.json'
-      };
+      if (prefix === void 0) {
+        prefix = 'i18n';
+      }
+      if (suffix === void 0) {
+        suffix = '.json';
+      }
       this.http = http;
-      this.configure(prefix, suffix);
+      this.prefix = prefix;
+      this.suffix = suffix;
     }
-    TranslateStaticLoader.prototype.configure = function(prefix, suffix) {
-      this.sfLoaderParams.prefix = prefix ? prefix : this.sfLoaderParams.prefix;
-      this.sfLoaderParams.suffix = suffix ? suffix : this.sfLoaderParams.suffix;
-    };
     TranslateStaticLoader.prototype.getTranslation = function(lang) {
-      return this.http.get(this.sfLoaderParams.prefix + "/" + lang + this.sfLoaderParams.suffix).map(function(res) {
+      return this.http.get(this.prefix + "/" + lang + this.suffix).map(function(res) {
         return res.json();
       });
     };
-    TranslateStaticLoader = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __param(2, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, String, String])], TranslateStaticLoader);
     return TranslateStaticLoader;
   }());
   exports.TranslateStaticLoader = TranslateStaticLoader;
   var TranslateService = (function() {
-    function TranslateService(http, loader) {
+    function TranslateService(http, currentLoader, missingTranslationHandler) {
       this.http = http;
+      this.currentLoader = currentLoader;
+      this.missingTranslationHandler = missingTranslationHandler;
       this.currentLang = this.defaultLang;
       this.onLangChange = new core_1.EventEmitter();
       this.translations = {};
       this.parser = new translate_parser_1.Parser();
-      if (loader !== null) {
-        this.currentLoader = loader;
-      } else {
-        this.useStaticFilesLoader();
-      }
     }
     TranslateService.prototype.useLoader = function(loader) {
       this.currentLoader = loader;
-    };
-    TranslateService.prototype.useStaticFilesLoader = function(prefix, suffix) {
-      this.currentLoader = new TranslateStaticLoader(this.http, prefix, suffix);
     };
     TranslateService.prototype.setDefaultLang = function(lang) {
       this.defaultLang = lang;
@@ -276,11 +268,10 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         return result;
       }
       if (translations) {
-        res = this.parser.interpolate(translations[key], interpolateParams);
+        res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
       }
       if (typeof res === 'undefined' && this.defaultLang && this.defaultLang !== this.currentLang) {
-        var translations_1 = this.parser.flattenObject(this.translations[this.defaultLang]);
-        res = this.parser.interpolate(translations_1[key], interpolateParams);
+        res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
       }
       if (!res && this.missingTranslationHandler) {
         this.missingTranslationHandler.handle(key);
@@ -294,25 +285,17 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
       }
       if (this.pending) {
         return this.pending.map(function(res) {
-          return _this.getParsedResult(_this.parser.flattenObject(res), key, interpolateParams);
+          return _this.getParsedResult(res, key, interpolateParams);
         });
       } else {
-        var translations = void 0;
-        if (this.translations[this.currentLang]) {
-          translations = this.parser.flattenObject(this.translations[this.currentLang]);
-        }
-        return Observable_1.Observable.of(this.getParsedResult(translations, key, interpolateParams));
+        return Observable_1.Observable.of(this.getParsedResult(this.translations[this.currentLang], key, interpolateParams));
       }
     };
     TranslateService.prototype.instant = function(key, interpolateParams) {
       if (!key) {
         throw new Error('Parameter "key" required');
       }
-      var translations;
-      if (this.translations[this.currentLang]) {
-        translations = this.parser.flattenObject(this.translations[this.currentLang]);
-      }
-      return this.getParsedResult(translations, key, interpolateParams);
+      return this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
     };
     TranslateService.prototype.set = function(key, value, lang) {
       if (lang === void 0) {
@@ -331,80 +314,83 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     TranslateService.prototype.setMissingTranslationHandler = function(handler) {
       this.missingTranslationHandler = handler;
     };
-    TranslateService = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, TranslateLoader])], TranslateService);
+    TranslateService = __decorate([core_1.Injectable(), __param(2, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, TranslateLoader, MissingTranslationHandler])], TranslateService);
     return TranslateService;
   }());
   exports.TranslateService = TranslateService;
+  global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.parser", [], true, function($__require, exports, module) {
   "use strict";
   ;
-  var define;
-  var global = this;
-  var GLOBAL = this;
+  var global = this,
+      __define = global.define;
+  global.define = undefined;
   var Parser = (function() {
     function Parser() {
       this.templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
     }
     Parser.prototype.interpolate = function(expr, params) {
-      if (!params) {
+      var _this = this;
+      if (typeof expr !== 'string' || !params) {
         return expr;
-      } else {
-        params = this.flattenObject(params);
       }
       return expr.replace(this.templateMatcher, function(substring, b) {
-        var r = params[b];
+        var r = _this.getValue(params, b);
         return typeof r !== 'undefined' ? r : substring;
       });
     };
-    Parser.prototype.flattenObject = function(target) {
-      var delimiter = '.';
-      var maxDepth;
-      var currentDepth = 1;
-      var output = {};
-      function step(object, prev) {
-        Object.keys(object).forEach(function(key) {
-          var value = object[key];
-          var newKey = prev ? prev + delimiter + key : key;
-          maxDepth = currentDepth + 1;
-          if (!Array.isArray(value) && typeof value === 'object' && Object.keys(value).length && currentDepth < maxDepth) {
-            ++currentDepth;
-            return step(value, newKey);
-          }
-          output[newKey] = value;
-        });
+    Parser.prototype.getValue = function(target, key) {
+      var keys = key.split('.');
+      try {
+        for (var _i = 0,
+            keys_1 = keys; _i < keys_1.length; _i++) {
+          var k = keys_1[_i];
+          target = target[k];
+        }
+        return target;
+      } catch (e) {
+        return;
       }
-      step(target);
-      return output;
     };
     return Parser;
   }());
   exports.Parser = Parser;
+  global.define = __define;
   return module.exports;
 });
 
-System.registerDynamic("ng2-translate", ["./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var define;
-  var global = this;
-  var GLOBAL = this;
+  var global = this,
+      __define = global.define;
+  global.define = undefined;
   function __export(m) {
     for (var p in m)
       if (!exports.hasOwnProperty(p))
         exports[p] = m[p];
   }
+  var core_1 = $__require('angular2/core');
+  var http_1 = $__require('angular2/http');
   var translate_pipe_1 = $__require('./src/translate.pipe');
   var translate_service_1 = $__require('./src/translate.service');
   __export($__require('./src/translate.pipe'));
   __export($__require('./src/translate.service'));
   __export($__require('./src/translate.parser'));
+  exports.TRANSLATE_PROVIDERS = [core_1.provide(translate_service_1.TranslateLoader, {
+    useFactory: function(http) {
+      return new translate_service_1.TranslateStaticLoader(http);
+    },
+    deps: [http_1.Http]
+  }), translate_service_1.TranslateService];
   Object.defineProperty(exports, "__esModule", {value: true});
   exports.default = {
     pipes: [translate_pipe_1.TranslatePipe],
     providers: [translate_service_1.TranslateService]
   };
+  global.define = __define;
   return module.exports;
 });

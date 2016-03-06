@@ -231,6 +231,10 @@ export class TranslateService {
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
+    /**
+     * Sets the Missing Translation Handler which will be used when the requested translation is not available
+     * @param handler
+     */
     public setMissingTranslationHandler(handler: MissingTranslationHandler) {
         this.missingTranslationHandler = handler;
     }
