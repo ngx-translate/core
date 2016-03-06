@@ -27,6 +27,7 @@ module.exports = function(config) {
             { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false, served: true },
             { pattern: 'node_modules/systemjs/dist/system-polyfills.js', included: false, watched: false, served: true }, // PhantomJS2 (and possibly others) might require it
 
+            { pattern: 'ng2-translate.ts', included: false, watched: true }, // source files
             { pattern: 'src/**/*.ts', included: false, watched: true }, // source files
             { pattern: 'tests/**/*.ts', included: false, watched: true }, // test files
             'karma-test-shim.js'

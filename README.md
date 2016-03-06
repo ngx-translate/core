@@ -21,25 +21,30 @@ System.config({
 ```
 
 Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the angular2/http bundle as well).
-It is recommended to instantiate `TranslateService` in the bootstrap of your application and to never add it to the "providers" property of your components, this way you will keep it as a singleton.
-If you add it to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized.
+It is recommended to use `NG_TRANSLATE_PROVIDERS` in the bootstrap of your application and to never add `TranslateService` to the "providers" property of your components, this way you will keep it as a singleton.
+`NG_TRANSLATE_PROVIDERS` provides a default configuration for the static translation file loader.
+If you add `TranslateService` to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized with the language to use or the default language.
 
 ```js
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {Component, Injectable, provide} from 'angular2/core';
-import {TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
+import {NG_TRANSLATE_PROVIDERS, TranslateService, TranslatePipe,
+    TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 import {bootstrap} from 'angular2/platform/browser';
 
 bootstrap(AppComponent, [
     HTTP_PROVIDERS,
     // not required if you use TranslateStaticLoader (default)
     // use this if you want to use another loader
-    provide(TranslateLoader, {useClass: TranslateStaticLoader}),
-    // not required, but recommended to have 1 unique instance of your service
-    TranslateService
+    // or to configure TranslateStaticLoader
+    provide(TranslateLoader, {
+        useFactory: (http: Http) => new TranslateStaticLoader(http),
+        deps: [Http]
+    }),
+    // recommended to have 1 unique instance of your service
+    NG_TRANSLATE_PROVIDERS
 ]);
 
-@Injectable()
 @Component({
     selector: 'app',
     template: `
@@ -63,11 +68,12 @@ export class AppComponent {
 }
 ```
 
-For now, only the static loader is available. You can configure it like this:
+For now, only the static loader is available. You can configure it like this during bootstrap:
 ```js
-var prefix = 'assets/i18n';
-var suffix = '.json';
-translate.useStaticFilesLoader(prefix, suffix);
+provide(TranslateLoader, {
+    useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
+    deps: [Http]
+})
 ```
 
 Then put your translations in a json file that looks like this (for `en.json`):
@@ -79,7 +85,7 @@ Then put your translations in a json file that looks like this (for `en.json`):
 
 An then you can get new translations like this:
 ```js
-    translate.getTranslation(userLang);
+translate.getTranslation(userLang);
 ```
 
 But you can also define your translations manually instead of using `getTranslation`:
@@ -104,14 +110,10 @@ translate.setTranslation('en', {
     ```
 
 #### Methods:
-- `useStaticFilesLoader()`: Use a static files loader
-- `useLoader(loader: TranslateLoader)`: Use a different loader
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object)`: Manually sets an object of translations for a given language
-- `setMissingTranslationHandler(handler: MissingTranslationHandler): void`: sets the Missing Translation Handler which will be
-used when the requested translation is not available
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys)
@@ -139,17 +141,8 @@ bootstrap(AppComponent, [
 ]);
 ```
 
-Or you can just use the `useLoader` method:
-```js
-export class AppComponent {
-    constructor(translate: TranslateService, myLoader: CustomLoader) {
-        translate.useLoader(myLoader);
-    }
-}
-```
-
 #### How to handle missing translations
-You can use the method `setMissingTranslationHandler` to define a handler that will be called when the requested translation is not available.
+You can setup a provider for `MissingTranslationHandler` to define a handler that will be called when the requested translation is not available.
 The only required method is `handle` where you can do whatever you want. Just don't forget that it will be called synchronously from the `get` & `instant` methods.
 
 ##### Example:
@@ -164,13 +157,9 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 }
 ```
 
-Set the Missing Translation Handler
+Setup the Missing Translation Handler in bootstrap
 ```js
-constructor(translate: TranslateService) {
-  ...
-  translate.setMissingTranslationHandler(new MyMissingTranslationHandler());
-  ...
-}  
+provide(MissingTranslationHandler, { useClass: MyMissingTranslationHandler })
 ```
 
 ### TranslatePipe
