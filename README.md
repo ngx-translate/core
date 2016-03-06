@@ -60,10 +60,16 @@ export class AppComponent {
 
 For now, only the static loader is available. You can configure it like this during bootstrap or in the `providers` property of a component:
 ```js
-provide(TranslateLoader, {
-    useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-    deps: [Http]
-})
+bootstrap(AppComponent, [
+    HTTP_PROVIDERS,
+    provide(TranslateLoader, {
+        useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
+        deps: [Http]
+    }),
+    // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
+    TranslateService
+]);
+
 ```
 
 Then put your translations in a json file that looks like this (for `en.json`):
