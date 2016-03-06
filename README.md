@@ -1,9 +1,7 @@
 # ng2-translate [![Build Status](https://travis-ci.org/ocombe/ng2-translate.svg?branch=master)](https://travis-ci.org/ocombe/ng2-translate) [![npm version](https://img.shields.io/npm/v/ng2-translate.svg)](https://www.npmjs.com/package/ng2-translate)
 An implementation of angular translate for Angular 2.
 
-Simple examples using ng2-translate:
-- with ng2-play: https://github.com/ocombe/ng2-play/tree/ng2-translate
-- with angular2-seed: https://github.com/ocombe/angular2-seed/tree/ng2-translate
+Simple example using ng2-translate: https://github.com/ocombe/ng2-play/tree/ng2-translate
 
 ## Installation
 First you need to install the npm module:
