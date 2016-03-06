@@ -59,14 +59,6 @@ export class TranslateService {
      * @param missingTranslationHandler A handler for missing translations
      */
     constructor(private http: Http, public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
-    
-    /**
-     * Use a translations loader
-     * @param loader
-     */
-    public useLoader(loader: TranslateLoader) {
-        this.currentLoader = loader;
-    }
 
     /**
      * Sets the default language to use as a fallback
@@ -229,14 +221,6 @@ export class TranslateService {
     private changeLang(lang: string) {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
-    }
-
-    /**
-     * Sets the Missing Translation Handler which will be used when the requested translation is not available
-     * @param handler
-     */
-    public setMissingTranslationHandler(handler: MissingTranslationHandler) {
-        this.missingTranslationHandler = handler;
     }
 
 }

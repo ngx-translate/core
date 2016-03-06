@@ -211,9 +211,6 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
       this.translations = {};
       this.parser = new translate_parser_1.Parser();
     }
-    TranslateService.prototype.useLoader = function(loader) {
-      this.currentLoader = loader;
-    };
     TranslateService.prototype.setDefaultLang = function(lang) {
       this.defaultLang = lang;
     };
@@ -310,9 +307,6 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         lang: lang,
         translations: this.translations[lang]
       });
-    };
-    TranslateService.prototype.setMissingTranslationHandler = function(handler) {
-      this.missingTranslationHandler = handler;
     };
     TranslateService = __decorate([core_1.Injectable(), __param(2, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, TranslateLoader, MissingTranslationHandler])], TranslateService);
     return TranslateService;
