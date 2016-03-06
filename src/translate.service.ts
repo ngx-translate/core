@@ -7,6 +7,11 @@ import 'rxjs/add/operator/map';
 
 import {Parser} from './translate.parser';
 
+export interface LangChangeEvent {
+    lang: string;
+    translations: any;
+}
+
 export abstract class MissingTranslationHandler {
     abstract handle(key: string): void;
 }
@@ -39,12 +44,12 @@ export class TranslateService {
 
     /**
      * An EventEmitter to listen to lang changes events
-     * onLangChange.subscribe((params: {lang: string, translations: any}) => {
+     * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
-     * @type {ng.EventEmitter}
+     * @type {ng.EventEmitter<LangChangeEvent>}
      */
-    public onLangChange: EventEmitter<any> = new EventEmitter();
+    public onLangChange = new EventEmitter<LangChangeEvent>();
 
     private pending: any;
     private translations: any = {};
