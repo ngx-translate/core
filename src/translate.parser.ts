@@ -25,9 +25,9 @@ export class Parser {
      * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
      * @param target
      * @param key
-     * @returns any
+     * @returns {string}
      */
-    public getValue(target: any, key: string) {
+    public getValue(target: any, key: string): string {
         let keys = key.split('.');
         try {
             for (let k of keys) {

@@ -21,8 +21,7 @@ export abstract class TranslateLoader {
 }
 
 export class TranslateStaticLoader implements TranslateLoader {
-    constructor(private http: Http, private prefix: string = 'i18n', private suffix: string = '.json') {
-    }
+    constructor(private http: Http, private prefix: string = 'i18n', private suffix: string = '.json') {}
 
     /**
      * Gets the translations from the server
@@ -69,7 +68,7 @@ export class TranslateService {
      * Sets the default language to use as a fallback
      * @param lang
      */
-    public setDefaultLang(lang: string) {
+    public setDefaultLang(lang: string): void {
         this.defaultLang = lang;
     }
 
@@ -123,7 +122,7 @@ export class TranslateService {
      * @param lang
      * @param translations
      */
-    public setTranslation(lang: string, translations: Object) {
+    public setTranslation(lang: string, translations: Object): void {
         this.translations[lang] = translations;
         this.updateLangs();
     }
@@ -132,14 +131,14 @@ export class TranslateService {
      * Returns an array of currently available langs
      * @returns {any}
      */
-    public getLangs() {
+    public getLangs(): Array<string> {
         return this.langs;
     }
 
     /**
      * Update the list of available langs
      */
-    private updateLangs() {
+    private updateLangs(): void {
         this.langs = Object.keys(this.translations);
     }
 
@@ -218,7 +217,7 @@ export class TranslateService {
      * @param value
      * @param lang
      */
-    public set(key: string, value: string, lang: string = this.currentLang) {
+    public set(key: string, value: string, lang: string = this.currentLang): void {
         this.translations[lang][key] = value;
         this.updateLangs();
     }
@@ -227,7 +226,7 @@ export class TranslateService {
      * Changes the current lang
      * @param lang
      */
-    private changeLang(lang: string) {
+    private changeLang(lang: string): void {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
