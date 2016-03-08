@@ -10,7 +10,7 @@ npm install ng2-translate --save
 ```
 
 If you use SystemJS to load your files, you might have to update your config with this if you don't use `defaultJSExtensions: true`:
-```js
+```ts
 System.config({
     packages: {
         "/ng2-translate": {"defaultExtension": "js"}
@@ -23,7 +23,7 @@ It is recommended to use `TRANSLATE_PROVIDERS` in the bootstrap of your applicat
 `TRANSLATE_PROVIDERS` provides a default configuration for the static translation file loader.
 If you add `TranslateService` to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized with the language to use or the default language.
 
-```js
+```ts
 import {HTTP_PROVIDERS} from 'angular2/http';
 import {Component, Injectable, provide} from 'angular2/core';
 import {TRANSLATE_PROVIDERS, TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
@@ -59,7 +59,7 @@ export class AppComponent {
 ```
 
 For now, only the static loader is available. You can configure it like this during bootstrap or in the `providers` property of a component:
-```js
+```ts
 bootstrap(AppComponent, [
     HTTP_PROVIDERS,
     provide(TranslateLoader, {
@@ -70,6 +70,24 @@ bootstrap(AppComponent, [
     TranslateService
 ]);
 
+```
+
+For Ionic 2 here is a complete bootstrap with configuration:
+```ts
+import {provide} from 'angular2/core';
+import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
+
+@App({
+  templateUrl: '....',
+  config: {},
+  providers: [
+    provide(TranslateLoader, {
+      useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
+      deps: [Http]
+    }),
+    TranslateService
+  ]
+})
 ```
 
 Then put your translations in a json file that looks like this (for `en.json`):
@@ -85,7 +103,7 @@ translate.getTranslation(userLang);
 ```
 
 But you can also define your translations manually instead of using `getTranslation`:
-```js
+```ts
 translate.setTranslation('en', {
     "HELLO": "hello {{value}}"
 });
@@ -99,7 +117,7 @@ translate.setTranslation('en', {
 - `onLangChange`: An EventEmitter to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
     example:
-	```js
+    ```ts
     onLangChange.subscribe(event: LangChangeEvent) => {
 	  // do something
 	});
@@ -120,7 +138,7 @@ If you want to write your own loader, you need to create a class that implements
 The only required method is `getTranslation` that must return an `Observable`. If your loader is synchronous, just use `Observable.of` to create an observable from your static value.
 
 ##### Example
-```js
+```ts
 class CustomLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
         return Observable.of({"KEY": "Value"});
@@ -129,7 +147,7 @@ class CustomLoader implements TranslateLoader {
 ```
 
 Once you've defined your loader, you can provide it during bootstrap or in the `providers` property of a component:
-```js
+```ts
 provide(TranslateLoader, {useClass: CustomLoader})
 ```
 
@@ -141,7 +159,7 @@ Just don't forget that it will be called synchronously from the `instant` method
 
 ##### Example:
 Create a Missing Translation Handler
-```js
+```ts
 import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
@@ -152,7 +170,7 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 ```
 
 Setup the Missing Translation Handler in bootstrap (recommended) or in the `providers` property of a component
-```js
+```ts
 provide(MissingTranslationHandler, { useClass: MyMissingTranslationHandler })
 ```
 
