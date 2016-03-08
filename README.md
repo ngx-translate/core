@@ -3,6 +3,8 @@ An implementation of angular translate for Angular 2.
 
 Simple example using ng2-translate: https://github.com/ocombe/ng2-play/tree/ng2-translate
 
+Get the complete changelog here: https://github.com/ocombe/ng2-translate/releases
+
 ## Installation
 First you need to install the npm module:
 ```sh
