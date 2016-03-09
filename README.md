@@ -5,6 +5,11 @@ Simple example using ng2-translate: https://github.com/ocombe/ng2-play/tree/ng2-
 
 Get the complete changelog here: https://github.com/ocombe/ng2-translate/releases
 
+* [Installation](#installation)
+* [Usage](#usage)
+* [API](#api)
+* [Additional Framework Support](#additional-framework-support)
+
 ## Installation
 First you need to install the npm module:
 ```sh
@@ -19,6 +24,8 @@ System.config({
     }
 });
 ```
+
+## Usage
 
 Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the angular2/http bundle as well).
 It is recommended to use `TRANSLATE_PROVIDERS` in the bootstrap of your application and to never add `TranslateService` to the "providers" property of your components, this way you will keep it as a singleton.
@@ -193,3 +200,8 @@ With the given translation: `"HELLO": "hello {{value}}"`.
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
 - `getValue(target: any, key: stirng): any`:  Gets a value from an object by composed key
      `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
+     
+## Additional Framework Support
+
+* [NativeScript](https://www.nativescript.org/) via [nativescript-ng2-translate](https://github.com/NathanWalker/nativescript-ng2-translate)
+
