@@ -29,14 +29,20 @@ export class Parser {
      */
     public getValue(target: any, key: string): string {
         let keys = key.split('.');
-        try {
-            for (let k of keys) {
-                target = target[k];
+        key = '';
+        do {
+            key += keys.shift();
+            if (target[key]) {
+                target = target[key];
+                key = '';
+            } else if (!keys.length) {
+                target = undefined;
+            } else {
+                key += '.';
             }
-            return target;
-        } catch (e) {
-            return;
-        }
+        } while (keys.length);
+        
+        return target;
     }
 
 }
