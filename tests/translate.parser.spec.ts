@@ -27,6 +27,13 @@ export function main() {
             expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.key3')).toEqual("value3");
             expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.keyWrong.key3')).not.toBeDefined();
             expect(parser.getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.keyWrong')).not.toBeDefined();
+
+
+            expect(parser.getValue({'key1.key2': {key3: "value3"}}, 'key1.key2.key3')).toEqual("value3");
+            expect(parser.getValue({key1: {'key2.key3': "value3"}}, 'key1.key2.key3')).toEqual("value3");
+            expect(parser.getValue({'key1.key2.key3': "value3"}, 'key1.key2.key3')).toEqual("value3");
+            expect(parser.getValue({'key1.key2': {key3: "value3"}}, 'key1.key2.keyWrong')).not.toBeDefined();
+
         });
     });
 }
