@@ -384,16 +384,19 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
     };
     Parser.prototype.getValue = function(target, key) {
       var keys = key.split('.');
-      try {
-        for (var _i = 0,
-            keys_1 = keys; _i < keys_1.length; _i++) {
-          var k = keys_1[_i];
-          target = target[k];
+      key = '';
+      do {
+        key += keys.shift();
+        if (target[key]) {
+          target = target[key];
+          key = '';
+        } else if (!keys.length) {
+          target = undefined;
+        } else {
+          key += '.';
         }
-        return target;
-      } catch (e) {
-        return;
-      }
+      } while (keys.length);
+      return target;
     };
     return Parser;
   }());
