@@ -1,4 +1,4 @@
-import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy} from 'angular2/core';
+import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from 'angular2/core';
 import {TranslateService, LangChangeEvent} from './translate.service';
 import {isPresent, isArray} from "angular2/src/facade/lang";
 
@@ -8,14 +8,12 @@ import {isPresent, isArray} from "angular2/src/facade/lang";
     pure: false // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-    translate: TranslateService;
     value: string = '';
     lastKey: string;
     lastParams: any[];
     onLangChange: EventEmitter<LangChangeEvent>;
 
-    constructor(translate: TranslateService) {
-        this.translate = translate;
+    constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
     }
 
     /**
@@ -73,6 +71,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     updateValue(key: string, interpolateParams?: Object): void {
         this.translate.get(key, interpolateParams).subscribe((res: string) => {
             this.value = res ? res : key;
+            this._ref.markForCheck();
         });
     }
 

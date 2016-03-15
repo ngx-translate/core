@@ -24,9 +24,10 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   var translate_service_1 = $__require('./translate.service');
   var lang_1 = $__require('angular2/src/facade/lang');
   var TranslatePipe = (function() {
-    function TranslatePipe(translate) {
-      this.value = '';
+    function TranslatePipe(translate, _ref) {
       this.translate = translate;
+      this._ref = _ref;
+      this.value = '';
     }
     TranslatePipe.prototype.equals = function(o1, o2) {
       if (o1 === o2)
@@ -76,6 +77,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       var _this = this;
       this.translate.get(key, interpolateParams).subscribe(function(res) {
         _this.value = res ? res : key;
+        _this._ref.markForCheck();
       });
     };
     TranslatePipe.prototype.transform = function(query, args) {
@@ -119,7 +121,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     TranslatePipe = __decorate([core_1.Injectable(), core_1.Pipe({
       name: 'translate',
       pure: false
-    }), __metadata('design:paramtypes', [translate_service_1.TranslateService])], TranslatePipe);
+    }), __metadata('design:paramtypes', [translate_service_1.TranslateService, core_1.ChangeDetectorRef])], TranslatePipe);
     return TranslatePipe;
   }());
   exports.TranslatePipe = TranslatePipe;
