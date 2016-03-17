@@ -291,4 +291,21 @@ export class TranslateService {
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
+    /**
+     * Allows to reload the lang file from the file
+     * @param lang
+     * @returns {Observable<any>}
+     */
+    public reloadLang(lang: string): Observable<any> {
+        this.resetLang(lang);
+        return this.getTranslation(lang);
+    }
+
+    /**
+     * Deletes inner translation
+     * @param lang
+     */
+    public resetLang(lang: string): void {
+        this.translations[lang] = undefined;
+    }
 }

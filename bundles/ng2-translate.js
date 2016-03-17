@@ -353,6 +353,13 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
         translations: this.translations[lang]
       });
     };
+    TranslateService.prototype.reloadLang = function(lang) {
+      this.resetLang(lang);
+      return this.getTranslation(lang);
+    };
+    TranslateService.prototype.resetLang = function(lang) {
+      this.translations[lang] = undefined;
+    };
     TranslateService = __decorate([core_1.Injectable(), __param(2, core_1.Optional()), __metadata('design:paramtypes', [http_1.Http, TranslateLoader, MissingTranslationHandler])], TranslateService);
     return TranslateService;
   }());
