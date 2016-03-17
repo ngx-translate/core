@@ -82,7 +82,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     };
     TranslatePipe.prototype.transform = function(query, args) {
       var _this = this;
-      if (query.length === 0) {
+      if (!query || query.length === 0) {
         return query;
       }
       if (this.equals(query, this.lastKey) && this.equals(args, this.lastParams)) {

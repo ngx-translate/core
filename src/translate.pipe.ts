@@ -76,7 +76,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     transform(query: string, args: any[]): any {
-        if(query.length === 0) {
+        if(!query || query.length === 0) {
             return query;
         }
         // if we ask another time for the same key, return the last value
