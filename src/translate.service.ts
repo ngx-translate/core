@@ -290,5 +290,19 @@ export class TranslateService {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
-
+    /**
+     * Allows to reload the lang file from the file
+     * @param lang
+     */
+    public reloadLang(lang:string){
+        this.resetLang(lang);
+        this.getTranslation(lang);
+    }
+    /**
+     * Deletes inner translation
+     * @param lang
+     */
+    private resetLang(lang:string){
+        this.translations[lang] = undefined;
+    }
 }
