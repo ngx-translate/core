@@ -1,9 +1,9 @@
 System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
+  var define,
+      global = this,
+      GLOBAL = this;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -125,16 +125,15 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     return TranslatePipe;
   }());
   exports.TranslatePipe = TranslatePipe;
-  global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/fromArray", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
+  var define,
+      global = this,
+      GLOBAL = this;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -358,16 +357,15 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
     return TranslateService;
   }());
   exports.TranslateService = TranslateService;
-  global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("src/translate.parser", [], true, function($__require, exports, module) {
   "use strict";
   ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
+  var define,
+      global = this,
+      GLOBAL = this;
   var Parser = (function() {
     function Parser() {
       this.templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
@@ -401,16 +399,15 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
     return Parser;
   }());
   exports.Parser = Parser;
-  global.define = __define;
   return module.exports;
 });
 
 System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
+  var define,
+      global = this,
+      GLOBAL = this;
   function __export(m) {
     for (var p in m)
       if (!exports.hasOwnProperty(p))
@@ -434,6 +431,5 @@ System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./sr
     pipes: [translate_pipe_1.TranslatePipe],
     providers: [translate_service_1.TranslateService]
   };
-  global.define = __define;
   return module.exports;
 });

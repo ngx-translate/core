@@ -12,6 +12,7 @@
     },
     "files": [
         "typings/main.d.ts",
+        "node_modules/zone.js/dist/zone.js.d.ts",
         "ng2-translate.ts",
         "./src/translate.pipe.ts",
         "./src/translate.service.ts",
