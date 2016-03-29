@@ -19,7 +19,6 @@ export function main() {
         connection.mockRespond(new Response(new ResponseOptions({body: response})));
     };
 
-
     describe('TranslateService', () => {
         let injector: Injector;
         let backend: MockBackend;
@@ -195,15 +194,62 @@ export function main() {
             });
             translate.use('en');
         });
+
+        it('should be able to reset a lang', (done: Function) => {
+            translate.use('en');
+            spyOn(connection, 'mockRespond').and.callThrough();
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+                expect(connection.mockRespond).toHaveBeenCalledTimes(1);
+
+                // reset the lang as if it was never initiated
+                translate.resetLang('en');
+
+                expect(translate.instant('TEST')).toEqual('TEST');
+
+                // use set timeout because no request is really made and we need to trigger zone to resolve the observable
+                setTimeout(() => {
+                    translate.get('TEST').subscribe((res: string) => {
+                        expect(res).toEqual('TEST'); // because the loader is "pristine" as if it was never called
+                        expect(connection.mockRespond).toHaveBeenCalledTimes(1);
+                        done();
+                    });
+                }, 10);
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should be able to reload a lang', () => {
+            translate.use('en');
+
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+
+                // reset the lang as if it was never initiated
+                translate.reloadLang('en').subscribe((res: string) => {
+                    expect(translate.instant('TEST')).toEqual('This is a test 2');
+                });
+
+                mockBackendResponse(connection, '{"TEST": "This is a test 2"}');
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
     });
-        
+
     describe('MissingTranslationHandler', () => {
         let injector: Injector;
         let backend: MockBackend;
         let translate: TranslateService;
         let connection: MockConnection; // this will be set when a new connection is emitted from the backend.
         let missingTranslationHandler: MissingTranslationHandler;
-        
+
         class Missing implements MissingTranslationHandler {
             handle(key: string) {
                 return "handled";
@@ -243,7 +289,7 @@ export function main() {
             prepare(Missing);
             translate.use('en');
             spyOn(missingTranslationHandler, 'handle').and.callThrough();
-            
+
             translate.get('nonExistingKey').subscribe((res: string) => {
                 expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
                 expect(res).toEqual('handled');
@@ -270,16 +316,16 @@ export function main() {
             // mock response after the xhr request, otherwise it will be undefined
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
-        
+
         it('should not call the MissingTranslationHandler when the key exists', () => {
             prepare(Missing);
             translate.use('en');
             spyOn(missingTranslationHandler, 'handle').and.callThrough();
-            
+
             translate.get('TEST').subscribe(() => {
                 expect(missingTranslationHandler.handle).not.toHaveBeenCalled();
             });
-            
+
             // mock response after the xhr request, otherwise it will be undefined
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
