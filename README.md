@@ -141,6 +141,8 @@ translate.setTranslation('en', {
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys)
 - `set(key: string, value: string, lang?: string)`: set the translated value of a key
+- `reloadLang(lang: string)`: Calls resetLang and retrieve the lang translations object for the current loader.
+- `resetLang(lang: string)`: Affects undefined to the current loader lang translations object.
 
 #### Write & use your own loader
 If you want to write your own loader, you need to create a class that implements `TranslateLoader`.
