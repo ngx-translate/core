@@ -28,14 +28,13 @@
   "homepage": "https://github.com/ocombe/ng2-translate",
   "peerDependencies": {
     "angular2": ">= 2.0.0-beta.0",
-    "es6-promise": ">= 3.0.2",
     "es6-shim": ">= 0.33.3",
     "reflect-metadata": ">= 0.1.2",
     "rxjs": ">= 5.0.0-beta.0",
     "zone.js": ">= 0.5.10"
   },
   "devDependencies": {
-    "angular2": "2.0.0-beta.11",
+    "angular2": "2.0.0-beta.12",
     "commitizen": "~2.5.0",
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "^3.0.2",
@@ -54,7 +53,7 @@
     "tsd": "^0.6.5",
     "typescript": "^1.8.9",
     "typings": "^0.6.8",
-    "zone.js": "^0.6.4"
+    "zone.js": "^0.6.6"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
