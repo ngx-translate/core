@@ -302,7 +302,7 @@ export class TranslateService {
      * Deletes inner translation
      * @param lang
      */
-    private resetLang(lang:string){
+    public resetLang(lang:string){
         this.translations[lang] = undefined;
     }
 }
