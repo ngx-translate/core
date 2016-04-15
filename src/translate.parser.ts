@@ -28,12 +28,12 @@ export class Parser {
      * @returns {string}
      */
     public getValue(target: any, key: string): string {
-        let keys = key.split('.');
+        let keys = key.trim().split('.');
         key = '';
         do {
             key += keys.shift();
             if (target[key] && (typeof target[key] === 'object' || !keys.length)) {
-                target = target[key];
+                target = target[key].trim();
                 key = '';
             } else if (!keys.length) {
                 target = undefined;
