@@ -1,20 +1,18 @@
 import {it} from "angular2/testing";
 import {provide, Injector} from "angular2/core";
-import {
-    ResponseOptions, Response, HTTP_PROVIDERS, Connection,
-    XHRBackend
-} from "angular2/http";
+import {ResponseOptions, Response, HTTP_PROVIDERS, XHRBackend} from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
 import {
     TRANSLATE_PROVIDERS,
-    TranslateService, MissingTranslationHandler, TranslateLoader,
+    TranslateService,
+    MissingTranslationHandler,
+    TranslateLoader,
     TranslateStaticLoader,
     LangChangeEvent
 } from './../ng2-translate';
 import {Observable} from "rxjs/Observable";
 
 export function main() {
-
     const mockBackendResponse = (connection: MockConnection, response: string) => {
         connection.mockRespond(new Response(new ResponseOptions({body: response})));
     };
@@ -268,7 +266,7 @@ export function main() {
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
                 TRANSLATE_PROVIDERS,
-                provide(MissingTranslationHandler, { useClass: handlerClass })
+                provide(MissingTranslationHandler, {useClass: handlerClass})
             ]);
             backend = injector.get(XHRBackend);
             translate = injector.get(TranslateService);
@@ -301,7 +299,8 @@ export function main() {
 
         it('should return the key when using MissingTranslationHandler & the handler returns nothing', () => {
             class MissingUndef implements MissingTranslationHandler {
-                handle(key: string) {}
+                handle(key: string) {
+                }
             }
 
             prepare(MissingUndef);
@@ -354,7 +353,11 @@ export function main() {
         });
 
         it('should wait for the MissingTranslationHandler when it returns an observable & we use get with an array', () => {
-            let translations = {nonExistingKey1: 'handled: nonExistingKey1', nonExistingKey2: 'handled: nonExistingKey2', nonExistingKey3: 'handled: nonExistingKey3'};
+            let translations = {
+                nonExistingKey1: 'handled: nonExistingKey1',
+                nonExistingKey2: 'handled: nonExistingKey2',
+                nonExistingKey3: 'handled: nonExistingKey3'
+            };
 
             prepare(MissingObs);
             translate.use('en');
@@ -381,13 +384,21 @@ export function main() {
         });
 
         it('should not wait for the MissingTranslationHandler when it returns an observable & we use instant with an array', () => {
-            let translations = {nonExistingKey1: 'handled: nonExistingKey1', nonExistingKey2: 'handled: nonExistingKey2', nonExistingKey3: 'handled: nonExistingKey3'};
+            let translations = {
+                nonExistingKey1: 'handled: nonExistingKey1',
+                nonExistingKey2: 'handled: nonExistingKey2',
+                nonExistingKey3: 'handled: nonExistingKey3'
+            };
 
             prepare(MissingObs);
             translate.use('en');
             spyOn(missingTranslationHandler, 'handle').and.callThrough();
 
-            expect(translate.instant(Object.keys(translations))).toEqual({nonExistingKey1: 'nonExistingKey1', nonExistingKey2: 'nonExistingKey2', nonExistingKey3: 'nonExistingKey3'});
+            expect(translate.instant(Object.keys(translations))).toEqual({
+                nonExistingKey1: 'nonExistingKey1',
+                nonExistingKey2: 'nonExistingKey2',
+                nonExistingKey3: 'nonExistingKey3'
+            });
 
             // mock response after the xhr request, otherwise it will be undefined
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
@@ -443,7 +454,7 @@ export function main() {
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
                 TRANSLATE_PROVIDERS,
-                provide(TranslateLoader, { useClass: CustomLoader })
+                provide(TranslateLoader, {useClass: CustomLoader})
             ]);
             prepare(injector);
 

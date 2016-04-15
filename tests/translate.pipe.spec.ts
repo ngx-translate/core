@@ -1,8 +1,9 @@
 import {TranslatePipe} from '../src/translate.pipe';
 import {MockConnection, MockBackend} from "angular2/src/http/backends/mock_backend";
 import {TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
-import {XHRBackend, HTTP_PROVIDERS} from "angular2/http";
+import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "angular2/http";
 import {provide, Injector, ChangeDetectorRef} from "angular2/core";
+import {LangChangeEvent} from "../src/translate.service";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
     markForCheck(): void {}
@@ -14,10 +15,13 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
     checkNoChanges(): void {}
 
     reattach(): void {}
-
 }
 
 export function main() {
+    const mockBackendResponse = (connection: MockConnection, response: string) => {
+        connection.mockRespond(new Response(new ResponseOptions({body: response})));
+    };
+
     describe('TranslatePipe', () => {
         let injector: Injector;
         let backend: MockBackend;
@@ -40,6 +44,15 @@ export function main() {
 
             ref = new FakeChangeDetectorRef();
             translatePipe = new TranslatePipe(translate, ref);
+        });
+
+        afterEach(() => {
+            injector = undefined;
+            backend = undefined;
+            translate = undefined;
+            connection = undefined;
+            translatePipe = undefined;
+            ref = undefined;
         });
 
         it('is defined', () => {
@@ -103,6 +116,41 @@ export function main() {
             expect(() => {
                 translatePipe.transform('TEST', [param]);
             }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`)
+        });
+
+        describe('should update translations on lang change', () => {
+            it('with static loader', (done) => {
+                translate.setTranslation('en', {"TEST": "This is a test"});
+                translate.setTranslation('fr', {"TEST": "C'est un test"});
+                translate.use('en');
+
+                expect(translatePipe.transform('TEST', [])).toEqual("This is a test");
+
+                // this will be resolved at the next lang change
+                translate.onLangChange.subscribe((res: LangChangeEvent) => {
+                    expect(res.lang).toEqual('fr');
+                    expect(translatePipe.transform('TEST', [])).toEqual("C'est un test");
+                    done();
+                });
+
+                translate.use('fr');
+            });
+
+            it('with file loader', (done) => {
+                translate.use('en');
+                mockBackendResponse(connection, '{"TEST": "This is a test"}');
+                expect(translatePipe.transform('TEST', [])).toEqual("This is a test");
+
+                // this will be resolved at the next lang change
+                translate.onLangChange.subscribe((res: LangChangeEvent) => {
+                    expect(res.lang).toEqual('fr');
+                    expect(translatePipe.transform('TEST', [])).toEqual("C'est un test");
+                    done();
+                });
+
+                translate.use('fr');
+                mockBackendResponse(connection, `{"TEST": "C'est un test"}`);
+            });
         });
     });
 }
