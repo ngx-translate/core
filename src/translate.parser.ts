@@ -33,7 +33,7 @@ export class Parser {
         do {
             key += keys.shift();
             if (target[key] && (typeof target[key] === 'object' || !keys.length)) {
-                target = target[key].trim();
+                target = target[key];
                 key = '';
             } else if (!keys.length) {
                 target = undefined;
