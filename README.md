@@ -16,14 +16,7 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-If you use SystemJS to load your files, you might have to update your config with this if you don't use `defaultJSExtensions: true`:
-```ts
-System.config({
-    packages: {
-        "/ng2-translate": {"defaultExtension": "js"}
-    }
-});
-```
+**If you use SystemJS** to load your files, you might have to update your config like [in this example](https://github.com/ocombe/ng2-play/blob/ng2-translate/index.html#L25-L28).
 
 ## Usage
 
