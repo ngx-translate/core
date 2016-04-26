@@ -75,7 +75,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         });
     }
 
-    transform(query: string, args: any[]): any {
+    transform(query: string, ...args: any[]): any {
         if(!query || query.length === 0) {
             return query;
         }

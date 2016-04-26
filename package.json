@@ -30,7 +30,7 @@
     "angular2": ">= 2.0.0-beta.10"
   },
   "devDependencies": {
-    "angular2": "2.0.0-beta.15",
+    "angular2": "2.0.0-beta.16",
     "commitizen": "~2.5.0",
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "^3.0.2",
