@@ -76,6 +76,7 @@ bootstrap(AppComponent, [
 
 For Ionic 2 here is a complete bootstrap with configuration:
 ```ts
+import {Http} from 'angular2/http';
 import {provide} from 'angular2/core';
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
@@ -84,8 +85,8 @@ import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-tran
   config: {},
   providers: [
     provide(TranslateLoader, {
-      useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-      deps: [Http]
+      useFactory: (http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
+      deps: [[Http]]
     }),
     TranslateService
   ]
