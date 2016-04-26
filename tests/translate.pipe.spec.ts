@@ -2,7 +2,7 @@ import {TranslatePipe} from '../src/translate.pipe';
 import {MockConnection, MockBackend} from "angular2/src/http/backends/mock_backend";
 import {TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "angular2/http";
-import {provide, Injector, ChangeDetectorRef} from "angular2/core";
+import {provide, Injector, ReflectiveInjector, ChangeDetectorRef} from "angular2/core";
 import {LangChangeEvent} from "../src/translate.service";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
@@ -31,7 +31,7 @@ export function main() {
         let ref: any;
 
         beforeEach(() => {
-            injector = Injector.resolveAndCreate([
+            injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
@@ -65,7 +65,7 @@ export function main() {
             translate.setTranslation('en', {"TEST": "This is a test"});
             translate.use('en');
 
-            expect(translatePipe.transform('TEST', [])).toEqual("This is a test");
+            expect(translatePipe.transform('TEST')).toEqual("This is a test");
         });
 
         it('should call markForChanges when it translates a string', () => {
@@ -73,7 +73,7 @@ export function main() {
             translate.use('en');
             spyOn(ref, 'markForCheck').and.callThrough();
 
-            translatePipe.transform('TEST', []);
+            translatePipe.transform('TEST');
             expect(ref.markForCheck).toHaveBeenCalled();
         });
 
@@ -81,15 +81,15 @@ export function main() {
             translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
             translate.use('en');
 
-            expect(translatePipe.transform('TEST', [{param: "with param"}])).toEqual("This is a test with param");
+            expect(translatePipe.transform('TEST', {param: "with param"})).toEqual("This is a test with param");
         });
 
         it('should translate a string with object as string parameters', () => {
             translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
             translate.use('en');
 
-            expect(translatePipe.transform('TEST', ['{param: "with param"}'])).toEqual("This is a test with param");
-            expect(translatePipe.transform('TEST', ['{"param": "with param"}'])).toEqual("This is a test with param");
+            expect(translatePipe.transform('TEST', '{param: "with param"}')).toEqual("This is a test with param");
+            expect(translatePipe.transform('TEST', '{"param": "with param"}')).toEqual("This is a test with param");
         });
 
         it('should update the value when the parameters change', () => {
@@ -99,11 +99,11 @@ export function main() {
             spyOn(translatePipe, 'updateValue').and.callThrough();
             spyOn(ref, 'markForCheck').and.callThrough();
 
-            expect(translatePipe.transform('TEST', [{param: "with param"}])).toEqual("This is a test with param");
+            expect(translatePipe.transform('TEST', {param: "with param"})).toEqual("This is a test with param");
             // same value, shouldn't call 'updateValue' again
-            expect(translatePipe.transform('TEST', [{param: "with param"}])).toEqual("This is a test with param");
+            expect(translatePipe.transform('TEST', {param: "with param"})).toEqual("This is a test with param");
             // different param, should call 'updateValue'
-            expect(translatePipe.transform('TEST', [{param: "with param2"}])).toEqual("This is a test with param2");
+            expect(translatePipe.transform('TEST', {param: "with param2"})).toEqual("This is a test with param2");
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(2);
             expect(ref.markForCheck).toHaveBeenCalledTimes(2);
         });
@@ -114,7 +114,7 @@ export function main() {
             let param = 'param: "with param"';
 
             expect(() => {
-                translatePipe.transform('TEST', [param]);
+                translatePipe.transform('TEST', param);
             }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`)
         });
 
@@ -124,12 +124,12 @@ export function main() {
                 translate.setTranslation('fr', {"TEST": "C'est un test"});
                 translate.use('en');
 
-                expect(translatePipe.transform('TEST', [])).toEqual("This is a test");
+                expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
                 // this will be resolved at the next lang change
                 translate.onLangChange.subscribe((res: LangChangeEvent) => {
                     expect(res.lang).toEqual('fr');
-                    expect(translatePipe.transform('TEST', [])).toEqual("C'est un test");
+                    expect(translatePipe.transform('TEST')).toEqual("C'est un test");
                     done();
                 });
 
@@ -139,12 +139,12 @@ export function main() {
             it('with file loader', (done) => {
                 translate.use('en');
                 mockBackendResponse(connection, '{"TEST": "This is a test"}');
-                expect(translatePipe.transform('TEST', [])).toEqual("This is a test");
+                expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
                 // this will be resolved at the next lang change
                 translate.onLangChange.subscribe((res: LangChangeEvent) => {
                     expect(res.lang).toEqual('fr');
-                    expect(translatePipe.transform('TEST', [])).toEqual("C'est un test");
+                    expect(translatePipe.transform('TEST')).toEqual("C'est un test");
                     done();
                 });
 
