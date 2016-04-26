@@ -1,5 +1,5 @@
 import {it} from "angular2/testing";
-import {provide, Injector} from "angular2/core";
+import {provide, Injector, ReflectiveInjector} from "angular2/core";
 import {ResponseOptions, Response, HTTP_PROVIDERS, XHRBackend} from "angular2/http";
 import {MockBackend, MockConnection} from "angular2/http/testing";
 import {
@@ -24,7 +24,7 @@ export function main() {
         let connection: MockConnection; // this will be set when a new connection is emitted from the backend.
 
         beforeEach(() => {
-            injector = Injector.resolveAndCreate([
+            injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
@@ -261,7 +261,7 @@ export function main() {
         }
 
         let prepare = ((handlerClass: Function) => {
-            injector = Injector.resolveAndCreate([
+            injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
@@ -419,7 +419,7 @@ export function main() {
         };
 
         it('should be able to provide TranslateStaticLoader', () => {
-            injector = Injector.resolveAndCreate([
+            injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
@@ -449,7 +449,7 @@ export function main() {
                     return Observable.of({"TEST": "This is a test"});
                 }
             }
-            injector = Injector.resolveAndCreate([
+            injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
                 provide(XHRBackend, {useClass: MockBackend}),
