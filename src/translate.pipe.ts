@@ -1,6 +1,6 @@
-import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from 'angular2/core';
+import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
 import {TranslateService, LangChangeEvent} from './translate.service';
-import {isPresent, isArray} from "angular2/src/facade/lang";
+import {isPresent, isArray} from "@angular/core/src/facade/lang";
 
 @Injectable()
 @Pipe({
