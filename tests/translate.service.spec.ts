@@ -1,7 +1,7 @@
-import {it} from "angular2/testing";
-import {provide, Injector, ReflectiveInjector} from "angular2/core";
-import {ResponseOptions, Response, HTTP_PROVIDERS, XHRBackend} from "angular2/http";
-import {MockBackend, MockConnection} from "angular2/http/testing";
+import {it} from "@angular/core/testing";
+import {provide, Injector, ReflectiveInjector} from "@angular/core";
+import {ResponseOptions, Response, HTTP_PROVIDERS, XHRBackend} from "@angular/http";
+import {MockBackend, MockConnection} from "@angular/http/testing";
 import {
     TRANSLATE_PROVIDERS,
     TranslateService,

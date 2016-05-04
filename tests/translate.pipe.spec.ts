@@ -1,8 +1,8 @@
 import {TranslatePipe} from '../src/translate.pipe';
-import {MockConnection, MockBackend} from "angular2/src/http/backends/mock_backend";
+import {MockConnection, MockBackend} from "@angular/http/testing";
 import {TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
-import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "angular2/http";
-import {provide, Injector, ReflectiveInjector, ChangeDetectorRef} from "angular2/core";
+import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "@angular/http";
+import {provide, Injector, ReflectiveInjector, ChangeDetectorRef} from "@angular/core";
 import {LangChangeEvent} from "../src/translate.service";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {

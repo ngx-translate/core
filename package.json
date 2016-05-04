@@ -1,5 +1,6 @@
 {
   "name": "ng2-translate",
+  "version": "2.0.1",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "test": "tsc && karma start",
@@ -27,10 +28,18 @@
   "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "peerDependencies": {
-    "angular2": ">= 2.0.0-beta.16"
+    "@angular/common": ">=2.0.0-rc.0",
+    "@angular/compiler": ">=2.0.0-rc.0",
+    "@angular/core": ">=2.0.0-rc.0",
+    "@angular/http": ">=2.0.0-rc.0"
   },
   "devDependencies": {
-    "angular2": "2.0.0-beta.16",
+    "@angular/common": ">=2.0.0-rc.0",
+    "@angular/compiler": ">=2.0.0-rc.0",
+    "@angular/core": ">=2.0.0-rc.0",
+    "@angular/http": ">=2.0.0-rc.0",
+    "@angular/platform-browser": "2.0.0-rc.0",
+    "@angular/platform-browser-dynamic": "2.0.0-rc.0",
     "commitizen": "~2.5.0",
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "^3.0.2",
@@ -44,14 +53,14 @@
     "karma-jasmine": "~0.3.8",
     "karma-typescript-preprocessor": "0.0.21",
     "reflect-metadata": "0.1.2",
-    "rxjs": "5.0.0-beta.2",
+    "rxjs": "5.0.0-beta.6",
     "semantic-release": "~4.3.5",
     "systemjs": "~0.19.24",
     "systemjs-builder": "^0.15.13",
     "tsd": "^0.6.5",
     "typescript": "^1.8.9",
     "typings": "^0.6.8",
-    "zone.js": "^0.6.10"
+    "zone.js": "^0.6.12"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
