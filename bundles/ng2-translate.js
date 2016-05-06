@@ -1,4 +1,4 @@
-System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.service", "@angular/core/src/facade/lang"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -20,9 +20,9 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
       return Reflect.metadata(k, v);
   };
-  var core_1 = $__require('angular2/core');
+  var core_1 = $__require('@angular/core');
   var translate_service_1 = $__require('./translate.service');
-  var lang_1 = $__require('angular2/src/facade/lang');
+  var lang_1 = $__require('@angular/core/src/facade/lang');
   var TranslatePipe = (function() {
     function TranslatePipe(translate, _ref) {
       this.translate = translate;
@@ -132,7 +132,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   return module.exports;
 });
 
-System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/of", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.service", ["@angular/core", "@angular/http", "rxjs/Observable", "rxjs/add/observable/of", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -159,8 +159,8 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
       decorator(target, key, paramIndex);
     };
   };
-  var core_1 = $__require('angular2/core');
-  var http_1 = $__require('angular2/http');
+  var core_1 = $__require('@angular/core');
+  var http_1 = $__require('@angular/http');
   var Observable_1 = $__require('rxjs/Observable');
   $__require('rxjs/add/observable/of');
   $__require('rxjs/add/operator/share');
@@ -413,7 +413,7 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate", ["@angular/core", "@angular/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -424,8 +424,8 @@ System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./sr
       if (!exports.hasOwnProperty(p))
         exports[p] = m[p];
   }
-  var core_1 = $__require('angular2/core');
-  var http_1 = $__require('angular2/http');
+  var core_1 = $__require('@angular/core');
+  var http_1 = $__require('@angular/http');
   var translate_pipe_1 = $__require('./src/translate.pipe');
   var translate_service_1 = $__require('./src/translate.service');
   __export($__require('./src/translate.pipe'));
