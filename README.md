@@ -20,16 +20,16 @@ npm install ng2-translate --save
 
 ## Usage
 
-Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the angular2/http bundle as well).
+Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the @angular/http bundle as well).
 It is recommended to use `TRANSLATE_PROVIDERS` in the bootstrap of your application and to never add `TranslateService` to the "providers" property of your components, this way you will keep it as a singleton.
 `TRANSLATE_PROVIDERS` provides a default configuration for the static translation file loader.
 If you add `TranslateService` to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized with the language to use or the default language.
 
 ```ts
-import {HTTP_PROVIDERS} from 'angular2/http';
-import {Component, Injectable, provide} from 'angular2/core';
+import {HTTP_PROVIDERS} from '@angular/http';
+import {Component, Injectable, provide} from '@angular/core';
 import {TRANSLATE_PROVIDERS, TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
-import {bootstrap} from 'angular2/platform/browser';
+import {bootstrap} from '@angular/platform-browser-dynamic';
 
 bootstrap(AppComponent, [
     HTTP_PROVIDERS,
@@ -76,7 +76,7 @@ bootstrap(AppComponent, [
 
 For Ionic 2 here is a complete bootstrap with configuration:
 ```ts
-import {provide} from 'angular2/core';
+import {provide} from '@angular/core';
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
 @App({

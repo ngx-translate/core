@@ -11,12 +11,19 @@ System.config({
     baseURL: '/base/',
     defaultJSExtensions: true,
     map: {
-        'angular2': 'node_modules/angular2',
+        '@angular': 'node_modules/@angular',
         'rxjs': 'node_modules/rxjs'
+    },
+    packages: {
+        '@angular/common': { main: 'index.js', defaultExtension: 'js' },
+        '@angular/compiler': { main: 'index.js', defaultExtension: 'js' },
+        '@angular/core': { main: 'index.js', defaultExtension: 'js' },
+        '@angular/http': { main: 'index.js', defaultExtension: 'js' },
+        '@angular/platform-browser': { main: 'index.js', defaultExtension: 'js' }
     }
 });
 
-System.import('angular2/src/platform/browser/browser_adapter').then(function(browser_adapter) {
+System.import('@angular/platform-browser/src/browser/browser_adapter').then(function(browser_adapter) {
     browser_adapter.BrowserDomAdapter.makeCurrent();
 }).then(function() {
         return Promise.all(
