@@ -1,4 +1,4 @@
-System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate/src/translate.pipe", ["angular2/core", "ng2-translate/src/translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -21,7 +21,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
       return Reflect.metadata(k, v);
   };
   var core_1 = $__require('angular2/core');
-  var translate_service_1 = $__require('./translate.service');
+  var translate_service_1 = $__require('ng2-translate/src/translate.service');
   var lang_1 = $__require('angular2/src/facade/lang');
   var TranslatePipe = (function() {
     function TranslatePipe(translate, _ref) {
@@ -132,7 +132,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   return module.exports;
 });
 
-System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/of", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate/src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "ng2-translate/src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -162,12 +162,11 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
   var core_1 = $__require('angular2/core');
   var http_1 = $__require('angular2/http');
   var Observable_1 = $__require('rxjs/Observable');
-  $__require('rxjs/add/observable/of');
   $__require('rxjs/add/operator/share');
   $__require('rxjs/add/operator/map');
   $__require('rxjs/add/operator/merge');
   $__require('rxjs/add/operator/toArray');
-  var translate_parser_1 = $__require('./translate.parser');
+  var translate_parser_1 = $__require('ng2-translate/src/translate.parser');
   var MissingTranslationHandler = (function() {
     function MissingTranslationHandler() {}
     return MissingTranslationHandler;
@@ -371,7 +370,7 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
   return module.exports;
 });
 
-System.registerDynamic("src/translate.parser", [], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate/src/translate.parser", [], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -413,7 +412,7 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate/ng2-translate", ["angular2/core", "angular2/http", "ng2-translate/src/translate.pipe", "ng2-translate/src/translate.service", "ng2-translate/src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -426,11 +425,11 @@ System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./sr
   }
   var core_1 = $__require('angular2/core');
   var http_1 = $__require('angular2/http');
-  var translate_pipe_1 = $__require('./src/translate.pipe');
-  var translate_service_1 = $__require('./src/translate.service');
-  __export($__require('./src/translate.pipe'));
-  __export($__require('./src/translate.service'));
-  __export($__require('./src/translate.parser'));
+  var translate_pipe_1 = $__require('ng2-translate/src/translate.pipe');
+  var translate_service_1 = $__require('ng2-translate/src/translate.service');
+  __export($__require('ng2-translate/src/translate.pipe'));
+  __export($__require('ng2-translate/src/translate.service'));
+  __export($__require('ng2-translate/src/translate.parser'));
   exports.TRANSLATE_PROVIDERS = [core_1.provide(translate_service_1.TranslateLoader, {
     useFactory: function(http) {
       return new translate_service_1.TranslateStaticLoader(http);
