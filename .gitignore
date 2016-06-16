@@ -15,6 +15,7 @@ coverage
 *.d.ts
 !make.js
 !bundles/*.js
+typings
 
 #################
 ## JetBrains

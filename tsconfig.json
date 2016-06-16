@@ -2,19 +2,24 @@
     "compilerOptions": {
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "ES5",
+        "target": "es5",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "sourceMap": true,
+        "inlineSourceMap": true,
+        "inlineSources": true,
         "declaration": true,
         "moduleResolution": "node"
     },
     "files": [
+        "typings/main.d.ts",
         "ng2-translate.ts",
-        "src/translate.directive.ts",
-        "src/translate.parser.ts",
-        "src/translate.pipe.ts",
-        "src/translate.service.ts"
+        "./src/translate.directive.ts",
+        "./src/translate.pipe.ts",
+        "./src/translate.service.ts",
+        "./src/translate.parser.ts",
+        "tests/translate.parser.spec.ts",
+        "tests/translate.service.spec.ts",
+        "tests/translate.pipe.spec.ts"
     ],
     "exclude": [
         "node_modules"

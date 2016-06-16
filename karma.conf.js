@@ -15,27 +15,25 @@ module.exports = function(config) {
         files: [
             // for Travis
             'node_modules/es6-shim/es6-shim.js',
-
-            // zone-microtask must be included first as it contains a Promise monkey patch
-            'node_modules/zone.js/dist/zone-microtask.js',
+            'node_modules/zone.js/dist/zone.js',
             'node_modules/zone.js/dist/long-stack-trace-zone.js',
             'node_modules/zone.js/dist/jasmine-patch.js',
             'node_modules/systemjs/dist/system.src.js',
             'node_modules/reflect-metadata/Reflect.js',
 
-            { pattern: 'node_modules/angular2/**/*.js', included: false, watched: false, served: true },
+            { pattern: 'node_modules/@angular/**/*.js', included: false, watched: false, served: true },
             { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false, served: true },
             { pattern: 'node_modules/systemjs/dist/system-polyfills.js', included: false, watched: false, served: true }, // PhantomJS2 (and possibly others) might require it
 
+            { pattern: 'ng2-translate.ts', included: false, watched: true }, // source files
             { pattern: 'src/**/*.ts', included: false, watched: true }, // source files
             { pattern: 'tests/**/*.ts', included: false, watched: true }, // test files
-
             'karma-test-shim.js'
         ],
 
         // list of files to exclude
         exclude: [
-            'node_modules/angular2/**/*_spec.js'
+            'node_modules/@angular/**/*_spec.js'
         ],
 
         preprocessors: {
@@ -45,7 +43,7 @@ module.exports = function(config) {
         typescriptPreprocessor: {
             options: require('./tsconfig.json').compilerOptions,
             typings: [
-                "node_modules/angular2/typings/jasmine/jasmine.d.ts"
+                "typings/main.d.ts"
             ]
         },
 
@@ -70,7 +68,7 @@ module.exports = function(config) {
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome'],
+        browsers: process.env.TRAVIS ? ['Firefox'] : ['Firefox', 'Chrome'],
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
