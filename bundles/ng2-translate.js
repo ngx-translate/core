@@ -1,61 +1,5 @@
-<<<<<<< HEAD
-System.registerDynamic("src/translate.directive", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
-  ;
-  var global = this,
-      __define = global.define;
-  global.define = undefined;
-  var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
-    var c = arguments.length,
-        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
-        d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-      r = Reflect.decorate(decorators, target, key, desc);
-    else
-      for (var i = decorators.length - 1; i >= 0; i--)
-        if (d = decorators[i])
-          r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-  };
-  var __metadata = (this && this.__metadata) || function(k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-      return Reflect.metadata(k, v);
-  };
-  var core_1 = $__require('angular2/core');
-  var translate_service_1 = $__require('./translate.service');
-  var TranslateDirective = (function() {
-    function TranslateDirective(translateService, ref) {
-      this.translateService = translateService;
-      this.ref = ref;
-    }
-    TranslateDirective.prototype.ngOnInit = function() {
-      var _this = this;
-      this.key = this.translate ? this.translate : this.ref.nativeElement.innerHTML;
-      this.updateValue(this.key);
-      this.translateService.onLangChange.subscribe(function() {
-        _this.updateValue(_this.key);
-      });
-    };
-    TranslateDirective.prototype.updateValue = function(key) {
-      var _this = this;
-      this.translateService.get(key, this.interpolateParams).subscribe(function(res) {
-        _this.ref.nativeElement.innerHTML = res;
-      });
-    };
-    __decorate([core_1.Input(), __metadata('design:type', String)], TranslateDirective.prototype, "translate", void 0);
-    __decorate([core_1.Input('translate-values'), __metadata('design:type', Object)], TranslateDirective.prototype, "interpolateParams", void 0);
-    TranslateDirective = __decorate([core_1.Injectable(), core_1.Directive({selector: '[translate]'}), __metadata('design:paramtypes', [translate_service_1.TranslateService, core_1.ElementRef])], TranslateDirective);
-    return TranslateDirective;
-  })();
-  exports.TranslateDirective = TranslateDirective;
-  global.define = __define;
-  return module.exports;
-});
-
-System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service"], true, function($__require, exports, module) {
-=======
-System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.service", "angular2/src/facade/lang"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.directive", ["@angular/core", "@angular/platform-browser", "./translate.service"], true, function($__require, exports, module) {
   "use strict";
->>>>>>> upstream/master
   ;
   var define,
       global = this,
@@ -76,9 +20,68 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
       return Reflect.metadata(k, v);
   };
-  var core_1 = $__require('angular2/core');
+  var core_1 = $__require('@angular/core');
+  var platform_browser_1 = $__require('@angular/platform-browser');
   var translate_service_1 = $__require('./translate.service');
-  var lang_1 = $__require('angular2/src/facade/lang');
+  var TranslateDirective = (function() {
+    function TranslateDirective(domSanitizationService, translateService, _elementRef, _changeDetectorRef) {
+      this.domSanitizationService = domSanitizationService;
+      this.translateService = translateService;
+      this._elementRef = _elementRef;
+      this._changeDetectorRef = _changeDetectorRef;
+    }
+    TranslateDirective.prototype.ngOnInit = function() {
+      var _this = this;
+      this.key = this.translate ? this.translate : this._elementRef.nativeElement.innerHTML;
+      this.updateValue(this.key);
+      this.translateService.onLangChange.subscribe(function() {
+        _this.updateValue(_this.key);
+      });
+    };
+    TranslateDirective.prototype.ngOnChanges = function(changes) {
+      console.log("change", changes);
+    };
+    TranslateDirective.prototype.updateValue = function(key) {
+      var _this = this;
+      this.translateService.get(key, this.interpolateParams).subscribe(function(res) {
+        _this._elementRef.nativeElement.innerHTML = _this.domSanitizationService.sanitize(platform_browser_1.SecurityContext.HTML, res);
+        _this._changeDetectorRef.markForCheck();
+      });
+    };
+    __decorate([core_1.Input(), __metadata('design:type', String)], TranslateDirective.prototype, "translate", void 0);
+    __decorate([core_1.Input('translate-values'), __metadata('design:type', Object)], TranslateDirective.prototype, "interpolateParams", void 0);
+    TranslateDirective = __decorate([core_1.Injectable(), core_1.Directive({selector: '[translate]'}), __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService, translate_service_1.TranslateService, core_1.ElementRef, core_1.ChangeDetectorRef])], TranslateDirective);
+    return TranslateDirective;
+  }());
+  exports.TranslateDirective = TranslateDirective;
+  return module.exports;
+});
+
+System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.service", "@angular/core/src/facade/lang"], true, function($__require, exports, module) {
+  "use strict";
+  ;
+  var define,
+      global = this,
+      GLOBAL = this;
+  var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+        d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+      r = Reflect.decorate(decorators, target, key, desc);
+    else
+      for (var i = decorators.length - 1; i >= 0; i--)
+        if (d = decorators[i])
+          r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+  };
+  var __metadata = (this && this.__metadata) || function(k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
+      return Reflect.metadata(k, v);
+  };
+  var core_1 = $__require('@angular/core');
+  var translate_service_1 = $__require('./translate.service');
+  var lang_1 = $__require('@angular/core/src/facade/lang');
   var TranslatePipe = (function() {
     function TranslatePipe(translate, _ref) {
       this.translate = translate;
@@ -188,7 +191,7 @@ System.registerDynamic("src/translate.pipe", ["angular2/core", "./translate.serv
   return module.exports;
 });
 
-System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http", "rxjs/Observable", "rxjs/add/observable/of", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("src/translate.service", ["@angular/core", "@angular/http", "rxjs/Observable", "rxjs/add/observable/of", "rxjs/add/operator/share", "rxjs/add/operator/map", "rxjs/add/operator/merge", "rxjs/add/operator/toArray", "./translate.parser"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -215,8 +218,8 @@ System.registerDynamic("src/translate.service", ["angular2/core", "angular2/http
       decorator(target, key, paramIndex);
     };
   };
-  var core_1 = $__require('angular2/core');
-  var http_1 = $__require('angular2/http');
+  var core_1 = $__require('@angular/core');
+  var http_1 = $__require('@angular/http');
   var Observable_1 = $__require('rxjs/Observable');
   $__require('rxjs/add/observable/of');
   $__require('rxjs/add/operator/share');
@@ -469,12 +472,8 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   return module.exports;
 });
 
-<<<<<<< HEAD
-System.registerDynamic("ng2-translate", ["./src/translate.directive", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
-=======
-System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
+System.registerDynamic("ng2-translate", ["@angular/core", "@angular/http", "./src/translate.directive", "./src/translate.pipe", "./src/translate.service", "./src/translate.parser"], true, function($__require, exports, module) {
   "use strict";
->>>>>>> upstream/master
   ;
   var define,
       global = this,
@@ -484,12 +483,9 @@ System.registerDynamic("ng2-translate", ["angular2/core", "angular2/http", "./sr
       if (!exports.hasOwnProperty(p))
         exports[p] = m[p];
   }
-<<<<<<< HEAD
+  var core_1 = $__require('@angular/core');
+  var http_1 = $__require('@angular/http');
   var translate_directive_1 = $__require('./src/translate.directive');
-=======
-  var core_1 = $__require('angular2/core');
-  var http_1 = $__require('angular2/http');
->>>>>>> upstream/master
   var translate_pipe_1 = $__require('./src/translate.pipe');
   var translate_service_1 = $__require('./src/translate.service');
   __export($__require('./src/translate.directive'));
