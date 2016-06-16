@@ -11,7 +11,7 @@
         "moduleResolution": "node"
     },
     "files": [
-        "typings/main.d.ts",
+        "typings/index.d.ts",
         "ng2-translate.ts",
         "./src/translate.pipe.ts",
         "./src/translate.service.ts",

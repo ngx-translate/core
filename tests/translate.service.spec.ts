@@ -27,7 +27,7 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                provide(XHRBackend, {useClass: MockBackend}),
+                {provide: XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS
             ]);
             backend = injector.get(XHRBackend);
@@ -264,9 +264,9 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                provide(XHRBackend, {useClass: MockBackend}),
+                {provide:XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS,
-                provide(MissingTranslationHandler, {useClass: handlerClass})
+                {provide: MissingTranslationHandler, useClass: handlerClass}
             ]);
             backend = injector.get(XHRBackend);
             translate = injector.get(TranslateService);
@@ -422,7 +422,7 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                provide(XHRBackend, {useClass: MockBackend}),
+                {provide: XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS
             ]);
             prepare(injector);
@@ -452,9 +452,9 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                provide(XHRBackend, {useClass: MockBackend}),
+                {provide: XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS,
-                provide(TranslateLoader, {useClass: CustomLoader})
+                {provide: TranslateLoader, useClass: CustomLoader}
             ]);
             prepare(injector);
 

@@ -43,7 +43,7 @@ module.exports = function(config) {
         typescriptPreprocessor: {
             options: require('./tsconfig.json').compilerOptions,
             typings: [
-                "typings/main.d.ts"
+                "typings/index.d.ts"
             ]
         },
 

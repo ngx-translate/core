@@ -8,10 +8,11 @@ export * from './src/translate.service';
 export * from './src/translate.parser';
 
 export const TRANSLATE_PROVIDERS: any = [
-    provide(TranslateLoader, {
+    {
+        provide: TranslateLoader,
         useFactory: (http: Http) => new TranslateStaticLoader(http),
         deps: [Http]
-    }),
+    },
     TranslateService
 ];
 

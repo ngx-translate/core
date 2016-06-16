@@ -34,7 +34,7 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                provide(XHRBackend, {useClass: MockBackend}),
+                {provide: XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS
             ]);
             backend = injector.get(XHRBackend);
@@ -127,9 +127,10 @@ export function main() {
                 expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
                 // this will be resolved at the next lang change
-                translate.onLangChange.subscribe((res: LangChangeEvent) => {
+                let subscription = translate.onLangChange.subscribe((res: LangChangeEvent) => {
                     expect(res.lang).toEqual('fr');
                     expect(translatePipe.transform('TEST')).toEqual("C'est un test");
+                    subscription.unsubscribe();
                     done();
                 });
 
@@ -142,10 +143,14 @@ export function main() {
                 expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
                 // this will be resolved at the next lang change
-                translate.onLangChange.subscribe((res: LangChangeEvent) => {
-                    expect(res.lang).toEqual('fr');
-                    expect(translatePipe.transform('TEST')).toEqual("C'est un test");
-                    done();
+                let subscription = translate.onLangChange.subscribe((res: LangChangeEvent) => {
+                    // let it update the translations
+                    setTimeout(() => {
+                        expect(res.lang).toEqual('fr');
+                        expect(translatePipe.transform('TEST')).toEqual("C'est un test");
+                        subscription.unsubscribe();
+                        done();
+                    });
                 });
 
                 translate.use('fr');
