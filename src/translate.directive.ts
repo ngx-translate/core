@@ -19,7 +19,7 @@ export class TranslateDirective implements OnInit, OnChanges {
     @Input()
     private translate: string;
     @Input('translate-values')
-    private interpolateParams: {};
+    private interpolateParams: { [key: string]: string };
     private key: string;
 
     constructor(

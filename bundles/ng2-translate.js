@@ -39,10 +39,15 @@ System.registerDynamic("src/translate.directive", ["@angular/core", "@angular/pl
       });
     };
     TranslateDirective.prototype.ngOnChanges = function(changes) {
-      console.log("change", changes);
+      if (changes["interpolateParams"] && this.key) {
+        this.updateValue(this.key);
+      }
     };
     TranslateDirective.prototype.updateValue = function(key) {
       var _this = this;
+      Object.keys(this.interpolateParams).forEach(function(key) {
+        _this.interpolateParams[key] = _this.domSanitizationService.sanitize(platform_browser_1.SecurityContext.HTML, _this.interpolateParams[key]);
+      });
       this.translateService.get(key, this.interpolateParams).subscribe(function(res) {
         _this._elementRef.nativeElement.innerHTML = _this.domSanitizationService.sanitize(platform_browser_1.SecurityContext.HTML, res);
         _this._changeDetectorRef.markForCheck();
