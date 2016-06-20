@@ -68,7 +68,7 @@ bootstrap(AppComponent, [
     provide: TranslateLoader,
     useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
     deps: [Http]
-  ),
+  },
   // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
   TranslateService
 ]);
