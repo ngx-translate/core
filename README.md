@@ -79,9 +79,8 @@ For Ionic 2 here is a complete bootstrap with configuration:
 ```ts
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
-@App({
+@Component({
   templateUrl: '....',
-  config: {},
   providers: [
     { 
       provide: TranslateLoader,
