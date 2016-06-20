@@ -27,7 +27,7 @@ If you add `TranslateService` to the "providers" property of a component it will
 
 ```ts
 import {HTTP_PROVIDERS} from '@angular/http';
-import {Component, Injectable, provide} from '@angular/core';
+import {Component, Injectable} from '@angular/core';
 import {TRANSLATE_PROVIDERS, TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 import {bootstrap} from '@angular/platform-browser-dynamic';
 
@@ -63,30 +63,31 @@ export class AppComponent {
 For now, only the static loader is available. You can configure it like this during bootstrap or in the `providers` property of a component:
 ```ts
 bootstrap(AppComponent, [
-    HTTP_PROVIDERS,
-    provide(TranslateLoader, {
-        useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-        deps: [Http]
-    }),
-    // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
-    TranslateService
+  HTTP_PROVIDERS,
+  { 
+    provide: TranslateLoader,
+    useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
+    deps: [Http]
+  ),
+  // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
+  TranslateService
 ]);
 
 ```
 
 For Ionic 2 here is a complete bootstrap with configuration:
 ```ts
-import {provide} from '@angular/core';
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
 @App({
   templateUrl: '....',
   config: {},
   providers: [
-    provide(TranslateLoader, {
+    { 
+      provide: TranslateLoader,
       useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
       deps: [Http]
-    }),
+    },
     TranslateService
   ]
 })
@@ -150,9 +151,9 @@ class CustomLoader implements TranslateLoader {
 }
 ```
 
-Once you've defined your loader, you can provide it during bootstrap or in the `providers` property of a component:
+Once you've defined your loader, you can provide it during bootstrap or by adding a Provider object to the `providers` property of a component:
 ```ts
-provide(TranslateLoader, {useClass: CustomLoader})
+{ provide: TranslateLoader, useClass: CustomLoader }
 ```
 
 #### How to handle missing translations
@@ -173,9 +174,9 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 }
 ```
 
-Setup the Missing Translation Handler in bootstrap (recommended) or in the `providers` property of a component
+Setup the Missing Translation Handler in bootstrap (recommended) or by adding a Provider object to the `providers` property of a component
 ```ts
-provide(MissingTranslationHandler, { useClass: MyMissingTranslationHandler })
+{ provide: MissingTranslationHandler, useClass: MyMissingTranslationHandler }
 ```
 
 ### TranslatePipe
