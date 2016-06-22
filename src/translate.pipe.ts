@@ -113,10 +113,12 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         this._dispose();
 
         // subscribe to onLangChange event, in case the language changes
-        this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-            this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
-            this.updateValue(query, interpolateParams);
-        });
+        if(!this.onLangChange) {
+            this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
+                this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+                this.updateValue(query, interpolateParams);
+            });
+        }
 
         return this.value;
     }
