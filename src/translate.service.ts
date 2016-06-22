@@ -73,7 +73,7 @@ export class TranslateService {
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(private http: Http, public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
+    constructor(public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {}
 
     /**
      * Sets the default language to use as a fallback
