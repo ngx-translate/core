@@ -13,7 +13,7 @@ export class Parser {
         if (typeof expr !== 'string' || !params) {
             return expr;
         }
-        
+
         return expr.replace(this.templateMatcher, (substring: string, b: string) => {
             var r = this.getValue(params, b);
             return typeof r !== 'undefined' ? r : substring;
@@ -32,7 +32,8 @@ export class Parser {
         key = '';
         do {
             key += keys.shift();
-            if (target[key] !== undefined && (typeof target[key] === 'object' || !keys.length)) {
+
+            if (target !== undefined && target[key] !== undefined && (typeof target[key] === 'object' || !keys.length)) {
                 target = target[key];
                 key = '';
             } else if (!keys.length) {
@@ -41,7 +42,7 @@ export class Parser {
                 key += '.';
             }
         } while (keys.length);
-        
+
         return target;
     }
 
