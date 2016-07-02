@@ -133,7 +133,7 @@ export class TranslateService {
      * @param lang
      * @param translations
      */
-    public setTranslation(lang: string, translations: Object, shouldMerge: boolean): void {
+    public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if (shouldMerge) {
             Object.assign(this.translations[lang], translations);
         } else {
