@@ -137,7 +137,7 @@ export class TranslateService {
         if (shouldMerge) {
             Object.assign(this.translations[lang], translations);
         } else {
-        	this.translations[lang] = translations;
+            this.translations[lang] = translations;
         }
         this.updateLangs();
     }
