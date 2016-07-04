@@ -120,7 +120,7 @@ translate.setTranslation('en', {
 
     example:
     ```ts
-    onLangChange.subscribe(event: LangChangeEvent) => {
+    onLangChange.subscribe((event: LangChangeEvent) => {
 	  // do something
 	});
     ```
