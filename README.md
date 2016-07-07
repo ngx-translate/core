@@ -72,7 +72,14 @@ bootstrap(AppComponent, [
   // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
   TranslateService
 ]);
+```
 
+Additionally, if you want the `TranslatePipe` to be available in the whole application (without having to add it your the `pipes` property of your components) you can add it to the `PLATFORM_PIPES`:
+```ts
+bootstrap(AppComponent, [
+  // ...
+  {provide: PLATFORM_PIPES, useValue: TranslatePipe, multi: true}
+]);
 ```
 
 For Ionic 2 here is a complete bootstrap with configuration:
