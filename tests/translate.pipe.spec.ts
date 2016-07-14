@@ -3,7 +3,7 @@ import {MockConnection, MockBackend} from "@angular/http/testing/mock_backend";
 import {TRANSLATE_PROVIDERS, TranslateService} from "./../ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "@angular/http";
 import {provide, Injector, ReflectiveInjector, ChangeDetectorRef} from "@angular/core";
-import {LangChangeEvent} from "../src/translate.service";
+import {LangChangeEvent, TranslationChangeEvent} from "../src/translate.service";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
     markForCheck(): void {}
@@ -116,6 +116,27 @@ export function main() {
             expect(() => {
                 translatePipe.transform('TEST', param);
             }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`)
+        });
+
+        describe('should update translations on translation by key change', () => {
+            it('with static loader', (done) => {
+                translate.setTranslation('en', {"TEST": "This is a test"});
+                translate.use('en');
+
+                expect(translatePipe.transform('TEST')).toEqual("This is a test");
+
+                // this will be resolved at the next key's translation change
+                let subscription = translate.onTranslationChange.subscribe(
+                    (res: TranslationChangeEvent) => {
+                        expect(res.translations['TEST']).toBeDefined();
+                        expect(res.translations['TEST']).toEqual("This is new test value");
+                        expect(translatePipe.transform('TEST')).toEqual("This is new test value");
+                        subscription.unsubscribe();
+                        done();
+                    });
+
+                translate.set('TEST', 'This is new test value', 'en');
+            });
         });
 
         describe('should update translations on lang change', () => {

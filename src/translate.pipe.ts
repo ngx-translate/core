@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {TranslateService, LangChangeEvent} from './translate.service';
+import {TranslateService, LangChangeEvent, TranslationChangeEvent} from './translate.service';
 import {isPresent, isArray} from "@angular/core/src/facade/lang";
 
 @Injectable()
@@ -11,6 +11,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     value: string = '';
     lastKey: string;
     lastParams: any[];
+    onTranslationChange: EventEmitter<TranslationChangeEvent>;
     onLangChange: EventEmitter<LangChangeEvent>;
 
     constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
@@ -112,11 +113,23 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         // if there is a subscription to onLangChange, clean it
         this._dispose();
 
+        // subscribe to onTranslationChange event, in case the translations change
+        if(!this.onTranslationChange) {
+            this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+                if (this.lastKey && event.lang === this.translate.currentLang) {
+                    this.lastKey = null;
+                    this.updateValue(query, interpolateParams);
+                }
+            });
+        }
+        
         // subscribe to onLangChange event, in case the language changes
         if(!this.onLangChange) {
             this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-                this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
-                this.updateValue(query, interpolateParams);
+                if (this.lastKey) {
+                    this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+                    this.updateValue(query, interpolateParams);
+                }
             });
         }
 
@@ -124,10 +137,14 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     /**
-     * Clean any existing subscription to onLangChange events
+     * Clean any existing subscription to change events
      * @private
      */
     _dispose(): void {
+        if(isPresent(this.onTranslationChange)) {
+            this.onTranslationChange.unsubscribe();
+            this.onTranslationChange = undefined;
+        }
         if(isPresent(this.onLangChange)) {
             this.onLangChange.unsubscribe();
             this.onLangChange = undefined;

@@ -163,6 +163,14 @@ Or use the `TranslatePipe` in any template:
 	  // do something
 	});
     ```
+- `onTranslationChange`: An EventEmitter to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
+
+    example:
+    ```ts
+    onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+	  // do something
+	});
+    ```
 
 #### Methods:
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback

@@ -109,15 +109,29 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
       this.lastParams = args;
       this.updateValue(query, interpolateParams);
       this._dispose();
+      if (!this.onTranslationChange) {
+        this.onTranslationChange = this.translate.onTranslationChange.subscribe(function(event) {
+          if (_this.lastKey && event.lang === _this.translate.currentLang) {
+            _this.lastKey = null;
+            _this.updateValue(query, interpolateParams);
+          }
+        });
+      }
       if (!this.onLangChange) {
         this.onLangChange = this.translate.onLangChange.subscribe(function(event) {
-          _this.lastKey = null;
-          _this.updateValue(query, interpolateParams);
+          if (_this.lastKey) {
+            _this.lastKey = null;
+            _this.updateValue(query, interpolateParams);
+          }
         });
       }
       return this.value;
     };
     TranslatePipe.prototype._dispose = function() {
+      if (lang_1.isPresent(this.onTranslationChange)) {
+        this.onTranslationChange.unsubscribe();
+        this.onTranslationChange = undefined;
+      }
       if (lang_1.isPresent(this.onLangChange)) {
         this.onLangChange.unsubscribe();
         this.onLangChange = undefined;
@@ -206,8 +220,10 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       this.currentLoader = currentLoader;
       this.missingTranslationHandler = missingTranslationHandler;
       this.currentLang = this.defaultLang;
+      this.onTranslationChange = new core_1.EventEmitter();
       this.onLangChange = new core_1.EventEmitter();
       this.translations = {};
+      this.langs = [];
       this.parser = new translate_parser_1.Parser();
     }
     TranslateService.prototype.setDefaultLang = function(lang) {
@@ -248,6 +264,10 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       }
       if (shouldMerge && this.translations[lang]) {
         Object.assign(this.translations[lang], translations);
+        this.onTranslationChange.emit({
+          translations: translations,
+          lang: lang
+        });
       } else {
         this.translations[lang] = translations;
       }
@@ -361,6 +381,11 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       }
       this.translations[lang][key] = value;
       this.updateLangs();
+      this.onTranslationChange.emit({
+        translations: (_a = {}, _a[key] = value, _a),
+        lang: lang
+      });
+      var _a;
     };
     TranslateService.prototype.changeLang = function(lang) {
       this.currentLang = lang;

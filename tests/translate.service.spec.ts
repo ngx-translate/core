@@ -7,7 +7,8 @@ import {
     MissingTranslationHandler,
     TranslateLoader,
     TranslateStaticLoader,
-    LangChangeEvent
+    LangChangeEvent,
+    TranslationChangeEvent
 } from './../ng2-translate';
 import {Observable} from "rxjs/Observable";
 
@@ -192,6 +193,16 @@ export function main() {
             translate.use('en');
 
             expect(translate.instant('TEST2')).toEqual('TEST2');
+        });
+
+        it('should trigger an event when the translation value changes', () => {
+            translate.setTranslation('en', {});
+            translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+                expect(event.translations).toBeDefined();
+                expect(event.translations["TEST"]).toEqual("This is a test");
+                expect(event.lang).toBe('en');
+            });
+            translate.set("TEST", "This is a test", 'en');
         });
 
         it('should trigger an event when the lang changes', () => {

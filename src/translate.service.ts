@@ -10,6 +10,11 @@ import "rxjs/add/operator/toArray";
 
 import {Parser} from "./translate.parser";
 
+export interface TranslationChangeEvent {
+    translations: any;
+    lang: string;
+}
+
 export interface LangChangeEvent {
     lang: string;
     translations: any;
@@ -54,7 +59,16 @@ export class TranslateService {
     public currentLang: string = this.defaultLang;
 
     /**
-     * An EventEmitter to listen to lang changes events
+     * An EventEmitter to listen to translation change events
+     * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
+     *     // do something
+     * });
+     * @type {ng.EventEmitter<TranslationChangeEvent>}
+     */
+    public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+
+    /**
+     * An EventEmitter to listen to lang change events
      * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
@@ -93,12 +107,12 @@ export class TranslateService {
     public use(lang: string): Observable<any> {
         let pending: Observable<any>;
         // check if this language is available
-        if(typeof this.translations[lang] === "undefined") {
+        if (typeof this.translations[lang] === "undefined") {
             // not available, ask for it
             pending = this.getTranslation(lang);
         }
 
-        if(typeof pending !== "undefined") {
+        if (typeof pending !== "undefined") {
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
             });
@@ -139,6 +153,7 @@ export class TranslateService {
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if (shouldMerge && this.translations[lang]) {
             Object.assign(this.translations[lang], translations);
+            this.onTranslationChange.emit({translations: translations, lang: lang});
         } else {
             this.translations[lang] = translations;
         }
@@ -178,20 +193,20 @@ export class TranslateService {
     private getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
 
-        if(key instanceof Array) {
+        if (key instanceof Array) {
             let result: any = {},
                 observables: boolean = false;
-            for(let k of key) {
+            for (let k of key) {
                 result[k] = this.getParsedResult(translations, k, interpolateParams);
-                if(typeof result[k].subscribe === "function") {
+                if (typeof result[k].subscribe === "function") {
                     observables = true;
                 }
             }
-            if(observables) {
+            if (observables) {
                 let mergedObs: any;
-                for(let k of key) {
+                for (let k of key) {
                     let obs = typeof result[k].subscribe === "function" ? result[k] : Observable.of(result[k]);
-                    if(typeof mergedObs === "undefined") {
+                    if (typeof mergedObs === "undefined") {
                         mergedObs = obs;
                     } else {
                         mergedObs = mergedObs.merge(obs);
@@ -208,15 +223,15 @@ export class TranslateService {
             return result;
         }
 
-        if(translations) {
+        if (translations) {
             res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
         }
 
-        if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
+        if (typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if(!res && this.missingTranslationHandler) {
+        if (!res && this.missingTranslationHandler) {
             res = this.missingTranslationHandler.handle(key);
         }
 
@@ -230,11 +245,11 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
-        if(!key) {
+        if (!key) {
             throw new Error(`Parameter "key" required`);
         }
         // check if we are loading a new translation to use
-        if(this.pending) {
+        if (this.pending) {
             return Observable.create((observer: Observer<string>) => {
                 let onComplete = (res: string) => {
                     observer.next(res);
@@ -242,7 +257,7 @@ export class TranslateService {
                 };
                 this.pending.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
-                    if(typeof res.subscribe === "function") {
+                    if (typeof res.subscribe === "function") {
                         res.subscribe(onComplete);
                     } else {
                         onComplete(res);
@@ -251,7 +266,7 @@ export class TranslateService {
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-            if(typeof res.subscribe === "function") {
+            if (typeof res.subscribe === "function") {
                 return res;
             } else {
                 return Observable.of(res);
@@ -267,13 +282,13 @@ export class TranslateService {
      * @returns {string}
      */
     public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
-        if(!key) {
+        if (!key) {
             throw new Error(`Parameter "key" required`);
         }
 
         let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-        if(typeof res.subscribe !== "undefined") {
-            if(key instanceof Array) {
+        if (typeof res.subscribe !== "undefined") {
+            if (key instanceof Array) {
                 let obj: any = {};
                 key.forEach((value: string, index: number) => {
                     obj[key[index]] = key[index];
@@ -295,6 +310,7 @@ export class TranslateService {
     public set(key: string, value: string, lang: string = this.currentLang): void {
         this.translations[lang][key] = value;
         this.updateLangs();
+        this.onTranslationChange.emit({translations: {[key]: value}, lang: lang});
     }
 
     /**
