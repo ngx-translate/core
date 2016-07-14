@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {TranslateService, LangChangeEvent} from './translate.service';
+import {TranslateService, LangChangeEvent, TranslationChangedEvent} from './translate.service';
 import {isPresent, isArray} from "@angular/core/src/facade/lang";
 
 @Injectable()
@@ -11,6 +11,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     value: string = '';
     lastKey: string;
     lastParams: any[];
+    onTranslationChange: EventEmitter<TranslationChangedEvent>;
     onLangChange: EventEmitter<LangChangeEvent>;
 
     constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
@@ -113,6 +114,16 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         this._dispose();
 
         // subscribe to onLangChange event, in case the language changes
+        if(!this.onTranslationChange) {
+            this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangedEvent) => {
+                if (this.lastKey) {
+                    this.lastKey = null;
+                    this.updateValue(query, interpolateParams);
+                }
+            });
+        }
+        
+        // subscribe to onLangChange event, in case the language changes
         if(!this.onLangChange) {
             this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
                 this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
@@ -128,6 +139,10 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
      * @private
      */
     _dispose(): void {
+        if(isPresent(this.onTranslationChange)) {
+            this.onTranslationChange.unsubscribe();
+            this.onTranslationChange = undefined;
+        }
         if(isPresent(this.onLangChange)) {
             this.onLangChange.unsubscribe();
             this.onLangChange = undefined;

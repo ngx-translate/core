@@ -109,6 +109,14 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
       this.lastParams = args;
       this.updateValue(query, interpolateParams);
       this._dispose();
+      if (!this.onTranslationChange) {
+        this.onTranslationChange = this.translate.onTranslationChange.subscribe(function(event) {
+          if (_this.lastKey) {
+            _this.lastKey = null;
+            _this.updateValue(query, interpolateParams);
+          }
+        });
+      }
       if (!this.onLangChange) {
         this.onLangChange = this.translate.onLangChange.subscribe(function(event) {
           _this.lastKey = null;
@@ -118,6 +126,10 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
       return this.value;
     };
     TranslatePipe.prototype._dispose = function() {
+      if (lang_1.isPresent(this.onTranslationChange)) {
+        this.onTranslationChange.unsubscribe();
+        this.onTranslationChange = undefined;
+      }
       if (lang_1.isPresent(this.onLangChange)) {
         this.onLangChange.unsubscribe();
         this.onLangChange = undefined;
@@ -206,6 +218,7 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       this.currentLoader = currentLoader;
       this.missingTranslationHandler = missingTranslationHandler;
       this.currentLang = this.defaultLang;
+      this.onTranslationChange = new core_1.EventEmitter();
       this.onLangChange = new core_1.EventEmitter();
       this.translations = {};
       this.parser = new translate_parser_1.Parser();
@@ -351,6 +364,11 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       }
       this.translations[lang][key] = value;
       this.updateLangs();
+      this.onTranslationChange.emit({
+        key: key,
+        value: value,
+        lang: lang
+      });
     };
     TranslateService.prototype.changeLang = function(lang) {
       this.currentLang = lang;
