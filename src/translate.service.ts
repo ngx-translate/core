@@ -66,6 +66,7 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string>;
+    private availableLangs: Array<string>;
     private parser: Parser = new Parser();
 
     /**
@@ -150,6 +151,22 @@ export class TranslateService {
      */
     public getLangs(): Array<string> {
         return this.langs;
+    }
+
+    /**
+     * Returns an array of available langs
+     * @returns {Array<string>}
+     */
+    public getAvailableLangs(): Array<string> {
+        return this.availableLangs;
+    }
+
+    /**
+     * @param langs
+     * Set available langs
+     */
+    public setAvailableLangs(langs: Array<string>): void {
+        this.availableLangs = langs;
     }
 
     /**

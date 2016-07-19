@@ -250,6 +250,12 @@ export function main() {
             // mock response after the xhr request, otherwise it will be undefined
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
+
+        it('should be able to set and get array of available languages', () => {
+            translate.setAvailableLangs(['en', 'pl']);
+
+            expect(translate.getAvailableLangs()).toEqual(['en', 'pl']);
+        });
     });
 
     describe('MissingTranslationHandler', () => {
