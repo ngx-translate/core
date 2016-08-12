@@ -37,7 +37,6 @@
     "@angular/http": "^2.0.0-rc.5",
     "@angular/platform-browser": "^2.0.0-rc.5",
     "@angular/platform-browser-dynamic": "^2.0.0-rc.5",
-    "@types/core-js": "^0.9.30",
     "@types/es6-shim": "0.0.29",
     "@types/hammerjs": "^2.0.30",
     "@types/jasmine": "^2.2.31",
