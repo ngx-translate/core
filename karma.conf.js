@@ -1,6 +1,9 @@
 // Karma configuration
 // Generated on Wed Dec 02 2015 22:57:01 GMT+0100 (Paris, Madrid)
 
+var tsConfig = require('./tsconfig.json').compilerOptions;
+tsConfig.types.push('es6-shim');
+
 module.exports = function(config) {
     config.set({
 
@@ -43,10 +46,7 @@ module.exports = function(config) {
         },
 
         typescriptPreprocessor: {
-            options: require('./tsconfig.json').compilerOptions,
-            typings: [
-                "typings/index.d.ts"
-            ]
+            options: tsConfig
         },
 
         // test results reporter to use

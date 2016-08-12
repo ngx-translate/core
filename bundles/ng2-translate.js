@@ -2,8 +2,8 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
   "use strict";
   ;
   var define,
-      global = this || self,
-      GLOBAL = global;
+      global = this,
+      GLOBAL = this;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -140,8 +140,8 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
   "use strict";
   ;
   var define,
-      global = this || self,
-      GLOBAL = global;
+      global = this,
+      GLOBAL = this;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -377,8 +377,8 @@ System.registerDynamic("src/translate.parser", [], true, function($__require, ex
   "use strict";
   ;
   var define,
-      global = this || self,
-      GLOBAL = global;
+      global = this,
+      GLOBAL = this;
   var Parser = (function() {
     function Parser() {
       this.templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
@@ -419,8 +419,8 @@ System.registerDynamic("ng2-translate", ["@angular/core", "@angular/http", "./sr
   "use strict";
   ;
   var define,
-      global = this || self,
-      GLOBAL = global;
+      global = this,
+      GLOBAL = this;
   var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,

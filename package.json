@@ -5,7 +5,7 @@
     "test": "tsc && karma start",
     "test-watch": "tsc && karma start --no-single-run --auto-watch",
     "commit": "npm run prepublish && npm test && git-cz",
-    "prepublish": "typings install && tsc && node make.js",
+    "prepublish": "tsc && node make.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
@@ -24,7 +24,6 @@
     "url": "https://github.com/ocombe/ng2-translate/issues"
   },
   "main": "ng2-translate.js",
-  "typings": "./ng2-translate.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "peerDependencies": {
     "@angular/core": "^2.0.0-rc.5",
@@ -37,6 +36,10 @@
     "@angular/http": "^2.0.0-rc.5",
     "@angular/platform-browser": "^2.0.0-rc.5",
     "@angular/platform-browser-dynamic": "^2.0.0-rc.5",
+    "@types/es6-shim": "0.0.29",
+    "@types/hammerjs": "^2.0.30",
+    "@types/jasmine": "^2.2.31",
+    "@types/node": "^6.0.33",
     "commitizen": "~2.5.0",
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "^3.0.2",
@@ -55,8 +58,7 @@
     "systemjs": "~0.19.24",
     "systemjs-builder": "^0.15.13",
     "tsd": "^0.6.5",
-    "typescript": "1.8.10",
-    "typings": "1.3.2",
+    "typescript": "2.0.0",
     "zone.js": "^0.6.10"
   },
   "czConfig": {

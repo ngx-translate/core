@@ -1,23 +1,32 @@
 {
-    "compilerOptions": {
-        "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es5",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "inlineSourceMap": true,
-        "inlineSources": true,
-        "declaration": true,
-        "moduleResolution": "node"
-    },
-    "files": [
-        "typings/index.d.ts",
-        "ng2-translate.ts",
-        "./src/translate.pipe.ts",
-        "./src/translate.service.ts",
-        "./src/translate.parser.ts",
-        "tests/translate.parser.spec.ts",
-        "tests/translate.service.spec.ts",
-        "tests/translate.pipe.spec.ts"
-    ]
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es5",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "types": [
+      "hammerjs",
+      "jasmine",
+      "node"
+    ],
+    "lib": ["es2015", "dom"]
+  },
+  "files": [
+    "ng2-translate.ts",
+    "./src/translate.pipe.ts",
+    "./src/translate.service.ts",
+    "./src/translate.parser.ts",
+    "tests/translate.parser.spec.ts",
+    "tests/translate.service.spec.ts",
+    "tests/translate.pipe.spec.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "bundles"
+  ]
 }
