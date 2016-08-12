@@ -1,7 +1,6 @@
 export class Parser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
-
     /**
      * Interpolates a string to replace parameters
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }

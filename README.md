@@ -19,70 +19,65 @@ npm install ng2-translate --save
 **If you use SystemJS** to load your files, you might have to update your config like [in this example](https://github.com/ocombe/ng2-play/blob/ng2-translate/index.html#L25-L28).
 
 ## Usage
+#### 1. Import the `TranslateModule`:
+Finally, you can use ng2-translate in your Angular 2 project.
+It is recommended to import `TranslateModule.forRoot()` in the NgModule of your application.
 
-Finally, you can use ng2-translate in your Angular 2 project (make sure that you've loaded the @angular/http bundle as well).
-It is recommended to use `TRANSLATE_PROVIDERS` in the bootstrap of your application and to never add `TranslateService` to the "providers" property of your components, this way you will keep it as a singleton.
-`TRANSLATE_PROVIDERS` provides a default configuration for the static translation file loader.
-If you add `TranslateService` to the "providers" property of a component it will instantiate a new instance of the service that won't be initialized with the language to use or the default language.
+
+The `forRoot` method is a convention for modules that provide a singleton service (such as the Angular 2 Router), you can also use it to configure the `TranslateModule` loader. By default it will use the `TranslateStaticLoader`, but you can provide another loader instead as a parameter of this method (see below [Write & use your own loader](#write--use-your-own-loader)).
+
 
 ```ts
-import {HTTP_PROVIDERS} from '@angular/http';
-import {Component, Injectable} from '@angular/core';
-import {TRANSLATE_PROVIDERS, TranslateService, TranslatePipe, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
-import {bootstrap} from '@angular/platform-browser-dynamic';
+import {BrowserModule} from "@angular/platform-browser";
+import {NgModule} from '@angular/core';
+import {TranslateModule} from 'ng2-translate/ng2-translate';
 
-bootstrap(AppComponent, [
-    HTTP_PROVIDERS,
-    // not required, but recommended to have 1 unique instance of your service
-    TRANSLATE_PROVIDERS
-]);
-
-@Component({
-    selector: 'app',
-    template: `
-        <div>{{ 'HELLO' | translate:{value: param} }}</div>
-    `,
-    pipes: [TranslatePipe]
+@NgModule({
+    imports: [
+        BrowserModule,
+        TranslateModule.forRoot()
+    ],
+    bootstrap: [AppComponent]
 })
-export class AppComponent {
-    param: string = "world";
-
-    constructor(translate: TranslateService) {
-        var userLang = navigator.language.split('-')[0]; // use navigator lang if available
-        userLang = /(fr|en)/gi.test(userLang) ? userLang : 'en';
-
-         // this language will be used as a fallback when a translation isn't found in the current language
-        translate.setDefaultLang('en');
-
-         // the lang to use, if the lang isn't available, it will use the current loader to get them
-        translate.use(userLang);
-    }
+export class AppModule {
 }
 ```
 
-For now, only the static loader is available. You can configure it like this during bootstrap or in the `providers` property of a component:
+If you have multiple NgModules and you use one as a shared NgModule (that you import in all of your other NgModules), don't forget that you can use it to export the `TranslateModule` that you imported in order to avoid having to import it multiple times.
+
 ```ts
-bootstrap(AppComponent, [
-  HTTP_PROVIDERS,
-  { 
-    provide: TranslateLoader,
-    useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-    deps: [Http]
-  },
-  // use TranslateService here, and not TRANSLATE_PROVIDERS (which will define a default TranslateStaticLoader)
-  TranslateService
-]);
+@NgModule({
+    imports: [
+        BrowserModule,
+        TranslateModule.forRoot()
+    ],
+    exports: [TranslateModule],
+})
+export class SharedModule {
+}
 ```
 
-Additionally, if you want the `TranslatePipe` to be available in the whole application (without having to add it your the `pipes` property of your components) you can add it to the `PLATFORM_PIPES`:
+By default, only the `TranslateStaticLoader` is available. It will search for files in i18n/*.json, if you want you can customize this behavior by changing the default prefix/suffix:
+
 ```ts
-bootstrap(AppComponent, [
-  // ...
-  {provide: PLATFORM_PIPES, useValue: TranslatePipe, multi: true}
-]);
+@NgModule({
+    imports: [
+        BrowserModule,
+        TranslateModule.forRoot({ 
+          provide: TranslateLoader,
+          useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n', '.json'),
+          deps: [Http]
+        })
+    ],
+    exports: [TranslateModule],
+})
+export class SharedModule {
+}
 ```
 
-For Ionic 2 here is a complete bootstrap with configuration:
+##### _Ionic 2 users:_
+
+For Ionic 2 here is a complete bootstrap with configuration (this may not be working as of RC5, don't hesitate to raise an issue if it's the case):
 ```ts
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
@@ -99,24 +94,59 @@ import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-tran
 })
 ```
 
-Then put your translations in a json file that looks like this (for `en.json`):
+#### 2. Init the `TranslateService` for your application:
+
+```ts
+import {Component} from '@angular/core';
+import {TranslateService} from 'ng2-translate/ng2-translate';
+
+@Component({
+    selector: 'app',
+    template: `
+        <div>{{ 'HELLO' | translate:{value: param} }}</div>
+    `
+})
+export class AppComponent {
+    param: string = "world";
+
+    constructor(translate: TranslateService) {
+        // this language will be used as a fallback when a translation isn't found in the current language
+        translate.setDefaultLang('en');
+
+         // the lang to use, if the lang isn't available, it will use the current loader to get them
+        translate.use('en');
+    }
+}
+```
+
+#### 3. Define the translations:
+
+Once you've imported the `TranslateModule`, put your translations in a json file that looks like this (for `en.json`) and that will be imported with the `TranslateStaticLoader`:
 ```json
 {
     "HELLO": "hello {{value}}"
 }
 ```
 
-An then you can get new translations like this:
-```js
-translate.getTranslation(userLang);
-```
-
-But you can also define your translations manually instead of using `getTranslation`:
+But you can also define your translations manually instead with `setTranslation`:
 ```ts
 translate.setTranslation('en', {
     "HELLO": "hello {{value}}"
 });
 ```
+
+#### 4. Use the service or the pipe:
+
+You can use the `TranslateService` to get new translations like this:
+```ts
+translate.getTranslation(userLang);
+```
+
+Or use the `TranslatePipe` in any template:
+```html
+<div>{{ 'HELLO' | translate:{value: param} }}</div>
+```
+
 
 ## API
 ### TranslateService
@@ -157,9 +187,18 @@ class CustomLoader implements TranslateLoader {
 }
 ```
 
-Once you've defined your loader, you can provide it during bootstrap or by adding a Provider object to the `providers` property of a component:
+Once you've defined your loader, you can provide it in your NgModule by adding it to its `providers` property.
+Don't forget that you have to import `TranslateModule` as well:
 ```ts
-{ provide: TranslateLoader, useClass: CustomLoader }
+@NgModule({
+    imports: [
+        BrowserModule,
+        TranslateModule.forRoot({ provide: TranslateLoader, useClass: CustomLoader })
+    ],
+    exports: [TranslateModule],
+})
+export class SharedModule {
+}
 ```
 
 #### How to handle missing translations
@@ -180,7 +219,7 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 }
 ```
 
-Setup the Missing Translation Handler in bootstrap (recommended) or by adding a Provider object to the `providers` property of a component
+Setup the Missing Translation Handler in your NgModule (recommended) by adding it to its `providers` property:
 ```ts
 { provide: MissingTranslationHandler, useClass: MyMissingTranslationHandler }
 ```
@@ -196,6 +235,8 @@ Example:
 With the given translation: `"HELLO": "hello {{value}}"`.
 
 ### Parser
+If you need it for some reason, you can use the `TranslateParser` service.
+
 #### Methods:
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
 

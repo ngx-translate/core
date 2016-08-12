@@ -18,6 +18,8 @@ module.exports = function(config) {
             'node_modules/zone.js/dist/zone.js',
             'node_modules/zone.js/dist/long-stack-trace-zone.js',
             'node_modules/zone.js/dist/jasmine-patch.js',
+            'node_modules/zone.js/dist/async-test.js',
+            'node_modules/zone.js/dist/fake-async-test.js',
             'node_modules/systemjs/dist/system.src.js',
             'node_modules/reflect-metadata/Reflect.js',
 
@@ -41,10 +43,7 @@ module.exports = function(config) {
         },
 
         typescriptPreprocessor: {
-            options: require('./tsconfig.json').compilerOptions,
-            typings: [
-                "typings/index.d.ts"
-            ]
+            options: require('./tsconfig.json').compilerOptions
         },
 
         // test results reporter to use

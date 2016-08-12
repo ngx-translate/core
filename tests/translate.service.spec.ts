@@ -1,6 +1,5 @@
-import {it} from "@angular/core/testing";
-import {provide, Injector, ReflectiveInjector} from "@angular/core";
-import {ResponseOptions, Response, HTTP_PROVIDERS, XHRBackend} from "@angular/http";
+import {Injector, ReflectiveInjector} from "@angular/core";
+import {ResponseOptions, Response, XHRBackend, HTTP_PROVIDERS} from "@angular/http";
 import {MockBackend, MockConnection} from "@angular/http/testing";
 import {
     TRANSLATE_PROVIDERS,
@@ -264,7 +263,7 @@ export function main() {
             injector = ReflectiveInjector.resolveAndCreate([
                 HTTP_PROVIDERS,
                 // Provide a mocked (fake) backend for Http
-                {provide:XHRBackend, useClass: MockBackend},
+                {provide: XHRBackend, useClass: MockBackend},
                 TRANSLATE_PROVIDERS,
                 {provide: MissingTranslationHandler, useClass: handlerClass}
             ]);
