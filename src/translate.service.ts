@@ -349,7 +349,7 @@ export class TranslateService {
         this.translations[lang] = undefined;
     }
 
-    public getBrowserLang(): string | undefined {
+    public getBrowserLang(): string {
         if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
             return undefined;
         }
