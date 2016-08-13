@@ -157,7 +157,7 @@ Or use the `TranslatePipe` in any template:
 
     example:
     ```ts
-    onLangChange.subscribe(event: LangChangeEvent) => {
+    onLangChange.subscribe((event: LangChangeEvent) => {
 	  // do something
 	});
     ```
