@@ -242,15 +242,25 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       });
       return this.pending;
     };
-    TranslateService.prototype.setTranslation = function(lang, translations) {
-      this.translations[lang] = translations;
+    TranslateService.prototype.setTranslation = function(lang, translations, shouldMerge) {
+      if (shouldMerge === void 0) {
+        shouldMerge = false;
+      }
+      if (shouldMerge && this.translations[lang]) {
+        Object.assign(this.translations[lang], translations);
+      } else {
+        this.translations[lang] = translations;
+      }
       this.updateLangs();
     };
     TranslateService.prototype.getLangs = function() {
       return this.langs;
     };
+    TranslateService.prototype.addLangs = function(langs) {
+      Object.assign(this.langs, langs);
+    };
     TranslateService.prototype.updateLangs = function() {
-      this.langs = Object.keys(this.translations);
+      Object.assign(this.langs, Object.keys(this.translations));
     };
     TranslateService.prototype.getParsedResult = function(translations, key, interpolateParams) {
       var res;

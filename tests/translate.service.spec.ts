@@ -251,10 +251,10 @@ export function main() {
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
 
-        it('should be able to set and get array of available languages', () => {
-            translate.setAvailableLangs(['en', 'pl']);
+        it('should be able to add new langs', () => {
+            translate.addLangs(['en', 'pl']);
 
-            expect(translate.getAvailableLangs()).toEqual(['en', 'pl']);
+            expect(translate.getLangs()).toEqual(['en', 'pl']);
         });
     });
 

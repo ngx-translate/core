@@ -65,8 +65,7 @@ export class TranslateService {
     private pending: any;
     private translations: any = {};
     private defaultLang: string;
-    private langs: Array<string>;
-    private availableLangs: Array<string>;
+    private langs: Array<string> = [];
     private parser: Parser = new Parser();
 
     /**
@@ -155,26 +154,18 @@ export class TranslateService {
     }
 
     /**
-     * Returns an array of available langs
-     * @returns {Array<string>}
-     */
-    public getAvailableLangs(): Array<string> {
-        return this.availableLangs;
-    }
-
-    /**
      * @param langs
-     * Set available langs
+     * Add available langs
      */
-    public setAvailableLangs(langs: Array<string>): void {
-        this.availableLangs = langs;
+    public addLangs(langs: Array<string>): void {
+        Object.assign(this.langs, langs);
     }
 
     /**
      * Update the list of available langs
      */
     private updateLangs(): void {
-        this.langs = Object.keys(this.translations);
+        Object.assign(this.langs, Object.keys(this.translations));
     }
 
     /**
