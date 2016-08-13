@@ -267,6 +267,12 @@ export function main() {
 
             expect(translate.getLangs()).toEqual(['en', 'pl']);
         });
+
+        it('should be able to get the browserLang', () => {
+            let browserLang = translate.getBrowserLang();
+            expect(browserLang).toBeDefined();
+            expect(typeof browserLang === 'string').toBeTruthy();
+        });
     });
 
     describe('MissingTranslationHandler', () => {

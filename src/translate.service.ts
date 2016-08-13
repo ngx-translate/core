@@ -20,6 +20,11 @@ export interface LangChangeEvent {
     translations: any;
 }
 
+declare interface Window {
+    navigator: any;
+}
+declare var window: Window;
+
 export abstract class MissingTranslationHandler {
     /**
      * A function that handles missing translations.
@@ -114,7 +119,7 @@ export class TranslateService {
 
         if (typeof pending !== "undefined") {
             // on init set the currentLang immediately
-            if(!this.currentLang) {
+            if (!this.currentLang) {
                 this.currentLang = lang;
             }
             pending.subscribe((res: any) => {
@@ -342,5 +347,19 @@ export class TranslateService {
      */
     public resetLang(lang: string): void {
         this.translations[lang] = undefined;
+    }
+
+    public getBrowserLang(): string | undefined {
+        if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+            return undefined;
+        }
+        let browserLang: any;
+        if (typeof window.navigator['languages'] !== 'undefined' && window.navigator['languages'].length > 0) {
+            browserLang = window.navigator['languages'][0].indexOf('-') !== -1 || window.navigator['languages'].length < 2 ? window.navigator['languages'][0] : window.navigator['languages'][1];
+        } else {
+            browserLang = window.navigator['language'] || window.navigator['browserLanguage'];
+        }
+
+        return browserLang && browserLang.length ? browserLang.split('-')[0] : undefined; // use navigator lang if available
     }
 }
