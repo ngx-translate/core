@@ -10,6 +10,12 @@ import "rxjs/add/operator/toArray";
 
 import {Parser} from "./translate.parser";
 
+export interface TranslationChangedEvent {
+    key: string;
+    value: string;
+    lang: string;
+}
+
 export interface LangChangeEvent {
     lang: string;
     translations: any;
@@ -52,6 +58,15 @@ export class TranslateService {
      * The lang currently used
      */
     public currentLang: string = this.defaultLang;
+
+    /**
+     * An EventEmitter to listen to key's translation changed
+     * onTranslationChange.subscribe((params: TranslationChangedEvent) => {
+     *     // do something
+     * });
+     * @type {ng.EventEmitter<TranslationChangedEvent>}
+     */
+    public onTranslationChange: EventEmitter<TranslationChangedEvent> = new EventEmitter<TranslationChangedEvent>();
 
     /**
      * An EventEmitter to listen to lang changes events
@@ -282,6 +297,7 @@ export class TranslateService {
     public set(key: string, value: string, lang: string = this.currentLang): void {
         this.translations[lang][key] = value;
         this.updateLangs();
+        this.onTranslationChange.emit({key:key, value: value, lang: lang});
     }
 
     /**
