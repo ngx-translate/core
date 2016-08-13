@@ -135,6 +135,7 @@ export class TranslateService {
      * Manually sets an object of translations for a given language
      * @param lang
      * @param translations
+     * @param shouldMerge
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if (shouldMerge && this.translations[lang]) {
