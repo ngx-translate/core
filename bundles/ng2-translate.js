@@ -404,6 +404,18 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
     TranslateService.prototype.resetLang = function(lang) {
       this.translations[lang] = undefined;
     };
+    TranslateService.prototype.getBrowserLang = function() {
+      if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+        return undefined;
+      }
+      var browserLang;
+      if (typeof window.navigator['languages'] !== 'undefined' && window.navigator['languages'].length > 0) {
+        browserLang = window.navigator['languages'][0].indexOf('-') !== -1 || window.navigator['languages'].length < 2 ? window.navigator['languages'][0] : window.navigator['languages'][1];
+      } else {
+        browserLang = window.navigator['language'] || window.navigator['browserLanguage'];
+      }
+      return browserLang && browserLang.length ? browserLang.split('-')[0] : undefined;
+    };
     TranslateService = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __metadata('design:paramtypes', [TranslateLoader, MissingTranslationHandler])], TranslateService);
     return TranslateService;
   }());
