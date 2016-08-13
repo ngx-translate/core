@@ -44,8 +44,6 @@
     "cz-conventional-changelog": "~1.1.4",
     "es6-promise": "^3.0.2",
     "es6-shim": "^0.35.1",
-    "gulp": "^3.9.1",
-    "gulp-git": "^1.7.1",
     "jasmine-core": "~2.4.1",
     "karma": "~0.13.15",
     "karma-chrome-launcher": "~0.2.2",
@@ -57,7 +55,6 @@
     "semantic-release": "~4.3.5",
     "systemjs": "~0.19.24",
     "systemjs-builder": "^0.15.13",
-    "tsd": "^0.6.5",
     "typescript": "2.0.0",
     "zone.js": "^0.6.10"
   },
