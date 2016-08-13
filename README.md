@@ -135,6 +135,17 @@ translate.setTranslation('en', {
 });
 ```
 
+The `TranslateParser` is able to understand json keys, which means that you can organize your translations like that:
+```json
+{
+    "HOME": {
+      "HELLO": "hello {{value}}"
+    }
+}
+```
+
+And then access them using the key `HOME.HELLO`.
+
 #### 4. Use the service or the pipe:
 
 You can use the `TranslateService` to get new translations like this:
