@@ -149,6 +149,18 @@ export function main() {
             });
         });
 
+        it("shouldn't override the translations if you set the translations twice ", (done: Function) => {
+            translate.setTranslation('en', {"TEST": "This is a test"}, true);
+            translate.setTranslation('en', {"TEST2": "This is a test"}, true);
+            translate.use('en');
+
+            translate.get('TEST').subscribe((res: string) => {
+                expect(res).toEqual('This is a test');
+                expect(connection).not.toBeDefined();
+                done();
+            });
+        });
+
         it("shouldn't do a request to the backend if you set the translation yourself", (done: Function) => {
             translate.setTranslation('en', {"TEST": "This is a test"});
             translate.use('en');
