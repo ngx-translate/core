@@ -236,6 +236,9 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
         pending = this.getTranslation(lang);
       }
       if (typeof pending !== "undefined") {
+        if (!this.currentLang) {
+          this.currentLang = lang;
+        }
         pending.subscribe(function(res) {
           _this.changeLang(lang);
         });

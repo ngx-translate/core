@@ -113,6 +113,10 @@ export class TranslateService {
         }
 
         if (typeof pending !== "undefined") {
+            // on init set the currentLang immediately
+            if(!this.currentLang) {
+                this.currentLang = lang;
+            }
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
             });
