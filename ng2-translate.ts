@@ -26,9 +26,6 @@ export default {
     providers: [TranslateService]
 };
 
-/**
- * This module doesn't provide a Translate Loader, you will have to provide one for yourself
- */
 @NgModule({
     imports: [],
     declarations: [
