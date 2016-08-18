@@ -355,7 +355,7 @@ export class TranslateService {
         }
         let browserLang: any;
         if (typeof window.navigator['languages'] !== 'undefined' && window.navigator['languages'].length > 0) {
-            browserLang = window.navigator['languages'][0].indexOf('-') !== -1 || window.navigator['languages'].length < 2 ? window.navigator['languages'][0] : window.navigator['languages'][1];
+            browserLang = window.navigator['languages'][0];
         } else {
             browserLang = window.navigator['language'] || window.navigator['browserLanguage'];
         }
