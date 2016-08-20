@@ -266,6 +266,7 @@ export function main() {
             translate.addLangs(['pl', 'es']);
             expect(translate.getLangs()).toEqual(['pl', 'es']);
             translate.addLangs(['fr']);
+            translate.addLangs(['pl','fr']);
             expect(translate.getLangs()).toEqual(['pl', 'es', 'fr']);
 
             // this will request the translation from the backend because we use a static files loader for TranslateService

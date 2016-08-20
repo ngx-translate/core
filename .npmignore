@@ -7,10 +7,10 @@ manifest.mf
 build.xml
 node_modules/*
 npm-debug.log
-coverage
 *.ts
 !*.d.ts
 tests
+examples
 
 #################
 ## JetBrains
@@ -18,8 +18,6 @@ tests
 .idea
 .project
 .settings
-.idea/*
-*.iml
 
 ############
 ## Windows

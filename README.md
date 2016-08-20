@@ -1,13 +1,14 @@
 # ng2-translate [![Build Status](https://travis-ci.org/ocombe/ng2-translate.svg?branch=master)](https://travis-ci.org/ocombe/ng2-translate) [![npm version](https://img.shields.io/npm/v/ng2-translate.svg)](https://www.npmjs.com/package/ng2-translate)
 An implementation of angular translate for Angular 2.
 
-Simple example using ng2-translate: https://github.com/ocombe/ng2-play/tree/ng2-translate
+Simple example using ng2-translate: http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
 
 Get the complete changelog here: https://github.com/ocombe/ng2-translate/releases
 
 * [Installation](#installation)
 * [Usage](#usage)
 * [API](#api)
+* [FAQ](#faq)'
 * [Additional Framework Support](#additional-framework-support)
 
 ## Installation
@@ -26,15 +27,19 @@ It is recommended to import `TranslateModule.forRoot()` in the NgModule of your 
 
 The `forRoot` method is a convention for modules that provide a singleton service (such as the Angular 2 Router), you can also use it to configure the `TranslateModule` loader. By default it will use the `TranslateStaticLoader`, but you can provide another loader instead as a parameter of this method (see below [Write & use your own loader](#write--use-your-own-loader)).
 
+For now ng2-translate requires HttpModule from `@angular/http` (this will change soon).
+
 
 ```ts
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from '@angular/core';
+import {HttpModule} from '@angular/http';
 import {TranslateModule} from 'ng2-translate/ng2-translate';
 
 @NgModule({
     imports: [
         BrowserModule,
+        HttpModule,
         TranslateModule.forRoot()
     ],
     bootstrap: [AppComponent]
@@ -49,9 +54,10 @@ If you have multiple NgModules and you use one as a shared NgModule (that you im
 @NgModule({
     imports: [
         BrowserModule,
+        HttpModule,
         TranslateModule.forRoot()
     ],
-    exports: [TranslateModule],
+    exports: [BrowserModule, HttpModule, TranslateModule],
 })
 export class SharedModule {
 }
@@ -63,13 +69,14 @@ By default, only the `TranslateStaticLoader` is available. It will search for fi
 @NgModule({
     imports: [
         BrowserModule,
+        HttpModule,
         TranslateModule.forRoot({ 
           provide: TranslateLoader,
           useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n', '.json'),
           deps: [Http]
         })
     ],
-    exports: [TranslateModule],
+    exports: [BrowserModule, HttpModule, TranslateModule],
 })
 export class SharedModule {
 }
@@ -77,7 +84,7 @@ export class SharedModule {
 
 ##### _Ionic 2 users:_
 
-For Ionic 2 here is a complete bootstrap with configuration (this may not be working as of RC5, don't hesitate to raise an issue if it's the case):
+For Ionic 2 here is a complete bootstrap with configuration. Ionic 2 still uses Angular 2 RC4, which means that you should use ng2-translate version 2.2.2:
 ```ts
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
 
@@ -266,7 +273,11 @@ If you need it for some reason, you can use the `TranslateParser` service.
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
 - `getValue(target: any, key: stirng): any`:  Gets a value from an object by composed key
      `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
-     
+
+## FAQ
+#### I'm getting an error `No provider for Http!`
+Because of the TranslateStaticLoader you have to load the HttpModule from `@angular/http`, even if you don't use this Loader
+
 ## Additional Framework Support
 
 * [NativeScript](https://www.nativescript.org/) via [nativescript-ng2-translate](https://github.com/NathanWalker/nativescript-ng2-translate)
