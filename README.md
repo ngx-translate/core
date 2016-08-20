@@ -8,7 +8,7 @@ Get the complete changelog here: https://github.com/ocombe/ng2-translate/release
 * [Installation](#installation)
 * [Usage](#usage)
 * [API](#api)
-* [FAQ](#faq)'
+* [FAQ](#faq)
 * [Additional Framework Support](#additional-framework-support)
 
 ## Installation
@@ -142,7 +142,7 @@ translate.setTranslation('en', {
 });
 ```
 
-The `TranslateParser` is able to understand json keys, which means that you can organize your translations like that:
+The `TranslateParser` understands json keys, which means that you can organize your translations like that:
 ```json
 {
     "HOME": {
@@ -151,7 +151,7 @@ The `TranslateParser` is able to understand json keys, which means that you can 
 }
 ```
 
-And then access them using the key `HOME.HELLO`.
+And then use them by adding a dot `.` between the keys. In this example you can use `HOME.HELLO`.
 
 #### 4. Use the service or the pipe:
 
@@ -277,6 +277,19 @@ If you need it for some reason, you can use the `TranslateParser` service.
 ## FAQ
 #### I'm getting an error `No provider for Http!`
 Because of the TranslateStaticLoader you have to load the HttpModule from `@angular/http`, even if you don't use this Loader
+
+
+#### I'm getting an error `npm ERR! peerinvalid Peer [...]`
+If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer dependencies well. With npm 2 you could only use fixed versions, but with npm 3 you can use `^` to use a newer version if available.
+
+If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`npm WARN!`), warning are just informative and if everything works then don't worry !
+
+If you're using an old version of angular 2 and ng2-translate wants a newer version then you should consider upgrading your application to use the newer angular 2 version. I cannot support old versions because the framework keeps doing breaking changes... If it's not an option for you, then check [the changelog](/releases) to know which version is the last compatible version.
+
+
+#### I'm using Ionic 2 and ng2-translate doesn't work
+Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix the version of ng2-translate to 2.2.2 until Ionic 2 upgrades to RC5.
+
 
 ## Additional Framework Support
 
