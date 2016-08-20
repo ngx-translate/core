@@ -23,7 +23,7 @@ If the current behavior is a bug or you can illustrate your feature request bett
 
 **Please tell us about your environment:**
 
-* **ng2-translate version:** 2.0.0-rc.X
+* **ng2-translate version:** x.x.x
 
 * **Angular version:** 2.0.0-rc.X
  
