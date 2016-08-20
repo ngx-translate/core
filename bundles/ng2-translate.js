@@ -280,10 +280,15 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
       return this.langs;
     };
     TranslateService.prototype.addLangs = function(langs) {
-      Object.assign(this.langs, langs);
+      var _this = this;
+      langs.forEach(function(lang) {
+        if (_this.langs.indexOf(lang) === -1) {
+          _this.langs.push(lang);
+        }
+      });
     };
     TranslateService.prototype.updateLangs = function() {
-      Object.assign(this.langs, Object.keys(this.translations));
+      this.addLangs(Object.keys(this.translations));
     };
     TranslateService.prototype.getParsedResult = function(translations, key, interpolateParams) {
       var res;

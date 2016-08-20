@@ -182,14 +182,18 @@ export class TranslateService {
      * Add available langs
      */
     public addLangs(langs: Array<string>): void {
-        Object.assign(this.langs, langs);
+        langs.forEach((lang: string) => {
+            if(this.langs.indexOf(lang) === -1) {
+                this.langs.push(lang);
+            }
+        });
     }
 
     /**
      * Update the list of available langs
      */
     private updateLangs(): void {
-        Object.assign(this.langs, Object.keys(this.translations));
+        this.addLangs(Object.keys(this.translations));
     }
 
     /**

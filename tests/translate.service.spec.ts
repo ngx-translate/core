@@ -263,9 +263,20 @@ export function main() {
         });
 
         it('should be able to add new langs', () => {
-            translate.addLangs(['en', 'pl']);
+            translate.addLangs(['pl', 'es']);
+            expect(translate.getLangs()).toEqual(['pl', 'es']);
+            translate.addLangs(['fr']);
+            expect(translate.getLangs()).toEqual(['pl', 'es', 'fr']);
 
-            expect(translate.getLangs()).toEqual(['en', 'pl']);
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.use('en').subscribe((res: string) => {
+                expect(translate.getLangs()).toEqual(['pl', 'es', 'fr', 'en']);
+                translate.addLangs(['de']);
+                expect(translate.getLangs()).toEqual(['pl', 'es', 'fr', 'en', 'de']);
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
 
         it('should be able to get the browserLang', () => {
