@@ -14,6 +14,7 @@ npm-debug.log
 *.d.ts
 !make.js
 !bundles/*.js
+!examples/**/*.js
 
 #################
 ## JetBrains

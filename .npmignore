@@ -11,6 +11,7 @@ npm-debug.log
 !*.d.ts
 tests
 examples
+.github
 
 #################
 ## JetBrains
