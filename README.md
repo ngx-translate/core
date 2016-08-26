@@ -279,6 +279,10 @@ If you need it for some reason, you can use the `TranslateParser` service.
 Because of the TranslateStaticLoader you have to load the HttpModule from `@angular/http`, even if you don't use this Loader
 
 
+#### I'm still using RC4, but I cannot use ng2-translate because I get errors?!
+If you're still using RC4, you should fix the version of ng2-translate to 2.2.2.
+
+
 #### I'm getting an error `npm ERR! peerinvalid Peer [...]`
 If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer dependencies well. With npm 2 you could only use fixed versions, but with npm 3 you can use `^` to use a newer version if available.
 
