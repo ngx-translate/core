@@ -266,7 +266,7 @@ export function main() {
             translate.addLangs(['pl', 'es']);
             expect(translate.getLangs()).toEqual(['pl', 'es']);
             translate.addLangs(['fr']);
-            translate.addLangs(['pl','fr']);
+            translate.addLangs(['pl', 'fr']);
             expect(translate.getLangs()).toEqual(['pl', 'es', 'fr']);
 
             // this will request the translation from the backend because we use a static files loader for TranslateService
@@ -356,6 +356,27 @@ export function main() {
             translate.get('nonExistingKey').subscribe((res: string) => {
                 expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey');
                 expect(res).toEqual('nonExistingKey');
+            });
+
+            // mock response after the xhr request, otherwise it will be undefined
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+        });
+
+        it('should pass interpolateParams to MissingTranslationHandler empowering consumers (e.g. to implement "defaultValue")', () => {
+            class MissingDefaultValue implements MissingTranslationHandler {
+                handle(key: string, interpolateParams?: {defaultValue?: string}) {
+                    const hasDefault = (interpolateParams && interpolateParams.defaultValue);
+                    return hasDefault ? interpolateParams.defaultValue : key;
+                }
+            }
+
+            prepare(MissingDefaultValue);
+            translate.use('en');
+            spyOn(missingTranslationHandler, 'handle').and.callThrough();
+
+            translate.get('nonExistingKey', {defaultValue: 'MyDefault'}).subscribe((res: string) => {
+                expect(missingTranslationHandler.handle).toHaveBeenCalledWith('nonExistingKey', {defaultValue: 'MyDefault'});
+                expect(res).toEqual('MyDefault');
             });
 
             // mock response after the xhr request, otherwise it will be undefined
