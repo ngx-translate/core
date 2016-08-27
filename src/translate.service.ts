@@ -246,7 +246,11 @@ export class TranslateService {
         }
 
         if (!res && this.missingTranslationHandler) {
-            res = this.missingTranslationHandler.handle(key, interpolateParams);
+            if (typeof interpolateParams === 'undefined') {
+                res = this.missingTranslationHandler.handle(key);
+            } else {
+                res = this.missingTranslationHandler.handle(key, interpolateParams);
+            }
         }
 
         return res || key;
