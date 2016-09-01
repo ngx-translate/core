@@ -8,8 +8,8 @@ build.xml
 node_modules/*
 npm-debug.log
 *.js
+!config/*
 !karma.conf.js
-!karma-test-shim.js
 *.map
 *.d.ts
 !make.js
