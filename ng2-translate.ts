@@ -7,19 +7,6 @@ export * from "./src/translate.pipe";
 export * from "./src/translate.service";
 export * from "./src/translate.parser";
 
-/**
- * Deprecated, import the new TranslateModule in your NgModule instead
- * @deprecated
- */
-export const TRANSLATE_PROVIDERS: any = [
-    {
-        provide: TranslateLoader,
-        useFactory: (http: Http) => new TranslateStaticLoader(http),
-        deps: [Http]
-    },
-    TranslateService
-];
-
 // for angular-cli
 export default {
     pipes: [TranslatePipe],
@@ -27,11 +14,12 @@ export default {
 };
 
 @NgModule({
-    imports: [],
+    imports: [HttpModule],
     declarations: [
         TranslatePipe
     ],
     exports: [
+        HttpModule, // todo remove this when removing the loader from core
         TranslatePipe
     ]
 })

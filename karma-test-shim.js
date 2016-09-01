@@ -13,7 +13,8 @@ System.config({
     defaultJSExtensions: true,
     map: {
         '@angular': 'node_modules/@angular',
-        'rxjs': 'node_modules/rxjs'
+        'rxjs': 'node_modules/rxjs',
+        '@angular/core/testing': 'node_modules/@angular/core/bundles/core-testing.umd.js'
     },
     packages: {
         '@angular/common': {main: 'index.js', defaultExtension: 'js'},
@@ -27,7 +28,7 @@ System.config({
 // Set up the test injector, then import all the specs, execute their `main()`
 // method and kick off Karma (Jasmine).
 System.import('@angular/core/testing')
-    .then(function(coreTesting){
+    .then(function(coreTesting) {
         return System.import('@angular/platform-browser-dynamic/testing')
             .then(function(browserTesting) {
                 coreTesting.TestBed.initTestEnvironment(
@@ -42,7 +43,7 @@ System.import('@angular/core/testing')
                 .map(window.file2moduleName)        // Normalize paths to module names.
                 .map(function(path) {
                     return System.import(path).then(function(module) {
-                        if (module.hasOwnProperty('main')) {
+                        if(module.hasOwnProperty('main')) {
                             module.main();
                         } else {
                             throw new Error('Module ' + path + ' does not implement main() method.');
