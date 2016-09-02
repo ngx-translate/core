@@ -12,6 +12,7 @@ npm-debug.log
 tests
 examples
 .github
+coverage
 
 #################
 ## JetBrains
