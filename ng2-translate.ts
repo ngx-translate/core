@@ -13,6 +13,10 @@ export default {
     providers: [TranslateService]
 };
 
+export function translateLoaderFactory(http: Http) {
+    return new TranslateStaticLoader(http);
+}
+
 @NgModule({
     imports: [HttpModule],
     declarations: [
@@ -26,7 +30,7 @@ export default {
 export class TranslateModule {
     static forRoot(providedLoader: any = {
         provide: TranslateLoader,
-        useFactory: (http: Http) => new TranslateStaticLoader(http),
+        useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
         return {
