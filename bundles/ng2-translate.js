@@ -515,12 +515,11 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
                 return undefined;
             }
             var browserLang;
-            if (typeof window.navigator['languages'] !== 'undefined' && window.navigator['languages'].length > 0) {
-                browserLang = window.navigator['languages'][0].indexOf('-') !== -1 || window.navigator['languages'].length < 2 ? window.navigator['languages'][0] : window.navigator['languages'][1];
-            } else {
-                browserLang = window.navigator['language'] || window.navigator['browserLanguage'];
-            }
-            return browserLang && browserLang.length ? browserLang.split('-')[0] : undefined; // use navigator lang if available
+            browserLang = window.navigator.languages ? window.navigator.languages[0] : null;
+            browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+            if (browserLang.indexOf('-') !== -1) browserLang = browserLang.split('-')[0];
+            if (browserLang.indexOf('_') !== -1) browserLang = browserLang.split('_')[0];
+            return browserLang;
         };
         TranslateService = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __metadata('design:paramtypes', [TranslateLoader, MissingTranslationHandler])], TranslateService);
         return TranslateService;
@@ -614,15 +613,17 @@ System.registerDynamic("ng2-translate", ["@angular/core", "@angular/http", "./sr
         pipes: [translate_pipe_1.TranslatePipe],
         providers: [translate_service_1.TranslateService]
     };
+    function translateLoaderFactory(http) {
+        return new translate_service_1.TranslateStaticLoader(http);
+    }
+    exports.translateLoaderFactory = translateLoaderFactory;
     var TranslateModule = function () {
         function TranslateModule() {}
         TranslateModule.forRoot = function (providedLoader) {
             if (providedLoader === void 0) {
                 providedLoader = {
                     provide: translate_service_1.TranslateLoader,
-                    useFactory: function (http) {
-                        return new translate_service_1.TranslateStaticLoader(http);
-                    },
+                    useFactory: translateLoaderFactory,
                     deps: [http_1.Http]
                 };
             }
