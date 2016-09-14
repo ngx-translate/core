@@ -358,12 +358,15 @@ export class TranslateService {
             return undefined;
         }
         let browserLang: any;
-        if (typeof window.navigator['languages'] !== 'undefined' && window.navigator['languages'].length > 0) {
-            browserLang = window.navigator['languages'][0].indexOf('-') !== -1 || window.navigator['languages'].length < 2 ? window.navigator['languages'][0] : window.navigator['languages'][1];
-        } else {
-            browserLang = window.navigator['language'] || window.navigator['browserLanguage'];
-        }
+        
+        browserLang = window.navigator.languages ? window.navigator.languages[0] : null;
+        browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+        if (browserLang.indexOf('-') !== -1)
+            browserLang = browserLang.split('-')[0];
 
-        return browserLang && browserLang.length ? browserLang.split('-')[0] : undefined; // use navigator lang if available
+        if (browserLang.indexOf('_') !== -1)
+            browserLang = browserLang.split('_')[0];
+        
+        return browserLang;
     }
 }
