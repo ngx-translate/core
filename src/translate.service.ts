@@ -112,14 +112,14 @@ export class TranslateService {
     public use(lang: string): Observable<any> {
         let pending: Observable<any>;
         // check if this language is available
-        if (typeof this.translations[lang] === "undefined") {
+        if(typeof this.translations[lang] === "undefined") {
             // not available, ask for it
             pending = this.getTranslation(lang);
         }
 
-        if (typeof pending !== "undefined") {
+        if(typeof pending !== "undefined") {
             // on init set the currentLang immediately
-            if (!this.currentLang) {
+            if(!this.currentLang) {
                 this.currentLang = lang;
             }
             pending.subscribe((res: any) => {
@@ -160,7 +160,7 @@ export class TranslateService {
      * @param shouldMerge
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
-        if (shouldMerge && this.translations[lang]) {
+        if(shouldMerge && this.translations[lang]) {
             Object.assign(this.translations[lang], translations);
             this.onTranslationChange.emit({translations: translations, lang: lang});
         } else {
@@ -206,20 +206,20 @@ export class TranslateService {
     private getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
 
-        if (key instanceof Array) {
+        if(key instanceof Array) {
             let result: any = {},
                 observables: boolean = false;
-            for (let k of key) {
+            for(let k of key) {
                 result[k] = this.getParsedResult(translations, k, interpolateParams);
-                if (typeof result[k].subscribe === "function") {
+                if(typeof result[k].subscribe === "function") {
                     observables = true;
                 }
             }
-            if (observables) {
+            if(observables) {
                 let mergedObs: any;
-                for (let k of key) {
+                for(let k of key) {
                     let obs = typeof result[k].subscribe === "function" ? result[k] : Observable.of(result[k]);
-                    if (typeof mergedObs === "undefined") {
+                    if(typeof mergedObs === "undefined") {
                         mergedObs = obs;
                     } else {
                         mergedObs = mergedObs.merge(obs);
@@ -236,15 +236,15 @@ export class TranslateService {
             return result;
         }
 
-        if (translations) {
+        if(translations) {
             res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
         }
 
-        if (typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
+        if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if (!res && this.missingTranslationHandler) {
+        if(!res && this.missingTranslationHandler) {
             res = this.missingTranslationHandler.handle(key);
         }
 
@@ -258,11 +258,11 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
-        if (!key) {
+        if(!key) {
             throw new Error(`Parameter "key" required`);
         }
         // check if we are loading a new translation to use
-        if (this.pending) {
+        if(this.pending) {
             return Observable.create((observer: Observer<string>) => {
                 let onComplete = (res: string) => {
                     observer.next(res);
@@ -270,7 +270,7 @@ export class TranslateService {
                 };
                 this.pending.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
-                    if (typeof res.subscribe === "function") {
+                    if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete);
                     } else {
                         onComplete(res);
@@ -279,7 +279,7 @@ export class TranslateService {
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-            if (typeof res.subscribe === "function") {
+            if(typeof res.subscribe === "function") {
                 return res;
             } else {
                 return Observable.of(res);
@@ -295,13 +295,13 @@ export class TranslateService {
      * @returns {string}
      */
     public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
-        if (!key) {
+        if(!key) {
             throw new Error(`Parameter "key" required`);
         }
 
         let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-        if (typeof res.subscribe !== "undefined") {
-            if (key instanceof Array) {
+        if(typeof res.subscribe !== "undefined") {
+            if(key instanceof Array) {
                 let obj: any = {};
                 key.forEach((value: string, index: number) => {
                     obj[key[index]] = key[index];
@@ -354,19 +354,21 @@ export class TranslateService {
     }
 
     public getBrowserLang(): string {
-        if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+        if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
             return undefined;
         }
-        let browserLang: any;
-        
-        browserLang = window.navigator.languages ? window.navigator.languages[0] : null;
-        browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
-        if (browserLang.indexOf('-') !== -1)
-            browserLang = browserLang.split('-')[0];
 
-        if (browserLang.indexOf('_') !== -1)
+        let browserLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
+        browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+
+        if(browserLang.indexOf('-') !== -1) {
+            browserLang = browserLang.split('-')[0];
+        }
+
+        if(browserLang.indexOf('_') !== -1) {
             browserLang = browserLang.split('_')[0];
-        
+        }
+
         return browserLang;
     }
 }

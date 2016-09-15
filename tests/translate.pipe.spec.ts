@@ -116,7 +116,7 @@ describe('TranslatePipe', () => {
 
         expect(() => {
             translatePipe.transform('TEST', param);
-        }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`)
+        }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`);
     });
 
     describe('should update translations on translation by key change', () => {

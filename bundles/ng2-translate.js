@@ -22,6 +22,7 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
             this._ref = _ref;
             this.value = '';
         }
+        /* tslint:disable */
         /**
          * @name equals
          *
@@ -77,6 +78,7 @@ System.registerDynamic("src/translate.pipe", ["@angular/core", "./translate.serv
             }
             return false;
         };
+        /* tslint:enable */
         TranslatePipe.prototype.updateValue = function (key, interpolateParams) {
             var _this = this;
             this.translate.get(key, interpolateParams).subscribe(function (res) {
@@ -514,11 +516,14 @@ System.registerDynamic("src/translate.service", ["@angular/core", "rxjs/Observab
             if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
                 return undefined;
             }
-            var browserLang;
-            browserLang = window.navigator.languages ? window.navigator.languages[0] : null;
+            var browserLang = window.navigator.languages ? window.navigator.languages[0] : null;
             browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
-            if (browserLang.indexOf('-') !== -1) browserLang = browserLang.split('-')[0];
-            if (browserLang.indexOf('_') !== -1) browserLang = browserLang.split('_')[0];
+            if (browserLang.indexOf('-') !== -1) {
+                browserLang = browserLang.split('-')[0];
+            }
+            if (browserLang.indexOf('_') !== -1) {
+                browserLang = browserLang.split('_')[0];
+            }
             return browserLang;
         };
         TranslateService = __decorate([core_1.Injectable(), __param(1, core_1.Optional()), __metadata('design:paramtypes', [TranslateLoader, MissingTranslationHandler])], TranslateService);
