@@ -7,15 +7,15 @@ manifest.mf
 build.xml
 node_modules/*
 npm-debug.log
-coverage
 *.js
+!config/*
 !karma.conf.js
-!karma-test-shim.js
 *.map
 *.d.ts
 !make.js
 !bundles/*.js
-typings
+!examples/**/*.js
+coverage
 
 #################
 ## JetBrains
@@ -23,8 +23,6 @@ typings
 .idea
 .project
 .settings
-.idea/*
-*.iml
 
 ############
 ## Windows

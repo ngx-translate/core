@@ -1,0 +1,36 @@
+{
+  "name": "app",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "watch": "webpack --watch --progress --profile",
+    "start": "webpack-dev-server --inline --progress --port 3000"
+  },
+  "dependencies": {
+    "@angular/common": "2.0.0-rc.5",
+    "@angular/compiler": "^2.0.0-rc.5",
+    "@angular/core": "2.0.0-rc.5",
+    "@angular/http": "2.0.0-rc.5",
+    "@angular/platform-browser": "2.0.0-rc.5",
+    "@angular/platform-browser-dynamic": "2.0.0-rc.5",
+    "core-js": "2.4.1",
+    "ng2-translate": "2.4.2",
+    "rxjs": "5.0.0-beta.6",
+    "zone.js": "^0.6.12"
+  },
+  "devDependencies": {
+    "@types/core-js": "^0.9.31",
+    "@types/hammerjs": "^2.0.31",
+    "@types/node": "^6.0.36",
+    "angular2-template-loader": "^0.4.0",
+    "awesome-typescript-loader": "2.1.1",
+    "html-loader": "^0.4.0",
+    "html-webpack-plugin": "^2.8.1",
+    "raw-loader": "0.5.1",
+    "source-map-loader": "^0.1.5",
+    "ts-helpers": "^1.1.1",
+    "typescript": "2.0.0",
+    "webpack": "2.1.0-beta.20",
+    "webpack-dev-server": "1.14.1"
+  }
+}

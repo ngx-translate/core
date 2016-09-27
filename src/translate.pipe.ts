@@ -1,6 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {TranslateService, LangChangeEvent} from './translate.service';
-import {isPresent, isArray} from "@angular/core/src/facade/lang";
+import {TranslateService, LangChangeEvent, TranslationChangeEvent} from './translate.service';
 
 @Injectable()
 @Pipe({
@@ -11,11 +10,13 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     value: string = '';
     lastKey: string;
     lastParams: any[];
+    onTranslationChange: EventEmitter<TranslationChangeEvent>;
     onLangChange: EventEmitter<LangChangeEvent>;
 
     constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
     }
 
+    /* tslint:disable */
     /**
      * @name equals
      *
@@ -38,26 +39,26 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         if(o1 !== o1 && o2 !== o2) return true; // NaN === NaN
         var t1 = typeof o1, t2 = typeof o2, length: number, key: any, keySet: any;
         if(t1 == t2 && t1 == 'object') {
-            if(isArray(o1)) {
-                if(!isArray(o2)) return false;
+            if(Array.isArray(o1)) {
+                if(!Array.isArray(o2)) return false;
                 if((length = o1.length) == o2.length) {
-                    for (key = 0; key < length; key++) {
+                    for(key = 0; key < length; key++) {
                         if(!this.equals(o1[key], o2[key])) return false;
                     }
                     return true;
                 }
             } else {
-                if(isArray(o2)) {
+                if(Array.isArray(o2)) {
                     return false;
                 }
                 keySet = Object.create(null);
-                for (key in o1) {
+                for(key in o1) {
                     if(!this.equals(o1[key], o2[key])) {
                         return false;
                     }
                     keySet[key] = true;
                 }
-                for (key in o2) {
+                for(key in o2) {
                     if(!(key in keySet) && typeof o2[key] !== 'undefined') {
                         return false;
                     }
@@ -67,10 +68,12 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         }
         return false;
     }
+    /* tslint:enable */
 
     updateValue(key: string, interpolateParams?: Object): void {
         this.translate.get(key, interpolateParams).subscribe((res: string) => {
             this.value = res ? res : key;
+            this.lastKey = key;
             this._ref.markForCheck();
         });
     }
@@ -91,7 +94,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
                 // which is why we might need to change it to real JSON objects such as {"n":1}
                 try {
                     interpolateParams = JSON.parse(args[0].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '));
-                } catch (e) {
+                } catch(e) {
                     throw new SyntaxError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`);
                 }
             } else if(typeof args[0] === 'object' && !Array.isArray(args[0])) {
@@ -111,20 +114,39 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         // if there is a subscription to onLangChange, clean it
         this._dispose();
 
+        // subscribe to onTranslationChange event, in case the translations change
+        if(!this.onTranslationChange) {
+            this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+                if(this.lastKey && event.lang === this.translate.currentLang) {
+                    this.lastKey = null;
+                    this.updateValue(query, interpolateParams);
+                }
+            });
+        }
+
         // subscribe to onLangChange event, in case the language changes
-        this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-            this.updateValue(query, interpolateParams);
-        });
+        if(!this.onLangChange) {
+            this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
+                if(this.lastKey) {
+                    this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+                    this.updateValue(query, interpolateParams);
+                }
+            });
+        }
 
         return this.value;
     }
 
     /**
-     * Clean any existing subscription to onLangChange events
+     * Clean any existing subscription to change events
      * @private
      */
     _dispose(): void {
-        if(isPresent(this.onLangChange)) {
+        if(typeof this.onTranslationChange !== 'undefined') {
+            this.onTranslationChange.unsubscribe();
+            this.onTranslationChange = undefined;
+        }
+        if(typeof this.onLangChange !== 'undefined') {
             this.onLangChange.unsubscribe();
             this.onLangChange = undefined;
         }
