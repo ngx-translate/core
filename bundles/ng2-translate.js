@@ -187,55 +187,83 @@ System.registerDynamic("src/translate.component", ["@angular/core", "./translate
     var core_1 = $__require("@angular/core");
     var translate_service_1 = $__require("./translate.service");
     var TranslateComponent = function () {
-        function TranslateComponent(sanitizer, translate, _elementRef, _changeDetectorRef) {
-            var _this = this;
+        function TranslateComponent(sanitizer, translate, _elRef, _cdRef) {
             this.sanitizer = sanitizer;
             this.translate = translate;
-            this._elementRef = _elementRef;
-            this._changeDetectorRef = _changeDetectorRef;
-            this.onLangChange = this.translate.onLangChange.subscribe(function (event) {
-                _this.updateValue(_this.key, "onLangeChange");
-            });
+            this._elRef = _elRef;
+            this._cdRef = _cdRef;
+            // I'll name it translate-values, because of compatibility to Pascal Prechts angular-translate
+            this.interpolationParams = {};
         }
         /**
          * preserves the key from the translate attribute or from innerHTML
          */
         TranslateComponent.prototype.ngOnInit = function () {
-            this.key = this.translateKey ? this.translateKey : this._elementRef.nativeElement.innerHTML;
-            this.updateValue(this.key);
+            var _this = this;
+            this.key = this.translateKey ? this.translateKey : this._elRef.nativeElement.innerHTML;
+            this.updateValue();
+            // if there is a subscription to onLangChange, clean it
+            this._dispose();
+            // subscribe to onTranslationChange event, in case the translations change
+            if (!this.onTranslationChange) {
+                this.onTranslationChange = this.translate.onTranslationChange.subscribe(function (event) {
+                    if (event.lang === _this.translate.currentLang) {
+                        _this.updateValue();
+                    }
+                });
+            }
+            // subscribe to onLangChange event, in case the language changes
+            if (!this.onLangChange) {
+                this.onLangChange = this.translate.onLangChange.subscribe(function (event) {
+                    _this.updateValue();
+                });
+            }
         };
         /**
          * updates the translation if the interpolation params change
          * @param  changes
          */
         TranslateComponent.prototype.ngOnChanges = function (changes) {
-            if (changes["translateValues"] && this.key) {
-                this.updateValue(this.key);
+            if (changes["interpolationParams"] && this.key) {
+                this.updateValue();
             }
         };
         /**
          * updates the translation
          * @param  key
          */
-        TranslateComponent.prototype.updateValue = function (key, debug) {
+        TranslateComponent.prototype.updateValue = function () {
             var _this = this;
-            Object.keys(this.translateValues).forEach(function (valueKey) {
-                _this.translateValues[valueKey] = _this.sanitizer.sanitize(core_1.SecurityContext.HTML, _this.translateValues[valueKey]);
+            Object.keys(this.interpolationParams).forEach(function (valueKey) {
+                _this.interpolationParams[valueKey] = _this.sanitizer.sanitize(core_1.SecurityContext.HTML, _this.interpolationParams[valueKey]);
             });
-            this.translate.get(key, this.translateValues).subscribe(function (res) {
-                _this._elementRef.nativeElement.innerHTML = _this.sanitizer.sanitize(core_1.SecurityContext.HTML, res);
-                _this._changeDetectorRef.markForCheck();
+            this.translate.get(this.key, this.interpolationParams).subscribe(function (res) {
+                _this._elRef.nativeElement.innerHTML = res ? _this.sanitizer.sanitize(core_1.SecurityContext.HTML, res) : _this.key;
+                _this._cdRef.markForCheck();
             });
+        };
+        /**
+         * Clean any existing subscription to change events
+         * @private
+         */
+        TranslateComponent.prototype._dispose = function () {
+            if (typeof this.onTranslationChange !== 'undefined') {
+                this.onTranslationChange.unsubscribe();
+                this.onTranslationChange = undefined;
+            }
+            if (typeof this.onLangChange !== 'undefined') {
+                this.onLangChange.unsubscribe();
+                this.onLangChange = undefined;
+            }
         };
         TranslateComponent.prototype.ngOnDestroy = function () {
-            this.onLangChange.unsubscribe();
+            this._dispose();
         };
         __decorate([core_1.Input('translate'), __metadata('design:type', String)], TranslateComponent.prototype, "translateKey", void 0);
-        __decorate([core_1.Input('translate-values'), __metadata('design:type', Object)], TranslateComponent.prototype, "translateValues", void 0);
-        TranslateComponent = __decorate([core_1.Injectable(), core_1.Component({
+        __decorate([core_1.Input('translate-values'), __metadata('design:type', Object)], TranslateComponent.prototype, "interpolationParams", void 0);
+        TranslateComponent = __decorate([core_1.Component({
             selector: '[translate]',
-            template: '<ng-content></ng-content>',
-            providers: [translate_service_1.TranslateService]
+            template: '<ng-content></ng-content>'
         }), __metadata('design:paramtypes', [core_1.Sanitizer, translate_service_1.TranslateService, core_1.ElementRef, core_1.ChangeDetectorRef])], TranslateComponent);
         return TranslateComponent;
     }();
