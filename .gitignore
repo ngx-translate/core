@@ -16,6 +16,7 @@ npm-debug.log
 !bundles/*.js
 !examples/**/*.js
 coverage
+*.metadata.json
 
 #################
 ## JetBrains

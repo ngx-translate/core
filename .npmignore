@@ -13,6 +13,7 @@ tests
 examples
 .github
 coverage
+!*.metadata.json
 
 #################
 ## JetBrains
