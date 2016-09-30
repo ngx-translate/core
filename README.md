@@ -82,25 +82,6 @@ export class SharedModule {
 }
 ```
 
-##### _Ionic 2 users:_
-
-For Ionic 2 here is a complete bootstrap with configuration. Ionic 2 still uses Angular 2 RC4, which means that you should use ng2-translate version 2.2.2:
-```ts
-import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
-
-@Component({
-  templateUrl: '....',
-  providers: [
-    { 
-      provide: TranslateLoader,
-      useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-      deps: [Http]
-    },
-    TranslateService
-  ]
-})
-```
-
 #### 2. Init the `TranslateService` for your application:
 
 ```ts

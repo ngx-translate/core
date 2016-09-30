@@ -27,7 +27,7 @@ var config = {
 builder.config(config);
 
 builder
-.bundle(name, path.resolve(__dirname, 'bundles/', name + '.js'))
+.buildStatic(name, path.resolve(__dirname, 'bundles/', name + '.js'), {format: 'umd'})
 .then(function() {
   console.log('Build complete.');
 })
