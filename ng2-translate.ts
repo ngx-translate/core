@@ -7,12 +7,6 @@ export * from "./src/translate.pipe";
 export * from "./src/translate.service";
 export * from "./src/translate.parser";
 
-// for angular-cli
-export default {
-    pipes: [TranslatePipe],
-    providers: [TranslateService]
-};
-
 export function translateLoaderFactory(http: Http) {
     return new TranslateStaticLoader(http);
 }

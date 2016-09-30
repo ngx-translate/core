@@ -28,5 +28,9 @@
   "exclude": [
     "node_modules",
     "bundles"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "strictMetadataEmit": true,
+    "skipTemplateCodegen": true
+  }
 }
