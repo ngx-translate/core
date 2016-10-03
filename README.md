@@ -170,6 +170,19 @@ Or use the `TranslatePipe` in any template:
 <div>{{ 'HELLO' | translate:{value: param} }}</div>
 ```
 
+#### 5. Use HTML tags:
+
+You can use HTML tags within your translations:
+```json
+{
+    "HELLO": "Welcome on my Angular application!<br><strong>This is an amazing app which uses the last technologies!</strong>"
+}
+```
+
+In the html page:
+```html
+<div [innerHTML]="'HELLO' | translate"></div>
+```
 
 ## API
 ### TranslateService
