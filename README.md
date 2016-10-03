@@ -82,6 +82,28 @@ export class SharedModule {
 }
 ```
 
+__If you use a custom TranslateLoader and use AoT compiling or Ionic 2__
+```ts
+export function createTranslateLoader(http: Http) = {
+    return new TranslateStaticLoader(http, '/assets/i18n', 'json');
+}
+
+@NgModule({
+    imports: [
+        BrowserModule,
+        HttpModule,
+        TranslateModule.forRoot({ 
+          provide: TranslateLoader,
+          useFactory: (createTranslateLoader),
+          deps: [Http]
+        })
+    ],
+    exports: [BrowserModule, HttpModule, TranslateModule],
+})
+export class SharedModule {
+}
+```
+
 #### 2. Init the `TranslateService` for your application:
 
 ```ts
