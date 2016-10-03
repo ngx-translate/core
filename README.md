@@ -82,7 +82,7 @@ export class SharedModule {
 }
 ```
 
-__If you use a custom TranslateLoader and use AoT compiling or Ionic 2__
+__If you use a custom TranslateLoader and use AoT compiling or Ionic 2 you must use an exported function for `useFactory`.__ Here is an example on how to do it:
 ```ts
 export function createTranslateLoader(http: Http) = {
     return new TranslateStaticLoader(http, '/assets/i18n', 'json');
