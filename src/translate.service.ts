@@ -104,6 +104,10 @@ export class TranslateService {
         this.defaultLang = lang;
     }
 
+    public getDefaultLang(): string {
+        return this.defaultLang;   
+    }
+
     /**
      * Changes the lang currently used
      * @param lang
