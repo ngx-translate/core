@@ -208,6 +208,7 @@ In the html page:
 
 #### Methods:
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
+- `getDefaultLang(): string`: Gets the default language
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object, shouldMerge: boolean = false)`: Manually sets an object of translations for a given language, set `shouldMerge` to true if you want to append the translations instead of replacing them
