@@ -108,6 +108,15 @@ describe('TranslateService', () => {
         });
     });
 
+    it('should return an empty value', () => {
+        translate.setDefaultLang('en');
+        translate.setTranslation('en', {"TEST": ""});
+        
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('');
+        });
+    });
+
     it('should be able to get translations with params', () => {
         translate.use('en');
 
