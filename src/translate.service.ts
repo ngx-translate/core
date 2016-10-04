@@ -248,7 +248,7 @@ export class TranslateService {
             res = this.missingTranslationHandler.handle(key);
         }
 
-        return res || key;
+        return res !== undefined ? res : key;
     }
 
     /**

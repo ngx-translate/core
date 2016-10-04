@@ -72,7 +72,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
 
     updateValue(key: string, interpolateParams?: Object): void {
         this.translate.get(key, interpolateParams).subscribe((res: string) => {
-            this.value = res ? res : key;
+            this.value = res !== undefined ? res : key;
             this.lastKey = key;
             this._ref.markForCheck();
         });
