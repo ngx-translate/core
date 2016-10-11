@@ -257,10 +257,10 @@ Just don't forget that it will be called synchronously from the `instant` method
 ##### Example:
 Create a Missing Translation Handler
 ```ts
-import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
+import {MissingTranslationHandler, MissingTranslationHandlerParams} from 'ng2-translate/ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
-  handle(key: string) {
+  handle(params: MissingTranslationHandlerParams) {
       return 'some value';
   }
 }
