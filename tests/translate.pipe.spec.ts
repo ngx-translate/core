@@ -91,6 +91,36 @@ describe('TranslatePipe', () => {
 
         expect(translatePipe.transform('TEST', '{param: "with param"}')).toEqual("This is a test with param");
         expect(translatePipe.transform('TEST', '{"param": "with param"}')).toEqual("This is a test with param");
+        expect(translatePipe.transform('TEST', "{param: 'with param'}")).toEqual("This is a test with param");
+        expect(translatePipe.transform('TEST', "{'param' : 'with param'}")).toEqual("This is a test with param");
+    });
+
+    it('should translate a string with object as multiple string parameters', () => {
+        translate.setTranslation('en', {"TEST": "This is a test {{param1}} {{param2}}"});
+        translate.use('en');
+
+        expect(translatePipe.transform('TEST', '{param1: "with param-1", param2: "and param-2"}'))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', '{"param1": "with param-1", "param2": "and param-2"}'))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', "{param1: 'with param-1', param2: 'and param-2'}"))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', "{'param1' : 'with param-1', 'param2': 'and param-2'}"))
+            .toEqual("This is a test with param-1 and param-2");
+    });
+
+    it('should translate a string with object as nested string parameters', () => {
+        translate.setTranslation('en', {"TEST": "This is a test {{param.one}} {{param.two}}"});
+        translate.use('en');
+
+        expect(translatePipe.transform('TEST', '{param: {one: "with param-1", two: "and param-2"}}'))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', '{"param": {"one": "with param-1", "two": "and param-2"}}'))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', "{param: {one: 'with param-1', two: 'and param-2'}}"))
+            .toEqual("This is a test with param-1 and param-2");
+        expect(translatePipe.transform('TEST', "{'param' : {'one': 'with param-1', 'two': 'and param-2'}}"))
+            .toEqual("This is a test with param-1 and param-2");
     });
 
     it('should update the value when the parameters change', () => {
