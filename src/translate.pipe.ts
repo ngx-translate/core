@@ -72,7 +72,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
 
     updateValue(key: string, interpolateParams?: Object): void {
         this.translate.get(key, interpolateParams).subscribe((res: string) => {
-            this.value = res ? res : key;
+            this.value = res !== undefined ? res : key;
             this.lastKey = key;
             this._ref.markForCheck();
         });
@@ -90,10 +90,13 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         var interpolateParams: Object;
         if(args.length && args[0] !== null) {
             if(typeof args[0] === 'string' && args[0].length) {
-                // we accept objects written in the template such as {n:1},
-                // which is why we might need to change it to real JSON objects such as {"n":1}
+                // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
+                // which is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
+                let validArgs: string = args[0]
+                    .replace(/(\')?([a-zA-Z0-9_]+)(\')?(\s)?:/g, '"$2":')
+                    .replace(/:(\s)?(\')(.*?)(\')/g, ':"$3"');
                 try {
-                    interpolateParams = JSON.parse(args[0].replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '));
+                    interpolateParams = JSON.parse(validArgs);
                 } catch(e) {
                     throw new SyntaxError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`);
                 }

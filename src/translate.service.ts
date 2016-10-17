@@ -105,6 +105,14 @@ export class TranslateService {
     }
 
     /**
+     * Gets the default language used
+     * @returns string
+     */
+    public getDefaultLang(): string {
+        return this.defaultLang;   
+    }
+
+    /**
      * Changes the lang currently used
      * @param lang
      * @returns {Observable<*>}
@@ -248,7 +256,7 @@ export class TranslateService {
             res = this.missingTranslationHandler.handle(key);
         }
 
-        return res || key;
+        return res !== undefined ? res : key;
     }
 
     /**

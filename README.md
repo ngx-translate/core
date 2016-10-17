@@ -17,7 +17,7 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-**If you use SystemJS** to load your files, you might have to update your config like [in this example](https://github.com/ocombe/ng2-play/blob/ng2-translate/index.html#L25-L28).
+**If you use SystemJS** to load your files, check the [plunkr example](http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview) for a working setup.
 
 ## Usage
 #### 1. Import the `TranslateModule`:
@@ -82,23 +82,26 @@ export class SharedModule {
 }
 ```
 
-##### _Ionic 2 users:_
-
-For Ionic 2 here is a complete bootstrap with configuration. Ionic 2 still uses Angular 2 RC4, which means that you should use ng2-translate version 2.2.2:
+__If you use a custom TranslateLoader and use AoT compiling or Ionic 2 you must use an exported function for `useFactory`.__ Here is an example on how to do it:
 ```ts
-import {TranslateService, TranslateLoader, TranslateStaticLoader} from 'ng2-translate/ng2-translate';
+export function createTranslateLoader(http: Http) {
+    return new TranslateStaticLoader(http, './assets/i18n', '.json');
+}
 
-@Component({
-  templateUrl: '....',
-  providers: [
-    { 
-      provide: TranslateLoader,
-      useFactory: (http: Http) => new TranslateStaticLoader(http, 'assets/i18n', '.json'),
-      deps: [Http]
-    },
-    TranslateService
-  ]
+@NgModule({
+    imports: [
+        BrowserModule,
+        HttpModule,
+        TranslateModule.forRoot({ 
+          provide: TranslateLoader,
+          useFactory: (createTranslateLoader),
+          deps: [Http]
+        })
+    ],
+    exports: [BrowserModule, HttpModule, TranslateModule],
 })
+export class SharedModule {
+}
 ```
 
 #### 2. Init the `TranslateService` for your application:
@@ -167,6 +170,19 @@ Or use the `TranslatePipe` in any template:
 <div>{{ 'HELLO' | translate:{value: param} }}</div>
 ```
 
+#### 5. Use HTML tags:
+
+You can use HTML tags within your translations:
+```json
+{
+    "HELLO": "Welcome on my Angular application!<br><strong>This is an amazing app which uses the last technologies!</strong>"
+}
+```
+
+In the html page:
+```html
+<div [innerHTML]="'HELLO' | translate"></div>
+```
 
 ## API
 ### TranslateService
@@ -192,6 +208,7 @@ Or use the `TranslatePipe` in any template:
 
 #### Methods:
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
+- `getDefaultLang(): string`: Gets the default language
 - `use(lang: string): Observable<any>`: Changes the lang currently used
 - `getTranslation(lang: string): Observable<any>`: Gets an object of translations for a given language with the current loader
 - `setTranslation(lang: string, translations: Object, shouldMerge: boolean = false)`: Manually sets an object of translations for a given language, set `shouldMerge` to true if you want to append the translations instead of replacing them

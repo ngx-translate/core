@@ -70,7 +70,10 @@ module.exports = {
                 exclude: [
                     /\.(e2e|spec)\.ts$/,
                     /node_modules/
-                ]
+                ],
+                query: {
+                  esModules: true
+                }
             }
         ]
     },
