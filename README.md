@@ -315,4 +315,3 @@ Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix
 ## Additional Framework Support
 
 * [NativeScript](https://www.nativescript.org/) via [nativescript-ng2-translate](https://github.com/NathanWalker/nativescript-ng2-translate)
-
