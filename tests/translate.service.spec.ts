@@ -127,6 +127,19 @@ describe('TranslateService', () => {
         mockBackendResponse(connection, '{"TEST": "This is a test {{param}}"}');
     });
 
+    it('should be able to get translations with params using declension rules', () => {
+        translate.use('en');
+        translate.setDeclensionRule('en', (value: any) => {
+            return value === 1 ? 0 : 1;
+        });
+
+        translate.get('TEST', {param: '2'}).subscribe((res: string) => {
+            expect(res).toEqual('I have 2 cats');
+        });
+
+        mockBackendResponse(connection, '{"TEST": "I have {{param}} cat{{@param(|s)}}"}');
+    });
+
     it('should be able to get translations with nested params', () => {
         translate.use('en');
 

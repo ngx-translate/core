@@ -220,6 +220,7 @@ In the html page:
 - `reloadLang(lang: string): Observable<string|Object>`: Calls resetLang and retrieves the translations object for the current loader
 - `resetLang(lang: string)`: Removes the current translations for this lang. /!\ You will have to call `use`, `reloadLang` or `getTranslation` again to be able to get translations
 - `getBrowserLang(): string | undefined`: Returns the current browser lang if available, or undefined otherwise 
+- `setDeclensionRule(lang: string, declensionRule: Function)`: Sets a declension rule for a given language
 
 #### Write & use your own loader
 If you want to write your own loader, you need to create a class that implements `TranslateLoader`.
@@ -247,6 +248,23 @@ Don't forget that you have to import `TranslateModule` as well:
 export class SharedModule {
 }
 ```
+
+#### How to support a declension
+Most languages require the proper word declension. If you want to support it in a particular language, you have to define declension rules when the `TranslateService` is being initialized:
+```ts
+translate.setDeclensionRule('en', (value: any) => {
+    return value === 1 ? 0 : 1;
+});
+```
+
+Now you can use the following syntax in your translations:
+```json
+{
+    "HELLO": "I have {{value}} {{@value(cat|cats)}}"
+}
+```
+
+For `value` = 1, the result will be "I have 1 cat". For any other value, word "cat" will be replaced by "cats".
 
 #### How to handle missing translations
 You can setup a provider for `MissingTranslationHandler` in the bootstrap of your application (recommended), or in the `providers` property of a component.
