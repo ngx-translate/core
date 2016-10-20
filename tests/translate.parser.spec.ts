@@ -48,7 +48,7 @@ describe('Parser', () => {
 
     });
 
-    it('should interpolate using declension rules', () => {
+    it('should interpolate using pluralization rules', () => {
         expect(parser.interpolate("I have {{key}} cat{{@key(|s)}}", {key: 1}, (value: any) => {
             return value === 1 ? 0 : 1;
         })).toEqual("I have 1 cat");

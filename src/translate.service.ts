@@ -85,7 +85,7 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
-    private declensionRules: any = {};
+    private pluralizationRules: any = {};
     private parser: Parser = new Parser();
 
     /**
@@ -179,12 +179,12 @@ export class TranslateService {
     }
 
     /**
-     * Sets a declension rule for a given language
+     * Sets a pluralization rule for a given language
      * @param lang
-     * @param declensionRule
+     * @param pluralizationRule
      */
-    public setDeclensionRule(lang: string, declensionRule: Function): void {
-        this.declensionRules[lang] = declensionRule;
+    public setPluralizationRule(lang: string, pluralizationRule: Function): void {
+        this.pluralizationRules[lang] = pluralizationRule;
     }
 
     /**
@@ -219,17 +219,17 @@ export class TranslateService {
      * @param translations
      * @param key
      * @param interpolateParams
-     * @param declensionRule
+     * @param pluralizationRule
      * @returns {any}
      */
-    private getParsedResult(translations: any, key: any, interpolateParams?: Object, declensionRule?: Function): any {
+    private getParsedResult(translations: any, key: any, interpolateParams?: Object, pluralizationRule?: Function): any {
         let res: string|Observable<string>;
 
         if(key instanceof Array) {
             let result: any = {},
                 observables: boolean = false;
             for(let k of key) {
-                result[k] = this.getParsedResult(translations, k, interpolateParams, declensionRule);
+                result[k] = this.getParsedResult(translations, k, interpolateParams, pluralizationRule);
                 if(typeof result[k].subscribe === "function") {
                     observables = true;
                 }
@@ -256,12 +256,12 @@ export class TranslateService {
         }
 
         if(translations) {
-            res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams, declensionRule);
+            res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams, pluralizationRule);
         }
 
         if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key),
-                interpolateParams, this.declensionRules[this.defaultLang]);
+                interpolateParams, this.pluralizationRules[this.defaultLang]);
         }
 
         if(!res && this.missingTranslationHandler) {
@@ -289,7 +289,7 @@ export class TranslateService {
                     observer.complete();
                 };
                 this.pending.subscribe((res: any) => {
-                    res = this.getParsedResult(res, key, interpolateParams, this.declensionRules[this.currentLang]);
+                    res = this.getParsedResult(res, key, interpolateParams, this.pluralizationRules[this.currentLang]);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete);
                     } else {
@@ -298,7 +298,7 @@ export class TranslateService {
                 });
             });
         } else {
-            let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams, this.declensionRules[this.currentLang]);
+            let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams, this.pluralizationRules[this.currentLang]);
             if(typeof res.subscribe === "function") {
                 return res;
             } else {
@@ -319,7 +319,7 @@ export class TranslateService {
             throw new Error(`Parameter "key" required`);
         }
 
-        let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams, this.declensionRules[this.currentLang]);
+        let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams, this.pluralizationRules[this.currentLang]);
         if(typeof res.subscribe !== "undefined") {
             if(key instanceof Array) {
                 let obj: any = {};

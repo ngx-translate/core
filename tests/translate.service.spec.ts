@@ -127,9 +127,9 @@ describe('TranslateService', () => {
         mockBackendResponse(connection, '{"TEST": "This is a test {{param}}"}');
     });
 
-    it('should be able to get translations with params using declension rules', () => {
+    it('should be able to get translations with params using pluralization rules', () => {
         translate.use('en');
-        translate.setDeclensionRule('en', (value: any) => {
+        translate.setPluralizationRule('en', (value: any) => {
             return value === 1 ? 0 : 1;
         });
 
