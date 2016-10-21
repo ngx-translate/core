@@ -24,14 +24,13 @@ module.exports = {
     devtool: 'cheap-module-source-map',
 
     module: {
-        preLoaders: [{
-            test: /\.js$/,
-            loader: 'source-map'
-        }],
         loaders: [{
             test: /\.ts$/,
-            loader: 'awesome-typescript-loader',
-            exclude: /(node_modules)/
+            loader: 'awesome-typescript-loader'
+        }, {
+            test: /\.js$/,
+            loader: 'babel',
+            include: /node_modules\/ng2-translate/
         }]
     },
 
