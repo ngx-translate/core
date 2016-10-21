@@ -10,6 +10,7 @@ npm-debug.log
 *.js
 !config/*
 !karma.conf.js
+!webpack.config.js
 *.map
 *.d.ts
 !make.js
