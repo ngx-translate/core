@@ -24,9 +24,9 @@
   "bugs": {
     "url": "https://github.com/ocombe/ng2-translate/issues"
   },
-  "main": "bundles/ng2-translate.js",
-  "module": "ng2-translate.js",
-  "typings": "./ng2-translate.d.ts",
+  "main": "bundles/index.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
   "peerDependencies": {
     "@angular/core": "^2.0.0",
