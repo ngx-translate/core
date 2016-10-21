@@ -44,7 +44,6 @@ testing.TestBed.initTestEnvironment(
  * we say do this recursively
  */
 var testContext = require.context('../tests', true, /\.spec\.ts/);
-console.log(testContext);
 
 /*
  * get all the files, for each file, call the context function

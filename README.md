@@ -34,7 +34,7 @@ For now ng2-translate requires HttpModule from `@angular/http` (this will change
 import {BrowserModule} from "@angular/platform-browser";
 import {NgModule} from '@angular/core';
 import {HttpModule} from '@angular/http';
-import {TranslateModule} from 'ng2-translate/ng2-translate';
+import {TranslateModule} from 'ng2-translate';
 
 @NgModule({
     imports: [
@@ -108,7 +108,7 @@ export class SharedModule {
 
 ```ts
 import {Component} from '@angular/core';
-import {TranslateService} from 'ng2-translate/ng2-translate';
+import {TranslateService} from 'ng2-translate';
 
 @Component({
     selector: 'app',
@@ -257,7 +257,7 @@ Just don't forget that it will be called synchronously from the `instant` method
 ##### Example:
 Create a Missing Translation Handler
 ```ts
-import {MissingTranslationHandler} from 'ng2-translate/ng2-translate';
+import {MissingTranslationHandler} from 'ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
   handle(key: string) {
