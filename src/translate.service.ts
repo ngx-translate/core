@@ -361,6 +361,11 @@ export class TranslateService {
         this.translations[lang] = undefined;
     }
 
+    /**
+     * Returns the language code name from the browser, e.g. "de"
+     *
+     * @returns {any}
+     */
     public getBrowserLang(): string {
         if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
             return undefined;
@@ -378,5 +383,21 @@ export class TranslateService {
         }
 
         return browserLang;
+    }
+
+    /**
+     * Returns the culture language code name from the browser, e.g. "de-DE"
+     *
+     * @returns {any}
+     */
+    public getBrowserCultureLang(): string {
+        if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+            return undefined;
+        }
+
+        let browserCultureLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
+        browserCultureLang = browserCultureLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+
+        return browserCultureLang;
     }
 }
