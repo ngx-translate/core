@@ -294,6 +294,12 @@ describe('TranslateService', () => {
         expect(browserLang).toBeDefined();
         expect(typeof browserLang === 'string').toBeTruthy();
     });
+
+    it('should be able to get the browserCultureLang', () => {
+        let browserCultureLand = translate.getBrowserCultureLang();
+        expect(browserCultureLand).toBeDefined();
+        expect(typeof browserCultureLand === 'string').toBeTruthy();
+    });
 });
 
 describe('MissingTranslationHandler', () => {
