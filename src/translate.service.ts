@@ -364,7 +364,7 @@ export class TranslateService {
     /**
      * Returns the language code name from the browser, e.g. "de"
      *
-     * @returns {any}
+     * @returns string
      */
     public getBrowserLang(): string {
         if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
@@ -388,7 +388,7 @@ export class TranslateService {
     /**
      * Returns the culture language code name from the browser, e.g. "de-DE"
      *
-     * @returns {any}
+     * @returns string
      */
     public getBrowserCultureLang(): string {
         if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
