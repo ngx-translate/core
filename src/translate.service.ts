@@ -396,12 +396,11 @@ export class TranslateService {
      * @returns string
      */
     public getBrowserLang(): string {
-        if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+        let browserLang = this.getBrowserCultureLang();
+
+        if(browserLang === 'undefined') {
             return undefined;
         }
-
-        let browserLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
-        browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
 
         if(browserLang.indexOf('-') !== -1) {
             browserLang = browserLang.split('-')[0];
