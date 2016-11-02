@@ -258,10 +258,10 @@ Just don't forget that it will be called synchronously from the `instant` method
 ##### Example:
 Create a Missing Translation Handler
 ```ts
-import {MissingTranslationHandler} from 'ng2-translate';
+import {MissingTranslationHandler, MissingTranslationHandlerParams} from 'ng2-translate';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
-  handle(key: string) {
+  handle(params: MissingTranslationHandlerParams) {
       return 'some value';
   }
 }
@@ -315,5 +315,5 @@ Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix
 
 ## Additional Framework Support
 
-* [NativeScript](https://www.nativescript.org/) via [nativescript-ng2-translate](https://github.com/NathanWalker/nativescript-ng2-translate)
+* [Use with NativeScript](https://github.com/NathanWalker/nativescript-ng2-translate/issues/5#issuecomment-257606661)
 
