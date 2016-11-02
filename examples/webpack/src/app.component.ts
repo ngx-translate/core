@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {TranslateService} from 'ng2-translate/ng2-translate';
+import {TranslateService} from 'ng2-translate';
 
 @Component({
     selector: 'my-app',
@@ -17,7 +17,7 @@ import {TranslateService} from 'ng2-translate/ng2-translate';
 })
 export class AppComponent {
     constructor(private translate: TranslateService) {
-        translate.addLangs(["en", "fr"]);
+        translate.addLangs(['en', 'fr']);
         translate.setDefaultLang('en');
 
         let browserLang = translate.getBrowserLang();
