@@ -1,22 +1,36 @@
-sudo: false
 language: node_js
+
 cache:
   directories:
+    - $HOME/.npm
+    - $HOME/.yarn-cache
     - node_modules
+
+sudo: false
+
 notifications:
   email: false
+
 node_js:
-  - '5'
-before_install:
-  - export CHROME_BIN=chromium-browser
-  - npm i -g npm@^3
-before_script:
-  - npm prune
-after_success:
-  - npm run semantic-release
+  - '6'
+
 branches:
   except:
     - "/^v\\d+\\.\\d+\\.\\d+$/"
+
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - npm i -g yarn
+
+before_script:
+  - npm prune
+
+install:
+  - yarn
+
+after_success:
+  - npm run semantic-release
+
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
