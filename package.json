@@ -6,7 +6,7 @@
     "test-watch": "karma start --singleRun=false --autoWatch=true",
     "commit": "npm run prepublish && npm test && git-cz",
     "prepublish": "ngc && npm run build",
-    "build": "webpack",
+    "build": "webpack && cp bundles/ng2-translate.umd.js bundles/index.js",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/ocombe/ng2-translate/issues"
   },
-  "main": "bundles/index.js",
+  "main": "bundles/ng2-translate.umd.js",
   "module": "index.js",
   "typings": "index.d.ts",
   "homepage": "https://github.com/ocombe/ng2-translate",
@@ -33,19 +33,19 @@
     "@angular/http": "^2.0.0"
   },
   "devDependencies": {
-    "@angular/common": "2.1.1",
-    "@angular/compiler": "2.1.1",
-    "@angular/compiler-cli": "2.1.1",
-    "@angular/core": "2.1.1",
-    "@angular/http": "2.1.1",
-    "@angular/platform-browser": "2.1.1",
-    "@angular/platform-browser-dynamic": "2.1.1",
-    "@angular/platform-server": "2.1.1",
+    "@angular/common": "2.1.2",
+    "@angular/compiler": "2.1.2",
+    "@angular/compiler-cli": "2.1.2",
+    "@angular/core": "2.1.2",
+    "@angular/http": "2.1.2",
+    "@angular/platform-browser": "2.1.2",
+    "@angular/platform-browser-dynamic": "2.1.2",
+    "@angular/platform-server": "2.1.2",
     "@types/hammerjs": "2.0.33",
-    "@types/jasmine": "2.5.35",
-    "@types/node": "6.0.45",
+    "@types/jasmine": "2.5.37",
+    "@types/node": "6.0.46",
     "awesome-typescript-loader": "2.2.4",
-    "codelyzer": "1.0.0-beta.1",
+    "codelyzer": "1.0.0-beta.3",
     "commitizen": "2.8.6",
     "core-js": "2.4.1",
     "cz-conventional-changelog": "1.2.0",
@@ -67,7 +67,7 @@
     "ts-helpers": "1.1.2",
     "tslint": "3.15.1",
     "tslint-loader": "2.1.5",
-    "typescript": "2.0.3",
+    "typescript": "2.0.6",
     "webpack": "2.1.0-beta.25",
     "zone.js": "0.6.26"
   },
