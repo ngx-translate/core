@@ -66,6 +66,8 @@ export class SharedModule {
 By default, only the `TranslateStaticLoader` is available. It will search for files in i18n/*.json, if you want you can customize this behavior by changing the default prefix/suffix:
 
 ```ts
+import { TranslateLoader, TranslateModule, TranslateStaticLoader } from 'ng2-translate';
+
 @NgModule({
     imports: [
         BrowserModule,
@@ -84,9 +86,7 @@ export class SharedModule {
 
 __If you use a custom TranslateLoader and use AoT compiling or Ionic 2 you must use an exported function for `useFactory`.__ Here is an example on how to do it:
 ```ts
-export function createTranslateLoader(http: Http) {
-    return new TranslateStaticLoader(http, './assets/i18n', '.json');
-}
+import { TranslateLoader, TranslateModule, TranslateStaticLoader } from 'ng2-translate';
 
 @NgModule({
     imports: [
@@ -100,7 +100,11 @@ export function createTranslateLoader(http: Http) {
     ],
     exports: [BrowserModule, HttpModule, TranslateModule],
 })
-export class SharedModule {
+
+export class SharedModule {}
+
+export function createTranslateLoader(http: Http) {
+    return new TranslateStaticLoader(http, './assets/i18n', '.json');
 }
 ```
 
