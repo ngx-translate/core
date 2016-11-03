@@ -1,8 +1,9 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {TranslateService} from 'ng2-translate/ng2-translate';
 
 @Component({
     selector: 'my-app',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div>
       <h2>{{ 'HOME.TITLE' | translate }}</h2>

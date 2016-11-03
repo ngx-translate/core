@@ -60,6 +60,12 @@ module.exports = {
     },
 
     plugins: [
+        // fix the warning in ./~/@angular/core/src/linker/system_js_ng_module_factory_loader.js
+        new webpack.ContextReplacementPlugin(
+            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+            helpers.root('./src')
+        ),
+
         new LoaderOptionsPlugin({
             debug: true,
             options: {

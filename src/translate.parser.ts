@@ -14,7 +14,7 @@ export class Parser {
         }
         
         return expr.replace(this.templateMatcher, (substring: string, b: string) => {
-            var r = this.getValue(params, b);
+            let r = this.getValue(params, b);
             return typeof r !== 'undefined' ? r : substring;
         });
     }
