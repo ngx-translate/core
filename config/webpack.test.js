@@ -3,6 +3,7 @@
  */
 
 const helpers = require('./helpers'),
+    webpack = require('webpack'),
     LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
 
 /**
