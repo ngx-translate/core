@@ -53,7 +53,7 @@ export abstract class MissingTranslationHandler {
      * A function that handles missing translations.
      * 
      * @abstract
-     * @param {MissingTranslationHandlerParams} the context for resolving a missing translation 
+     * @param {MissingTranslationHandlerParams} params context for resolving a missing translation
      * @returns {any} a value or an observable
      * If it returns a value, then this value is used.
      * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
@@ -93,7 +93,7 @@ export class TranslateService {
      * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
      *     // do something
      * });
-     * @type {ng.EventEmitter<TranslationChangeEvent>}
+     * @type {EventEmitter<TranslationChangeEvent>}
      */
     public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
 
@@ -102,7 +102,7 @@ export class TranslateService {
      * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
-     * @type {ng.EventEmitter<LangChangeEvent>}
+     * @type {EventEmitter<LangChangeEvent>}
      */
     public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
 
@@ -114,7 +114,6 @@ export class TranslateService {
 
     /**
      *
-     * @param http The Angular 2 http provider
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
@@ -236,7 +235,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any}
      */
-    private getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
+    public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
 
         if(key instanceof Array) {

@@ -1,7 +1,10 @@
 import {TranslatePipe} from '../src/translate.pipe';
 import {TranslateService, TranslateModule} from "./../ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
-import {Injector, ChangeDetectorRef} from "@angular/core";
+import {
+    Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable,
+    ViewContainerRef
+} from "@angular/core";
 import {LangChangeEvent, TranslationChangeEvent} from "../src/translate.service";
 import {getTestBed, TestBed} from "@angular/core/testing";
 import {MockConnection, MockBackend} from "@angular/http/testing";
@@ -16,6 +19,20 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
     checkNoChanges(): void {}
 
     reattach(): void {}
+}
+
+@Injectable()
+@Component({
+    selector: 'hmx-app',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `{{'TEST' | translate}}`
+})
+class App {
+    viewContainerRef: ViewContainerRef;
+
+    constructor(viewContainerRef: ViewContainerRef) {
+        this.viewContainerRef = viewContainerRef;
+    }
 }
 
 const mockBackendResponse = (connection: MockConnection, response: string) => {
@@ -33,6 +50,7 @@ describe('TranslatePipe', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpModule, TranslateModule.forRoot()],
+            declarations: [App],
             providers: [
                 {provide: XHRBackend, useClass: MockBackend}
             ]
@@ -207,6 +225,16 @@ describe('TranslatePipe', () => {
 
             translate.use('fr');
             mockBackendResponse(connection, `{"TEST": "C'est un test"}`);
+        });
+
+        it('should detect changes with OnPush', () => {
+            let fixture = (<any>TestBed).createComponent(App);
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
+            translate.use('en');
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
         });
     });
 });
