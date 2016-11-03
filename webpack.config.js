@@ -11,7 +11,6 @@ const helpers = require('./config/helpers'),
 const ProvidePlugin = require('webpack/lib/ProvidePlugin');
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
-const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 
 module.exports = {
     devtool: 'inline-source-map',
@@ -25,7 +24,7 @@ module.exports = {
     output: {
         path: helpers.root('bundles'),
         publicPath: '/',
-        filename: 'index.js',
+        filename: 'ng2-translate.umd.js',
         libraryTarget: 'umd',
         library: 'ng2-translate'
     },
