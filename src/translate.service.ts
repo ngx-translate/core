@@ -20,29 +20,6 @@ export interface LangChangeEvent {
     translations: any;
 }
 
-export interface MissingTranslationHandlerParams {
-    /**
-     * the key that's missing in translation files
-     * 
-     * @type {string}
-     */
-    key: string;
-
-    /**
-     * an instance of the service that was unable to translate the key.
-     * 
-     * @type {TranslateService}
-     */
-    translateService: TranslateService;
-
-    /**
-     * interpolation params that were passed along for translating the given key.
-     * 
-     * @type {Object}
-     */
-    interpolateParams?: Object;
-}
-
 declare interface Window {
     navigator: any;
 }
@@ -51,15 +28,13 @@ declare var window: Window;
 export abstract class MissingTranslationHandler {
     /**
      * A function that handles missing translations.
-     * 
-     * @abstract
-     * @param {MissingTranslationHandlerParams} the context for resolving a missing translation 
+     * @param key the missing key
      * @returns {any} a value or an observable
      * If it returns a value, then this value is used.
      * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
      * If it doesn't return then the key will be used as a value
      */
-    abstract handle(params: MissingTranslationHandlerParams): any;
+    abstract handle(key: string): any;
 }
 
 export abstract class TranslateLoader {
@@ -277,12 +252,8 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if (!res && this.missingTranslationHandler) {
-            let params: MissingTranslationHandlerParams = { key, translateService: this };
-            if (typeof interpolateParams !== 'undefined') {
-                params.interpolateParams = interpolateParams;
-            }
-            res = this.missingTranslationHandler.handle(params);
+        if(!res && this.missingTranslationHandler) {
+            res = this.missingTranslationHandler.handle(key);
         }
 
         return res !== undefined ? res : key;
