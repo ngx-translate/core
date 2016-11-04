@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {TranslateService} from 'ng2-translate/ng2-translate';
+import {Component, OnInit} from '@angular/core';
+import {TranslateService} from 'ng2-translate';
 
 @Component({
     selector: 'my-app',
@@ -15,12 +15,14 @@ import {TranslateService} from 'ng2-translate/ng2-translate';
     </div>
   `,
 })
-export class AppComponent {
-    constructor(private translate: TranslateService) {
-        translate.addLangs(["en", "fr"]);
-        translate.setDefaultLang('en');
+export class AppComponent implements OnInit {
+    constructor(private translate: TranslateService) { }
+  
+    ngOnInit() {
+        this.translate.addLangs(["en", "fr"]);
+        this.translate.setDefaultLang('en');
 
-        let browserLang = translate.getBrowserLang();
-        translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
+        const browserLang = this.translate.getBrowserLang();
+        this.translate.use(browserLang.match(/en|fr/) ? browserLang : 'en');
     }
 }
