@@ -10,6 +10,7 @@ Get the complete changelog here: https://github.com/ocombe/ng2-translate/release
 * [Usage](#usage)
 * [API](#api)
 * [FAQ](#faq)
+* [Plugins](#plugins)
 * [Additional Framework Support](#additional-framework-support)
 
 
@@ -339,6 +340,10 @@ If you're using an old version of angular 2 and ng2-translate wants a newer vers
 #### I'm using Ionic 2 and ng2-translate doesn't work
 
 Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix the version of ng2-translate to 2.2.2 until Ionic 2 upgrades to RC5.
+
+
+## Plugins
+- [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular 2. If you need localized urls (for example /fr/page and /en/page).
 
 
 ## Additional Framework Support
