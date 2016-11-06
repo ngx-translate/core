@@ -6,6 +6,7 @@ import "rxjs/add/observable/of";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
+import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/toArray";
 
 import {Parser} from "./translate.parser";
@@ -299,19 +300,13 @@ export class TranslateService {
         }
         // check if we are loading a new translation to use
         if(this.pending) {
-            return Observable.create((observer: Observer<string>) => {
-                let onComplete = (res: string) => {
-                    observer.next(res);
-                    observer.complete();
-                };
-                this.pending.subscribe((res: any) => {
-                    res = this.getParsedResult(res, key, interpolateParams);
-                    if(typeof res.subscribe === "function") {
-                        res.subscribe(onComplete);
-                    } else {
-                        onComplete(res);
-                    }
-                });
+            return this.pending.mergeMap((res: any) => {
+                res = this.getParsedResult(res, key, interpolateParams);
+                if (typeof res.subscribe === "function") {
+                    return res;
+                } else {
+                    return Observable.of(res);
+                }
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
