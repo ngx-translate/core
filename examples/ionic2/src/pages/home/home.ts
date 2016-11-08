@@ -8,7 +8,7 @@ import { TranslateService } from "ng2-translate";
 })
 export class HomePage {
 
-  langs = ['en', 'fr'];
+  langs = ['en', 'fr', 'es'];
 
   constructor(public navCtrl: NavController, public translate: TranslateService) {
 
