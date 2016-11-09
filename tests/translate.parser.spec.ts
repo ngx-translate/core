@@ -1,10 +1,10 @@
-import {Parser} from '../src/translate.parser';
+import {Parser, DefaultParser} from '../src/translate.parser';
 
 describe('Parser', () => {
     let parser: Parser;
 
     beforeEach(() => {
-        parser = new Parser();
+        parser = new DefaultParser();
     });
 
     it('is defined', () => {

@@ -1,8 +1,7 @@
+import {Injectable} from "@angular/core";
 import {isDefined} from "./util";
 
-export class Parser {
-    templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
-
+export abstract class Parser {
     /**
      * Interpolates a string to replace parameters
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
@@ -10,7 +9,23 @@ export class Parser {
      * @param params
      * @returns {string}
      */
-    public interpolate(expr: string, params?: any): string {
+    abstract interpolate(expr: string, params?: any): string;
+
+    /**
+     * Gets a value from an object by composed key
+     * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
+     * @param target
+     * @param key
+     * @returns {string}
+     */
+    abstract getValue(target: any, key: string): string;
+}
+
+@Injectable()
+export class DefaultParser extends Parser {
+    templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
+
+    interpolate(expr: string, params?: any): string {
         if(typeof expr !== 'string' || !params) {
             return expr;
         }
@@ -21,14 +36,7 @@ export class Parser {
         });
     }
 
-    /**
-     * Gets a value from an object by composed key
-     * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
-     * @param target
-     * @param key
-     * @returns {string}
-     */
-    public getValue(target: any, key: string): string {
+    getValue(target: any, key: string): string {
         let keys = key.split('.');
         key = '';
         do {
@@ -45,5 +53,4 @@ export class Parser {
 
         return target;
     }
-
 }
