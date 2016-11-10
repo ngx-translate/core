@@ -3,9 +3,11 @@ import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
-import "rxjs/add/operator/share";
+import "rxjs/add/observable/throw";
+import "rxjs/add/operator/catch";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
+import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/toArray";
 
 import {Parser} from "./translate.parser";
@@ -172,14 +174,14 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        this.pending = this.currentLoader.getTranslation(lang).share();
-        this.pending.subscribe((res: Object) => {
+        this.pending = this.currentLoader.getTranslation(lang).mergeMap((res: Object) => {
             this.translations[lang] = res;
             this.updateLangs();
-        }, (err: any) => {
-            throw err;
-        }, () => {
             this.pending = undefined;
+            return Observable.of(res);
+        }).catch((err) => {
+            this.pending = undefined;
+            return Observable.throw(err);
         });
 
         return this.pending;
