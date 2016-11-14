@@ -398,7 +398,7 @@ export class TranslateService {
         let browserLang = this.getBrowserCultureLang();
 
         if(browserLang === 'undefined') {
-            return undefined;
+            return 'undefined';
         }
 
         if(browserLang.indexOf('-') !== -1) {
@@ -419,7 +419,7 @@ export class TranslateService {
      */
     public getBrowserCultureLang(): string {
         if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
-            return undefined;
+            return 'undefined';
         }
 
         let browserCultureLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
