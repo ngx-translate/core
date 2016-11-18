@@ -1,11 +1,11 @@
 import {NgModule, ModuleWithProviders} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
-import {TranslatePipe} from "./src/translate.pipe";
-import {TranslateService, TranslateLoader, TranslateStaticLoader} from "./src/translate.service";
+import {TranslatePipe} from "./translate/translate.pipe";
+import {TranslateService, TranslateLoader, TranslateStaticLoader} from "./translate/translate.service";
 
-export * from "./src/translate.pipe";
-export * from "./src/translate.service";
-export * from "./src/translate.parser";
+export * from "./translate/translate.pipe";
+export * from "./translate/translate.service";
+export * from "./translate/translate.parser";
 
 export function translateLoaderFactory(http: Http) {
     return new TranslateStaticLoader(http);

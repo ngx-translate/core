@@ -1,4 +1,4 @@
-import {Parser} from '../src/translate.parser';
+import {Parser} from '../src/translate/translate.parser';
 
 describe('Parser', () => {
     let parser: Parser;

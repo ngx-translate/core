@@ -1,11 +1,11 @@
-import {TranslatePipe} from '../src/translate.pipe';
-import {TranslateService, TranslateModule} from "./../ng2-translate";
+import {TranslatePipe} from '../src/translate/translate.pipe';
+import {TranslateService, TranslateModule} from "../src/ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {
     Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable,
     ViewContainerRef
 } from "@angular/core";
-import {LangChangeEvent, TranslationChangeEvent} from "../src/translate.service";
+import {LangChangeEvent, TranslationChangeEvent} from "../src/translate/translate.service";
 import {getTestBed, TestBed} from "@angular/core/testing";
 import {MockConnection, MockBackend} from "@angular/http/testing";
 

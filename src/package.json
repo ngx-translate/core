@@ -1,0 +1,11 @@
+{
+  "name": "ng2-translate",
+  "version": "4.0.1",
+  "main": "bundles/ng2-translate.umd.js",
+  "module": "index.js",
+  "typings": "index.d.ts",
+  "peerDependencies": {
+    "@angular/core": "*",
+    "@angular/http": "*"
+  }
+}
