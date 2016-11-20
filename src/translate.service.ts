@@ -156,6 +156,7 @@ export class TranslateService {
             }
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
+            }, (err: any) => {
             });
 
             return pending;
@@ -176,9 +177,8 @@ export class TranslateService {
         this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
             this.updateLangs();
+            this.pending = undefined;
         }, (err: any) => {
-            throw err;
-        }, () => {
             this.pending = undefined;
         });
 
@@ -304,14 +304,17 @@ export class TranslateService {
                     observer.next(res);
                     observer.complete();
                 };
+                let onError = (err: any) => {
+                    observer.error(err);
+                };
                 this.pending.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
-                        res.subscribe(onComplete);
+                        res.subscribe(onComplete, onError);
                     } else {
                         onComplete(res);
                     }
-                });
+                }, onError);
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
