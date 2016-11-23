@@ -121,11 +121,11 @@ import {TranslateService} from 'ng2-translate';
 @Component({
     selector: 'app',
     template: `
-        <div>{{ 'HELLO' | translate:{value: param} }}</div>
+        <div>{{ 'HELLO' | translate:param }}</div>
     `
 })
 export class AppComponent {
-    param: string = 'world';
+    param = {value: 'world'};
 
     constructor(translate: TranslateService) {
         // this language will be used as a fallback when a translation isn't found in the current language
@@ -183,7 +183,12 @@ translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
 And this is how you do it with the pipe.
 
 ```html
-<div>{{ 'HELLO' | translate:{value: param} }}</div>
+<div>{{ 'HELLO' | translate:param }}</div>
+```
+
+And in your component define `param` like this:
+```ts
+param = {value: 'world'};
 ```
 
 #### 5. Use HTML tags:
