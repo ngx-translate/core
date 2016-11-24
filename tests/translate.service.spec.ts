@@ -83,11 +83,42 @@ describe('TranslateService', () => {
     it("should fallback to the default language", () => {
         translate.use('fr');
 
-        translate.setDefaultLang('en');
-        translate.setTranslation('en', {"TEST": "This is a test"});
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('TEST');
+
+            translate.setDefaultLang('nl');
+
+            translate.get('TEST').subscribe((res2: string) => {
+                expect(res2).toEqual('Dit is een test');
+            });
+
+            mockBackendResponse(connection, '{"TEST": "Dit is een test"}');
+        });
+
+        mockBackendResponse(connection, '{}');
+    });
+
+    it("should use the default language by default", () => {
+        translate.setDefaultLang('nl');
 
         translate.get('TEST').subscribe((res: string) => {
-            expect(res).toEqual('This is a test');
+            expect(res).toEqual('Dit is een test');
+        });
+
+        mockBackendResponse(connection, '{"TEST": "Dit is een test"}');
+    });
+
+    it("should fallback to english if no default language was set", () => {
+        translate.use('fr');
+
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('TEST');
+
+            translate.get('TEST').subscribe((res2: string) => {
+                expect(res2).toEqual('This is a test');
+            });
+
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
         });
 
         mockBackendResponse(connection, '{}');
@@ -225,7 +256,7 @@ describe('TranslateService', () => {
         translate.use('en');
     });
 
-    it('should be able to reset a lang', (done: Function) => {
+    it('should be able to reset a lang', () => {
         translate.use('en');
         spyOn(connection, 'mockRespond').and.callThrough();
 
@@ -239,14 +270,15 @@ describe('TranslateService', () => {
 
             expect(translate.instant('TEST')).toEqual('TEST');
 
-            // use set timeout because no request is really made and we need to trigger zone to resolve the observable
-            setTimeout(() => {
-                translate.get('TEST').subscribe((res2: string) => {
-                    expect(res2).toEqual('TEST'); // because the loader is "pristine" as if it was never called
-                    expect(connection.mockRespond).toHaveBeenCalledTimes(1);
-                    done();
-                });
-            }, 10);
+            spyOn(connection, 'mockRespond').and.callThrough();
+
+            // as current language does not contain the right translation any more, it will request the default language
+            translate.get('TEST').subscribe((res2: string) => {
+                expect(res2).toEqual('TEST'); // because the default language does not contain the right translation either
+                expect(connection.mockRespond).toHaveBeenCalledTimes(1);
+            });
+
+            mockBackendResponse(connection, '{}');
         });
 
         // mock response after the xhr request, otherwise it will be undefined

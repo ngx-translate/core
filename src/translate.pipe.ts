@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {TranslateService, LangChangeEvent, TranslationChangeEvent} from './translate.service';
+import {TranslateService, LangChangeEvent, TranslationChangeEvent, DefaultLangChangeEvent} from './translate.service';
 
 @Injectable()
 @Pipe({
@@ -12,6 +12,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     lastParams: any[];
     onTranslationChange: EventEmitter<TranslationChangeEvent>;
     onLangChange: EventEmitter<LangChangeEvent>;
+    onDefaultLangChange: EventEmitter<DefaultLangChangeEvent>;
 
     constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
     }
@@ -146,6 +147,16 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             });
         }
 
+        // subscribe to onDefaultLangChange event, in case the default language changes
+        if(!this.onDefaultLangChange) {
+            this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
+                if(this.lastKey) {
+                    this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+                    this.updateValue(query, interpolateParams, event.translations);
+                }
+            });
+        }
+
         return this.value;
     }
 
@@ -161,6 +172,10 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         if(typeof this.onLangChange !== 'undefined') {
             this.onLangChange.unsubscribe();
             this.onLangChange = undefined;
+        }
+        if(typeof this.onDefaultLangChange !== 'undefined') {
+            this.onDefaultLangChange.unsubscribe();
+            this.onDefaultLangChange = undefined;
         }
     }
 
