@@ -1,5 +1,6 @@
 {
   "name": "ng2-translate",
+  "version": "4.0.1",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "test": "karma start",
