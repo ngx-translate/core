@@ -27,7 +27,7 @@ export class Parser {
      * @returns {string}
      */
     public getValue(target: any, key: string): string {
-        let keys = key.split('.');
+        let keys = key.trim().split('.');
         key = '';
         do {
             key += keys.shift();
