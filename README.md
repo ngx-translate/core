@@ -349,7 +349,7 @@ Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular 2. If you need localized urls (for example /fr/page and /en/page).
-- [.po files Loader](https://www.npmjs.com/package/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ng2-translate
+- [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ng2-translate
 
 
 ## Additional Framework Support
