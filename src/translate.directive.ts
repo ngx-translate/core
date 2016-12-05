@@ -4,7 +4,7 @@ import {isDefined} from "./util";
 import {TranslateService, LangChangeEvent} from "./translate.service";
 
 @Directive({
-    selector: '[translate]'
+    selector: '[translate],[ng2-translate]'
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
     key: string;
