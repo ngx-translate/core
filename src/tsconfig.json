@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "outDir": "../dist",
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": false,
+    "noEmitHelpers": false,
+    "noImplicitAny": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "lib": ["dom", "es6"],
+    "types": [
+      "jasmine"
+    ],
+    "typeRoots": [
+      "../node_modules/@types"
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "files": [
+    "./ng2-translate.ts",
+    "./index.ts"
+  ],
+  "angularCompilerOptions": {
+    "genDir": "../temp/factories"
+  }
+}

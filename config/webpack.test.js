@@ -26,12 +26,12 @@ module.exports = {
     },
 
     module: {
-        rules: [{
+        rules: [/*{
             enforce: 'pre',
             test: /\.ts$/,
             loader: 'tslint',
             exclude: [helpers.root('node_modules')]
-        }, {
+        },*/ {
             enforce: 'pre',
             test: /\.js$/,
             loader: 'source-map-loader',
@@ -45,10 +45,13 @@ module.exports = {
             loader: 'awesome-typescript-loader',
             query: {
                 // use inline sourcemaps for "karma-remap-coverage" reporter
-                sourceMap: false,
-                inlineSourceMap: true,
-                module: "commonjs",
-                removeComments: true
+                compilerOptions: {
+                  sourceMap: false,
+                  inlineSourceMap: true,
+                  module: "commonjs",
+                  removeComments: true
+                },
+                configFileName : 'src/tsconfig.json'
             },
             exclude: [/\.e2e\.ts$/]
         }, {
