@@ -37,7 +37,7 @@ export class TranslateModule {
             providers: [
                 providedLoader,
                 TranslateService,
-                { provide: TranslateParser, useClass: DefaultTranslateParser },
+                { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
         };
     }
