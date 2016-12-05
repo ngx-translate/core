@@ -88,6 +88,7 @@ describe('TranslateService', () => {
 
         translate.get('TEST').subscribe((res: string) => {
             expect(res).toEqual('This is a test');
+            expect(translate.getDefaultLang()).toEqual('en');
         });
 
         mockBackendResponse(connection, '{}');
@@ -143,6 +144,18 @@ describe('TranslateService', () => {
 
         expect(() => {
             translate.get(undefined);
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.get('');
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.get(null);
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.instant(undefined);
         }).toThrowError('Parameter "key" required');
     });
 

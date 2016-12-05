@@ -20,7 +20,6 @@ describe('Parser', () => {
     it('should interpolate with falsy values', () => {
         expect(parser.interpolate("This is a {{ key }}", {key: ""})).toEqual("This is a ");
         expect(parser.interpolate("This is a {{ key }}", {key: 0})).toEqual("This is a 0");
-        expect(parser.interpolate("This is a {{ key }}", {key: null})).toEqual("This is a null");
     });
 
     it('should interpolate with object properties', () => {
