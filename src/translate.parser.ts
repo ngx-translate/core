@@ -22,7 +22,7 @@ export abstract class TranslateParser {
 }
 
 @Injectable()
-export class DefaultParser extends TranslateParser {
+export class DefaultTranslateParser extends TranslateParser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
     public interpolate(expr: string, params?: any): string {
