@@ -24,7 +24,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         // subscribe to onLangChange event, in case the language changes
         if(!this.onLangChangeSub) {
             this.onLangChangeSub = this.translateService.onLangChange.subscribe((event: LangChangeEvent) => {
-                this.checkNodes(true);
+                this.checkNodes(event.translations);
             });
         }
     }
@@ -33,7 +33,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         this.checkNodes();
     }
 
-    checkNodes(langChanged = false) {
+    checkNodes(translations?: any) {
         let nodes: NodeList = this.element.nativeElement.childNodes;
         for(let i = 0; i < nodes.length; ++i) {
             let node: any = nodes[i];
@@ -49,18 +49,19 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                             key = content;
                             // the content was changed from the user, we'll use it as a reference if needed
                             node.originalContent = node.textContent;
-                        } else if(node.originalContent && langChanged) { // the content seems ok, but the lang has changed
+                        } else if(node.originalContent && isDefined(translations)) { // the content seems ok, but the lang has changed
+                            node.lastKey = null;
                             // the current content is the translation, not the key, use the last real content as key
                             key = node.originalContent.trim();
                         }
                     }
                 }
-                this.updateValue(key, node);
+                this.updateValue(key, node, translations);
             }
         }
     }
 
-    updateValue(key: string, node: any) {
+    updateValue(key: string, node: any, translations: any) {
         if(key) {
             let interpolateParams: Object = this.translateParams;
             if(node.lastKey === key && this.lastParams === interpolateParams) {
@@ -68,7 +69,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             }
 
             this.lastParams = interpolateParams;
-            this.translateService.get(key, interpolateParams).subscribe((res: string | any) => {
+
+            let onTranslation = (res: string) => {
                 if(res !== key) {
                     node.lastKey = key;
                 }
@@ -78,7 +80,18 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                 node.currentValue = isDefined(res) ? res : (node.originalContent || key);
                 // we replace in the original content to preserve spaces that we might have trimmed
                 node.textContent = this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue);
-            });
+            };
+
+            if(isDefined(translations)) {
+                let res = this.translateService.getParsedResult(translations, key, interpolateParams);
+                if(typeof res.subscribe === "function") {
+                    res.subscribe(onTranslation);
+                } else {
+                    onTranslation(res);
+                }
+            } else {
+                this.translateService.get(key, interpolateParams).subscribe(onTranslation);
+            }
         }
     }
 

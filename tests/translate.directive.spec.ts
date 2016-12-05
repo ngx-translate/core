@@ -101,4 +101,18 @@ describe('TranslateDirective', () => {
 
         expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('It is ok');
     });
+
+    it('should update the DOM when the lang changes', () => {
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+
+        translate.setTranslation('en', {"TEST": "This is a test"});
+        translate.setTranslation('fr', {"TEST": "C'est un test"});
+
+        translate.use('en');
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+
+        translate.use('fr');
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
+    });
+
 });
