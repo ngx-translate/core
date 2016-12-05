@@ -1,3 +1,5 @@
+import {isDefined} from "./util";
+
 export class Parser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
@@ -15,7 +17,7 @@ export class Parser {
         
         return expr.replace(this.templateMatcher, (substring: string, b: string) => {
             let r = this.getValue(params, b);
-            return typeof r !== 'undefined' ? r : substring;
+            return isDefined(r) ? r : substring;
         });
     }
 
@@ -31,7 +33,7 @@ export class Parser {
         key = '';
         do {
             key += keys.shift();
-            if (target!==undefined && target[key] !== undefined && (typeof target[key] === 'object' || !keys.length)) {
+            if(isDefined(target) && isDefined(target[key]) && (typeof target[key] === 'object' || !keys.length)) {
                 target = target[key];
                 key = '';
             } else if (!keys.length) {

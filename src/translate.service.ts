@@ -9,6 +9,7 @@ import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 
 import {Parser} from "./translate.parser";
+import {isDefined} from "./util";
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -294,7 +295,7 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
         // check if we are loading a new translation to use
@@ -334,7 +335,7 @@ export class TranslateService {
      * @returns {string}
      */
     public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
 
