@@ -1,7 +1,7 @@
 import {NgModule, ModuleWithProviders} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
 import {TranslatePipe} from "./src/translate.pipe";
-import {TranslateParser, DefaultParser} from "./src/translate.parser";
+import {TranslateParser, DefaultTranslateParser} from "./src/translate.parser";
 import {TranslateService, TranslateLoader, TranslateStaticLoader} from "./src/translate.service";
 import {TranslateDirective} from "./src/translate.directive";
 
@@ -37,7 +37,7 @@ export class TranslateModule {
             providers: [
                 providedLoader,
                 TranslateService,
-                { provide: TranslateParser, useClass: DefaultParser },
+                { provide: TranslateParser, useClass: DefaultTranslateParser },
             ]
         };
     }
