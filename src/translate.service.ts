@@ -111,14 +111,17 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
-    private parser: Parser = new Parser();
 
     /**
      *
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {
+    constructor(
+        public currentLoader: TranslateLoader, 
+        private parser: Parser, 
+        @Optional() private missingTranslationHandler: MissingTranslationHandler
+    ) {
     }
 
     /**
