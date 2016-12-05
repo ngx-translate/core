@@ -167,11 +167,11 @@ The `TranslateParser` understands nested JSON objects. This means that you can h
 
 You can then access the value by using the dot notation, in this case `HOME.HELLO`.
 
-#### 4. Use the service or the pipe:
+#### 4. Use the service, the pipe or the directive:
 
-You can either use the `TranslateService` or the `TranslatePipe` to get your translation values.
+You can either use the `TranslateService`, the `TranslatePipe` or the `TranslateDirective` to get your translation values.
 
-With the service, it looks like this.
+With the **service**, it looks like this:
 
 ```ts
 translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
@@ -180,7 +180,7 @@ translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
 });
 ```
 
-And this is how you do it with the pipe.
+This is how you do it with the **pipe**:
 
 ```html
 <div>{{ 'HELLO' | translate:param }}</div>
@@ -189,6 +189,16 @@ And this is how you do it with the pipe.
 And in your component define `param` like this:
 ```ts
 param = {value: 'world'};
+```
+
+This is how you use the **directive**:
+```html
+<div [translate]="'HELLO'" [translateparams]="{param: 'world'}"></div>
+```
+
+Or even simpler using the content of your element as a key:
+```html
+<div translate [translateparams]="{param: 'world'}">HELLO</div>
 ```
 
 #### 5. Use HTML tags:
@@ -201,7 +211,7 @@ You can easily use raw HTML tags within your translations.
 }
 ```
 
-To render them, simply use the `innerHTML` attributeon any element.
+To render them, simply use the `innerHTML` attribute with the pipe on any element.
 
 ```html
 <div [innerHTML]="'HELLO' | translate"></div>

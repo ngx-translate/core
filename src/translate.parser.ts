@@ -11,10 +11,10 @@ export class Parser {
      * @returns {string}
      */
     public interpolate(expr: string, params?: any): string {
-        if (typeof expr !== 'string' || !params) {
+        if(typeof expr !== 'string' || !params) {
             return expr;
         }
-        
+
         return expr.replace(this.templateMatcher, (substring: string, b: string) => {
             let r = this.getValue(params, b);
             return isDefined(r) ? r : substring;
@@ -36,13 +36,13 @@ export class Parser {
             if(isDefined(target) && isDefined(target[key]) && (typeof target[key] === 'object' || !keys.length)) {
                 target = target[key];
                 key = '';
-            } else if (!keys.length) {
+            } else if(!keys.length) {
                 target = undefined;
             } else {
                 key += '.';
             }
-        } while (keys.length);
-        
+        } while(keys.length);
+
         return target;
     }
 

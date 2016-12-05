@@ -1,112 +1,90 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Sanitizer,
-  SecurityContext,
-  SimpleChange
-} from '@angular/core';
-import {
-  LangChangeEvent,
-  TranslateService,
-  TranslationChangeEvent
-} from './translate.service';
+import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from "@angular/core";
+import {Subscription} from "rxjs";
+import {isDefined} from "./util";
+import {TranslateService, LangChangeEvent} from "./translate.service";
 
-@Component({
-  selector: '[translate]',
-  template: '<ng-content></ng-content>'
+@Directive({
+    selector: '[translate]'
 })
-export class TranslateComponent implements OnInit, OnChanges, OnDestroy {
-  @Input('translate')
-  private translateKey: string;
-  // I'll name it translate-values, because of compatibility to Pascal Prechts angular-translate
-  @Input('translate-values')
-  private interpolationParams: { [key: string]: string } = {};
-  private key: string;
-  onTranslationChange: EventEmitter<TranslationChangeEvent>;
-  onLangChange: EventEmitter<LangChangeEvent>;
+export class TranslateDirective implements AfterViewChecked, OnDestroy {
+    key: string;
+    lastParams: any;
+    onLangChangeSub: Subscription;
 
-  constructor(
-    public sanitizer: Sanitizer,
-    public translate: TranslateService,
-    public _elRef: ElementRef,
-    public _cdRef: ChangeDetectorRef
-  ) {
-
-  }
-
-  /**
-   * preserves the key from the translate attribute or from innerHTML
-   */
-  ngOnInit() {
-    this.key = this.translateKey ? this.translateKey : this._elRef.nativeElement.innerHTML;
-    this.updateValue();
-
-    // if there is a subscription to onLangChange, clean it
-    this._dispose();
-
-    // subscribe to onTranslationChange event, in case the translations change
-    if (!this.onTranslationChange) {
-      this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
-        if (event.lang === this.translate.currentLang) {
-          this.updateValue();
+    @Input() set translate(key: string) {
+        if(key) {
+            this.key = key;
+            this.checkNodes();
         }
-      });
     }
 
-    // subscribe to onLangChange event, in case the language changes
-    if (!this.onLangChange) {
-      this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-        this.updateValue();
-      });
-    }
-  }
+    @Input() translateParams: any;
 
-  /**
-   * updates the translation if the interpolation params change
-   * @param  changes
-   */
-  ngOnChanges(changes: { [key: string]: SimpleChange; }) {
-    if (changes["interpolationParams"] && this.key) {
-      this.updateValue();
+    constructor(private translateService: TranslateService, private element: ElementRef) {
+        // subscribe to onLangChange event, in case the language changes
+        if(!this.onLangChangeSub) {
+            this.onLangChangeSub = this.translateService.onLangChange.subscribe((event: LangChangeEvent) => {
+                this.checkNodes(true);
+            });
+        }
     }
-  }
 
-  /**
-   * updates the translation
-   * @param  key
-   */
-  updateValue() {
-    Object.keys(this.interpolationParams).forEach(valueKey => {
-      this.interpolationParams[valueKey] = this.sanitizer.sanitize(SecurityContext.HTML, this.interpolationParams[valueKey]);
-    });
-    this.translate.get(this.key, this.interpolationParams).subscribe((res: string | any) => {
-      this._elRef.nativeElement.innerHTML = res ? this.sanitizer.sanitize(SecurityContext.HTML, res) : this.key;
-      this._cdRef.markForCheck();
-    });
-  }
-
-  /**
-   * Clean any existing subscription to change events
-   * @private
-   */
-  _dispose(): void {
-    if (typeof this.onTranslationChange !== 'undefined') {
-      this.onTranslationChange.unsubscribe();
-      this.onTranslationChange = undefined;
+    ngAfterViewChecked() {
+        this.checkNodes();
     }
-    if (typeof this.onLangChange !== 'undefined') {
-      this.onLangChange.unsubscribe();
-      this.onLangChange = undefined;
-    }
-  }
 
-  ngOnDestroy(): void {
-    this._dispose();
-  }
+    checkNodes(langChanged = false) {
+        let nodes: NodeList = this.element.nativeElement.childNodes;
+        for(let i = 0; i < nodes.length; ++i) {
+            let node: any = nodes[i];
+            if(node.nodeType === 3) { // node type 3 is a text node
+                let key: string;
+                if(this.key) {
+                    key = this.key;
+                } else {
+                    let content = node.textContent.trim();
+                    if(content.length) {
+                        // we want to use the content as a key, not the translation value
+                        if(content !== node.currentValue) {
+                            key = content;
+                            // the content was changed from the user, we'll use it as a reference if needed
+                            node.originalContent = node.textContent;
+                        } else if(node.originalContent && langChanged) { // the content seems ok, but the lang has changed
+                            // the current content is the translation, not the key, use the last real content as key
+                            key = node.originalContent.trim();
+                        }
+                    }
+                }
+                this.updateValue(key, node);
+            }
+        }
+    }
+
+    updateValue(key: string, node: any) {
+        if(key) {
+            let interpolateParams: Object = this.translateParams;
+            if(node.lastKey === key && this.lastParams === interpolateParams) {
+                return;
+            }
+
+            this.lastParams = interpolateParams;
+            this.translateService.get(key, interpolateParams).subscribe((res: string | any) => {
+                if(res !== key) {
+                    node.lastKey = key;
+                }
+                if(!node.originalContent) {
+                    node.originalContent = node.textContent;
+                }
+                node.currentValue = isDefined(res) ? res : (node.originalContent || key);
+                // we replace in the original content to preserve spaces that we might have trimmed
+                node.textContent = this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue);
+            });
+        }
+    }
+
+    ngOnDestroy() {
+        if(this.onLangChangeSub) {
+            this.onLangChangeSub.unsubscribe();
+        }
+    }
 }

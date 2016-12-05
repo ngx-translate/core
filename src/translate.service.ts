@@ -47,7 +47,7 @@ export interface MissingTranslationHandlerParams {
 declare interface Window {
     navigator: any;
 }
-declare var window: Window;
+declare const window: Window;
 
 export abstract class MissingTranslationHandler {
     /**
