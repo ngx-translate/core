@@ -28,21 +28,21 @@ export interface DefaultLangChangeEvent {
 export interface MissingTranslationHandlerParams {
     /**
      * the key that's missing in translation files
-     * 
+     *
      * @type {string}
      */
     key: string;
 
     /**
      * an instance of the service that was unable to translate the key.
-     * 
+     *
      * @type {TranslateService}
      */
     translateService: TranslateService;
 
     /**
      * interpolation params that were passed along for translating the given key.
-     * 
+     *
      * @type {Object}
      */
     interpolateParams?: Object;
@@ -56,7 +56,7 @@ declare var window: Window;
 export abstract class MissingTranslationHandler {
     /**
      * A function that handles missing translations.
-     * 
+     *
      * @abstract
      * @param {MissingTranslationHandlerParams} params context for resolving a missing translation
      * @returns {any} a value or an observable
@@ -139,21 +139,7 @@ export class TranslateService {
      * @param lang
      */
     public setDefaultLang(lang: string): void {
-        let pending: Observable<any> = this.retrieveTranslations(lang);
-
-        if(typeof pending !== "undefined") {
-            // on init set the defaultLang immediately
-            if(!this.defaultLang) {
-                this.defaultLang = lang;
-            }
-
-            pending.subscribe((res: any) => {
-                this.changeDefaultLang(lang);
-            }, (err: any) => {
-            });
-        } else { // we already have this language
-            this.changeDefaultLang(lang);
-        }
+        this.defaultLang = lang;
     }
 
     /**
@@ -161,7 +147,7 @@ export class TranslateService {
      * @returns string
      */
     public getDefaultLang(): string {
-        return this.defaultLang;   
+        return this.defaultLang;
     }
 
     /**
@@ -310,13 +296,16 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
         }
 
-        if(typeof res === "undefined") {
-            if(!this.defaultLang) {
-                // load a default language
-                this.setDefaultLang('en');
-            } else if(this.defaultLang !== this.currentLang) {
-                res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
+        if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
+            if(!this.translations[this.defaultLang]) {
+                let pending: Observable<any> = this.retrieveTranslations(this.defaultLang);
+
+                pending.subscribe((res2: any) => {
+                    this.onDefaultLangChange.emit({lang: this.defaultLang, translations: this.translations[this.defaultLang]});
+                }, (err: any) => {
+                });
             }
+            res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
         if (!res && this.missingTranslationHandler) {
@@ -415,15 +404,6 @@ export class TranslateService {
     private changeLang(lang: string): void {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
-    }
-
-    /**
-     * Changes the default lang
-     * @param lang
-     */
-    private changeDefaultLang(lang: string): void {
-        this.defaultLang = lang;
-        this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
     /**
