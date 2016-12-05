@@ -1,16 +1,16 @@
-import {Parser} from '../src/translate.parser';
+import {TranslateParser, DefaultParser} from '../src/translate.parser';
 
 describe('Parser', () => {
-    let parser: Parser;
+    let parser: TranslateParser;
 
     beforeEach(() => {
-        parser = new Parser();
+        parser = new DefaultParser();
     });
 
     it('is defined', () => {
-        expect(Parser).toBeDefined();
+        expect(TranslateParser).toBeDefined();
 
-        expect(parser instanceof Parser).toBeTruthy();
+        expect(parser instanceof TranslateParser).toBeTruthy();
     });
 
     it('should interpolate', () => {

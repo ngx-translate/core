@@ -8,7 +8,7 @@ import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 
-import {Parser} from "./translate.parser";
+import {TranslateParser} from "./translate.parser";
 import {isDefined} from "./util";
 
 export interface TranslationChangeEvent {
@@ -111,15 +111,17 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
-    private parser: Parser = new Parser();
 
     /**
      *
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {
-    }
+    constructor(
+        public currentLoader: TranslateLoader, 
+        private parser: TranslateParser,
+        @Optional() private missingTranslationHandler: MissingTranslationHandler
+    ) {}
 
     /**
      * Sets the default language to use as a fallback
