@@ -1,6 +1,7 @@
-export class Parser {
-    templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
+import {Injectable} from "@angular/core";
+import {isDefined} from "./util";
 
+export abstract class TranslateParser {
     /**
      * Interpolates a string to replace parameters
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
@@ -8,16 +9,7 @@ export class Parser {
      * @param params
      * @returns {string}
      */
-    public interpolate(expr: string, params?: any): string {
-        if (typeof expr !== 'string' || !params) {
-            return expr;
-        }
-        
-        return expr.replace(this.templateMatcher, (substring: string, b: string) => {
-            let r = this.getValue(params, b);
-            return typeof r !== 'undefined' ? r : substring;
-        });
-    }
+    abstract interpolate(expr: string, params?: any): string;
 
     /**
      * Gets a value from an object by composed key
@@ -26,22 +18,39 @@ export class Parser {
      * @param key
      * @returns {string}
      */
-    public getValue(target: any, key: string): string {
+    abstract getValue(target: any, key: string): string
+}
+
+@Injectable()
+export class DefaultParser extends TranslateParser {
+    templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
+
+    public interpolate(expr: string, params?: any): string {
+        if(typeof expr !== 'string' || !params) {
+            return expr;
+        }
+
+        return expr.replace(this.templateMatcher, (substring: string, b: string) => {
+            let r = this.getValue(params, b);
+            return isDefined(r) ? r : substring;
+        });
+    }
+
+    getValue(target: any, key: string): string {
         let keys = key.split('.');
         key = '';
         do {
             key += keys.shift();
-            if (target!==undefined && target[key] !== undefined && (typeof target[key] === 'object' || !keys.length)) {
+            if(isDefined(target) && isDefined(target[key]) && (typeof target[key] === 'object' || !keys.length)) {
                 target = target[key];
                 key = '';
-            } else if (!keys.length) {
+            } else if(!keys.length) {
                 target = undefined;
             } else {
                 key += '.';
             }
-        } while (keys.length);
-        
+        } while(keys.length);
+
         return target;
     }
-
 }

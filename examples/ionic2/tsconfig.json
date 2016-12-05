@@ -1,18 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "es5"
   },
-  "filesGlob": [
-    "**/*.ts",
-    "!node_modules/**/*"
+  "include": [
+    "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "typings/global",
-    "typings/global.d.ts"
+    "node_modules"
   ],
   "compileOnSave": false,
   "atom": {

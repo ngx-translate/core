@@ -121,11 +121,11 @@ import {TranslateService} from 'ng2-translate';
 @Component({
     selector: 'app',
     template: `
-        <div>{{ 'HELLO' | translate:{value: param} }}</div>
+        <div>{{ 'HELLO' | translate:param }}</div>
     `
 })
 export class AppComponent {
-    param: string = 'world';
+    param = {value: 'world'};
 
     constructor(translate: TranslateService) {
         // this language will be used as a fallback when a translation isn't found in the current language
@@ -167,11 +167,11 @@ The `TranslateParser` understands nested JSON objects. This means that you can h
 
 You can then access the value by using the dot notation, in this case `HOME.HELLO`.
 
-#### 4. Use the service or the pipe:
+#### 4. Use the service, the pipe or the directive:
 
-You can either use the `TranslateService` or the `TranslatePipe` to get your translation values.
+You can either use the `TranslateService`, the `TranslatePipe` or the `TranslateDirective` to get your translation values.
 
-With the service, it looks like this.
+With the **service**, it looks like this:
 
 ```ts
 translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
@@ -180,10 +180,25 @@ translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
 });
 ```
 
-And this is how you do it with the pipe.
+This is how you do it with the **pipe**:
 
 ```html
-<div>{{ 'HELLO' | translate:{value: param} }}</div>
+<div>{{ 'HELLO' | translate:param }}</div>
+```
+
+And in your component define `param` like this:
+```ts
+param = {value: 'world'};
+```
+
+This is how you use the **directive**:
+```html
+<div [translate]="'HELLO'" [translateparams]="{param: 'world'}"></div>
+```
+
+Or even simpler using the content of your element as a key:
+```html
+<div translate [translateparams]="{param: 'world'}">HELLO</div>
 ```
 
 #### 5. Use HTML tags:
@@ -196,7 +211,7 @@ You can easily use raw HTML tags within your translations.
 }
 ```
 
-To render them, simply use the `innerHTML` attributeon any element.
+To render them, simply use the `innerHTML` attribute with the pipe on any element.
 
 ```html
 <div [innerHTML]="'HELLO' | translate"></div>
@@ -236,7 +251,7 @@ To render them, simply use the `innerHTML` attributeon any element.
 - `setTranslation(lang: string, translations: Object, shouldMerge: boolean = false)`: Manually sets an object of translations for a given language, set `shouldMerge` to true if you want to append the translations instead of replacing them
 - `addLangs(langs: Array<string>)`: Add new langs to the list
 - `getLangs()`: Returns an array of currently available langs
-- `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys)
+- `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys) or the key if the value was not found
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys). /!\ This method is **synchronous** and the default file loader is asynchronous. You are responsible for knowing when your translations have been loaded and it is safe to use this method. If you are not sure then you should use the `get` method instead.
 - `set(key: string, value: string, lang?: string)`: Sets the translated value of a key
 - `reloadLang(lang: string): Observable<string|Object>`: Calls resetLang and retrieves the translations object for the current loader
@@ -310,7 +325,7 @@ export class AppModule { }
 
 ### Parser
 
-If you need it for some reason, you can use the `TranslateParser` service.
+If you need it for some reason, you can use the `DefaultParser` service.
 
 #### Methods:
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
@@ -344,6 +359,7 @@ Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular 2. If you need localized urls (for example /fr/page and /en/page).
+- [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ng2-translate
 
 
 ## Additional Framework Support

@@ -8,7 +8,8 @@ import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 
-import {Parser} from "./translate.parser";
+import {TranslateParser} from "./translate.parser";
+import {isDefined} from "./util";
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -46,7 +47,7 @@ export interface MissingTranslationHandlerParams {
 declare interface Window {
     navigator: any;
 }
-declare var window: Window;
+declare const window: Window;
 
 export abstract class MissingTranslationHandler {
     /**
@@ -110,14 +111,17 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
-    private parser: Parser = new Parser();
 
     /**
      *
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {
+    constructor(
+        public currentLoader: TranslateLoader, 
+        private parser: TranslateParser,
+        @Optional() private missingTranslationHandler: MissingTranslationHandler
+    ) {
     }
 
     /**
@@ -156,6 +160,7 @@ export class TranslateService {
             }
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
+            }, (err: any) => {
             });
 
             return pending;
@@ -176,9 +181,8 @@ export class TranslateService {
         this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
             this.updateLangs();
+            this.pending = undefined;
         }, (err: any) => {
-            throw err;
-        }, () => {
             this.pending = undefined;
         });
 
@@ -294,7 +298,7 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
         // check if we are loading a new translation to use
@@ -304,14 +308,17 @@ export class TranslateService {
                     observer.next(res);
                     observer.complete();
                 };
+                let onError = (err: any) => {
+                    observer.error(err);
+                };
                 this.pending.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
-                        res.subscribe(onComplete);
+                        res.subscribe(onComplete, onError);
                     } else {
                         onComplete(res);
                     }
-                });
+                }, onError);
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
@@ -331,7 +338,7 @@ export class TranslateService {
      * @returns {string}
      */
     public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
 
