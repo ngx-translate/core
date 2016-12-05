@@ -1,0 +1,18 @@
+{
+  "HOME": {
+    "TITLE": "Bonjour Angular 2 avec ng2-translate !",
+    "SELECT": "Changer la langue"
+  },
+  "ABOUT": {
+    "TITLE": "À propos"
+  },
+  "CONTACT": {
+    "TITLE": "Contacter",
+    "TWITTER_MESSAGE": "Suivez-nous sur Twitter"
+  },
+  "TABS": {
+    "HOME": "Accueil",
+    "ABOUT": "À propos",
+    "CONTACT": "Contacter"
+  }
+}

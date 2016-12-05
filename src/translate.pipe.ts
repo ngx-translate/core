@@ -37,7 +37,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         if(o1 === o2) return true;
         if(o1 === null || o2 === null) return false;
         if(o1 !== o1 && o2 !== o2) return true; // NaN === NaN
-        var t1 = typeof o1, t2 = typeof o2, length: number, key: any, keySet: any;
+        let t1 = typeof o1, t2 = typeof o2, length: number, key: any, keySet: any;
         if(t1 == t2 && t1 == 'object') {
             if(Array.isArray(o1)) {
                 if(!Array.isArray(o2)) return false;
@@ -70,12 +70,21 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
     /* tslint:enable */
 
-    updateValue(key: string, interpolateParams?: Object): void {
-        this.translate.get(key, interpolateParams).subscribe((res: string) => {
+    updateValue(key: string, interpolateParams?: Object, translations?: any): void {
+        let onTranslation = (res: string) => {
             this.value = res !== undefined ? res : key;
             this.lastKey = key;
             this._ref.markForCheck();
-        });
+        };
+        if(translations) {
+            let res = this.translate.getParsedResult(translations, key, interpolateParams);
+            if(typeof res.subscribe === "function") {
+                res.subscribe(onTranslation);
+            } else {
+                onTranslation(res);
+            }
+        }
+        this.translate.get(key, interpolateParams).subscribe(onTranslation);
     }
 
     transform(query: string, ...args: any[]): any {
@@ -87,7 +96,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             return this.value;
         }
 
-        var interpolateParams: Object;
+        let interpolateParams: Object;
         if(args.length && args[0] !== null) {
             if(typeof args[0] === 'string' && args[0].length) {
                 // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
@@ -122,7 +131,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
                 if(this.lastKey && event.lang === this.translate.currentLang) {
                     this.lastKey = null;
-                    this.updateValue(query, interpolateParams);
+                    this.updateValue(query, interpolateParams, event.translations);
                 }
             });
         }
@@ -132,7 +141,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
                 if(this.lastKey) {
                     this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
-                    this.updateValue(query, interpolateParams);
+                    this.updateValue(query, interpolateParams, event.translations);
                 }
             });
         }

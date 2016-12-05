@@ -10,12 +10,14 @@ npm-debug.log
 *.js
 !config/*
 !karma.conf.js
+!webpack.config.js
 *.map
 *.d.ts
 !make.js
 !examples/**/*.js
 coverage
 *.metadata.json
+bundles
 
 #################
 ## JetBrains

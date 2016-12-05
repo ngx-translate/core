@@ -20,6 +20,29 @@ export interface LangChangeEvent {
     translations: any;
 }
 
+export interface MissingTranslationHandlerParams {
+    /**
+     * the key that's missing in translation files
+     * 
+     * @type {string}
+     */
+    key: string;
+
+    /**
+     * an instance of the service that was unable to translate the key.
+     * 
+     * @type {TranslateService}
+     */
+    translateService: TranslateService;
+
+    /**
+     * interpolation params that were passed along for translating the given key.
+     * 
+     * @type {Object}
+     */
+    interpolateParams?: Object;
+}
+
 declare interface Window {
     navigator: any;
 }
@@ -28,13 +51,15 @@ declare var window: Window;
 export abstract class MissingTranslationHandler {
     /**
      * A function that handles missing translations.
-     * @param key the missing key
+     * 
+     * @abstract
+     * @param {MissingTranslationHandlerParams} params context for resolving a missing translation
      * @returns {any} a value or an observable
      * If it returns a value, then this value is used.
      * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
      * If it doesn't return then the key will be used as a value
      */
-    abstract handle(key: string): any;
+    abstract handle(params: MissingTranslationHandlerParams): any;
 }
 
 export abstract class TranslateLoader {
@@ -68,7 +93,7 @@ export class TranslateService {
      * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
      *     // do something
      * });
-     * @type {ng.EventEmitter<TranslationChangeEvent>}
+     * @type {EventEmitter<TranslationChangeEvent>}
      */
     public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
 
@@ -77,7 +102,7 @@ export class TranslateService {
      * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
-     * @type {ng.EventEmitter<LangChangeEvent>}
+     * @type {EventEmitter<LangChangeEvent>}
      */
     public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
 
@@ -89,7 +114,6 @@ export class TranslateService {
 
     /**
      *
-     * @param http The Angular 2 http provider
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
@@ -132,6 +156,7 @@ export class TranslateService {
             }
             pending.subscribe((res: any) => {
                 this.changeLang(lang);
+            }, (err: any) => {
             });
 
             return pending;
@@ -152,9 +177,8 @@ export class TranslateService {
         this.pending.subscribe((res: Object) => {
             this.translations[lang] = res;
             this.updateLangs();
+            this.pending = undefined;
         }, (err: any) => {
-            throw err;
-        }, () => {
             this.pending = undefined;
         });
 
@@ -211,7 +235,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any}
      */
-    private getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
+    public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
 
         if(key instanceof Array) {
@@ -252,8 +276,12 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if(!res && this.missingTranslationHandler) {
-            res = this.missingTranslationHandler.handle(key);
+        if (!res && this.missingTranslationHandler) {
+            let params: MissingTranslationHandlerParams = { key, translateService: this };
+            if (typeof interpolateParams !== 'undefined') {
+                params.interpolateParams = interpolateParams;
+            }
+            res = this.missingTranslationHandler.handle(params);
         }
 
         return res !== undefined ? res : key;
@@ -276,14 +304,17 @@ export class TranslateService {
                     observer.next(res);
                     observer.complete();
                 };
+                let onError = (err: any) => {
+                    observer.error(err);
+                };
                 this.pending.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
-                        res.subscribe(onComplete);
+                        res.subscribe(onComplete, onError);
                     } else {
                         onComplete(res);
                     }
-                });
+                }, onError);
             });
         } else {
             let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
@@ -361,6 +392,11 @@ export class TranslateService {
         this.translations[lang] = undefined;
     }
 
+    /**
+     * Returns the language code name from the browser, e.g. "de"
+     *
+     * @returns string
+     */
     public getBrowserLang(): string {
         if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
             return undefined;
@@ -378,5 +414,21 @@ export class TranslateService {
         }
 
         return browserLang;
+    }
+
+    /**
+     * Returns the culture language code name from the browser, e.g. "de-DE"
+     *
+     * @returns string
+     */
+    public getBrowserCultureLang(): string {
+        if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+            return undefined;
+        }
+
+        let browserCultureLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
+        browserCultureLang = browserCultureLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+
+        return browserCultureLang;
     }
 }
