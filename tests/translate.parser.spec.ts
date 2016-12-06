@@ -1,16 +1,16 @@
-import {Parser} from '../src/translate.parser';
+import {TranslateParser, DefaultTranslateParser} from '../src/translate.parser';
 
 describe('Parser', () => {
-    let parser: Parser;
+    let parser: TranslateParser;
 
     beforeEach(() => {
-        parser = new Parser();
+        parser = new DefaultTranslateParser();
     });
 
     it('is defined', () => {
-        expect(Parser).toBeDefined();
+        expect(TranslateParser).toBeDefined();
 
-        expect(parser instanceof Parser).toBeTruthy();
+        expect(parser instanceof TranslateParser).toBeTruthy();
     });
 
     it('should interpolate', () => {
@@ -20,7 +20,6 @@ describe('Parser', () => {
     it('should interpolate with falsy values', () => {
         expect(parser.interpolate("This is a {{ key }}", {key: ""})).toEqual("This is a ");
         expect(parser.interpolate("This is a {{ key }}", {key: 0})).toEqual("This is a 0");
-        expect(parser.interpolate("This is a {{ key }}", {key: null})).toEqual("This is a null");
     });
 
     it('should interpolate with object properties', () => {

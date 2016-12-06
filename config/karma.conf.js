@@ -7,7 +7,7 @@ module.exports = function(config) {
         frameworks: ['jasmine'],
 
         // list of files to exclude
-        exclude: [ ],
+        exclude: [],
 
         /*
          * list of files / patterns to load in the browser
@@ -35,6 +35,10 @@ module.exports = function(config) {
         webpackMiddleware: { stats: 'errors-only'},
 
         reporters: [ 'mocha', 'coverage', 'remap-coverage' ],
+
+        mochaReporter: {
+            ignoreSkipped: true
+        },
 
         // web server port
         port: 9876,

@@ -8,7 +8,8 @@ import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 
-import {Parser} from "./translate.parser";
+import {TranslateParser} from "./translate.parser";
+import {isDefined} from "./util";
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -51,7 +52,7 @@ export interface MissingTranslationHandlerParams {
 declare interface Window {
     navigator: any;
 }
-declare var window: Window;
+declare const window: Window;
 
 export abstract class MissingTranslationHandler {
     /**
@@ -124,15 +125,17 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
-    private parser: Parser = new Parser();
 
     /**
      *
      * @param currentLoader An instance of the loader currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(public currentLoader: TranslateLoader, @Optional() private missingTranslationHandler: MissingTranslationHandler) {
-    }
+    constructor(
+        public currentLoader: TranslateLoader, 
+        private parser: TranslateParser,
+        @Optional() private missingTranslationHandler: MissingTranslationHandler
+    ) {}
 
     /**
      * Sets the default language to use as a fallback
@@ -326,7 +329,7 @@ export class TranslateService {
      * @returns {any} the translated key, or an object of translated keys
      */
     public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
         // check if we are loading a new translation to use
@@ -366,7 +369,7 @@ export class TranslateService {
      * @returns {string}
      */
     public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
-        if(!key) {
+        if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
 
