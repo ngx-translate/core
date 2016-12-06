@@ -241,7 +241,15 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 	  // do something
 	});
     ```
+- `onDefaultLangChange`: An EventEmitter to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
+    example:
+    ```ts
+    onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
+	  // do something
+	});
+    ```
+    
 #### Methods:
 
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
