@@ -1,7 +1,7 @@
-import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from "@angular/core";
-import {Subscription} from "rxjs";
-import {isDefined} from "./util";
-import {TranslateService, LangChangeEvent} from "./translate.service";
+import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {isDefined} from './util';
+import {TranslateService, LangChangeEvent, DefaultLangChangeEvent} from './translate.service';
 
 @Directive({
     selector: '[translate],[ng2-translate]'
@@ -10,6 +10,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     key: string;
     lastParams: any;
     onLangChangeSub: Subscription;
+    onDefaultLangChangeSub: Subscription;
 
     @Input() set translate(key: string) {
         if(key) {
@@ -24,6 +25,13 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         // subscribe to onLangChange event, in case the language changes
         if(!this.onLangChangeSub) {
             this.onLangChangeSub = this.translateService.onLangChange.subscribe((event: LangChangeEvent) => {
+                this.checkNodes(event.translations);
+            });
+        }
+
+        // subscribe to onDefaultLangChange event, in case the default language changes
+        if(!this.onDefaultLangChangeSub) {
+            this.onDefaultLangChangeSub = this.translateService.onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
                 this.checkNodes(event.translations);
             });
         }
@@ -98,6 +106,10 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     ngOnDestroy() {
         if(this.onLangChangeSub) {
             this.onLangChangeSub.unsubscribe();
+        }
+
+        if(this.onDefaultLangChangeSub) {
+            this.onDefaultLangChangeSub.unsubscribe();
         }
     }
 }

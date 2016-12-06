@@ -142,7 +142,21 @@ export class TranslateService {
      * @param lang
      */
     public setDefaultLang(lang: string): void {
-        this.defaultLang = lang;
+        let pending: Observable<any> = this.retrieveTranslations(lang);
+
+        if(typeof pending !== "undefined") {
+            // on init set the defaultLang immediately
+            if(!this.defaultLang) {
+                this.defaultLang = lang;
+            }
+
+            pending.subscribe((res: any) => {
+                this.changeDefaultLang(lang);
+            }, (err: any) => {
+            });
+        } else { // we already have this language
+            this.changeDefaultLang(lang);
+        }
     }
 
     /**
@@ -300,14 +314,6 @@ export class TranslateService {
         }
 
         if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
-            if(!this.translations[this.defaultLang]) {
-                let pending: Observable<any> = this.retrieveTranslations(this.defaultLang);
-
-                pending.subscribe((res2: any) => {
-                    this.onDefaultLangChange.emit({lang: this.defaultLang, translations: this.translations[this.defaultLang]});
-                }, (err: any) => {
-                });
-            }
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
@@ -407,6 +413,15 @@ export class TranslateService {
     private changeLang(lang: string): void {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    }
+
+    /**
+     * Changes the default lang
+     * @param lang
+     */
+    private changeDefaultLang(lang: string): void {
+        this.defaultLang = lang;
+        this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
     /**
