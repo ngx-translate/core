@@ -5,7 +5,7 @@ import {
     Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable,
     ViewContainerRef
 } from "@angular/core";
-import {LangChangeEvent, TranslationChangeEvent} from "../src/translate.service";
+import {LangChangeEvent, TranslationChangeEvent, DefaultLangChangeEvent} from "../src/translate.service";
 import {getTestBed, TestBed} from "@angular/core/testing";
 import {MockConnection, MockBackend} from "@angular/http/testing";
 
@@ -232,6 +232,56 @@ describe('TranslatePipe', () => {
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
             translate.use('en');
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
+        });
+    });
+
+    describe('should update translations on default lang change', () => {
+        it('with static loader', (done) => {
+            translate.setTranslation('en', {"TEST": "This is a test"});
+            translate.setTranslation('fr', {"TEST": "C'est un test"});
+            translate.setDefaultLang('en');
+
+            expect(translatePipe.transform('TEST')).toEqual("This is a test");
+
+            // this will be resolved at the next lang change
+            let subscription = translate.onDefaultLangChange.subscribe((res: DefaultLangChangeEvent) => {
+                expect(res.lang).toEqual('fr');
+                expect(translatePipe.transform('TEST')).toEqual("C'est un test");
+                subscription.unsubscribe();
+                done();
+            });
+
+            translate.setDefaultLang('fr');
+        });
+
+        it('with file loader', (done) => {
+            translate.setDefaultLang('en');
+            mockBackendResponse(connection, '{"TEST": "This is a test"}');
+            expect(translatePipe.transform('TEST')).toEqual("This is a test");
+
+            // this will be resolved at the next lang change
+            let subscription = translate.onDefaultLangChange.subscribe((res: DefaultLangChangeEvent) => {
+                // let it update the translations
+                setTimeout(() => {
+                    expect(res.lang).toEqual('fr');
+                    expect(translatePipe.transform('TEST')).toEqual("C'est un test");
+                    subscription.unsubscribe();
+                    done();
+                });
+            });
+
+            translate.setDefaultLang('fr');
+            mockBackendResponse(connection, `{"TEST": "C'est un test"}`);
+        });
+
+        it('should detect changes with OnPush', () => {
+            let fixture = (<any>TestBed).createComponent(App);
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
+            translate.setDefaultLang('en');
             mockBackendResponse(connection, '{"TEST": "This is a test"}');
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
