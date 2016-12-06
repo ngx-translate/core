@@ -22,7 +22,8 @@ First you need to install the npm module:
 npm install ng2-translate --save
 ```
 
-**If you use SystemJS** to load your files, check the [plunkr example](http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview) for a working setup.
+**If you use SystemJS** to load your files, you can check the [plunkr example](http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
+If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'ng2-translate': 'node_modules/ng2-translate/bundles'` in the map and `'ng2-translate' : { defaultExtension: 'js' }` in packages.
 
 
 ## Usage
