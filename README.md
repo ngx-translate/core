@@ -81,7 +81,7 @@ By default, only the `TranslateStaticLoader` is available. It will search for fi
         TranslateModule.forRoot({
             provide: TranslateLoader,
             useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n', '.json'),
-            deps: [Http] 
+            deps: [Http]
         })
     ],
     bootstrap: [AppComponent]
@@ -105,7 +105,7 @@ export function createTranslateLoader(http: Http) {
         TranslateModule.forRoot({
             provide: TranslateLoader,
             useFactory: (createTranslateLoader),
-            deps: [Http] 
+            deps: [Http]
         })
     ],
     bootstrap: [AppComponent]
@@ -257,8 +257,8 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 - `set(key: string, value: string, lang?: string)`: Sets the translated value of a key
 - `reloadLang(lang: string): Observable<string|Object>`: Calls resetLang and retrieves the translations object for the current loader
 - `resetLang(lang: string)`: Removes the current translations for this lang. /!\ You will have to call `use`, `reloadLang` or `getTranslation` again to be able to get translations
-- `getBrowserLang(): string | undefined`: Returns the current browser lang if available, or undefined otherwise 
-- `getBrowserCultureLang(): string | undefined`: Returns the current browser culture language name (e.g. "de-DE" if available, or undefined otherwise 
+- `getBrowserLang(): string | undefined`: Returns the current browser lang if available, or undefined otherwise
+- `getBrowserCultureLang(): string | undefined`: Returns the current browser culture language name (e.g. "de-DE" if available, or undefined otherwise
 
 #### Write & use your own loader
 
@@ -361,7 +361,7 @@ Ionic 2 is still using angular 2 RC4, but ng2-translate uses RC5. You should fix
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular 2. If you need localized urls (for example /fr/page and /en/page).
 - [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ng2-translate
-
+- [ng2-translate-extract](https://www.npmjs.com/package/@biesbjerg/ng2-translate-extract) by @biesbjerg: Extract translatable strings from your projects
 
 ## Additional Framework Support
 
