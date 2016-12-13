@@ -8,15 +8,15 @@
   },
   "dependencies": {
     "@angular/common": "^2.1.2",
-    "@angular/compiler": "2.1.2",
+    "@angular/compiler": "^2.1.2",
     "@angular/core": "^2.1.2",
     "@angular/http": "^2.1.2",
     "@angular/platform-browser": "^2.1.2",
     "@angular/platform-browser-dynamic": "^2.1.2",
     "core-js": "2.4.1",
     "ng2-translate": "^3.2.1",
-    "rxjs": "5.0.0-beta.12",
-    "zone.js": "0.6.26"
+    "rxjs": "5.0.0-rc.4",
+    "zone.js": "0.7.2"
   },
   "devDependencies": {
     "@types/core-js": "0.9.34",
@@ -26,6 +26,7 @@
     "awesome-typescript-loader": "2.2.4",
     "html-loader": "0.4.4",
     "html-webpack-plugin": "2.24.1",
+	"copy-webpack-plugin": "^4.0.1",
     "raw-loader": "0.5.1",
     "source-map-loader": "0.1.5",
     "ts-helpers": "1.1.2",

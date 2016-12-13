@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 function root(args) {
     args = Array.prototype.slice.call(arguments, 0);
@@ -62,6 +63,9 @@ module.exports = {
             template: 'index.html',
             chunksSortMode: 'dependency'
         }),
+		new CopyWebpackPlugin([
+			{ from: 'i18n/', to: 'i18n' }
+		]),
 
         new webpack.optimize.OccurrenceOrderPlugin(true)
     ]
