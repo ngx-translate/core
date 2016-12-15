@@ -194,12 +194,12 @@ param = {value: 'world'};
 
 This is how you use the **directive**:
 ```html
-<div [translate]="'HELLO'" [translateParams]="{param: 'world'}"></div>
+<div [translate]="'HELLO'" [translateParams]="{value: 'world'}"></div>
 ```
 
 Or even simpler using the content of your element as a key:
 ```html
-<div translate [translateParams]="{param: 'world'}">HELLO</div>
+<div translate [translateParams]="{value: 'world'}">HELLO</div>
 ```
 
 #### 5. Use HTML tags:
