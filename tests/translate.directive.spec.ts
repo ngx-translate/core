@@ -117,12 +117,11 @@ describe('TranslateDirective', () => {
 
     // Test (temporarily) disabled as the directive tests manipulate the DOM manually which breaks this test.
     // https://github.com/ocombe/ng2-translate/pull/336
-    xit('should update the DOM when the default lang changes', () => {
+    it('should update the DOM when the default lang changes', () => {
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
 
         translate.setTranslation('en', {"TEST": "This is a test"});
         translate.setTranslation('fr', {"TEST": "C'est un test"});
-
         translate.setDefaultLang('en');
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
 
