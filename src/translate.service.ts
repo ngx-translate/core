@@ -197,7 +197,7 @@ export class TranslateService {
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if(shouldMerge && this.translations[lang]) {
             Object.assign(this.translations[lang], translations);
-            this.onTranslationChange.emit({translations: translations, lang: lang});
+            this.onTranslationChange.emit({translations: this.translations[lang], lang: lang});
         } else {
             this.translations[lang] = translations;
         }
