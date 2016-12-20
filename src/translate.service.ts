@@ -21,6 +21,11 @@ export interface LangChangeEvent {
     translations: any;
 }
 
+export interface DefaultLangChangeEvent {
+    lang: string;
+    translations: any;
+}
+
 export interface MissingTranslationHandlerParams {
     /**
      * the key that's missing in translation files
@@ -107,6 +112,15 @@ export class TranslateService {
      */
     public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
 
+    /**
+     * An EventEmitter to listen to default lang change events
+     * onDefaultLangChange.subscribe((params: DefaultLangChangeEvent) => {
+     *     // do something
+     * });
+     * @type {EventEmitter<DefaultLangChangeEvent>}
+     */
+    public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+
     private pending: any;
     private translations: any = {};
     private defaultLang: string;
@@ -128,7 +142,21 @@ export class TranslateService {
      * @param lang
      */
     public setDefaultLang(lang: string): void {
-        this.defaultLang = lang;
+        let pending: Observable<any> = this.retrieveTranslations(lang);
+
+        if(typeof pending !== "undefined") {
+            // on init set the defaultLang immediately
+            if(!this.defaultLang) {
+                this.defaultLang = lang;
+            }
+
+            pending.subscribe((res: any) => {
+                this.changeDefaultLang(lang);
+            }, (err: any) => {
+            });
+        } else { // we already have this language
+            this.changeDefaultLang(lang);
+        }
     }
 
     /**
@@ -145,12 +173,7 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public use(lang: string): Observable<any> {
-        let pending: Observable<any>;
-        // check if this language is available
-        if(typeof this.translations[lang] === "undefined") {
-            // not available, ask for it
-            pending = this.getTranslation(lang);
-        }
+        let pending: Observable<any> = this.retrieveTranslations(lang);
 
         if(typeof pending !== "undefined") {
             // on init set the currentLang immediately
@@ -168,6 +191,21 @@ export class TranslateService {
 
             return Observable.of(this.translations[lang]);
         }
+    }
+
+    /**
+     * Retrieves the given translations
+     * @param lang
+     * @returns {Observable<*>}
+     */
+    private retrieveTranslations(lang: string): Observable<any> {
+        let pending: Observable<any>;
+        // check if this language is available
+        if(typeof this.translations[lang] === "undefined") {
+            // not available, ask for it
+            pending = this.getTranslation(lang);
+        }
+        return pending;
     }
 
     /**
@@ -375,6 +413,15 @@ export class TranslateService {
     private changeLang(lang: string): void {
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    }
+
+    /**
+     * Changes the default lang
+     * @param lang
+     */
+    private changeDefaultLang(lang: string): void {
+        this.defaultLang = lang;
+        this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
     }
 
     /**

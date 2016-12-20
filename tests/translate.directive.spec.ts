@@ -1,9 +1,9 @@
-import {Component, ViewChild, ElementRef} from "@angular/core";
-import {TestBed, ComponentFixture, getTestBed} from "@angular/core/testing";
-import {HttpModule} from "@angular/http";
-import {Injector, Injectable, ChangeDetectionStrategy, ViewContainerRef} from "@angular/core";
-import {TranslateService} from "../src/translate.service";
-import {TranslateModule} from "../index";
+import {Component, ViewChild, ElementRef} from '@angular/core';
+import {TestBed, ComponentFixture, getTestBed} from '@angular/core/testing';
+import {HttpModule} from '@angular/http';
+import {Injector, Injectable, ChangeDetectionStrategy, ViewContainerRef} from '@angular/core';
+import {TranslateService} from '../src/translate.service';
+import {TranslateModule} from '../index';
 
 @Injectable()
 @Component({
@@ -115,4 +115,40 @@ describe('TranslateDirective', () => {
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
     });
 
+    // Test (temporarily) disabled as the directive tests manipulate the DOM manually which breaks this test.
+    // https://github.com/ocombe/ng2-translate/pull/336
+    xit('should update the DOM when the default lang changes', () => {
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+
+        translate.setTranslation('en', {"TEST": "This is a test"});
+        translate.setTranslation('fr', {"TEST": "C'est un test"});
+
+        translate.setDefaultLang('en');
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+
+        translate.setDefaultLang('fr');
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
+    });
+
+    it('should unsubscribe from lang change subscription on destroy', () => {
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
+
+        fixture.destroy();
+
+        translate.setTranslation('en', {"TEST": "This is a test"});
+        translate.use('en');
+
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
+    });
+
+    it('should unsubscribe from default lang change subscription on destroy', () => {
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
+
+        fixture.destroy();
+
+        translate.setTranslation('en', {"TEST": "This is a test"});
+        translate.setDefaultLang('en');
+
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
+    });
 });

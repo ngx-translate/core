@@ -83,15 +83,28 @@ describe('TranslateService', () => {
     it("should fallback to the default language", () => {
         translate.use('fr');
 
-        translate.setDefaultLang('en');
-        translate.setTranslation('en', {"TEST": "This is a test"});
-
         translate.get('TEST').subscribe((res: string) => {
-            expect(res).toEqual('This is a test');
-            expect(translate.getDefaultLang()).toEqual('en');
+            expect(res).toEqual('TEST');
+
+            translate.setDefaultLang('nl');
+            translate.setTranslation('nl', {"TEST": "Dit is een test"});
+
+            translate.get('TEST').subscribe((res2: string) => {
+                expect(res2).toEqual('Dit is een test');
+                expect(translate.getDefaultLang()).toEqual('nl');
+            });
         });
 
         mockBackendResponse(connection, '{}');
+    });
+
+    it("should use the default language by default", () => {
+        translate.setDefaultLang('nl');
+        translate.setTranslation('nl', {"TEST": "Dit is een test"});
+
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('Dit is een test');
+        });
     });
 
     it("should return the key when it doesn't find a translation", () => {
