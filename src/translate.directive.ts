@@ -1,7 +1,9 @@
-import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from "@angular/core";
-import {Subscription} from "rxjs";
-import {isDefined} from "./util";
-import {TranslateService, LangChangeEvent} from "./translate.service";
+import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {isDefined} from './util';
+import {TranslateService, LangChangeEvent} from './translate.service';
+import {TranslationChangeEvent} from "./translate.service";
+import {DefaultLangChangeEvent} from "./translate.service";
 
 @Directive({
     selector: '[translate],[ng2-translate]'
@@ -10,6 +12,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     key: string;
     lastParams: any;
     onLangChangeSub: Subscription;
+    onDefaultLangChangeSub: Subscription;
+    onTranslationChangeSub: Subscription;
 
     @Input() set translate(key: string) {
         if(key) {
@@ -21,10 +25,26 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     @Input() translateParams: any;
 
     constructor(private translateService: TranslateService, private element: ElementRef) {
+        // subscribe to onTranslationChange event, in case the translations of the current lang change
+        if(!this.onTranslationChangeSub) {
+            this.onTranslationChangeSub = this.translateService.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+                if(event.lang === this.translateService.currentLang) {
+                    this.checkNodes(true, event.translations);
+                }
+            });
+        }
+
         // subscribe to onLangChange event, in case the language changes
         if(!this.onLangChangeSub) {
             this.onLangChangeSub = this.translateService.onLangChange.subscribe((event: LangChangeEvent) => {
-                this.checkNodes(event.translations);
+                this.checkNodes(true, event.translations);
+            });
+        }
+
+        // subscribe to onDefaultLangChange event, in case the default language changes
+        if(!this.onDefaultLangChangeSub) {
+            this.onDefaultLangChangeSub = this.translateService.onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
+                this.checkNodes(true);
             });
         }
     }
@@ -33,7 +53,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         this.checkNodes();
     }
 
-    checkNodes(translations?: any) {
+    checkNodes(forceUpdate = false, translations?: any) {
         let nodes: NodeList = this.element.nativeElement.childNodes;
         for(let i = 0; i < nodes.length; ++i) {
             let node: any = nodes[i];
@@ -49,7 +69,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                             key = content;
                             // the content was changed from the user, we'll use it as a reference if needed
                             node.originalContent = node.textContent;
-                        } else if(node.originalContent && isDefined(translations)) { // the content seems ok, but the lang has changed
+                        } else if(node.originalContent && forceUpdate) { // the content seems ok, but the lang has changed
                             node.lastKey = null;
                             // the current content is the translation, not the key, use the last real content as key
                             key = node.originalContent.trim();
@@ -98,6 +118,14 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     ngOnDestroy() {
         if(this.onLangChangeSub) {
             this.onLangChangeSub.unsubscribe();
+        }
+
+        if(this.onDefaultLangChangeSub) {
+            this.onDefaultLangChangeSub.unsubscribe();
+        }
+
+        if(this.onTranslationChangeSub) {
+            this.onTranslationChangeSub.unsubscribe();
         }
     }
 }
