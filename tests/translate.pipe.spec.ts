@@ -1,5 +1,5 @@
 import {TranslatePipe} from '../src/translate.pipe';
-import {TranslateService, TranslateModule} from "./../ng2-translate";
+import {TranslateService, TranslateModule} from "../index";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {
     Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable,

@@ -1,17 +1,17 @@
 {
-  "name": "ng2-translate",
+  "name": "@ngx-translate/core",
   "description": "An implementation of angular translate for Angular 2",
   "scripts": {
     "test": "karma start",
     "test-watch": "karma start --singleRun=false --autoWatch=true",
     "commit": "npm run prepublish && npm test && git-cz",
     "prepublish": "ngc && npm run build",
-    "build": "webpack && cp bundles/ng2-translate.umd.js bundles/index.js",
+    "build": "webpack",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ocombe/ng2-translate.git"
+    "url": "git+https://github.com/ngx-translate/core.git"
   },
   "keywords": [
     "angular",
@@ -22,12 +22,12 @@
   "author": "Olivier Combe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ocombe/ng2-translate/issues"
+    "url": "https://github.com/ngx-translate/core/issues"
   },
-  "main": "bundles/ng2-translate.umd.js",
+  "main": "bundles/core.umd.js",
   "module": "index.js",
   "typings": "index.d.ts",
-  "homepage": "https://github.com/ocombe/ng2-translate",
+  "homepage": "https://github.com/ocombe/ngx-translate",
   "peerDependencies": {
     "@angular/core": "^2.0.0",
     "@angular/http": "^2.0.0"
@@ -75,5 +75,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "clean-webpack-plugin": "^0.1.14"
   }
 }

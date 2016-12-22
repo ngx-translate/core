@@ -3,7 +3,8 @@
  */
 
 const helpers = require('./config/helpers'),
-    webpack = require('webpack');
+    webpack = require('webpack'),
+    CleanWebpackPlugin = require('clean-webpack-plugin');
 
 /**
  * Webpack Plugins
@@ -19,14 +20,14 @@ module.exports = {
         extensions: ['.ts', '.js']
     },
 
-    entry: helpers.root('ng2-translate.ts'),
+    entry: helpers.root('index.ts'),
 
     output: {
         path: helpers.root('bundles'),
         publicPath: '/',
-        filename: 'ng2-translate.umd.js',
-        libraryTarget: 'umd',
-        library: 'ng2-translate'
+        filename: 'core.umd.js',
+        library: 'ngx-translate-core',
+        libraryTarget: 'umd'
     },
 
     // require those dependencies but don't bundle them
@@ -59,6 +60,14 @@ module.exports = {
                     failOnHint: false
                 }
             }
+        }),
+
+        // Reference: https://github.com/johnagan/clean-webpack-plugin
+        // Removes the bundle folder before the build
+        new CleanWebpackPlugin(['bundles'], {
+            root: helpers.root(),
+            verbose: false,
+            dry: false
         })
     ]
 };

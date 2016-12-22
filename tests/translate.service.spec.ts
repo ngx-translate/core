@@ -9,7 +9,7 @@ import {
     TranslateStaticLoader,
     LangChangeEvent,
     TranslationChangeEvent, TranslateModule
-} from './../ng2-translate';
+} from '../index';
 import {Observable} from "rxjs/Observable";
 import {getTestBed, TestBed} from "@angular/core/testing";
 
