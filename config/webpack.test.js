@@ -85,5 +85,8 @@ module.exports = {
 
             }
         })
-    ]
+    ],
+
+    // disable warnings about bundle size for tests
+    performance: {hints: false}
 };
