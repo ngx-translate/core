@@ -1,5 +1,4 @@
 import {Injectable, EventEmitter, Optional} from "@angular/core";
-import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
@@ -73,21 +72,6 @@ export abstract class TranslateLoader {
     abstract getTranslation(lang: string): Observable<any>;
 }
 
-export class TranslateStaticLoader implements TranslateLoader {
-    constructor(private http: Http, private prefix: string = "i18n", private suffix: string = ".json") {
-    }
-
-    /**
-     * Gets the translations from the server
-     * @param lang
-     * @returns {any}
-     */
-    public getTranslation(lang: string): Observable<any> {
-        return this.http.get(`${this.prefix}/${lang}${this.suffix}`)
-            .map((res: Response) => res.json());
-    }
-}
-
 @Injectable()
 export class TranslateService {
     /**
@@ -122,7 +106,8 @@ export class TranslateService {
      */
     public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
 
-    private pending: any;
+    private loadingTranslations: Observable<any>;
+    private pending: boolean = false;
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
@@ -133,11 +118,10 @@ export class TranslateService {
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
      */
-    constructor(
-        public currentLoader: TranslateLoader,
-        public parser: TranslateParser,
-        @Optional() private missingTranslationHandler: MissingTranslationHandler
-    ) {}
+    constructor(public currentLoader: TranslateLoader,
+                public parser: TranslateParser,
+                @Optional() private missingTranslationHandler: MissingTranslationHandler) {
+    }
 
     /**
      * Sets the default language to use as a fallback
@@ -222,18 +206,19 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        this.pending = this.currentLoader.getTranslation(lang).share();
+        this.pending = true;
+        this.loadingTranslations = this.currentLoader.getTranslation(lang).share();
 
-        this.pending.take(1)
+        this.loadingTranslations.take(1)
             .subscribe((res: Object) => {
                 this.translations[lang] = res;
                 this.updateLangs();
-                this.pending = undefined;
+                this.pending = false;
             }, (err: any) => {
-                this.pending = undefined;
+                this.pending = false;
             });
 
-        return this.pending;
+        return this.loadingTranslations;
     }
 
     /**
@@ -358,7 +343,7 @@ export class TranslateService {
                 let onError = (err: any) => {
                     observer.error(err);
                 };
-                this.pending.subscribe((res: any) => {
+                this.loadingTranslations.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);

@@ -42,7 +42,7 @@ module.exports = {
         }, {
             test: /\.ts$/,
             loader: 'awesome-typescript-loader?declaration=false',
-            exclude: [/\.e2e\.ts$/]
+            exclude: [/\.spec\.ts$/]
         }]
     },
 

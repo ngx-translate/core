@@ -1,6 +1,6 @@
 {
   "name": "@ngx-translate/core",
-  "description": "An implementation of angular translate for Angular 2",
+  "description": "The internationalization (i18n) library for Angular 2+",
   "scripts": {
     "test": "karma start",
     "test-watch": "karma start --singleRun=false --autoWatch=true",
@@ -15,7 +15,7 @@
   },
   "keywords": [
     "angular",
-    "angular2",
+    "angular 2",
     "translate",
     "i18n"
   ],
@@ -29,22 +29,21 @@
   "typings": "index.d.ts",
   "homepage": "https://github.com/ocombe/ngx-translate",
   "peerDependencies": {
-    "@angular/core": "^2.0.0",
-    "@angular/http": "^2.0.0"
+    "@angular/core": "^2.0.0"
   },
   "devDependencies": {
     "@angular/common": "2.4.1",
     "@angular/compiler": "2.4.1",
     "@angular/compiler-cli": "2.4.1",
     "@angular/core": "2.4.1",
-    "@angular/http": "2.4.1",
     "@angular/platform-browser": "2.4.1",
     "@angular/platform-browser-dynamic": "2.4.1",
     "@angular/platform-server": "2.4.1",
     "@types/hammerjs": "2.0.33",
     "@types/jasmine": "2.5.38",
-    "@types/node": "6.0.52",
+    "@types/node": "6.0.53",
     "awesome-typescript-loader": "3.0.0-beta.17",
+    "clean-webpack-plugin": "0.1.14",
     "codelyzer": "2.0.0-beta.4",
     "commitizen": "2.9.2",
     "core-js": "2.4.1",
@@ -55,7 +54,7 @@
     "karma-chrome-launcher": "2.0.0",
     "karma-coverage": "1.1.1",
     "karma-jasmine": "1.0.2",
-    "karma-mocha-reporter": "^2.1.0",
+    "karma-mocha-reporter": "2.2.1",
     "karma-remap-coverage": "0.1.2",
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.8.1",
@@ -75,8 +74,5 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  },
-  "dependencies": {
-    "clean-webpack-plugin": "^0.1.14"
   }
 }

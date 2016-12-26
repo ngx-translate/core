@@ -1,13 +1,10 @@
 import {TranslatePipe} from '../src/translate.pipe';
 import {TranslateService, TranslateModule} from "../index";
-import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
-import {
-    Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable,
-    ViewContainerRef
-} from "@angular/core";
-import {LangChangeEvent, TranslationChangeEvent, DefaultLangChangeEvent} from "../src/translate.service";
+import {Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable, ViewContainerRef} from "@angular/core";
+import {LangChangeEvent, DefaultLangChangeEvent} from "../src/translate.service";
 import {getTestBed, TestBed} from "@angular/core/testing";
-import {MockConnection, MockBackend} from "@angular/http/testing";
+import {Observable} from "rxjs";
+import {TranslateLoader} from "../src/translate.service";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
     markForCheck(): void {}
@@ -35,41 +32,34 @@ class App {
     }
 }
 
-const mockBackendResponse = (connection: MockConnection, response: string) => {
-    connection.mockRespond(new Response(new ResponseOptions({body: response})));
-};
+let translations: any = {"TEST": "This is a test"};
+class FakeLoader implements TranslateLoader {
+    getTranslation(lang: string): Observable<any> {
+        return Observable.of(translations);
+    }
+}
 
 describe('TranslatePipe', () => {
     let injector: Injector;
-    let backend: MockBackend;
     let translate: TranslateService;
-    let connection: MockConnection; // this will be set when a new connection is emitted from the backend.
     let translatePipe: TranslatePipe;
     let ref: any;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpModule, TranslateModule.forRoot()],
-            declarations: [App],
-            providers: [
-                {provide: XHRBackend, useClass: MockBackend}
-            ]
+            imports: [TranslateModule.forRoot({provide: TranslateLoader, useClass: FakeLoader})],
+            declarations: [App]
         });
         injector = getTestBed();
-        backend = injector.get(XHRBackend);
         translate = injector.get(TranslateService);
-        // sets the connection when someone tries to access the backend with an xhr request
-        backend.connections.subscribe((c: MockConnection) => connection = c);
-
         ref = new FakeChangeDetectorRef();
         translatePipe = new TranslatePipe(translate, ref);
     });
 
     afterEach(() => {
         injector = undefined;
-        backend = undefined;
         translate = undefined;
-        connection = undefined;
+        translations = {"TEST": "This is a test"};
         translatePipe = undefined;
         ref = undefined;
     });
@@ -167,29 +157,8 @@ describe('TranslatePipe', () => {
         }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`);
     });
 
-    describe('should update translations on translation by key change', () => {
-        it('with static loader', (done) => {
-            translate.setTranslation('en', {"TEST": "This is a test"});
-            translate.use('en');
-
-            expect(translatePipe.transform('TEST')).toEqual("This is a test");
-
-            // this will be resolved at the next key's translation change
-            let subscription = translate.onTranslationChange.subscribe(
-                (res: TranslationChangeEvent) => {
-                    expect(res.translations['TEST']).toBeDefined();
-                    expect(res.translations['TEST']).toEqual("This is new test value");
-                    expect(translatePipe.transform('TEST')).toEqual("This is new test value");
-                    subscription.unsubscribe();
-                    done();
-                });
-
-            translate.set('TEST', 'This is new test value', 'en');
-        });
-    });
-
     describe('should update translations on lang change', () => {
-        it('with static loader', (done) => {
+        it('with fake loader', (done) => {
             translate.setTranslation('en', {"TEST": "This is a test"});
             translate.setTranslation('fr', {"TEST": "C'est un test"});
             translate.use('en');
@@ -209,7 +178,6 @@ describe('TranslatePipe', () => {
 
         it('with file loader', (done) => {
             translate.use('en');
-            mockBackendResponse(connection, '{"TEST": "This is a test"}');
             expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
             // this will be resolved at the next lang change
@@ -223,8 +191,8 @@ describe('TranslatePipe', () => {
                 });
             });
 
+            translations = {"TEST": "C'est un test"};
             translate.use('fr');
-            mockBackendResponse(connection, `{"TEST": "C'est un test"}`);
         });
 
         it('should detect changes with OnPush', () => {
@@ -232,14 +200,13 @@ describe('TranslatePipe', () => {
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
             translate.use('en');
-            mockBackendResponse(connection, '{"TEST": "This is a test"}');
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
         });
     });
 
     describe('should update translations on default lang change', () => {
-        it('with static loader', (done) => {
+        it('with fake loader', (done) => {
             translate.setTranslation('en', {"TEST": "This is a test"});
             translate.setTranslation('fr', {"TEST": "C'est un test"});
             translate.setDefaultLang('en');
@@ -259,7 +226,6 @@ describe('TranslatePipe', () => {
 
         it('with file loader', (done) => {
             translate.setDefaultLang('en');
-            mockBackendResponse(connection, '{"TEST": "This is a test"}');
             expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
             // this will be resolved at the next lang change
@@ -273,8 +239,8 @@ describe('TranslatePipe', () => {
                 });
             });
 
+            translations = {"TEST": "C'est un test"};
             translate.setDefaultLang('fr');
-            mockBackendResponse(connection, `{"TEST": "C'est un test"}`);
         });
 
         it('should detect changes with OnPush', () => {
@@ -282,7 +248,6 @@ describe('TranslatePipe', () => {
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
             translate.setDefaultLang('en');
-            mockBackendResponse(connection, '{"TEST": "This is a test"}');
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
         });
