@@ -1,4 +1,4 @@
-import {Injector} from "@angular/core";
+/*import {Injector} from "@angular/core";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {MockBackend, MockConnection} from "@angular/http/testing";
 import {
@@ -595,3 +595,4 @@ describe('TranslateLoader', () => {
     });
 
 });
+*/

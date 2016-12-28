@@ -4,6 +4,7 @@ import {isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
 import {TranslationChangeEvent} from "./translate.service";
 import {DefaultLangChangeEvent} from "./translate.service";
+import {ModuleLoader} from "./translate.service";
 
 @Directive({
     selector: '[translate],[ng2-translate]'
@@ -24,7 +25,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
     @Input() translateParams: any;
 
-    constructor(private translateService: TranslateService, private element: ElementRef) {
+    constructor(private translateService: TranslateService, private element: ElementRef, private ModuleLoader: ModuleLoader) {
         // subscribe to onTranslationChange event, in case the translations of the current lang change
         if(!this.onTranslationChangeSub) {
             this.onTranslationChangeSub = this.translateService.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
@@ -110,7 +111,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                     onTranslation(res);
                 }
             } else {
-                this.translateService.get(key, interpolateParams).subscribe(onTranslation);
+                this.translateService.get(this.ModuleLoader.uid, key, interpolateParams).subscribe(onTranslation);
             }
         }
     }

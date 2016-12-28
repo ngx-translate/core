@@ -126,6 +126,7 @@ export class TranslateService {
     private translations: any = {};
     private defaultLang: string;
     private langs: Array<string> = [];
+    private loaders: any = {};
 
     /**
      *
@@ -134,10 +135,17 @@ export class TranslateService {
      * @param missingTranslationHandler A handler for missing translations.
      */
     constructor(
-        public currentLoader: TranslateLoader,
         public parser: TranslateParser,
         @Optional() private missingTranslationHandler: MissingTranslationHandler
-    ) {}
+    ) {
+      console.log('constructor translate service');
+    }
+
+    public addLoader(uid: string, loader: TranslateLoader): void {
+      this.loaders[uid] = loader;
+      this.translations[uid] = {};
+    }
+
 
     /**
      * Sets the default language to use as a fallback
@@ -207,9 +215,15 @@ export class TranslateService {
      */
     private retrieveTranslations(lang: string): Observable<any> {
         let pending: Observable<any>;
-
+        let shouldRetrieveTranslations: boolean = false;
+        Object.keys(this.loaders).forEach(function(loader) {
+            // if this language is unavailable, ask for it
+            if(typeof this.translations[loader][lang] === "undefined") {
+                shouldRetrieveTranslations = true;
+            }
+        });
         // if this language is unavailable, ask for it
-        if(typeof this.translations[lang] === "undefined") {
+        if (shouldRetrieveTranslations) {
             pending = this.getTranslation(lang);
         }
 
@@ -222,16 +236,20 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        this.pending = this.currentLoader.getTranslation(lang).share();
-
-        this.pending.take(1)
-            .subscribe((res: Object) => {
-                this.translations[lang] = res;
-                this.updateLangs();
-                this.pending = undefined;
-            }, (err: any) => {
-                this.pending = undefined;
-            });
+        let obs: any[] = [];
+        Object.keys(this.loaders).forEach(function(loader) {
+            let translate = this.loaders[loader].getTranslation(lang).share();
+            translate.take(1)
+                .subscribe((res: Object) => {
+                    this.translations[loader][lang] = res;
+                    this.updateLangs();
+                    this.pending = undefined;
+                }, (err: any) => {
+                    this.pending = undefined;
+                });
+            obs.push(translate);
+        });
+        this.pending = Observable.merge(obs).share();
 
         return this.pending;
     }
@@ -344,7 +362,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any} the translated key, or an object of translated keys
      */
-    public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
+    public get(uid: string, key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -359,7 +377,7 @@ export class TranslateService {
                     observer.error(err);
                 };
                 this.pending.subscribe((res: any) => {
-                    res = this.getParsedResult(res, key, interpolateParams);
+                    res = this.getParsedResult(res[uid], key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);
                     } else {
@@ -368,7 +386,7 @@ export class TranslateService {
                 }, onError);
             });
         } else {
-            let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
+            let res = this.getParsedResult(this.translations[uid][this.currentLang], key, interpolateParams);
             if(typeof res.subscribe === "function") {
                 return res;
             } else {
@@ -454,7 +472,9 @@ export class TranslateService {
      * @param lang
      */
     public resetLang(lang: string): void {
-        this.translations[lang] = undefined;
+        Object.keys(this.translations).forEach(function(uid) {
+            this.translations[uid][lang] = undefined;
+        });
     }
 
     /**
@@ -495,5 +515,21 @@ export class TranslateService {
         browserCultureLang = browserCultureLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
 
         return browserCultureLang;
+    }
+}
+
+@Injectable()
+export class ModuleLoader {
+    public uid: string = '';
+
+    constructor(public currentLoader: TranslateLoader, public TranslateService: TranslateService) {
+      this.uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+          function(c: string) {
+              var r = Math.floor(Math.random() * 16), 
+                  v = c === 'x' ? r : (r % 4 + 4);
+              return v.toString(16);          
+          }).toUpperCase();
+      this.TranslateService.addLoader(this.uid, this.currentLoader);
+      console.log('ModuleLoader constructor', this.uid);
     }
 }

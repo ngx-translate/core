@@ -2,7 +2,7 @@ import {NgModule, ModuleWithProviders} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateParser, DefaultTranslateParser} from "./src/translate.parser";
-import {TranslateService, TranslateLoader, TranslateStaticLoader} from "./src/translate.service";
+import {TranslateService, TranslateLoader, TranslateStaticLoader, ModuleLoader} from "./src/translate.service";
 import {TranslateDirective} from "./src/translate.directive";
 
 export * from "./src/translate.pipe";
@@ -32,11 +32,30 @@ export class TranslateModule {
         useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
+        // var id = 'root';
         return {
             ngModule: TranslateModule,
             providers: [
                 providedLoader,
                 TranslateService,
+                ModuleLoader,
+                { provide: TranslateParser, useClass: DefaultTranslateParser }
+            ]
+        };
+    }
+    static forChild(providedLoader: any = {
+        provide: TranslateLoader,
+        useFactory: translateLoaderFactory,
+        deps: [Http]
+    }): ModuleWithProviders {
+        console.log('for child');
+
+        // var id = 'child';
+        return {
+            ngModule: TranslateModule,
+            providers: [
+                providedLoader,
+                ModuleLoader,
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
         };

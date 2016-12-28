@@ -1,4 +1,4 @@
-import {TranslatePipe} from '../src/translate.pipe';
+/*import {TranslatePipe} from '../src/translate.pipe';
 import {TranslateService, TranslateModule} from "./../ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {
@@ -159,7 +159,7 @@ describe('TranslatePipe', () => {
 
     it("should throw if you don't give an object parameter", () => {
         translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
-        translate.use('en');
+        translate.use('enTranslatePipe');
         let param = 'param: "with param"';
 
         expect(() => {
@@ -288,3 +288,4 @@ describe('TranslatePipe', () => {
         });
     });
 });
+*/
