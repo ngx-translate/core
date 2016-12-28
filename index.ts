@@ -38,7 +38,7 @@ export class TranslateModule {
             providers: [
                 providedLoader,
                 TranslateService,
-                ModuleLoader,
+                { provide: ModuleLoader, useValue: {uid: 'root'} },
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
         };

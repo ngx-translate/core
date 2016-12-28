@@ -111,7 +111,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                     onTranslation(res);
                 }
             } else {
-                this.translateService.get(this.ModuleLoader.uid, key, interpolateParams).subscribe(onTranslation);
+                this.translateService.setCurrentModuleId(this.ModuleLoader.uid);
+                this.translateService.get(key, interpolateParams).subscribe(onTranslation);
             }
         }
     }
