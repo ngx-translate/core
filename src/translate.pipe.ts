@@ -33,8 +33,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
                 onTranslation(res);
             }
         }
-        this.translate.setCurrentModuleId(this.ModuleLoader.uid);
-        this.translate.get(key, interpolateParams).subscribe(onTranslation);
+        this.translate.get(key, interpolateParams, this.ModuleLoader.uid).subscribe(onTranslation);
     }
 
     transform(query: string, ...args: any[]): any {

@@ -389,7 +389,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any} the translated key, or an object of translated keys
      */
-    public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
+    public get(key: string|Array<string>, interpolateParams?: Object, moduleId: string = 'root'): Observable<string|any> {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -405,7 +405,7 @@ export class TranslateService {
                 };
                 this.pending.subscribe((res: any) => {
                   console.log('res', res);
-                    res = this.getParsedResult(res[this.currentModuleId], key, interpolateParams);
+                    res = this.getParsedResult(res[moduleId], key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);
                     } else {
@@ -414,7 +414,7 @@ export class TranslateService {
                 }, onError);
             });
         } else {
-            let res = this.getParsedResult(this.translations[this.currentModuleId][this.currentLang], key, interpolateParams);
+            let res = this.getParsedResult(this.translations[moduleId][this.currentLang], key, interpolateParams);
             if(typeof res.subscribe === "function") {
                 return res;
             } else {
