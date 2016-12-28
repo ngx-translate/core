@@ -331,14 +331,14 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any}
      */
-    public getParsedResult(moduleId: string, translations: any, key: any, interpolateParams?: Object): any {
+    public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
 
         if(key instanceof Array) {
             let result: any = {},
                 observables: boolean = false;
             for(let k of key) {
-                result[k] = this.getParsedResult(moduleId, translations, k, interpolateParams);
+                result[k] = this.getParsedResult(translations, k, interpolateParams);
                 if(typeof result[k].subscribe === "function") {
                     observables = true;
                 }
