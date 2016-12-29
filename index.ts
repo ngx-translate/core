@@ -27,17 +27,21 @@ export function translateLoaderFactory(http: Http) {
     ]
 })
 export class TranslateModule {
+
+    constructor(loader: ModuleLoader) {
+      loader.init();
+    }
     static forRoot(providedLoader: any = {
         provide: TranslateLoader,
         useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
-        // var id = 'root';
         return {
             ngModule: TranslateModule,
             providers: [
                 providedLoader,
                 TranslateService,
+                ModuleLoader,
                 { provide: ModuleIdentifier, useValue: {uid: 'root'} },
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
