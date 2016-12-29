@@ -4,7 +4,7 @@ import {isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
 import {TranslationChangeEvent} from "./translate.service";
 import {DefaultLangChangeEvent} from "./translate.service";
-import {ModuleLoader} from "./translate.service";
+import {ModuleIdentifier} from "./translate.service";
 
 @Directive({
     selector: '[translate],[ng2-translate]'
@@ -15,6 +15,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     onLangChangeSub: Subscription;
     onDefaultLangChangeSub: Subscription;
     onTranslationChangeSub: Subscription;
+    moduleId: string = 'root';
 
     @Input() set translate(key: string) {
         if(key) {
@@ -25,7 +26,10 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
     @Input() translateParams: any;
 
-    constructor(private translateService: TranslateService, private element: ElementRef, private ModuleLoader: ModuleLoader) {
+    constructor(private translateService: TranslateService, private element: ElementRef, private ModuleId: ModuleIdentifier) {
+        if (this.ModuleId && this.ModuleId.uid) {
+          this.moduleId = this.ModuleId.uid;
+        }
         // subscribe to onTranslationChange event, in case the translations of the current lang change
         if(!this.onTranslationChangeSub) {
             this.onTranslationChangeSub = this.translateService.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
@@ -111,7 +115,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                     onTranslation(res);
                 }
             } else {
-                this.translateService.get(key, interpolateParams, this.ModuleLoader.uid).subscribe(onTranslation);
+                this.translateService.get(key, interpolateParams, this.moduleId).subscribe(onTranslation);
             }
         }
     }

@@ -1,8 +1,8 @@
-import {NgModule, ModuleWithProviders, Injector} from "@angular/core";
+import {NgModule, ModuleWithProviders} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateParser, DefaultTranslateParser} from "./src/translate.parser";
-import {TranslateService, TranslateLoader, TranslateStaticLoader, ModuleLoader} from "./src/translate.service";
+import {TranslateService, TranslateLoader, TranslateStaticLoader, ModuleLoader, ModuleIdentifier} from "./src/translate.service";
 import {TranslateDirective} from "./src/translate.directive";
 
 export * from "./src/translate.pipe";
@@ -27,12 +27,6 @@ export function translateLoaderFactory(http: Http) {
     ]
 })
 export class TranslateModule {
-
-    static INJECTOR: Injector;
-
-    constructor(Injector: Injector) {
-      TranslateModule.INJECTOR = Injector;
-    }
     static forRoot(providedLoader: any = {
         provide: TranslateLoader,
         useFactory: translateLoaderFactory,
@@ -44,7 +38,7 @@ export class TranslateModule {
             providers: [
                 providedLoader,
                 TranslateService,
-                { provide: ModuleLoader, useValue: {uid: 'root'} },
+                { provide: ModuleIdentifier, useValue: {uid: 'root'} },
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
         };
@@ -54,13 +48,18 @@ export class TranslateModule {
         useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
-        let service: TranslateService = TranslateModule.INJECTOR.get(TranslateService);
-        let moduleLoader = new ModuleLoader(service, TranslateModule.INJECTOR, providedLoader);
+        let uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+          function(c: string) {
+              var r = Math.floor(Math.random() * 16),
+                  v = c === 'x' ? r : (r % 4 + 4);
+              return v.toString(16);
+          }).toUpperCase();
         return {
             ngModule: TranslateModule,
             providers: [
                 providedLoader,
-                { provide: ModuleLoader, useValue: moduleLoader }
+                ModuleLoader,
+                { provide: ModuleIdentifier, useValue: {uid: uid} }
             ]
         };
     }
