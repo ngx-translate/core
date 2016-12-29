@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter, Optional} from "@angular/core";
+import {Injectable, EventEmitter, Optional, Injector} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
@@ -138,6 +138,7 @@ export class TranslateService {
     constructor(
         public parser: TranslateParser,
         public rootLoader: TranslateLoader,
+        public injector: Injector,
         @Optional() private missingTranslationHandler: MissingTranslationHandler
     ) {
       console.log('constructor translate service');
@@ -393,6 +394,11 @@ export class TranslateService {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
+        // inject loader
+        if (!this.loaders[moduleId]) {
+          this.injector.get(ModuleLoader);
+          this.retrieveTranslations(this.currentLang);
+        }
         // check if we are loading a new translation to use
         if(this.pending) {
             return Observable.create((observer: Observer<string>) => {
@@ -557,6 +563,7 @@ export class ModuleIdentifier {
 @Injectable()
 export class ModuleLoader {
     constructor(public identifier: ModuleIdentifier, public translateService: TranslateService, public loader: TranslateLoader) {
+        console.log('ModuleLoader ',this.identifier.uid);
         translateService.addLoader(this.identifier.uid, loader);
     }
 }
