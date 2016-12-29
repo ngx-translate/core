@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter, Optional} from "@angular/core";
+import {Injectable, EventEmitter, Optional, Injector} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
@@ -554,14 +554,16 @@ export class TranslateService {
 export class ModuleLoader {
     public uid: string = '';
 
-    constructor(public currentLoader: TranslateLoader, public TranslateService: TranslateService) {
+    constructor(translateService: TranslateService, public Injector: Injector, providedLoader: any) {
+      let providerLoader = providedLoader.provide || providedLoader;
+      let loader = this.Injector.get(providerLoader);
       this.uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
           function(c: string) {
               var r = Math.floor(Math.random() * 16), 
                   v = c === 'x' ? r : (r % 4 + 4);
               return v.toString(16);          
           }).toUpperCase();
-      this.TranslateService.addLoader(this.uid, this.currentLoader);
+      translateService.addLoader(this.uid, loader);
       console.log('ModuleLoader constructor', this.uid);
     }
 }

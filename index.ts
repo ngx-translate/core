@@ -1,4 +1,4 @@
-import {NgModule, ModuleWithProviders} from "@angular/core";
+import {NgModule, ModuleWithProviders, Injector} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateParser, DefaultTranslateParser} from "./src/translate.parser";
@@ -27,6 +27,12 @@ export function translateLoaderFactory(http: Http) {
     ]
 })
 export class TranslateModule {
+
+    static INJECTOR: Injector;
+
+    constructor(Injector: Injector) {
+      TranslateModule.INJECTOR = Injector;
+    }
     static forRoot(providedLoader: any = {
         provide: TranslateLoader,
         useFactory: translateLoaderFactory,
@@ -48,15 +54,13 @@ export class TranslateModule {
         useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
-        console.log('for child');
-
-        // var id = 'child';
+        let service: TranslateService = TranslateModule.INJECTOR.get(TranslateService);
+        let moduleLoader = new ModuleLoader(service, TranslateModule.INJECTOR, providedLoader);
         return {
             ngModule: TranslateModule,
             providers: [
                 providedLoader,
-                ModuleLoader,
-                { provide: TranslateParser, useClass: DefaultTranslateParser }
+                { provide: ModuleLoader, useValue: moduleLoader }
             ]
         };
     }
