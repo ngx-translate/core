@@ -20,7 +20,6 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       if (this.ModuleId && this.ModuleId.uid) {
         this.moduleId = this.ModuleId.uid;
       }
-      console.log('pipe constructor', this.moduleId);
     }
 
     updateValue(key: string, interpolateParams?: Object, translations?: any): void {

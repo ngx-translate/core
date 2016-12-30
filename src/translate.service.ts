@@ -135,18 +135,12 @@ export class TranslateService {
     constructor(
         public parser: TranslateParser,
         @Optional() private missingTranslationHandler: MissingTranslationHandler
-    ) {
-      console.log('constructor translate service');
-    }
+    ) {}
 
     public addModule(module: ModuleLoader): void {
         this.setCurrentModuleId(module.uid);
         if (!this.modules[module.uid]) {
             this.modules[module.uid] = module;
-            // check if root module is pending or already loaded
-            if (this.currentLang && this.modules.root && (this.modules.root.pending || this.modules.root.translations[this.currentLang])) {
-                module.getTranslation(this.currentLang);
-            }
         }
     }
 
@@ -170,7 +164,6 @@ export class TranslateService {
             if(!this.defaultLang) {
                 this.defaultLang = lang;
             }
-
             pending.take(1)
                 .subscribe((res: any) => {
                     this.changeDefaultLang(lang);
@@ -254,12 +247,7 @@ export class TranslateService {
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         let module = this.modules[this.currentModuleId];
-        delete module.pending;
-        if(shouldMerge && module.translations[lang]) {
-            Object.assign(module.translations[lang], translations);
-        } else {
-            module.translations[lang] = translations;
-        }
+        module.setTranslation(lang, translations, shouldMerge);
         this.onTranslationChange.emit({lang: lang, translations: module.translations[lang]});
     }
 
@@ -528,6 +516,8 @@ export class ModuleLoader {
     public translations: any = {};
     private langs: Array<string> = [];
     public pending: Observable<any>;
+    private onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+
     constructor(identifier: ModuleIdentifier, public translateService: TranslateService, public loader: TranslateLoader) {
         this.uid = identifier.uid;
     }
@@ -540,7 +530,15 @@ export class ModuleLoader {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        this.pending = this.loader.getTranslation(lang).share();
+        this.pending = Observable.create((observer: Observer<string>) => {
+            this.onTranslationChange.subscribe((event: LangChangeEvent) => {
+                if (event.lang === lang) {
+                    observer.next(event.translations);
+                    observer.complete();
+                }
+            });
+
+        }).merge(this.loader.getTranslation(lang).share());
         this.pending.take(1)
             .subscribe((res: Object) => {
                 if (this.pending) {
@@ -556,10 +554,10 @@ export class ModuleLoader {
     }
 
     /**
-    * Update the list of available langs
-    */
+     * Update the list of available langs
+     */
     private updateLangs(): void {
-      this.addLangs(Object.keys(this.translations));
+        this.addLangs(Object.keys(this.translations));
     }
 
     /**
@@ -590,6 +588,22 @@ export class ModuleLoader {
      */
     public set(key: string, value: string, lang: string = this.translateService.currentLang): void {
         this.translations[lang][key] = value;
+        this.updateLangs();
+    }
+
+    /**
+     * Manually sets an object of translations for a given language
+     * @param lang
+     * @param translations
+     * @param shouldMerge
+     */
+    public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
+        if(shouldMerge && this.translations[lang]) {
+            Object.assign(this.translations[lang], translations);
+        } else {
+            this.translations[lang] = translations;
+        }
+        this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
         this.updateLangs();
     }
 }
