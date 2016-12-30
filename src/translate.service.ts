@@ -124,7 +124,7 @@ export class TranslateService {
 
     private defaultLang: string;
     public modules: any = {};
-    private currentModuleId: string;
+    private currentModule: ModuleLoader;
 
     /**
      *
@@ -138,14 +138,18 @@ export class TranslateService {
     ) {}
 
     public addModule(module: ModuleLoader): void {
-        this.setCurrentModuleId(module.uid);
+        this.setCurrentModule(module);
         if (!this.modules[module.uid]) {
             this.modules[module.uid] = module;
         }
     }
 
-    public setCurrentModuleId(currentModuleId: string): void {
-        this.currentModuleId = currentModuleId;
+    private setCurrentModule(currentModule: ModuleLoader): void {
+        this.currentModule = currentModule;
+    }
+
+    private getCurrentModule(): ModuleLoader {
+        return this.currentModule;
     }
 
     /**
@@ -187,13 +191,12 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public use(lang: string): Observable<any> {
-        let module = this.modules[this.currentModuleId];
-
         // retrieve translations on all other modules
         let self = this;
         Object.keys(this.modules).forEach(function(moduleId) {
-          if (moduleId !== self.currentModuleId) {
-            this.modules[moduleId].getTranslation(lang);
+          let module = self.modules[moduleId];
+          if (module !== self.getCurrentModule()) {
+            module.getTranslation(lang);
           }
         });
 
@@ -212,7 +215,7 @@ export class TranslateService {
             return pending;
         } else { // we have this language, return an Observable
             this.changeLang(lang);
-            return Observable.of(module.translations[lang]);
+            return Observable.of(this.getCurrentModule().translations[lang]);
         }
     }
 
@@ -224,7 +227,7 @@ export class TranslateService {
     private retrieveTranslations(lang: string): Observable<any> {
         let pending: Observable<any>;
         // if this language is unavailable, ask for it
-        if(typeof this.modules[this.currentModuleId].translations[lang] === "undefined") {
+        if(typeof this.getCurrentModule().translations[lang] === "undefined") {
             pending = this.getTranslation(lang);
         }
         return pending;
@@ -236,7 +239,7 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        return this.modules[this.currentModuleId].getTranslation(lang);
+        return this.getCurrentModule().getTranslation(lang);
     }
 
     /**
@@ -246,7 +249,7 @@ export class TranslateService {
      * @param shouldMerge
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
-        let module = this.modules[this.currentModuleId];
+        let module = this.getCurrentModule();
         module.setTranslation(lang, translations, shouldMerge);
         this.onTranslationChange.emit({lang: lang, translations: module.translations[lang]});
     }
@@ -256,7 +259,7 @@ export class TranslateService {
      * @returns {any}
      */
     public getLangs(): Array<string> {
-        return this.modules[this.currentModuleId].getLangs();
+        return this.getCurrentModule().getLangs();
     }
 
     /**
@@ -264,7 +267,7 @@ export class TranslateService {
      * Add available langs
      */
     public addLangs(langs: Array<string>): void {
-        return this.modules[this.currentModuleId].addLangs(langs);
+        return this.getCurrentModule().addLangs(langs);
     }
 
     /**
@@ -276,7 +279,7 @@ export class TranslateService {
      */
     public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
         let res: string|Observable<string>;
-        let module = this.modules[this.currentModuleId];
+        let module = this.getCurrentModule();
 
         if(key instanceof Array) {
             let result: any = {},
@@ -379,9 +382,8 @@ export class TranslateService {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
-        let module = this.modules[this.currentModuleId];
 
-        let res = this.getParsedResult(module.translations[this.currentLang], key, interpolateParams);
+        let res = this.getParsedResult(this.getCurrentModule().translations[this.currentLang], key, interpolateParams);
         if(typeof res.subscribe !== "undefined") {
             if(key instanceof Array) {
                 let obj: any = {};
@@ -403,7 +405,7 @@ export class TranslateService {
      * @param lang
      */
     public set(key: string, value: string, lang: string = this.currentLang): void {
-        let module = this.modules[this.currentModuleId];
+        let module = this.getCurrentModule();
         module.set(key, value, lang);
         this.onTranslationChange.emit({lang: lang, translations:  module.translations[lang]});
     }
@@ -414,7 +416,7 @@ export class TranslateService {
      */
     private changeLang(lang: string): void {
         this.currentLang = lang;
-        let module = this.modules[this.currentModuleId];
+        let module = this.getCurrentModule();
         this.onLangChange.emit({lang: lang, translations: module.translations[lang]});
 
         // if there is no default lang, use the one that we just set
@@ -429,7 +431,7 @@ export class TranslateService {
      */
     private changeDefaultLang(lang: string): void {
         this.defaultLang = lang;
-        let module = this.modules[this.currentModuleId];
+        let module = this.getCurrentModule();
         this.onDefaultLangChange.emit({lang: lang, translations: module.translations[lang]});
     }
 
@@ -443,7 +445,7 @@ export class TranslateService {
         let self = this;
         let obs: Observable<any>;
         Object.keys(this.modules).forEach(function(moduleId) {
-            let module = self.modules[self.currentModuleId];
+            let module = self.modules[moduleId];
             let translation = module.getTranslation(lang);
             if (typeof obs !== 'undefined') {
               obs.merge(translation);
