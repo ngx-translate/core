@@ -100,7 +100,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                 node.currentValue = isDefined(res) ? res : (node.originalContent || key);
                 // we replace in the original content to preserve spaces that we might have trimmed
                 if(node.textContent) node.textContent = this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue);
-                else node.data = _this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue);
+                else node.data = this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue);
             };
 
             if(isDefined(translations)) {
