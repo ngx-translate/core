@@ -142,6 +142,9 @@ export class TranslateService {
         if (!this.modules[module.uid]) {
             this.modules[module.uid] = module;
         }
+        if (this.currentLang) {
+          module.getTranslation(this.currentLang);
+        }
     }
 
     private setCurrentModule(currentModule: ModuleLoader): void {
