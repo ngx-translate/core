@@ -123,8 +123,7 @@ export class TranslateService {
     public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
 
     private defaultLang: string;
-    private langs: Array<string> = [];
-    private modules: any = {};
+    public modules: any = {};
     private currentModuleId: string;
 
     /**
@@ -135,19 +134,20 @@ export class TranslateService {
      */
     constructor(
         public parser: TranslateParser,
-        public rootLoader: TranslateLoader,
         @Optional() private missingTranslationHandler: MissingTranslationHandler
     ) {
       console.log('constructor translate service');
     }
 
-    public addModule(currentModuleId: string, module: any): void {
-        if (this.modules[currentModuleId]) {
-          return;
+    public addModule(module: ModuleLoader): void {
+        this.setCurrentModuleId(module.uid);
+        if (!this.modules[module.uid]) {
+            this.modules[module.uid] = module;
+            // check if root module is pending or already loaded
+            if (this.currentLang && this.modules.root && (this.modules.root.pending || this.modules.root.translations[this.currentLang])) {
+                module.getTranslation(this.currentLang);
+            }
         }
-        this.setCurrentModuleId(currentModuleId);
-        this.modules[currentModuleId] = module;
-        this.retrieveTranslations(this.currentLang);
     }
 
     public setCurrentModuleId(currentModuleId: string): void {
@@ -195,6 +195,15 @@ export class TranslateService {
      */
     public use(lang: string): Observable<any> {
         let module = this.modules[this.currentModuleId];
+
+        // retrieve translations on all other modules
+        let self = this;
+        Object.keys(this.modules).forEach(function(moduleId) {
+          if (moduleId !== self.currentModuleId) {
+            this.modules[moduleId].getTranslation(lang);
+          }
+        });
+
         let pending: Observable<any> = this.retrieveTranslations(lang);
 
         if(typeof pending !== "undefined") {
@@ -202,7 +211,6 @@ export class TranslateService {
             if(!this.currentLang) {
                 this.currentLang = lang;
             }
-
             pending.take(1)
                 .subscribe((res: any) => {
                     this.changeLang(lang);
@@ -235,19 +243,7 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        let module = this.modules[this.currentModuleId];
-        module.pending = module.loader.getTranslation(lang).share();
-
-        module.pending.take(1)
-            .subscribe((res: Object) => {
-                module.translations[lang] = res;
-                this.updateLangs();
-                module.pending = undefined;
-            }, (err: any) => {
-                module.pending = undefined;
-            });
-
-        return module.pending;
+        return this.modules[this.currentModuleId].getTranslation(lang);
     }
 
     /**
@@ -258,12 +254,12 @@ export class TranslateService {
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         let module = this.modules[this.currentModuleId];
+        delete module.pending;
         if(shouldMerge && module.translations[lang]) {
             Object.assign(module.translations[lang], translations);
         } else {
             module.translations[lang] = translations;
         }
-        this.updateLangs();
         this.onTranslationChange.emit({lang: lang, translations: module.translations[lang]});
     }
 
@@ -272,7 +268,7 @@ export class TranslateService {
      * @returns {any}
      */
     public getLangs(): Array<string> {
-        return this.langs;
+        return this.modules[this.currentModuleId].getLangs();
     }
 
     /**
@@ -280,19 +276,7 @@ export class TranslateService {
      * Add available langs
      */
     public addLangs(langs: Array<string>): void {
-        langs.forEach((lang: string) => {
-            if(this.langs.indexOf(lang) === -1) {
-                this.langs.push(lang);
-            }
-        });
-    }
-
-    /**
-     * Update the list of available langs
-     */
-    private updateLangs(): void {
-        let module = this.modules[this.currentModuleId];
-        this.addLangs(Object.keys(module.translations));
+        return this.modules[this.currentModuleId].addLangs(langs);
     }
 
     /**
@@ -365,7 +349,7 @@ export class TranslateService {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
-        let module = this.modules[this.currentModuleId];
+        let module = this.modules[moduleId];
 
         // check if we are loading a new translation to use
         if(module.pending) {
@@ -378,7 +362,6 @@ export class TranslateService {
                     observer.error(err);
                 };
                 module.pending.subscribe((res: any) => {
-                  console.log('res', res);
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);
@@ -433,8 +416,7 @@ export class TranslateService {
      */
     public set(key: string, value: string, lang: string = this.currentLang): void {
         let module = this.modules[this.currentModuleId];
-        module.translations[lang][key] = value;
-        this.updateLangs();
+        module.set(key, value, lang);
         this.onTranslationChange.emit({lang: lang, translations:  module.translations[lang]});
     }
 
@@ -471,18 +453,16 @@ export class TranslateService {
     public reloadLang(lang: string): Observable<any> {
         this.resetLang(lang);
         let self = this;
-        let currentModuleId = self.currentModuleId;
         let obs: Observable<any>;
         Object.keys(this.modules).forEach(function(moduleId) {
-            this.setCurrentModuleId(moduleId);
-            let translations = this.getTranslation(lang);
-            if (obs) {
-              obs.merge(translations);
+            let module = self.modules[self.currentModuleId];
+            let translation = module.getTranslation(lang);
+            if (typeof obs !== 'undefined') {
+              obs.merge(translation);
             } else {
-              obs = translations;
+              obs = translation;
             }
         });
-        this.setCurrentModuleId(currentModuleId);
         return obs;
     }
 
@@ -544,15 +524,73 @@ export class ModuleIdentifier {
 
 @Injectable()
 export class ModuleLoader {
-    constructor(public identifier: ModuleIdentifier, public translateService: TranslateService, public loader: TranslateLoader) {
-        console.log('ModuleLoader ',this.identifier.uid);
+    public uid: string;
+    public translations: any = {};
+    private langs: Array<string> = [];
+    public pending: Observable<any>;
+    constructor(identifier: ModuleIdentifier, public translateService: TranslateService, public loader: TranslateLoader) {
+        this.uid = identifier.uid;
     }
     public init(): void {
-        let module = {
-          loader: this.loader,
-          translations: {}
-        };
-        this.translateService.addModule(this.identifier.uid, module);
+        this.translateService.addModule(this);
+    }
+    /**
+     * Gets an object of translations for a given language with the current loader
+     * @param lang
+     * @returns {Observable<*>}
+     */
+    public getTranslation(lang: string): Observable<any> {
+        this.pending = this.loader.getTranslation(lang).share();
+        this.pending.take(1)
+            .subscribe((res: Object) => {
+                if (this.pending) {
+                  this.translations[lang] = res;
+                  this.pending = undefined;
+                  this.updateLangs();
+                }
+            }, (err: any) => {
+                this.pending = undefined;
+            });
+
+        return this.pending;
+    }
+
+    /**
+    * Update the list of available langs
+    */
+    private updateLangs(): void {
+      this.addLangs(Object.keys(this.translations));
+    }
+
+    /**
+     * @param langs
+     * Add available langs
+     */
+    public addLangs(langs: Array<string>): void {
+        langs.forEach((lang: string) => {
+            if(this.langs.indexOf(lang) === -1) {
+                this.langs.push(lang);
+            }
+        });
+    }
+
+    /**
+     * Returns an array of currently available langs
+     * @returns {any}
+     */
+    public getLangs(): Array<string> {
+        return this.langs;
+    }
+
+    /**
+     * Sets the translated value of a key
+     * @param key
+     * @param value
+     * @param lang
+     */
+    public set(key: string, value: string, lang: string = this.translateService.currentLang): void {
+        this.translations[lang][key] = value;
+        this.updateLangs();
     }
 }
 

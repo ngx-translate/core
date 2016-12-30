@@ -1,4 +1,4 @@
-/*import {Injector} from "@angular/core";
+import {Injector} from "@angular/core";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {MockBackend, MockConnection} from "@angular/http/testing";
 import {
@@ -551,8 +551,8 @@ describe('TranslateLoader', () => {
         prepare(injector);
 
         expect(translate).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof TranslateStaticLoader).toBeTruthy();
+        expect(translate.modules.root.loader).toBeDefined();
+        expect(translate.modules.root.loader instanceof TranslateStaticLoader).toBeTruthy();
 
         // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use('en');
@@ -582,8 +582,8 @@ describe('TranslateLoader', () => {
         prepare(injector);
 
         expect(translate).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
+        expect(translate.modules.root.loader).toBeDefined();
+        expect(translate.modules.root.loader instanceof CustomLoader).toBeTruthy();
 
         // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use('en');
@@ -595,4 +595,3 @@ describe('TranslateLoader', () => {
     });
 
 });
-*/

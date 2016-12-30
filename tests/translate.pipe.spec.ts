@@ -1,4 +1,4 @@
-/*import {TranslatePipe} from '../src/translate.pipe';
+import {TranslatePipe} from '../src/translate.pipe';
 import {TranslateService, TranslateModule} from "./../ng2-translate";
 import {ResponseOptions, Response, XHRBackend, HttpModule} from "@angular/http";
 import {
@@ -62,7 +62,7 @@ describe('TranslatePipe', () => {
         backend.connections.subscribe((c: MockConnection) => connection = c);
 
         ref = new FakeChangeDetectorRef();
-        translatePipe = new TranslatePipe(translate, ref);
+        translatePipe = new TranslatePipe(translate, ref, {uid: 'root'});
     });
 
     afterEach(() => {
@@ -288,4 +288,3 @@ describe('TranslatePipe', () => {
         });
     });
 });
-*/
