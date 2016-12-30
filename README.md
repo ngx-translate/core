@@ -67,7 +67,21 @@ If you use a [`SharedModule`](https://angular.io/docs/ts/latest/guide/ngmodule.h
 export class SharedModule { }
 ```
 
-> Note: Never call a `forRoot` static method in the `SharedModule`. You will end up with multiple different instances of a service in your injector tree.
+> Note: Never call a `forRoot` static method in the `SharedModule`, use `forChild` instead. You will end up with multiple different instances of a service in your injector tree.
+
+```ts
+@NgModule({
+    exports: [
+        CommonModule,
+        TranslateModule.forChild({
+            provide: TranslateLoader,
+            useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n/SharedModule', '.json'),
+            deps: [Http]
+        })
+    ]
+})
+export class SharedModule { }
+```
 
 ##### Configuration
 
@@ -250,7 +264,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 	  // do something
 	});
     ```
-    
+
 #### Methods:
 
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
