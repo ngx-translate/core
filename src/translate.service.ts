@@ -124,6 +124,7 @@ export class TranslateService {
 
     private defaultLang: string;
     public modules: any = {};
+    public currentLoader: TranslateLoader;
     private currentModule: ModuleLoader;
 
     /**
@@ -149,6 +150,7 @@ export class TranslateService {
 
     private setCurrentModule(currentModule: ModuleLoader): void {
         this.currentModule = currentModule;
+        this.currentLoader = currentModule.loader;
     }
 
     private getCurrentModule(): ModuleLoader {
