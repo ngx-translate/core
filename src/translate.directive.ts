@@ -27,8 +27,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     @Input() translateParams: any;
 
     constructor(private translateService: TranslateService, private element: ElementRef, private ModuleId: ModuleIdentifier) {
-        if (this.ModuleId && this.ModuleId.uid) {
-          this.moduleId = this.ModuleId.uid;
+        if (this.ModuleId && this.ModuleId.id) {
+          this.moduleId = this.ModuleId.id;
         }
         // subscribe to onTranslationChange event, in case the translations of the current lang change
         if(!this.onTranslationChangeSub) {
