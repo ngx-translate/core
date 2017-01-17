@@ -17,8 +17,8 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     moduleId: string = 'root';
 
     constructor(private translate: TranslateService, private _ref: ChangeDetectorRef, private ModuleId: ModuleIdentifier) {
-      if (this.ModuleId && this.ModuleId.uid) {
-        this.moduleId = this.ModuleId.uid;
+      if (this.ModuleId && this.ModuleId.id) {
+        this.moduleId = this.ModuleId.id;
       }
     }
 
