@@ -62,7 +62,7 @@ describe('TranslatePipe', () => {
         backend.connections.subscribe((c: MockConnection) => connection = c);
 
         ref = new FakeChangeDetectorRef();
-        translatePipe = new TranslatePipe(translate, ref, {uid: 'root'});
+        translatePipe = new TranslatePipe(translate, ref, {id: 'root'});
     });
 
     afterEach(() => {
