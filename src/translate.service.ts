@@ -140,8 +140,8 @@ export class TranslateService {
 
     public addModule(module: ModuleLoader): void {
         this.setCurrentModule(module);
-        if (!this.modules[module.uid]) {
-            this.modules[module.uid] = module;
+        if (!this.modules[module.id]) {
+            this.modules[module.id] = module;
         }
         if (this.currentLang) {
           module.getTranslation(this.currentLang);
@@ -514,19 +514,19 @@ export class TranslateService {
 }
 
 export class ModuleIdentifier {
-    public uid: string = '';
+    public id: string = '';
 }
 
 @Injectable()
 export class ModuleLoader {
-    public uid: string;
+    public id: string;
     public translations: any = {};
     private langs: Array<string> = [];
     public pending: Observable<any>;
     private onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
 
     constructor(identifier: ModuleIdentifier, public translateService: TranslateService, public loader: TranslateLoader) {
-        this.uid = identifier.uid;
+        this.id = identifier.id;
     }
     public init(): void {
         this.translateService.addModule(this);
