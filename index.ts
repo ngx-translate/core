@@ -42,7 +42,7 @@ export class TranslateModule {
                 providedLoader,
                 TranslateService,
                 ModuleLoader,
-                { provide: ModuleIdentifier, useValue: {uid: 'root'} },
+                { provide: ModuleIdentifier, useValue: {id: 'root'} },
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
             ]
         };
@@ -52,18 +52,13 @@ export class TranslateModule {
         useFactory: translateLoaderFactory,
         deps: [Http]
     }): ModuleWithProviders {
-        let uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
-          function(c: string) {
-              var r = Math.floor(Math.random() * 16),
-                  v = c === 'x' ? r : (r % 4 + 4);
-              return v.toString(16);
-          }).toUpperCase();
+        let id = Math.random().toString(36);
         return {
             ngModule: TranslateModule,
             providers: [
                 providedLoader,
                 ModuleLoader,
-                { provide: ModuleIdentifier, useValue: {uid: uid} }
+                { provide: ModuleIdentifier, useValue: {id: id} }
             ]
         };
     }
