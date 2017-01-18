@@ -359,7 +359,7 @@ If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer d
 
 If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`npm WARN!`), warning are just informative and if everything works then don't worry !
 
-If you're using an old version of angular 2 and ng2-translate wants a newer version then you should consider upgrading your application to use the newer angular 2 version. I cannot support old versions because the framework keeps doing breaking changes... If it's not an option for you, then check [the changelog](/releases) to know which version is the last compatible version.
+If you're using an old version of angular 2 and ng2-translate wants a newer version then you should consider upgrading your application to use the newer angular 2 version. I cannot support old versions because the framework keeps doing breaking changes... If it's not an option for you, then check [the changelog](https://github.com/ocombe/ng2-translate/releases) to know which version is the last compatible version.
 
 
 ## Plugins
