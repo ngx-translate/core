@@ -7,18 +7,21 @@ export abstract class TranslateParser {
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
      * @param expr
      * @param params
+     * @param lang
      * @returns {string}
      */
-    abstract interpolate(expr: string, params?: any): string;
+    abstract interpolate(expr: string, params?: any, lang?: string): string;
 
     /**
      * Gets a value from an object by composed key
      * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
      * @param target
      * @param key
+     * @param params
+     * @param lang
      * @returns {string}
      */
-    abstract getValue(target: any, key: string): string
+    abstract getValue(target: any, key: string, params?: any, lang?: string): string
 }
 
 @Injectable()
