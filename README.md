@@ -363,9 +363,9 @@ If you need it for some reason, you can use the `TranslateParser` service.
 
 Because of the TranslateStaticLoader you have to load the HttpModule from `@angular/http`, even if you don't use this Loader
 
-#### I'm still using Angular with beta / RC, but I cannot use ngx-translate because I get errors?!
+#### I'm still using Angular with beta / RC / 2.0 to 2.2, but I cannot use ngx-translate because I get errors?!
 
-I'm sorry but ngx-translate only supports Angular from version 2.0.0 and above.
+I'm sorry but ngx-translate only supports Angular from version 2.3.0 and above because of changes in the framework...
 
 #### I'm getting an error `npm ERR! peerinvalid Peer [...]`
 
