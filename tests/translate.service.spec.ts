@@ -83,14 +83,28 @@ describe('TranslateService', () => {
     it("should fallback to the default language", () => {
         translate.use('fr');
 
-        translate.setDefaultLang('en');
-        translate.setTranslation('en', {"TEST": "This is a test"});
-
         translate.get('TEST').subscribe((res: string) => {
-            expect(res).toEqual('This is a test');
+            expect(res).toEqual('TEST');
+
+            translate.setDefaultLang('nl');
+            translate.setTranslation('nl', {"TEST": "Dit is een test"});
+
+            translate.get('TEST').subscribe((res2: string) => {
+                expect(res2).toEqual('Dit is een test');
+                expect(translate.getDefaultLang()).toEqual('nl');
+            });
         });
 
         mockBackendResponse(connection, '{}');
+    });
+
+    it("should use the default language by default", () => {
+        translate.setDefaultLang('nl');
+        translate.setTranslation('nl', {"TEST": "Dit is een test"});
+
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('Dit is een test');
+        });
     });
 
     it("should return the key when it doesn't find a translation", () => {
@@ -112,7 +126,7 @@ describe('TranslateService', () => {
     it('should return an empty value', () => {
         translate.setDefaultLang('en');
         translate.setTranslation('en', {"TEST": ""});
-        
+
         translate.get('TEST').subscribe((res: string) => {
             expect(res).toEqual('');
         });
@@ -143,6 +157,18 @@ describe('TranslateService', () => {
 
         expect(() => {
             translate.get(undefined);
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.get('');
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.get(null);
+        }).toThrowError('Parameter "key" required');
+
+        expect(() => {
+            translate.instant(undefined);
         }).toThrowError('Parameter "key" required');
     });
 
@@ -353,7 +379,7 @@ describe('MissingTranslationHandler', () => {
 
         translate.get('nonExistingKey').subscribe((res: string) => {
             expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({ key: 'nonExistingKey' }));
-            //test that the instance of the last called argument is string 
+            //test that the instance of the last called argument is string
             expect(res).toEqual('handled');
         });
 
@@ -369,7 +395,7 @@ describe('MissingTranslationHandler', () => {
 
         translate.get('nonExistingKey', interpolateParams).subscribe((res: string) => {
             expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({ interpolateParams: interpolateParams }));
-            //test that the instance of the last called argument is string 
+            //test that the instance of the last called argument is string
             expect(res).toEqual('handled');
         });
 
@@ -385,7 +411,7 @@ describe('MissingTranslationHandler', () => {
 
         translate.get('nonExistingKey', interpolateParams).subscribe((res: string) => {
             expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({ translateService: translate }));
-            //test that the instance of the last called argument is string 
+            //test that the instance of the last called argument is string
             expect(res).toEqual('handled');
         });
 
