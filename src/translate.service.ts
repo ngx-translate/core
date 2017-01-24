@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter, Optional} from "@angular/core";
+import {Injectable, EventEmitter} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
@@ -8,6 +8,8 @@ import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
+import {TranslateLoader} from "./translate.loader";
+import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
 import {isDefined} from "./util";
 
@@ -26,51 +28,10 @@ export interface DefaultLangChangeEvent {
     translations: any;
 }
 
-export interface MissingTranslationHandlerParams {
-    /**
-     * the key that's missing in translation files
-     *
-     * @type {string}
-     */
-    key: string;
-
-    /**
-     * an instance of the service that was unable to translate the key.
-     *
-     * @type {TranslateService}
-     */
-    translateService: TranslateService;
-
-    /**
-     * interpolation params that were passed along for translating the given key.
-     *
-     * @type {Object}
-     */
-    interpolateParams?: Object;
-}
-
 declare interface Window {
     navigator: any;
 }
 declare const window: Window;
-
-export abstract class MissingTranslationHandler {
-    /**
-     * A function that handles missing translations.
-     *
-     * @abstract
-     * @param {MissingTranslationHandlerParams} params context for resolving a missing translation
-     * @returns {any} a value or an observable
-     * If it returns a value, then this value is used.
-     * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
-     * If it doesn't return then the key will be used as a value
-     */
-    abstract handle(params: MissingTranslationHandlerParams): any;
-}
-
-export abstract class TranslateLoader {
-    abstract getTranslation(lang: string): Observable<any>;
-}
 
 @Injectable()
 export class TranslateService {
@@ -120,7 +81,7 @@ export class TranslateService {
      */
     constructor(public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
-                @Optional() private missingTranslationHandler: MissingTranslationHandler) {
+                public missingTranslationHandler: MissingTranslationHandler) {
     }
 
     /**
@@ -312,7 +273,7 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if(!res && this.missingTranslationHandler) {
+        if(typeof res === "undefined") {
             let params: MissingTranslationHandlerParams = {key, translateService: this};
             if(typeof interpolateParams !== 'undefined') {
                 params.interpolateParams = interpolateParams;

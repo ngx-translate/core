@@ -1,8 +1,7 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
 import {TestBed, ComponentFixture, getTestBed} from '@angular/core/testing';
 import {Injector, Injectable, ChangeDetectionStrategy, ViewContainerRef} from '@angular/core';
-import {TranslateService} from '../src/translate.service';
-import {TranslateModule} from '../index';
+import {TranslateService, TranslateModule} from '../index';
 
 @Injectable()
 @Component({
@@ -36,7 +35,9 @@ describe('TranslateDirective', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot()],
+            imports: [
+                TranslateModule.forRoot()
+            ],
             declarations: [App]
         });
         injector = getTestBed();

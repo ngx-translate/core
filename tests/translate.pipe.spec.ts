@@ -1,10 +1,8 @@
 import {TranslatePipe} from '../src/translate.pipe';
-import {TranslateService, TranslateModule} from "../index";
+import {TranslateService, TranslateModule, TranslateLoader, LangChangeEvent, DefaultLangChangeEvent} from "../index";
 import {Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable, ViewContainerRef} from "@angular/core";
-import {LangChangeEvent, DefaultLangChangeEvent} from "../src/translate.service";
 import {getTestBed, TestBed} from "@angular/core/testing";
-import {Observable} from "rxjs";
-import {TranslateLoader} from "../src/translate.service";
+import {Observable} from "rxjs/Observable";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
     markForCheck(): void {}
@@ -47,7 +45,11 @@ describe('TranslatePipe', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot({provide: TranslateLoader, useClass: FakeLoader})],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: {provide: TranslateLoader, useClass: FakeLoader}
+                })
+            ],
             declarations: [App]
         });
         injector = getTestBed();
