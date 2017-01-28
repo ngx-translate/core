@@ -1,5 +1,4 @@
 import {NgModule, ModuleWithProviders, Provider} from "@angular/core";
-import {TranslateStore} from "./src/translate.store";
 import {TranslateLoader, TranslateFakeLoader} from "./src/translate.loader";
 import {TranslateService} from "./src/translate.service";
 import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./src/missing-translation-handler";
@@ -7,7 +6,6 @@ import {TranslateParser, TranslateDefaultParser} from "./src/translate.parser";
 import {TranslateDirective} from "./src/translate.directive";
 import {TranslatePipe} from "./src/translate.pipe";
 
-export * from "./src/translate.store";
 export * from "./src/translate.loader";
 export * from "./src/translate.service";
 export * from "./src/missing-translation-handler";
@@ -38,9 +36,15 @@ export class TranslateModule {
      * @returns {ModuleWithProviders}
      */
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders {
-        let baseConfig = this.forChild(config);
-        Array.prototype.push.call(baseConfig.providers, TranslateStore);
-        return baseConfig;
+        return {
+            ngModule: TranslateModule,
+            providers: [
+                config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
+                config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
+                config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+                TranslateService
+            ]
+        };
     }
 
     /**
@@ -49,19 +53,12 @@ export class TranslateModule {
      * @returns {ModuleWithProviders}
      */
     static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders {
-        let optionalProviders: Provider[] = [];
-        if(config.missingTranslationHandler) {
-            Array.prototype.push.call(optionalProviders, config.missingTranslationHandler);
-        }
-
         return {
             ngModule: TranslateModule,
             providers: [
                 config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
-                config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
-                ...optionalProviders,
-                TranslateService
+                config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler}
             ]
         };
     }
