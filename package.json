@@ -30,7 +30,7 @@
   "typings": "index.d.ts",
   "homepage": "https://github.com/ocombe/ngx-translate",
   "peerDependencies": {
-    "@angular/core": "^2.3.0"
+    "@angular/core": ">=2.3.0 || >=4.0.0-beta.0"
   },
   "devDependencies": {
     "@angular/common": "2.4.6",
