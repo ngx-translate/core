@@ -7,14 +7,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true,
-    "pretty": true,
-    "types": [
-      "core-js"
-    ]
+    "pretty": true
   },
   "compileOnSave": false,
-  "buildOnSave": false,
-  "awesomeTypescriptLoaderOptions": {
-    "forkChecker": false
-  }
+  "buildOnSave": false
 }

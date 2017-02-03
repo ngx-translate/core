@@ -2,5 +2,6 @@
   "HOME": {
     "TITLE": "Hello Angular 2 with ng2-translate!",
     "SELECT": "Change language"
-  }
+  },
+  "LAZY": "I'm lazy loaded!"
 }
