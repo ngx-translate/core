@@ -333,9 +333,10 @@ export class TranslateService {
                 params.interpolateParams = interpolateParams;
             }
             res = this.missingTranslationHandler.handle(params);
+            return typeof res !== "undefined" ? res : key;
         }
 
-        return typeof res !== "undefined" ? res : key;
+        return typeof res === "string" ? res : key;
     }
 
     /**
