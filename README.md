@@ -22,7 +22,7 @@ First you need to install the npm module:
 npm install @ngx-translate/core --save
 ```
 
-**If you use SystemJS** to load your files, you can check the [plunkr example](http://plnkr.co/edit/pYo6bFPRRxVPgRR8toDt?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
+**If you use SystemJS** to load your files, you can check the [plunkr example](http://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
 If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
 
 
