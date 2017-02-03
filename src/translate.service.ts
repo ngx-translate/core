@@ -56,7 +56,7 @@ export class TranslateService {
      * @type {EventEmitter<TranslationChangeEvent>}
      */
     get onTranslationChange(): EventEmitter<TranslationChangeEvent> {
-        return this.useStore ? this.store.onTranslationChange : this._onTranslationChange;
+        return this.isolate ? this._onTranslationChange : this.store.onTranslationChange;
     }
 
     /**
@@ -67,7 +67,7 @@ export class TranslateService {
      * @type {EventEmitter<LangChangeEvent>}
      */
     get onLangChange(): EventEmitter<LangChangeEvent> {
-        return this.useStore ? this.store.onLangChange : this._onLangChange;
+        return this.isolate ? this._onLangChange : this.store.onLangChange;
     }
 
     /**
@@ -78,20 +78,21 @@ export class TranslateService {
      * @type {EventEmitter<DefaultLangChangeEvent>}
      */
     get onDefaultLangChange() {
-        return this.useStore ? this.store.onDefaultLangChange : this._onDefaultLangChange;
+        return this.isolate ? this._onDefaultLangChange : this.store.onDefaultLangChange;
     }
 
     /**
      * The default lang to fallback when translations are missing on the current lang
      */
     get defaultLang(): string {
-        return this.useStore ? this.store.defaultLang : this._defaultLang;
+        return this.isolate ? this._defaultLang : this.store.defaultLang;
     }
+
     set defaultLang(defaultLang: string) {
-        if(this.useStore) {
-            this.store.defaultLang = defaultLang;
-        } else {
+        if(this.isolate) {
             this._defaultLang = defaultLang;
+        } else {
+            this.store.defaultLang = defaultLang;
         }
     }
 
@@ -100,13 +101,14 @@ export class TranslateService {
      * @type {string}
      */
     get currentLang(): string {
-        return this.useStore ? this.store.currentLang : this._currentLang;
+        return this.isolate ? this._currentLang : this.store.currentLang;
     }
+
     set currentLang(currentLang: string) {
-        if(this.useStore) {
-            this.store.currentLang = currentLang;
-        } else {
+        if(this.isolate) {
             this._currentLang = currentLang;
+        } else {
+            this.store.currentLang = currentLang;
         }
     }
 
@@ -115,13 +117,14 @@ export class TranslateService {
      * @type {Array}
      */
     get langs(): string[] {
-        return this.useStore ? this.store.langs : this._langs;
+        return this.isolate ? this._langs : this.store.langs;
     }
+
     set langs(langs: string[]) {
-        if(this.useStore) {
-            this.store.langs = langs;
-        } else {
+        if(this.isolate) {
             this._langs = langs;
+        } else {
+            this.store.langs = langs;
         }
     }
 
@@ -130,14 +133,14 @@ export class TranslateService {
      * @type {{}}
      */
     get translations(): any {
-        return this.useStore ? this.store.translations : this._translations;
+        return this.isolate ? this._translations : this.store.translations;
     }
 
     set translations(translations: any) {
-        if(this.useStore) {
-            this.store.translations = translations;
-        } else {
+        if(this.isolate) {
             this._currentLang = translations;
+        } else {
+            this.store.translations = translations;
         }
     }
 
@@ -147,13 +150,13 @@ export class TranslateService {
      * @param currentLoader An instance of the loader currently used
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
-     * @param useStore whether this service should use the store or not
+     * @param isolate whether this service should use the store or not
      */
     constructor(public store: TranslateStore,
                 public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
-                @Inject(USE_STORE) private useStore: boolean = true) {
+                @Inject(USE_STORE) private isolate: boolean = false) {
     }
 
     /**

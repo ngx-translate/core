@@ -127,10 +127,10 @@ describe("module", () => {
         }))
     );
 
-    it("should create 2 instances of the service when lazy loaded using forChild and useStore false", fakeAsync(inject(
+    it("should create 2 instances of the service when lazy loaded using forChild and isolate true", fakeAsync(inject(
         [Router, Location, NgModuleFactoryLoader],
         (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-            let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({useStore: false}));
+            let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
             loader.stubbedModules = {expected: LoadedModule};
 
             const fixture = createRoot(router, RootCmp),
@@ -153,7 +153,7 @@ describe("module", () => {
         }))
     );
 
-    it("should relay events when lazy loading & using forChild with useStore true", fakeAsync(inject(
+    it("should relay events when lazy loading & using forChild with isolate false", fakeAsync(inject(
         [Router, Location, NgModuleFactoryLoader],
         (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
             let LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
@@ -178,10 +178,10 @@ describe("module", () => {
         }))
     );
 
-    it("should not relay events when lazy loading & using forChild with useStore false", fakeAsync(inject(
+    it("should not relay events when lazy loading & using forChild with isolate true", fakeAsync(inject(
         [Router, Location, NgModuleFactoryLoader],
         (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-            let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({useStore: false}));
+            let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
             loader.stubbedModules = {expected: LoadedModule};
 
             const fixture = createRoot(router, RootCmp),
