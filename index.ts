@@ -5,6 +5,9 @@ import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./src/mi
 import {TranslateParser, TranslateDefaultParser} from "./src/translate.parser";
 import {TranslateDirective} from "./src/translate.directive";
 import {TranslatePipe} from "./src/translate.pipe";
+import {TranslateStore} from "./src/translate.store";
+import {USE_STORE} from "./src/translate.service";
+import {isDefined} from "./src/util";
 
 export * from "./src/translate.loader";
 export * from "./src/translate.service";
@@ -17,6 +20,7 @@ export interface TranslateModuleConfig {
     loader?: Provider;
     parser?: Provider;
     missingTranslationHandler?: Provider;
+    useStore?: boolean;
 }
 
 @NgModule({
@@ -42,6 +46,8 @@ export class TranslateModule {
                 config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
                 config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+                TranslateStore,
+                {provide: USE_STORE, useValue: isDefined(config.useStore) ? config.useStore : true},
                 TranslateService
             ]
         };
@@ -58,7 +64,9 @@ export class TranslateModule {
             providers: [
                 config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
-                config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler}
+                config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+                {provide: USE_STORE, useValue: isDefined(config.useStore) ? config.useStore : true},
+                TranslateService
             ]
         };
     }

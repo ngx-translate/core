@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter} from "@angular/core";
+import {Injectable, EventEmitter, Inject, OpaqueToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
@@ -8,10 +8,13 @@ import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
+import {TranslateStore} from "./translate.store";
 import {TranslateLoader} from "./translate.loader";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
 import {isDefined} from "./util";
+
+export const USE_STORE = new OpaqueToken('USE_STORE');
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -35,10 +38,15 @@ declare const window: Window;
 
 @Injectable()
 export class TranslateService {
-    /**
-     * The lang currently used
-     */
-    public currentLang: string = this.defaultLang;
+    private loadingTranslations: Observable<any>;
+    private pending: boolean = false;
+    private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+    private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
+    private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+    private _defaultLang: string;
+    private _currentLang: string;
+    private _langs: Array<string> = [];
+    private _translations: any = {};
 
     /**
      * An EventEmitter to listen to translation change events
@@ -47,7 +55,9 @@ export class TranslateService {
      * });
      * @type {EventEmitter<TranslationChangeEvent>}
      */
-    public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+    get onTranslationChange(): EventEmitter<TranslationChangeEvent> {
+        return this.useStore ? this.store.onTranslationChange : this._onTranslationChange;
+    }
 
     /**
      * An EventEmitter to listen to lang change events
@@ -56,7 +66,9 @@ export class TranslateService {
      * });
      * @type {EventEmitter<LangChangeEvent>}
      */
-    public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
+    get onLangChange(): EventEmitter<LangChangeEvent> {
+        return this.useStore ? this.store.onLangChange : this._onLangChange;
+    }
 
     /**
      * An EventEmitter to listen to default lang change events
@@ -65,23 +77,83 @@ export class TranslateService {
      * });
      * @type {EventEmitter<DefaultLangChangeEvent>}
      */
-    public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+    get onDefaultLangChange() {
+        return this.useStore ? this.store.onDefaultLangChange : this._onDefaultLangChange;
+    }
 
-    private loadingTranslations: Observable<any>;
-    private pending: boolean = false;
-    private translations: any = {};
-    private defaultLang: string;
-    private langs: Array<string> = [];
+    /**
+     * The default lang to fallback when translations are missing on the current lang
+     */
+    get defaultLang(): string {
+        return this.useStore ? this.store.defaultLang : this._defaultLang;
+    }
+    set defaultLang(defaultLang: string) {
+        if(this.useStore) {
+            this.store.defaultLang = defaultLang;
+        } else {
+            this._defaultLang = defaultLang;
+        }
+    }
+
+    /**
+     * The lang currently used
+     * @type {string}
+     */
+    get currentLang(): string {
+        return this.useStore ? this.store.currentLang : this._currentLang;
+    }
+    set currentLang(currentLang: string) {
+        if(this.useStore) {
+            this.store.currentLang = currentLang;
+        } else {
+            this._currentLang = currentLang;
+        }
+    }
+
+    /**
+     * an array of langs
+     * @type {Array}
+     */
+    get langs(): string[] {
+        return this.useStore ? this.store.langs : this._langs;
+    }
+    set langs(langs: string[]) {
+        if(this.useStore) {
+            this.store.langs = langs;
+        } else {
+            this._langs = langs;
+        }
+    }
+
+    /**
+     * a list of translations per lang
+     * @type {{}}
+     */
+    get translations(): any {
+        return this.useStore ? this.store.translations : this._translations;
+    }
+
+    set translations(translations: any) {
+        if(this.useStore) {
+            this.store.translations = translations;
+        } else {
+            this._currentLang = translations;
+        }
+    }
 
     /**
      *
+     * @param store an instance of the store (that is supposed to be unique)
      * @param currentLoader An instance of the loader currently used
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
+     * @param useStore whether this service should use the store or not
      */
-    constructor(public currentLoader: TranslateLoader,
+    constructor(public store: TranslateStore,
+                public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
-                public missingTranslationHandler: MissingTranslationHandler) {
+                public missingTranslationHandler: MissingTranslationHandler,
+                @Inject(USE_STORE) private useStore: boolean = true) {
     }
 
     /**
@@ -233,7 +305,7 @@ export class TranslateService {
      * @returns {any}
      */
     public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
-        let res: string|Observable<string>;
+        let res: string | Observable<string>;
 
         if(key instanceof Array) {
             let result: any = {},
@@ -290,7 +362,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any} the translated key, or an object of translated keys
      */
-    public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
+    public get(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -330,7 +402,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {string}
      */
-    public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
+    public instant(key: string | Array<string>, interpolateParams?: Object): string | any {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
