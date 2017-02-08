@@ -1,4 +1,4 @@
-import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from '@angular/core';
+import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy, OnChanges} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
@@ -8,7 +8,7 @@ import {DefaultLangChangeEvent} from "./translate.service";
 @Directive({
     selector: '[translate],[ng2-translate]'
 })
-export class TranslateDirective implements AfterViewChecked, OnDestroy {
+export class TranslateDirective implements AfterViewChecked, OnDestroy, OnChanges {
     key: string;
     lastParams: any;
     onLangChangeSub: Subscription;
@@ -51,6 +51,16 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
     ngAfterViewChecked() {
         this.checkNodes();
+    }
+
+    ngOnChanges(changes: any) { //Everytime an Input property is changed, Angular fires ngOnchanges
+        for (let propName in changes) {
+            if(propName === "translateParams") {//We only care if the translateParams changed
+                this.lastParams = changes.translateParams.previousValue; //Self explanatory
+                this.translateParams = changes.translateParams.currentValue; //Self explanatory
+                this.checkNodes(); //We check the nodes to update to the new value                
+            }
+        }
     }
 
     checkNodes(forceUpdate = false, translations?: any) {
@@ -111,6 +121,26 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                 }
             } else {
                 this.translateService.get(key, interpolateParams).subscribe(onTranslation);
+            }
+        } else if (this.translateParams !== this.lastParams) { //If the params changed, I made this else if because for some reason the key is nulll (I didn't get that part)
+            let onTranslation = (res: string) => {
+                if (!node.originalContent) {
+                    node.originalContent = res;
+                }
+                node.currentValue = res;
+                // we replace in the original content to preserve spaces that we might have trimmed
+                node.textContent = res;
+            };
+
+            if (isDefined(translations)) {
+                var res = this.translateService.getParsedResult(translations, node.lastKey, this.translateParams); //Because the key is null and we want the actual translation key, we use node.lastKey
+                if (typeof res.subscribe === "function") {
+                    res.subscribe(onTranslation);
+                } else {
+                    onTranslation(res);
+                }
+            } else {
+                this.translateService.get(node.lastKey, this.translateParams).subscribe(onTranslation); //Because the key is null and we want the actual translation key, we use node.lastKey
             }
         }
     }
