@@ -54,12 +54,10 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy, OnChange
     }
 
     ngOnChanges(changes: any) { //Everytime an Input property is changed, Angular fires ngOnchanges
-        for (let propName in changes) {
-            if(propName === "translateParams") {//We only care if the translateParams changed
-                this.lastParams = changes.translateParams.previousValue; //Self explanatory
-                this.translateParams = changes.translateParams.currentValue; //Self explanatory
-                this.checkNodes(); //We check the nodes to update to the new value                
-            }
+        if(changes.translateParams) {//We only care if the translateParams changed
+            this.lastParams = changes.translateParams.previousValue; //Self explanatory
+            this.translateParams = changes.translateParams.currentValue; //Self explanatory
+            this.checkNodes(); //We check the nodes to update to the new value
         }
     }
 
