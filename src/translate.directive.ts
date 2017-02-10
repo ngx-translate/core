@@ -56,11 +56,20 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy, OnChange
     }
 
     ngOnChanges(changes: any) { //Everytime an Input property is changed, Angular fires ngOnchanges
+<<<<<<< HEAD
         if(changes.translateParams) {//We only care if the translateParams changed
             this.lastParams = changes.translateParams.previousValue; //Self explanatory
             // this.translateParams = changes.translateParams.currentValue; //Self explanatory
             this.currentParams = changes.translateParams.currentValue; //Self explanatory
             this.checkNodes(); //We check the nodes to update to the new value
+=======
+        for (let propName in changes) {
+            if(propName === "translateParams") {//We only care if the translateParams changed
+                this.lastParams = changes.translateParams.previousValue; //Self explanatory
+                this.translateParams = changes.translateParams.currentValue; //Self explanatory
+                this.checkNodes(); //We check the nodes to update to the new value                
+            }
+>>>>>>> ca43e2c... Dynamic inline variables for the translate directive
         }
     }
 
@@ -123,7 +132,11 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy, OnChange
             } else {
                 this.translateService.get(key, interpolateParams).subscribe(onTranslation);
             }
+<<<<<<< HEAD
         } else if ((this.currentParams !== this.lastParams) && node.lastKey) { //If the params changed, I made this else if because for some reason the key is nulll (I didn't get that part)
+=======
+        } else if (this.translateParams !== this.lastParams) { //If the params changed, I made this else if because for some reason the key is nulll (I didn't get that part)
+>>>>>>> ca43e2c... Dynamic inline variables for the translate directive
             let onTranslation = (res: string) => {
                 if (!node.originalContent) {
                     node.originalContent = res;
@@ -134,14 +147,22 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy, OnChange
             };
 
             if (isDefined(translations)) {
+<<<<<<< HEAD
                 var res = this.translateService.getParsedResult(translations, node.lastKey, this.currentParams); //Because the key is null and we want the actual translation key, we use node.lastKey
+=======
+                var res = this.translateService.getParsedResult(translations, node.lastKey, this.translateParams); //Because the key is null and we want the actual translation key, we use node.lastKey
+>>>>>>> ca43e2c... Dynamic inline variables for the translate directive
                 if (typeof res.subscribe === "function") {
                     res.subscribe(onTranslation);
                 } else {
                     onTranslation(res);
                 }
             } else {
+<<<<<<< HEAD
                 this.translateService.get(node.lastKey, this.currentParams).subscribe(onTranslation); //Because the key is null and we want the actual translation key, we use node.lastKey
+=======
+                this.translateService.get(node.lastKey, this.translateParams).subscribe(onTranslation); //Because the key is null and we want the actual translation key, we use node.lastKey
+>>>>>>> ca43e2c... Dynamic inline variables for the translate directive
             }
         }
     }
