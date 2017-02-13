@@ -62,7 +62,7 @@ describe('TranslatePipe', () => {
         backend.connections.subscribe((c: MockConnection) => connection = c);
 
         ref = new FakeChangeDetectorRef();
-        translatePipe = new TranslatePipe(translate, ref);
+        translatePipe = new TranslatePipe(translate, ref, {id: 'root'});
     });
 
     afterEach(() => {
@@ -159,7 +159,7 @@ describe('TranslatePipe', () => {
 
     it("should throw if you don't give an object parameter", () => {
         translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
-        translate.use('en');
+        translate.use('enTranslatePipe');
         let param = 'param: "with param"';
 
         expect(() => {

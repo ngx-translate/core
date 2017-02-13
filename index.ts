@@ -2,7 +2,7 @@ import {NgModule, ModuleWithProviders} from "@angular/core";
 import {Http, HttpModule} from "@angular/http";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateParser, DefaultTranslateParser} from "./src/translate.parser";
-import {TranslateService, TranslateLoader, TranslateStaticLoader} from "./src/translate.service";
+import {TranslateService, TranslateLoader, TranslateStaticLoader, ModuleLoader, ModuleIdentifier} from "./src/translate.service";
 import {TranslateDirective} from "./src/translate.directive";
 
 export * from "./src/translate.pipe";
@@ -27,6 +27,10 @@ export function translateLoaderFactory(http: Http) {
     ]
 })
 export class TranslateModule {
+
+    constructor(loader: ModuleLoader) {
+      loader.init();
+    }
     static forRoot(providedLoader: any = {
         provide: TranslateLoader,
         useFactory: translateLoaderFactory,
@@ -37,7 +41,24 @@ export class TranslateModule {
             providers: [
                 providedLoader,
                 TranslateService,
+                ModuleLoader,
+                { provide: ModuleIdentifier, useValue: {id: 'root'} },
                 { provide: TranslateParser, useClass: DefaultTranslateParser }
+            ]
+        };
+    }
+    static forChild(providedLoader: any = {
+        provide: TranslateLoader,
+        useFactory: translateLoaderFactory,
+        deps: [Http]
+    }): ModuleWithProviders {
+        let id = Math.random().toString(36);
+        return {
+            ngModule: TranslateModule,
+            providers: [
+                providedLoader,
+                ModuleLoader,
+                { provide: ModuleIdentifier, useValue: {id: id} }
             ]
         };
     }

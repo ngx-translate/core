@@ -1,5 +1,5 @@
 import {PipeTransform, Pipe, Injectable, EventEmitter, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {TranslateService, LangChangeEvent, TranslationChangeEvent, DefaultLangChangeEvent} from './translate.service';
+import {TranslateService, LangChangeEvent, TranslationChangeEvent, DefaultLangChangeEvent, ModuleIdentifier} from './translate.service';
 import {equals, isDefined} from './util';
 
 @Injectable()
@@ -14,8 +14,12 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     onTranslationChange: EventEmitter<TranslationChangeEvent>;
     onLangChange: EventEmitter<LangChangeEvent>;
     onDefaultLangChange: EventEmitter<DefaultLangChangeEvent>;
+    moduleId: string = 'root';
 
-    constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
+    constructor(private translate: TranslateService, private _ref: ChangeDetectorRef, private ModuleId: ModuleIdentifier) {
+      if (this.ModuleId && this.ModuleId.id) {
+        this.moduleId = this.ModuleId.id;
+      }
     }
 
     updateValue(key: string, interpolateParams?: Object, translations?: any): void {
@@ -32,7 +36,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
                 onTranslation(res);
             }
         }
-        this.translate.get(key, interpolateParams).subscribe(onTranslation);
+        this.translate.get(key, interpolateParams, this.moduleId).subscribe(onTranslation);
     }
 
     transform(query: string, ...args: any[]): any {
