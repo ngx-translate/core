@@ -113,6 +113,18 @@ export function createTranslateLoader(http: Http) {
 export class AppModule { }
 ```
 
+##### Localizations
+
+If you need to handle different localizations for the same language you can use the LocalizableTranslateStaticLoader. It allows you to manage different files (es.json, es-UY.json, es-US.json, ...) were each specific localization file overrides the keys of the default one.
+
+```ts
+export function createTranslateLoader(http: Http) {
+    return new LocalizableTranslateStaticLoader(http, './assets/i18n', '.json');
+}
+```
+
+Note: Remember to use the specific locale, e.g. `translate.use('es-UY');`
+
 #### 2. Init the `TranslateService` for your application:
 
 ```ts
