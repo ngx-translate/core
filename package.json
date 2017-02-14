@@ -1,51 +1,51 @@
 {
-  "name": "ng2-translate",
-  "description": "An implementation of angular translate for Angular 2",
+  "name": "@ngx-translate/core",
+  "description": "The internationalization (i18n) library for Angular 2+",
   "scripts": {
+    "clean": "rimraf bundles coverage src/**/*.d.ts src/**/*.metadata.json src/**/*.js tests/**/*.d.ts tests/**/*.metadata.json tests/**/*.js index.d.ts index.metadata.json index.js",
     "test": "karma start",
     "test-watch": "karma start --singleRun=false --autoWatch=true",
     "commit": "npm run prepublish && npm test && git-cz",
     "prepublish": "ngc && npm run build",
-    "build": "webpack && cp bundles/ng2-translate.umd.js bundles/index.js",
+    "build": "webpack",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ocombe/ng2-translate.git"
+    "url": "git+https://github.com/ngx-translate/core.git"
   },
   "keywords": [
     "angular",
-    "angular2",
+    "angular 2",
     "translate",
     "i18n"
   ],
   "author": "Olivier Combe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ocombe/ng2-translate/issues"
+    "url": "https://github.com/ngx-translate/core/issues"
   },
-  "main": "bundles/ng2-translate.umd.js",
+  "main": "bundles/core.umd.js",
   "module": "index.js",
   "typings": "index.d.ts",
-  "homepage": "https://github.com/ocombe/ng2-translate",
+  "homepage": "https://github.com/ocombe/ngx-translate",
   "peerDependencies": {
-    "@angular/core": "^2.0.0",
-    "@angular/http": "^2.0.0"
+    "@angular/core": ">=2.3.0 || >=4.0.0-beta.0"
   },
   "devDependencies": {
-    "@angular/common": "2.4.5",
-    "@angular/compiler": "2.4.5",
-    "@angular/compiler-cli": "2.4.5",
-    "@angular/core": "2.4.5",
-    "@angular/http": "2.4.5",
-    "@angular/platform-browser": "2.4.5",
-    "@angular/platform-browser-dynamic": "2.4.5",
-    "@angular/platform-server": "2.4.5",
-    "@angular/router": "3.4.5",
+    "@angular/common": "2.4.6",
+    "@angular/compiler": "2.4.6",
+    "@angular/compiler-cli": "2.4.6",
+    "@angular/core": "2.4.6",
+    "@angular/platform-browser": "2.4.6",
+    "@angular/platform-browser-dynamic": "2.4.6",
+    "@angular/platform-server": "2.4.6",
+    "@angular/router": "3.4.6",
     "@types/hammerjs": "2.0.34",
     "@types/jasmine": "2.5.41",
     "@types/node": "7.0.4",
     "awesome-typescript-loader": "3.0.0-beta.18",
+    "clean-webpack-plugin": "0.1.15",
     "codelyzer": "2.0.0-beta.4",
     "commitizen": "2.9.5",
     "core-js": "2.4.1",
@@ -56,20 +56,21 @@
     "karma-chrome-launcher": "2.0.0",
     "karma-coverage": "1.1.1",
     "karma-jasmine": "1.0.2",
-    "karma-mocha-reporter": "^2.1.0",
+    "karma-mocha-reporter": "2.2.2",
     "karma-remap-coverage": "0.1.2",
     "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "1.8.0",
+    "karma-webpack": "2.0.2",
     "loader-utils": "0.2.16",
     "reflect-metadata": "0.1.9",
+    "rimraf": "2.5.4",
     "rxjs": "5.0.3",
-    "semantic-release": "6.3.2",
-    "source-map-loader": "0.1.5",
+    "semantic-release": "6.3.5",
+    "source-map-loader": "0.1.6",
     "ts-helpers": "1.1.2",
-    "tslint": "4.0.2",
+    "tslint": "4.4.2",
     "tslint-loader": "3.3.0",
     "typescript": "2.0.10",
-    "webpack": "2.1.0-beta.27",
+    "webpack": "2.2.1",
     "zone.js": "0.7.6"
   },
   "config": {
