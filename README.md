@@ -6,6 +6,8 @@ Simple example using ngx-translate: http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
+**This is the documentation for the 6.x version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
+
 * [Installation](#installation)
 * [Usage](#usage)
 * [API](#api)
