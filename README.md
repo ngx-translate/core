@@ -2,7 +2,7 @@
 
 The internationalization (i18n) library for Angular 2+.
 
-Simple example using ngx-translate: http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
+Simple example using ngx-translate: https://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
@@ -24,7 +24,7 @@ First you need to install the npm module:
 npm install @ngx-translate/core --save
 ```
 
-**If you use SystemJS** to load your files, you can check the [plunkr example](http://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
+**If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
 If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
 
 
