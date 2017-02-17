@@ -391,10 +391,6 @@ If you need it for some reason, you can use the `TranslateParser` service.
 
 ## FAQ
 
-#### I'm still using Angular with beta / RC / 2.0 to 2.2, but I cannot use ngx-translate because I get errors?!
-
-I'm sorry but ngx-translate only supports Angular from version 2.3.0 and above because of changes in the framework...
-
 #### I'm getting an error `npm ERR! peerinvalid Peer [...]`
 
 If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer dependencies well. With npm 2 you could only use fixed versions, but with npm 3 you can use `^` to use a newer version if available.
