@@ -47,6 +47,7 @@ export class TranslateService {
     private _currentLang: string;
     private _langs: Array<string> = [];
     private _translations: any = {};
+    private _translationRequests: any  = {};
 
     /**
      * An EventEmitter to listen to translation change events
@@ -230,7 +231,8 @@ export class TranslateService {
 
         // if this language is unavailable, ask for it
         if(typeof this.translations[lang] === "undefined") {
-            pending = this.getTranslation(lang);
+            this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
+            pending = this._translationRequests[lang];
         }
 
         return pending;
@@ -475,6 +477,7 @@ export class TranslateService {
      * @param lang
      */
     public resetLang(lang: string): void {
+        this._translationRequests[lang] = undefined;
         this.translations[lang] = undefined;
     }
 
