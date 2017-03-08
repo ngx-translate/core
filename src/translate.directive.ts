@@ -1,4 +1,4 @@
-import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy} from '@angular/core';
+import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy, ChangeDetectorRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
@@ -6,11 +6,12 @@ import {TranslationChangeEvent} from "./translate.service";
 import {DefaultLangChangeEvent} from "./translate.service";
 
 @Directive({
-    selector: '[translate],[ng2-translate]'
+    selector: '[translate],[ngx-translate]'
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
     key: string;
     lastParams: any;
+    currentParams: any;
     onLangChangeSub: Subscription;
     onDefaultLangChangeSub: Subscription;
     onTranslationChangeSub: Subscription;
@@ -22,9 +23,14 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         }
     }
 
-    @Input() translateParams: any;
+    @Input() set translateParams(params: any) {
+        if(this.currentParams !== params) {
+            this.currentParams = params;
+            this.checkNodes();
+        }
+    }
 
-    constructor(private translateService: TranslateService, private element: ElementRef) {
+    constructor(private translateService: TranslateService, private element: ElementRef, private _ref: ChangeDetectorRef) {
         // subscribe to onTranslationChange event, in case the translations of the current lang change
         if(!this.onTranslationChangeSub) {
             this.onTranslationChangeSub = this.translateService.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
@@ -83,12 +89,11 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
     updateValue(key: string, node: any, translations: any) {
         if(key) {
-            let interpolateParams: Object = this.translateParams;
-            if(node.lastKey === key && this.lastParams === interpolateParams) {
+            if(node.lastKey === key && this.lastParams === this.currentParams) {
                 return;
             }
 
-            this.lastParams = interpolateParams;
+            this.lastParams = this.currentParams;
 
             let onTranslation = (res: string) => {
                 if(res !== key) {
@@ -104,14 +109,14 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             };
 
             if(isDefined(translations)) {
-                let res = this.translateService.getParsedResult(translations, key, interpolateParams);
+                let res = this.translateService.getParsedResult(translations, key, this.currentParams);
                 if(typeof res.subscribe === "function") {
                     res.subscribe(onTranslation);
                 } else {
                     onTranslation(res);
                 }
             } else {
-                this.translateService.get(key, interpolateParams).subscribe(onTranslation);
+                this.translateService.get(key, this.currentParams).subscribe(onTranslation);
             }
         }
     }

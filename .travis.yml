@@ -1,10 +1,6 @@
 language: node_js
 
-cache:
-  directories:
-    - $HOME/.npm
-    - $HOME/.yarn-cache
-    - node_modules
+cache: yarn
 
 sudo: false
 
@@ -12,7 +8,7 @@ notifications:
   email: false
 
 node_js:
-  - '6'
+  - '7'
 
 branches:
   except:
@@ -20,13 +16,9 @@ branches:
 
 before_install:
   - export CHROME_BIN=chromium-browser
-  - npm i -g yarn
 
 before_script:
   - npm prune
-
-install:
-  - yarn
 
 after_success:
   - npm run semantic-release

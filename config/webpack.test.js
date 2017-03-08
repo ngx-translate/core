@@ -57,7 +57,7 @@ module.exports = {
             loader: 'istanbul-instrumenter-loader',
             include: helpers.root('src'),
             exclude: [/\.spec\.ts$/, /\.e2e\.ts$/, /node_modules/]
-        }],
+        }]
     },
 
     plugins: [
@@ -81,9 +81,11 @@ module.exports = {
                     emitErrors: false,
                     failOnHint: false,
                     resourcePath: 'src'
-                },
-
+                }
             }
         })
-    ]
+    ],
+
+    // disable warnings about bundle size for tests
+    performance: {hints: false}
 };
