@@ -1,5 +1,5 @@
 import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy, ChangeDetectorRef} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Subscription} from 'rxjs/Subscription';
 import {isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
 import {TranslationChangeEvent} from "./translate.service";
