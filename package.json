@@ -33,6 +33,7 @@
     "@angular/core": ">=2.0.0 || >=4.0.0-beta.0"
   },
   "devDependencies": {
+    "@angular/animations": "4.0.0-rc.6",
     "@angular/common": "4.0.0-rc.6",
     "@angular/compiler": "4.0.0-rc.6",
     "@angular/compiler-cli": "4.0.0-rc.6",
