@@ -61,6 +61,12 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
     checkNodes(forceUpdate = false, translations?: any) {
         let nodes: NodeList = this.element.nativeElement.childNodes;
+        // if the element is empty
+        if(!nodes.length) {
+            // we add the key as content
+            this.element.nativeElement.textContent = this.key;
+            nodes = this.element.nativeElement.childNodes;
+        }
         for(let i = 0; i < nodes.length; ++i) {
             let node: any = nodes[i];
             if(node.nodeType === 3) { // node type 3 is a text node
