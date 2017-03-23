@@ -3,6 +3,9 @@ import {TranslateService, TranslateLoader, LangChangeEvent, TranslationChangeEve
 import {Observable} from "rxjs/Observable";
 import {getTestBed, TestBed, fakeAsync, tick} from "@angular/core/testing";
 
+import 'rxjs/add/observable/timer';
+import 'rxjs/add/operator/mapTo';
+
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
