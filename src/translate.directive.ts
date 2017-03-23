@@ -67,6 +67,9 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
                 let key: string;
                 if(this.key) {
                     key = this.key;
+                    if(forceUpdate) {
+                        node.lastKey = null;
+                    }
                 } else {
                     let content = node.textContent.trim();
                     if(content.length) {
