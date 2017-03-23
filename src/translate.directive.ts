@@ -1,6 +1,6 @@
 import {Directive, ElementRef, AfterViewChecked, Input, OnDestroy, ChangeDetectorRef} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
-import {isDefined} from './util';
+import {equals, isDefined} from './util';
 import {TranslateService, LangChangeEvent} from './translate.service';
 import {TranslationChangeEvent} from "./translate.service";
 import {DefaultLangChangeEvent} from "./translate.service";
@@ -24,9 +24,9 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     }
 
     @Input() set translateParams(params: any) {
-        if(this.currentParams !== params) {
+        if(!equals(this.currentParams, params)) {
             this.currentParams = params;
-            this.checkNodes();
+            this.checkNodes(true);
         }
     }
 

@@ -106,15 +106,18 @@ describe('TranslateDirective', () => {
     it('should update the translation when params change', () => {
         // replace the content with the key
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
 
         translate.setTranslation('en', {"TEST": "It is {{value}}"});
         translate.use('en');
 
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('It is ok');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('It is ok');
         fixture.componentInstance.value = {value: 'changed'};
         fixture.detectChanges();
 
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('It is changed');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('It is changed');
     });
 
     it('should update the DOM when the lang changes', () => {
