@@ -57,13 +57,13 @@ module.exports = {
             loader: 'istanbul-instrumenter-loader',
             include: helpers.root('src'),
             exclude: [/\.spec\.ts$/, /\.e2e\.ts$/, /node_modules/]
-        }],
+        }]
     },
 
     plugins: [
         // fix the warning in ./~/@angular/core/src/linker/system_js_ng_module_factory_loader.js
         new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+            /angular(\\|\/)core(\\|\/)@angular/,
             helpers.root('./src')
         ),
 
@@ -81,9 +81,11 @@ module.exports = {
                     emitErrors: false,
                     failOnHint: false,
                     resourcePath: 'src'
-                },
-
+                }
             }
         })
-    ]
+    ],
+
+    // disable warnings about bundle size for tests
+    performance: {hints: false}
 };

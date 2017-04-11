@@ -1,5 +1,4 @@
-import {Injectable, EventEmitter, Optional} from "@angular/core";
-import {Http, Response} from "@angular/http";
+import {Injectable, EventEmitter, Inject, OpaqueToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
@@ -9,8 +8,13 @@ import "rxjs/add/operator/merge";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
+import {TranslateStore} from "./translate.store";
+import {TranslateLoader} from "./translate.loader";
+import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
 import {isDefined} from "./util";
+
+export const USE_STORE = new OpaqueToken('USE_STORE');
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -27,73 +31,23 @@ export interface DefaultLangChangeEvent {
     translations: any;
 }
 
-export interface MissingTranslationHandlerParams {
-    /**
-     * the key that's missing in translation files
-     *
-     * @type {string}
-     */
-    key: string;
-
-    /**
-     * an instance of the service that was unable to translate the key.
-     *
-     * @type {TranslateService}
-     */
-    translateService: TranslateService;
-
-    /**
-     * interpolation params that were passed along for translating the given key.
-     *
-     * @type {Object}
-     */
-    interpolateParams?: Object;
-}
-
 declare interface Window {
     navigator: any;
 }
 declare const window: Window;
 
-export abstract class MissingTranslationHandler {
-    /**
-     * A function that handles missing translations.
-     *
-     * @abstract
-     * @param {MissingTranslationHandlerParams} params context for resolving a missing translation
-     * @returns {any} a value or an observable
-     * If it returns a value, then this value is used.
-     * If it return an observable, the value returned by this observable will be used (except if the method was "instant").
-     * If it doesn't return then the key will be used as a value
-     */
-    abstract handle(params: MissingTranslationHandlerParams): any;
-}
-
-export abstract class TranslateLoader {
-    abstract getTranslation(lang: string): Observable<any>;
-}
-
-export class TranslateStaticLoader implements TranslateLoader {
-    constructor(private http: Http, private prefix: string = "i18n", private suffix: string = ".json") {
-    }
-
-    /**
-     * Gets the translations from the server
-     * @param lang
-     * @returns {any}
-     */
-    public getTranslation(lang: string): Observable<any> {
-        return this.http.get(`${this.prefix}/${lang}${this.suffix}`)
-            .map((res: Response) => res.json());
-    }
-}
-
 @Injectable()
 export class TranslateService {
-    /**
-     * The lang currently used
-     */
-    public currentLang: string = this.defaultLang;
+    private loadingTranslations: Observable<any>;
+    private pending: boolean = false;
+    private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+    private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
+    private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+    private _defaultLang: string;
+    private _currentLang: string;
+    private _langs: Array<string> = [];
+    private _translations: any = {};
+    private _translationRequests: any  = {};
 
     /**
      * An EventEmitter to listen to translation change events
@@ -102,7 +56,9 @@ export class TranslateService {
      * });
      * @type {EventEmitter<TranslationChangeEvent>}
      */
-    public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+    get onTranslationChange(): EventEmitter<TranslationChangeEvent> {
+        return this.isolate ? this._onTranslationChange : this.store.onTranslationChange;
+    }
 
     /**
      * An EventEmitter to listen to lang change events
@@ -111,7 +67,9 @@ export class TranslateService {
      * });
      * @type {EventEmitter<LangChangeEvent>}
      */
-    public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
+    get onLangChange(): EventEmitter<LangChangeEvent> {
+        return this.isolate ? this._onLangChange : this.store.onLangChange;
+    }
 
     /**
      * An EventEmitter to listen to default lang change events
@@ -120,24 +78,87 @@ export class TranslateService {
      * });
      * @type {EventEmitter<DefaultLangChangeEvent>}
      */
-    public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+    get onDefaultLangChange() {
+        return this.isolate ? this._onDefaultLangChange : this.store.onDefaultLangChange;
+    }
 
-    private pending: any;
-    private translations: any = {};
-    private defaultLang: string;
-    private langs: Array<string> = [];
+    /**
+     * The default lang to fallback when translations are missing on the current lang
+     */
+    get defaultLang(): string {
+        return this.isolate ? this._defaultLang : this.store.defaultLang;
+    }
+
+    set defaultLang(defaultLang: string) {
+        if(this.isolate) {
+            this._defaultLang = defaultLang;
+        } else {
+            this.store.defaultLang = defaultLang;
+        }
+    }
+
+    /**
+     * The lang currently used
+     * @type {string}
+     */
+    get currentLang(): string {
+        return this.isolate ? this._currentLang : this.store.currentLang;
+    }
+
+    set currentLang(currentLang: string) {
+        if(this.isolate) {
+            this._currentLang = currentLang;
+        } else {
+            this.store.currentLang = currentLang;
+        }
+    }
+
+    /**
+     * an array of langs
+     * @type {Array}
+     */
+    get langs(): string[] {
+        return this.isolate ? this._langs : this.store.langs;
+    }
+
+    set langs(langs: string[]) {
+        if(this.isolate) {
+            this._langs = langs;
+        } else {
+            this.store.langs = langs;
+        }
+    }
+
+    /**
+     * a list of translations per lang
+     * @type {{}}
+     */
+    get translations(): any {
+        return this.isolate ? this._translations : this.store.translations;
+    }
+
+    set translations(translations: any) {
+        if(this.isolate) {
+            this._currentLang = translations;
+        } else {
+            this.store.translations = translations;
+        }
+    }
 
     /**
      *
+     * @param store an instance of the store (that is supposed to be unique)
      * @param currentLoader An instance of the loader currently used
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
+     * @param isolate whether this service should use the store or not
      */
-    constructor(
-        public currentLoader: TranslateLoader,
-        public parser: TranslateParser,
-        @Optional() private missingTranslationHandler: MissingTranslationHandler
-    ) {}
+    constructor(public store: TranslateStore,
+                public currentLoader: TranslateLoader,
+                public parser: TranslateParser,
+                public missingTranslationHandler: MissingTranslationHandler,
+                @Inject(USE_STORE) private isolate: boolean = false) {
+    }
 
     /**
      * Sets the default language to use as a fallback
@@ -210,7 +231,8 @@ export class TranslateService {
 
         // if this language is unavailable, ask for it
         if(typeof this.translations[lang] === "undefined") {
-            pending = this.getTranslation(lang);
+            this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
+            pending = this._translationRequests[lang];
         }
 
         return pending;
@@ -222,18 +244,19 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
-        this.pending = this.currentLoader.getTranslation(lang).share();
+        this.pending = true;
+        this.loadingTranslations = this.currentLoader.getTranslation(lang).share();
 
-        this.pending.take(1)
+        this.loadingTranslations.take(1)
             .subscribe((res: Object) => {
                 this.translations[lang] = res;
                 this.updateLangs();
-                this.pending = undefined;
+                this.pending = false;
             }, (err: any) => {
-                this.pending = undefined;
+                this.pending = false;
             });
 
-        return this.pending;
+        return this.loadingTranslations;
     }
 
     /**
@@ -287,7 +310,7 @@ export class TranslateService {
      * @returns {any}
      */
     public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
-        let res: string|Observable<string>;
+        let res: string | Observable<string>;
 
         if(key instanceof Array) {
             let result: any = {},
@@ -327,7 +350,7 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if(!res && this.missingTranslationHandler) {
+        if(typeof res === "undefined") {
             let params: MissingTranslationHandlerParams = {key, translateService: this};
             if(typeof interpolateParams !== 'undefined') {
                 params.interpolateParams = interpolateParams;
@@ -344,7 +367,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {any} the translated key, or an object of translated keys
      */
-    public get(key: string|Array<string>, interpolateParams?: Object): Observable<string|any> {
+    public get(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -358,7 +381,7 @@ export class TranslateService {
                 let onError = (err: any) => {
                     observer.error(err);
                 };
-                this.pending.subscribe((res: any) => {
+                this.loadingTranslations.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);
@@ -384,7 +407,7 @@ export class TranslateService {
      * @param interpolateParams
      * @returns {string}
      */
-    public instant(key: string|Array<string>, interpolateParams?: Object): string|any {
+    public instant(key: string | Array<string>, interpolateParams?: Object): string | any {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -454,6 +477,7 @@ export class TranslateService {
      * @param lang
      */
     public resetLang(lang: string): void {
+        this._translationRequests[lang] = undefined;
         this.translations[lang] = undefined;
     }
 

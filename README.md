@@ -1,10 +1,12 @@
-# ng2-translate [![Build Status](https://travis-ci.org/ocombe/ng2-translate.svg?branch=master)](https://travis-ci.org/ocombe/ng2-translate) [![npm version](https://img.shields.io/npm/v/ng2-translate.svg)](https://www.npmjs.com/package/ng2-translate)
+# @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://img.shields.io/npm/v/@ngx-translate/core.svg)](https://www.npmjs.com/package/@ngx-translate/core)
 
-An implementation of angular translate for Angular 2.
+The internationalization (i18n) library for Angular 2+.
 
-Simple example using ng2-translate: http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
+Simple example using ngx-translate: https://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview
 
-Get the complete changelog here: https://github.com/ocombe/ng2-translate/releases
+Get the complete changelog here: https://github.com/ngx-translate/core/releases
+
+**This is the documentation for the 6.x version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
 
 * [Installation](#installation)
 * [Usage](#usage)
@@ -19,33 +21,31 @@ Get the complete changelog here: https://github.com/ocombe/ng2-translate/release
 First you need to install the npm module:
 
 ```sh
-npm install ng2-translate --save
+npm install @ngx-translate/core --save
 ```
 
-**If you use SystemJS** to load your files, you can check the [plunkr example](http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
-If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'ng2-translate': 'node_modules/ng2-translate/bundles'` in the map and `'ng2-translate' : { defaultExtension: 'js' }` in packages.
+**If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
+If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
 
 
 ## Usage
 
 #### 1. Import the `TranslateModule`:
 
-Finally, you can use ng2-translate in your Angular 2 project.It is recommended to import `TranslateModule.forRoot()` in the NgModule of your application.
+Finally, you can use ngx-translate in your Angular project. You have to import `TranslateModule.forRoot()` in the root NgModule of your application.
 
-The [`forRoot`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#core-for-root) static method is a convention that provides and configures services at the same time. Make sure you only call this method at the root module of your application, most of the time called `AppModule`. This method allows you to configure the `TranslateModule` loader. By default it will use the `TranslateStaticLoader`, but you can provide another loader instead as a parameter of this method (see below [Write & use your own loader](#write--use-your-own-loader)).
-
-For now ng2-translate requires HttpModule from `@angular/http` (this will change soon).
+The [`forRoot`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#core-for-root) static method is a convention that provides and configures services at the same time.
+Make sure you only call this method in the root module of your application, most of the time called `AppModule`.
+This method allows you to configure the `TranslateModule` by specifying a loader, a parser and/or a missing translations handler.
 
 ```ts
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {HttpModule} from '@angular/http';
-import {TranslateModule} from 'ng2-translate';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
     imports: [
         BrowserModule,
-        HttpModule,
         TranslateModule.forRoot()
     ],
     bootstrap: [AppComponent]
@@ -55,7 +55,8 @@ export class AppModule { }
 
 ##### SharedModule
 
-If you use a [`SharedModule`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#shared-modules) that you import in multiple other feature modules, you can easily export the `TranslateModule` to make sure you don't have to import it in every module.
+If you use a [`SharedModule`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#shared-modules) that you import in multiple other feature modules,
+you can export the `TranslateModule` to make sure you don't have to import it in every module.
 
 ```ts
 @NgModule({
@@ -67,21 +68,63 @@ If you use a [`SharedModule`](https://angular.io/docs/ts/latest/guide/ngmodule.h
 export class SharedModule { }
 ```
 
-> Note: Never call a `forRoot` static method in the `SharedModule`. You will end up with multiple different instances of a service in your injector tree.
+> Note: Never call a `forRoot` static method in the `SharedModule`. You might end up with different instances of the service in your injector tree. But you can use `forChild` if necessary.
+
+##### Lazy loaded modules
+
+When you lazy load a module, you should use the `forChild` static method to import the `TranslateModule`.
+
+Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/parser/missing translations handler.
+You can also isolate the service by using `isolate: true`. In which case the service is a completely isolated instance (for translations, current lang, events, ...).
+Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/parser/handler even if you don't isolate the service).
+
+```ts
+@NgModule({
+    imports: [
+        TranslateModule.forChild({
+            loader: {provide: TranslateLoader, useClass: CustomLoader},
+            parser: {provide: TranslateParser, useClass: CustomParser},
+            missingTranslationHandler: {provide: MissingTranslationHandler, useClass: CustomHandler},
+            isolate: true
+        })
+    ]
+})
+export class LazyLoadedModule { }
+```
 
 ##### Configuration
 
-By default, only the `TranslateStaticLoader` is available. It will search for files in `i18n/*.json`, if you want you can customize this behavior by changing the default prefix/suffix:
+By default, there is no loader available. You can add translations manually using `setTranslation` but it is better to use a loader.
+You can write your own loader, or import an existing one.
+For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using Http.
+
+Once you've decided which loader to use, you have to setup the `TranslateModule` to use it.
+
+Here is how you would use the `TranslateHttpLoader` to load translations from "/assets/i18n/[lang].json" (`[lang]` is the lang that you're using, for english it could be `en`):
 
 ```ts
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {HttpModule, Http} from '@angular/http';
+import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {AppComponent} from "./app";
+
+// AoT requires an exported function for factories
+export function HttpLoaderFactory(http: Http) {
+    return new TranslateHttpLoader(http);
+}
+
 @NgModule({
     imports: [
         BrowserModule,
         HttpModule,
         TranslateModule.forRoot({
-            provide: TranslateLoader,
-            useFactory: (http: Http) => new TranslateStaticLoader(http, '/assets/i18n', '.json'),
-            deps: [Http]
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [Http]
+            }
         })
     ],
     bootstrap: [AppComponent]
@@ -95,7 +138,7 @@ If you want to configure a custom `TranslateLoader` while using [AoT compilation
 
 ```ts
 export function createTranslateLoader(http: Http) {
-    return new TranslateStaticLoader(http, './assets/i18n', '.json');
+    return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 @NgModule({
@@ -103,9 +146,11 @@ export function createTranslateLoader(http: Http) {
         BrowserModule,
         HttpModule,
         TranslateModule.forRoot({
-            provide: TranslateLoader,
-            useFactory: (createTranslateLoader),
-            deps: [Http]
+            loader: {
+                provide: TranslateLoader,
+                useFactory: (createTranslateLoader),
+                deps: [Http]
+            }
         })
     ],
     bootstrap: [AppComponent]
@@ -117,7 +162,7 @@ export class AppModule { }
 
 ```ts
 import {Component} from '@angular/core';
-import {TranslateService} from 'ng2-translate';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app',
@@ -140,7 +185,7 @@ export class AppComponent {
 
 #### 3. Define the translations:
 
-Once you've imported the `TranslateModule`, you can put your translations in a json file that will be imported with the `TranslateStaticLoader`. The following translations should be stored in `en.json`.
+Once you've imported the `TranslateModule`, you can put your translations in a json file that will be imported with the `TranslateHttpLoader`. The following translations should be stored in `en.json`.
 
 ```json
 {
@@ -289,8 +334,7 @@ Once you've defined your loader, you can provide it in your configuration by add
     imports: [
         BrowserModule,
         TranslateModule.forRoot({
-            provide: TranslateLoader,
-            useClass: CustomLoader
+            loader: {provide: TranslateLoader, useClass: CustomLoader}
         })
     ],
     bootstrap: [AppComponent]
@@ -307,7 +351,7 @@ You can setup a provider for the `MissingTranslationHandler` in the bootstrap of
 Create a Missing Translation Handler
 
 ```ts
-import {MissingTranslationHandler, MissingTranslationHandlerParams} from 'ng2-translate';
+import {MissingTranslationHandler, MissingTranslationHandlerParams} from '@ngx-translate/core';
 
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams) {
@@ -316,16 +360,18 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
 }
 ```
 
-Setup the Missing Translation Handler in your module by adding it to the `providers` list.
+Setup the Missing Translation Handler in your module import by adding it to the `forRoot` (or `forChild`) configuration.
 
 ```ts
 @NgModule({
     imports: [
         BrowserModule,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot({
+            missingTranslationHandler: {provide: MissingTranslationHandler, useClass: MyMissingTranslationHandler}
+        })
     ],
     providers: [
-        { provide: MissingTranslationHandler, useClass: MyMissingTranslationHandler }
+        
     ],
     bootstrap: [AppComponent]
 })
@@ -340,18 +386,10 @@ If you need it for some reason, you can use the `TranslateParser` service.
 - `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
 
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
-- `getValue(target: any, key: stirng): any`:  Gets a value from an object by composed key
+- `getValue(target: any, key: string): any`:  Gets a value from an object by composed key
      `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
 
 ## FAQ
-
-#### I'm getting an error `No provider for Http!`
-
-Because of the TranslateStaticLoader you have to load the HttpModule from `@angular/http`, even if you don't use this Loader
-
-#### I'm still using RC4, but I cannot use ng2-translate because I get errors?!
-
-If you're still using RC4, you should fix the version of ng2-translate to 2.2.2.
 
 #### I'm getting an error `npm ERR! peerinvalid Peer [...]`
 
@@ -359,12 +397,12 @@ If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer d
 
 If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`npm WARN!`), warning are just informative and if everything works then don't worry !
 
-If you're using an old version of angular 2 and ng2-translate wants a newer version then you should consider upgrading your application to use the newer angular 2 version. I cannot support old versions because the framework keeps doing breaking changes... If it's not an option for you, then check [the changelog](https://github.com/ocombe/ng2-translate/releases) to know which version is the last compatible version.
+If you're using an old version of Angular and ngx-translate requires a newer version then you should consider upgrading your application to use the newer angular 2 version. There is always a reason when I upgrade the minimum dependencies of the library. Often it is because Angular had a breaking changes. If it's not an option for you, then check [the changelog](/releases) to know which version is the last compatible version for you.
 
 
 ## Plugins
-- [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular 2. If you need localized urls (for example /fr/page and /en/page).
-- [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ng2-translate
+- [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
+- [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ng2-translate-po-loader) by @biesbjerg: Use .po translation files with ngx-translate
 - [ng2-translate-extract](https://www.npmjs.com/package/@biesbjerg/ng2-translate-extract) by @biesbjerg: Extract translatable strings from your projects
 
 ## Additional Framework Support

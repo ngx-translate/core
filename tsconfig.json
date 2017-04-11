@@ -17,7 +17,6 @@
   },
   "files": [
     "index.ts",
-    "ng2-translate.ts",
     "./src/translate.pipe.ts",
     "./src/translate.service.ts",
     "./src/translate.parser.ts",

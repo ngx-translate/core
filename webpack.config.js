@@ -3,7 +3,8 @@
  */
 
 const helpers = require('./config/helpers'),
-    webpack = require('webpack');
+    webpack = require('webpack'),
+    CleanWebpackPlugin = require('clean-webpack-plugin');
 
 /**
  * Webpack Plugins
@@ -19,14 +20,14 @@ module.exports = {
         extensions: ['.ts', '.js']
     },
 
-    entry: helpers.root('ng2-translate.ts'),
+    entry: helpers.root('index.ts'),
 
     output: {
         path: helpers.root('bundles'),
         publicPath: '/',
-        filename: 'ng2-translate.umd.js',
-        libraryTarget: 'umd',
-        library: 'ng2-translate'
+        filename: 'core.umd.js',
+        library: 'ngx-translate-core',
+        libraryTarget: 'umd'
     },
 
     // require those dependencies but don't bundle them
@@ -40,15 +41,18 @@ module.exports = {
             exclude: [helpers.root('node_modules')]
         }, {
             test: /\.ts$/,
-            loader: 'awesome-typescript-loader?declaration=false',
-            exclude: [/\.e2e\.ts$/]
+            loader: 'awesome-typescript-loader',
+            options: {
+                declaration: false
+            },
+            exclude: [/\.spec\.ts$/]
         }]
     },
 
     plugins: [
         // fix the warning in ./~/@angular/core/src/linker/system_js_ng_module_factory_loader.js
         new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+            /angular(\\|\/)core(\\|\/)@angular/,
             helpers.root('./src')
         ),
 
@@ -59,6 +63,14 @@ module.exports = {
                     failOnHint: false
                 }
             }
+        }),
+
+        // Reference: https://github.com/johnagan/clean-webpack-plugin
+        // Removes the bundle folder before the build
+        new CleanWebpackPlugin(['bundles'], {
+            root: helpers.root(),
+            verbose: false,
+            dry: false
         })
     ]
 };

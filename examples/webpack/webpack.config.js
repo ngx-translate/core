@@ -1,8 +1,9 @@
 var path = require('path');
 var webpack = require('webpack');
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
+var HtmlWebpackPlugin = require('html-webpack-plugin'),
+    CopyWebpackPlugin = require('copy-webpack-plugin'),
+    {CheckerPlugin} = require('awesome-typescript-loader');
 
 function root(args) {
     args = Array.prototype.slice.call(arguments, 0);
@@ -18,12 +19,8 @@ module.exports = {
 
     module: {
         rules: [{
-            test: /\.js$/,
-            loader: 'source-map',
-            enforce: 'pre'
-        }, {
             test: /\.ts$/,
-            loader: 'awesome-typescript-loader',
+            loaders: ['awesome-typescript-loader', 'angular2-router-loader'],
             exclude: /(node_modules)/
         }]
     },
@@ -33,10 +30,6 @@ module.exports = {
     },
 
     devServer: {
-        outputPath: root('dist'),
-        watchOptions: {
-            poll: true
-        },
         stats: {
             modules: false,
             cached: false,
@@ -55,7 +48,7 @@ module.exports = {
     plugins: [
         // fix the warning in ./~/@angular/core/src/linker/system_js_ng_module_factory_loader.js
         new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+            /angular(\\|\/)core(\\|\/)@angular/,
             root('./src')
         ),
 
@@ -63,10 +56,13 @@ module.exports = {
             template: 'index.html',
             chunksSortMode: 'dependency'
         }),
-		new CopyWebpackPlugin([
-			{ from: 'i18n/', to: 'i18n' }
-		]),
+        new CopyWebpackPlugin([
+            {from: 'i18n/', to: 'i18n'}
+        ]),
 
-        new webpack.optimize.OccurrenceOrderPlugin(true)
+        new webpack.optimize.OccurrenceOrderPlugin(true),
+
+        // fork the typescript linter into another process to speed up compilation
+        new CheckerPlugin()
     ]
 };
