@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { TranslateService } from "ng2-translate";
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'page-home',
