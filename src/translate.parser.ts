@@ -41,7 +41,7 @@ export class TranslateDefaultParser extends TranslateParser {
         key = '';
         do {
             key += keys.shift();
-            if(isDefined(target) && isDefined(target[key]) && (typeof target[key] === 'object' || !keys.length)) {
+            if(target && target[key]  && (typeof target[key] === 'object' || !keys.length)) {
                 target = target[key];
                 key = '';
             } else if(!keys.length) {
