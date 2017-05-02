@@ -153,7 +153,7 @@ describe('MissingTranslationHandler', () => {
 
         translate.get(Object.keys(tr)).subscribe((res: string) => {
             expect(missingTranslationHandler.handle).toHaveBeenCalledTimes(3);
-            expect(res).toEqual(tr);
+            expect(res).toEqual(tr as any);
         });
     });
 
@@ -180,6 +180,6 @@ describe('MissingTranslationHandler', () => {
             nonExistingKey1: 'nonExistingKey1',
             nonExistingKey2: 'nonExistingKey2',
             nonExistingKey3: 'nonExistingKey3'
-        });
+        } as any);
     });
 });

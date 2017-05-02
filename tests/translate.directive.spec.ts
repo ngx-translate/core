@@ -10,6 +10,7 @@ import {TranslateService, TranslateModule} from '../index';
     template: `
         <div #noKey translate>TEST</div>
         <div #withKey [translate]="'TEST'">Some init content</div>
+        <div #noContent [translate]="'TEST'"></div>
         <div #withOtherElements translate>TEST1 <span>Hey</span> TEST2</div>
         <div #withParams [translate]="'TEST'" [translateParams]="value">Some init content</div>
         <div #withParamsNoKey translate [translateParams]="value">TEST</div>
@@ -22,6 +23,7 @@ class App {
     @ViewChild('withOtherElements') withOtherElements: ElementRef;
     @ViewChild('withParams') withParams: ElementRef;
     @ViewChild('withParamsNoKey') withParamsNoKey: ElementRef;
+    @ViewChild('noContent') noContent: ElementRef;
     value = {value: 'ok'};
 
     constructor(viewContainerRef: ViewContainerRef) {
@@ -106,32 +108,39 @@ describe('TranslateDirective', () => {
     it('should update the translation when params change', () => {
         // replace the content with the key
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('TEST');
 
         translate.setTranslation('en', {"TEST": "It is {{value}}"});
         translate.use('en');
 
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('It is ok');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('It is ok');
         fixture.componentInstance.value = {value: 'changed'};
         fixture.detectChanges();
 
         expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('It is changed');
+        expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual('It is changed');
     });
 
     it('should update the DOM when the lang changes', () => {
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+        expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
+        expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('TEST');
 
         translate.setTranslation('en', {"TEST": "This is a test"});
         translate.setTranslation('fr', {"TEST": "C'est un test"});
 
         translate.use('en');
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+        expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('This is a test');
+        expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('This is a test');
 
         translate.use('fr');
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
+        expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual("C'est un test");
+        expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual("C'est un test");
     });
 
-    // Test (temporarily) disabled as the directive tests manipulate the DOM manually which breaks this test.
-    // https://github.com/ocombe/ng2-translate/pull/336
     it('should update the DOM when the default lang changes', () => {
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
 

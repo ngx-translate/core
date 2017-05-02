@@ -1,7 +1,10 @@
 import {Injector} from "@angular/core";
 import {TranslateService, TranslateLoader, LangChangeEvent, TranslationChangeEvent, TranslateModule} from '../index';
 import {Observable} from "rxjs/Observable";
-import {getTestBed, TestBed} from "@angular/core/testing";
+import {getTestBed, TestBed, fakeAsync, tick} from "@angular/core/testing";
+
+import 'rxjs/add/observable/timer';
+import 'rxjs/add/operator/mapTo';
 
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
@@ -296,4 +299,18 @@ describe('TranslateService', () => {
         expect(browserCultureLand).toBeDefined();
         expect(typeof browserCultureLand === 'string').toBeTruthy();
     });
+
+    it('should not make duplicate requests', fakeAsync(() => {
+        let getTranslationCalls = 0;
+        spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+            getTranslationCalls += 1;
+            return Observable.timer(1000).mapTo(Observable.of(translations));
+        });
+        translate.use('en');
+        translate.use('en');
+
+        tick(1001);
+
+        expect(getTranslationCalls).toEqual(1);
+    }));
 });
