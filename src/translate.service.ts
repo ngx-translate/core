@@ -41,9 +41,6 @@ export class TranslateService {
     private loadingTranslations: Observable<any>;
     private pending: boolean = false;
     private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
-    private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
-    private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
-    private _defaultLang: string;
     private _currentLang: string;
     private _langs: Array<string> = [];
     private _translations: any = {};
@@ -68,7 +65,7 @@ export class TranslateService {
      * @type {EventEmitter<LangChangeEvent>}
      */
     get onLangChange(): EventEmitter<LangChangeEvent> {
-        return this.isolate ? this._onLangChange : this.store.onLangChange;
+        return this.store.onLangChange;
     }
 
     /**
@@ -79,22 +76,18 @@ export class TranslateService {
      * @type {EventEmitter<DefaultLangChangeEvent>}
      */
     get onDefaultLangChange() {
-        return this.isolate ? this._onDefaultLangChange : this.store.onDefaultLangChange;
+        return this.store.onDefaultLangChange;
     }
 
     /**
      * The default lang to fallback when translations are missing on the current lang
      */
     get defaultLang(): string {
-        return this.isolate ? this._defaultLang : this.store.defaultLang;
+        return this.store.defaultLang;
     }
 
     set defaultLang(defaultLang: string) {
-        if(this.isolate) {
-            this._defaultLang = defaultLang;
-        } else {
-            this.store.defaultLang = defaultLang;
-        }
+        this.store.defaultLang = defaultLang;
     }
 
     /**
@@ -102,15 +95,11 @@ export class TranslateService {
      * @type {string}
      */
     get currentLang(): string {
-        return this.isolate ? this._currentLang : this.store.currentLang;
+        return this.store.currentLang;
     }
 
     set currentLang(currentLang: string) {
-        if(this.isolate) {
-            this._currentLang = currentLang;
-        } else {
-            this.store.currentLang = currentLang;
-        }
+        this.store.currentLang = currentLang;
     }
 
     /**
@@ -158,6 +147,9 @@ export class TranslateService {
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
                 @Inject(USE_STORE) private isolate: boolean = false) {
+        if(this.currentLang) {
+            this.retrieveTranslations(this.currentLang);
+        }
     }
 
     /**
