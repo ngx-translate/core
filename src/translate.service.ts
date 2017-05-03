@@ -1,7 +1,8 @@
-import {Injectable, EventEmitter, Inject, OpaqueToken} from "@angular/core";
+import {Injectable, EventEmitter, Inject, OpaqueToken, Injector, SkipSelf} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
+import "rxjs/add/observable/zip";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
@@ -48,6 +49,7 @@ export class TranslateService {
     private _langs: Array<string> = [];
     private _translations: any = {};
     private _translationRequests: any  = {};
+    private _parent: any = null;
 
     /**
      * An EventEmitter to listen to translation change events
@@ -157,7 +159,9 @@ export class TranslateService {
                 public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
+                @SkipSelf() private _Injector: Injector,
                 @Inject(USE_STORE) private isolate: boolean = false) {
+        this._parent = this._Injector.get(TranslateService, null);
     }
 
     /**
@@ -244,8 +248,25 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public getTranslation(lang: string): Observable<any> {
+      var self = this;
         this.pending = true;
         this.loadingTranslations = this.currentLoader.getTranslation(lang).share();
+        if(this.isolate && this._parent) {
+            return new Observable((observer) => {
+                var parentTranslations = self._parent.getTranslation(lang);
+                var translations = Observable.zip(parentTranslations, self.loadingTranslations);
+                translations.subscribe((translationArray: any) => {
+                    var parent = translationArray[0];
+                    var current = translationArray[1];
+                    var res = Object.assign(parent, current);
+                    this.translations[lang] = res;
+                    this.updateLangs();
+                    this.pending = false;
+                    observer.next(res);
+                    observer.complete();
+                });
+            });
+        }
 
         this.loadingTranslations.take(1)
             .subscribe((res: Object) => {
