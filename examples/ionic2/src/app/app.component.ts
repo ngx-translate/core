@@ -21,8 +21,11 @@ export class MyApp {
       Splashscreen.hide();
       // this language will be used as a fallback when a translation isn't found in the current language
       translate.setDefaultLang('en');
-      // the lang to use, if the lang isn't available, it will use the current loader to get them
-      translate.use('en');
+      
+      // Set Platform Language
+       let userLang = navigator.language.split('-')[0]; // use navigator lang if available
+       userLang = /(de|en|fr|es)/gi.test(userLang) ? userLang : 'en'; // Set default do en if no other language could be found
+       translate.use(userLang);
     });
   }
 
