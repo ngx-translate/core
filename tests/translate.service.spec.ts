@@ -172,14 +172,14 @@ describe('TranslateService', () => {
         });
     });
 
-    it("shouldn't override the translations if you set the translations twice", (done: Function) => {
+    it("should merge translations if option shouldMerge is true", (done: Function) => {
         translations = {};
-        translate.setTranslation('en', {"TEST": "This is a test"}, true);
-        translate.setTranslation('en', {"TEST2": "This is a test"}, true);
+        translate.setTranslation('en', {"TEST": {"sub1": "value1"}}, true);
+        translate.setTranslation('en', {"TEST": {"sub2": "value2"}}, true);
         translate.use('en');
 
-        translate.get('TEST').subscribe((res: string) => {
-            expect(res).toEqual('This is a test');
+        translate.get('TEST').subscribe((res: any) => {
+            expect(res).toEqual({"sub1": "value1", "sub2": "value2"});
             expect(translations).toEqual({});
             done();
         });
