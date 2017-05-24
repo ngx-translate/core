@@ -3,9 +3,11 @@ import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
 import "rxjs/add/observable/zip";
+import "rxjs/add/operator/concat";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
+import "rxjs/add/operator/switchMap";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
@@ -13,7 +15,7 @@ import {TranslateStore} from "./translate.store";
 import {TranslateLoader} from "./translate.loader";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
-import {isDefined} from "./util";
+import {deepMerge, isDefined} from "./util";
 
 export const USE_STORE = new OpaqueToken('USE_STORE');
 
@@ -288,7 +290,7 @@ export class TranslateService {
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if(shouldMerge && this.translations[lang]) {
-            Object.assign(this.translations[lang], translations);
+            this.translations[lang] = deepMerge(this.translations[lang], translations);
         } else {
             this.translations[lang] = translations;
         }
@@ -419,6 +421,30 @@ export class TranslateService {
                 return Observable.of(res);
             }
         }
+    }
+
+    /**
+     * Returns a stream of translated values of a key (or an array of keys) which updates
+     * whenever the language changes.
+     * @param key
+     * @param interpolateParams
+     * @returns {any} A stream of the translated key, or an object of translated keys
+     */
+    public stream(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+        if(!isDefined(key) || !key.length) {
+            throw new Error(`Parameter "key" required`);
+        }
+
+        return this
+            .get(key, interpolateParams)
+            .concat(this.onLangChange.switchMap((event: LangChangeEvent) => {
+                const res = this.getParsedResult(event.translations, key, interpolateParams);
+                if(typeof res.subscribe === "function") {
+                    return res;
+                } else {
+                    return Observable.of(res);
+                }
+            }));
     }
 
     /**

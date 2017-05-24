@@ -4,7 +4,9 @@ import {Observable} from "rxjs/Observable";
 import {getTestBed, TestBed, fakeAsync, tick} from "@angular/core/testing";
 
 import 'rxjs/add/observable/timer';
+import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/mapTo';
+import 'rxjs/add/operator/zip';
 
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
@@ -170,14 +172,14 @@ describe('TranslateService', () => {
         });
     });
 
-    it("shouldn't override the translations if you set the translations twice", (done: Function) => {
+    it("should merge translations if option shouldMerge is true", (done: Function) => {
         translations = {};
-        translate.setTranslation('en', {"TEST": "This is a test"}, true);
-        translate.setTranslation('en', {"TEST2": "This is a test"}, true);
+        translate.setTranslation('en', {"TEST": {"sub1": "value1"}}, true);
+        translate.setTranslation('en', {"TEST": {"sub2": "value2"}}, true);
         translate.use('en');
 
-        translate.get('TEST').subscribe((res: string) => {
-            expect(res).toEqual('This is a test');
+        translate.get('TEST').subscribe((res: any) => {
+            expect(res).toEqual({"sub1": "value1", "sub2": "value2"});
             expect(translations).toEqual({});
             done();
         });
@@ -193,6 +195,90 @@ describe('TranslateService', () => {
             expect(translations).toEqual({});
             done();
         });
+    });
+
+    it('should be able to stream a translation for the current language', (done: Function) => {
+        translations = {"TEST": "This is a test"};
+        translate.use('en');
+
+        translate.stream('TEST').subscribe((res: string) => {
+            expect(res).toEqual('This is a test');
+            done();
+        });
+    });
+
+    it('should be able to stream a translation of an array for the current language', (done: Function) => {
+        let tr = {"TEST": "This is a test", "TEST2": "This is a test2"};
+        translate.setTranslation('en', tr);
+        translate.use('en');
+
+        translate.stream(['TEST', 'TEST2']).subscribe((res: any) => {
+            expect(res).toEqual(tr);
+            done();
+        });
+    });
+
+    it('should initially return the same value for streaming and non-streaming get', (done: Function) => {
+        translations = {"TEST": "This is a test"};
+        translate.use('en');
+
+        translate.stream('TEST').zip(translate.get('TEST')).subscribe((value: [string, string]) => {
+            const [streamed, nonStreamed] = value;
+            expect(streamed).toEqual('This is a test');
+            expect(streamed).toEqual(nonStreamed);
+            done();
+        });
+    });
+
+    it('should update streaming translations on language change', (done: Function) => {
+        translations = {"TEST": "This is a test"};
+        translate.use('en');
+
+        translate.stream('TEST').take(3).toArray().subscribe((res: string[]) => {
+            const expected = ['This is a test', 'Dit is een test', 'This is a test'];
+            expect(res).toEqual(expected);
+            done();
+        });
+
+        translate.setTranslation('nl', {"TEST": "Dit is een test"});
+        translate.use('nl');
+        translate.use('en');
+    });
+
+    it('should update streaming translations of an array on language change', (done: Function) => {
+        const en = {"TEST": "This is a test", "TEST2": "This is a test2"};
+        const nl = {"TEST": "Dit is een test", "TEST2": "Dit is een test2"};
+        translate.setTranslation('en', en);
+        translate.use('en');
+
+        translate.stream(['TEST', 'TEST2']).take(3).toArray().subscribe((res: any[]) => {
+            const expected = [en, nl, en];
+            expect(res).toEqual(expected);
+            done();
+        });
+
+        translate.setTranslation('nl', nl);
+        translate.use('nl');
+        translate.use('en');
+    });
+
+    it('should interpolate the same param into each streamed value', (done: Function) => {
+        translations = {"TEST": "This is a test {{param}}"};
+        translate.use('en');
+
+        translate.stream('TEST', { param: 'with param' }).take(3).toArray().subscribe((res: string[]) => {
+            const expected = [
+                'This is a test with param',
+                'Dit is een test with param',
+                'This is a test with param'
+            ];
+            expect(res).toEqual(expected);
+            done();
+        });
+
+        translate.setTranslation('nl', {"TEST": "Dit is een test {{param}}"});
+        translate.use('nl');
+        translate.use('en');
     });
 
     it('should be able to get instant translations', () => {

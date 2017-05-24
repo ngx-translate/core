@@ -55,3 +55,71 @@ export function equals(o1: any, o2: any): boolean {
 export function isDefined(value: any): boolean {
     return typeof value !== 'undefined' && value !== null;
 }
+
+/** Start deep merge, from https://github.com/KyleAMathews/deepmerge **/
+function isMergeableObject<T>(val: T): boolean {
+    let nonNullObject = val && typeof val === 'object';
+
+    return nonNullObject
+        && Object.prototype.toString.call(val) !== '[object RegExp]'
+        && Object.prototype.toString.call(val) !== '[object Date]';
+}
+
+function emptyTarget<T>(val: T): any {
+    return Array.isArray(val) ? [] : {};
+}
+
+function cloneIfNecessary<T>(value: T, options: DeepMergeOptions<T>): T {
+    let clone = options && options.clone === true;
+    return clone && isMergeableObject(value) ? deepMerge(emptyTarget(value), value, options) : value;
+}
+
+function defaultArrayMerge<T>(target: T[], source: T[], options: DeepMergeOptions<T>): T[] {
+    let destination = target.slice();
+    source.forEach(function(e, i) {
+        if(typeof destination[i] === 'undefined') {
+            destination[i] = cloneIfNecessary(e, options);
+        } else if(isMergeableObject(e)) {
+            destination[i] = deepMerge(target[i], e, options);
+        } else if(target.indexOf(e) === -1) {
+            destination.push(cloneIfNecessary(e, options));
+        }
+    });
+    return destination;
+}
+
+function mergeObject<T>(target: any, source: any, options: DeepMergeOptions<T>): T {
+    let destination: any = {};
+    if(isMergeableObject(target)) {
+        Object.keys(target).forEach(function(key) {
+            destination[key] = cloneIfNecessary(target[key], options)
+        });
+    }
+    Object.keys(source).forEach(function(key) {
+        if(!isMergeableObject(source[key]) || !target[key]) {
+            destination[key] = cloneIfNecessary(source[key], options);
+        } else {
+            destination[key] = deepMerge(target[key], source[key], options);
+        }
+    });
+    return destination;
+}
+
+export interface DeepMergeOptions<T> {
+    clone?: boolean;
+
+    arrayMerge?(destination: T, source: T, options?: DeepMergeOptions<T>): T;
+}
+
+export function deepMerge<T>(target: T, source: T, options?: DeepMergeOptions<T>): T {
+    let array = Array.isArray(source);
+    options = options || {arrayMerge: defaultArrayMerge} as any;
+    let arrayMerge: any = options.arrayMerge || defaultArrayMerge;
+
+    if(array) {
+        return Array.isArray(target) ? arrayMerge(target, source, options) : cloneIfNecessary(source, options);
+    } else {
+        return mergeObject(target, source, options);
+    }
+}
+/** End deep merge **/
