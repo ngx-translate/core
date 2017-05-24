@@ -15,6 +15,7 @@ examples
 coverage
 !*.metadata.json
 !bundles/*.js
+tsconfig.json
 
 #################
 ## JetBrains
