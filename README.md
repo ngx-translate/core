@@ -108,7 +108,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {HttpModule, Http} from '@angular/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {AppComponent} from "./app";
+import {AppComponent} from './app';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: Http) {
