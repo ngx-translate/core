@@ -108,7 +108,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {HttpModule, Http} from '@angular/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {AppComponent} from "./app";
+import {AppComponent} from './app';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: Http) {
@@ -306,6 +306,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 - `addLangs(langs: Array<string>)`: Add new langs to the list
 - `getLangs()`: Returns an array of currently available langs
 - `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys) or the key if the value was not found
+- `stream(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Returns a stream of translated values of a key (or an array of keys) or the key if the value was not found. Without any `onLangChange` events this returns the same value as `get` but it will also emit new values whenever the used language changes.
 - `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys). /!\ This method is **synchronous** and the default file loader is asynchronous. You are responsible for knowing when your translations have been loaded and it is safe to use this method. If you are not sure then you should use the `get` method instead.
 - `set(key: string, value: string, lang?: string)`: Sets the translated value of a key
 - `reloadLang(lang: string): Observable<string|Object>`: Calls resetLang and retrieves the translations object for the current loader

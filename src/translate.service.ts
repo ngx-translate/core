@@ -2,9 +2,11 @@ import {Injectable, EventEmitter, Inject, OpaqueToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
+import "rxjs/add/operator/concat";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
+import "rxjs/add/operator/switchMap";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
@@ -398,6 +400,30 @@ export class TranslateService {
                 return Observable.of(res);
             }
         }
+    }
+
+    /**
+     * Returns a stream of translated values of a key (or an array of keys) which updates
+     * whenever the language changes.
+     * @param key
+     * @param interpolateParams
+     * @returns {any} A stream of the translated key, or an object of translated keys
+     */
+    public stream(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+        if(!isDefined(key) || !key.length) {
+            throw new Error(`Parameter "key" required`);
+        }
+
+        return this
+            .get(key, interpolateParams)
+            .concat(this.onLangChange.switchMap((event: LangChangeEvent) => {
+                const res = this.getParsedResult(event.translations, key, interpolateParams);
+                if(typeof res.subscribe === "function") {
+                    return res;
+                } else {
+                    return Observable.of(res);
+                }
+            }));
     }
 
     /**
