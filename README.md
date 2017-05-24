@@ -402,8 +402,8 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
-- [.po files Loader](https://www.npmjs.com/package/@biesbjerg/ngx-translate-po-http-loader) by @biesbjerg: Use .po translation files with ngx-translate
-- [ng2-translate-extract](https://www.npmjs.com/package/@biesbjerg/ng2-translate-extract) by @biesbjerg: Extract translatable strings from your projects
+- [.po files Loader](https://github.com/biesbjerg/ngx-translate-po-http-loader) by @biesbjerg: Use .po translation files with ngx-translate
+- [ngx-translate-extract](https://github.com/biesbjerg/ngx-translate-extract) by @biesbjerg: Extract translatable strings from your projects
 
 ## Additional Framework Support
 
