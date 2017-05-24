@@ -1,7 +1,8 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { HttpModule, Http } from '@angular/http';
-import { IonicApp, IonicModule } from 'ionic-angular';
-import { TranslateModule, TranslateLoader, TranslateStaticLoader } from 'ng2-translate';
+import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { MyApp } from './app.component';
 import { AboutPage } from '../pages/about/about';
@@ -9,8 +10,8 @@ import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 
-export function createTranslateLoader(http: Http) {
-  return new TranslateStaticLoader(http, './assets/i18n', '.json');
+export function HttpLoaderFactory(http: Http) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 @NgModule({
@@ -24,9 +25,11 @@ export function createTranslateLoader(http: Http) {
   imports: [
     HttpModule,
     TranslateModule.forRoot({
-      provide: TranslateLoader,
-      useFactory: (createTranslateLoader),
-      deps: [Http]
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [Http]
+      }
     }),
     IonicModule.forRoot(MyApp)
   ],
@@ -38,6 +41,8 @@ export function createTranslateLoader(http: Http) {
     HomePage,
     TabsPage
   ],
-  providers: []
+  providers: [
+    {provide: ErrorHandler, useClass: IonicErrorHandler}
+  ]
 })
 export class AppModule {}

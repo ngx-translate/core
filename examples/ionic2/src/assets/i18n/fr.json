@@ -1,7 +1,9 @@
 {
   "HOME": {
     "TITLE": "Bonjour Angular 2 avec ngx-translate !",
-    "SELECT": "Changer la langue"
+    "SUBTITLE": "Bienvenue chez Ionic !",
+    "SELECT": "Changer la langue",
+    "SUMMARY": "Ce projet de démarrage est livré avec une mise en page basée sur des tabulations simples pour les applications qui vont principalement utiliser une interface utilisateur à onglet."
   },
   "ABOUT": {
     "TITLE": "À propos"
