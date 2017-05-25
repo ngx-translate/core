@@ -14,7 +14,7 @@ import {TranslateStore} from "./translate.store";
 import {TranslateLoader} from "./translate.loader";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
-import {deepMerge, isDefined} from "./util";
+import {mergeDeep, isDefined} from "./util";
 
 export const USE_STORE = new OpaqueToken('USE_STORE');
 
@@ -269,7 +269,7 @@ export class TranslateService {
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
         if(shouldMerge && this.translations[lang]) {
-            this.translations[lang] = deepMerge(this.translations[lang], translations);
+            this.translations[lang] = mergeDeep(this.translations[lang], translations);
         } else {
             this.translations[lang] = translations;
         }

@@ -16,32 +16,32 @@
  * @returns {boolean} True if arguments are equal.
  */
 export function equals(o1: any, o2: any): boolean {
-    if(o1 === o2) return true;
-    if(o1 === null || o2 === null) return false;
-    if(o1 !== o1 && o2 !== o2) return true; // NaN === NaN
+    if (o1 === o2) return true;
+    if (o1 === null || o2 === null) return false;
+    if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
     let t1 = typeof o1, t2 = typeof o2, length: number, key: any, keySet: any;
-    if(t1 == t2 && t1 == 'object') {
-        if(Array.isArray(o1)) {
-            if(!Array.isArray(o2)) return false;
-            if((length = o1.length) == o2.length) {
-                for(key = 0; key < length; key++) {
-                    if(!equals(o1[key], o2[key])) return false;
+    if (t1 == t2 && t1 == 'object') {
+        if (Array.isArray(o1)) {
+            if (!Array.isArray(o2)) return false;
+            if ((length = o1.length) == o2.length) {
+                for (key = 0; key < length; key++) {
+                    if (!equals(o1[key], o2[key])) return false;
                 }
                 return true;
             }
         } else {
-            if(Array.isArray(o2)) {
+            if (Array.isArray(o2)) {
                 return false;
             }
             keySet = Object.create(null);
-            for(key in o1) {
-                if(!equals(o1[key], o2[key])) {
+            for (key in o1) {
+                if (!equals(o1[key], o2[key])) {
                     return false;
                 }
                 keySet[key] = true;
             }
-            for(key in o2) {
-                if(!(key in keySet) && typeof o2[key] !== 'undefined') {
+            for (key in o2) {
+                if (!(key in keySet) && typeof o2[key] !== 'undefined') {
                     return false;
                 }
             }
@@ -56,70 +56,26 @@ export function isDefined(value: any): boolean {
     return typeof value !== 'undefined' && value !== null;
 }
 
-/** Start deep merge, from https://github.com/KyleAMathews/deepmerge **/
-function isMergeableObject<T>(val: T): boolean {
-    let nonNullObject = val && typeof val === 'object';
-
-    return nonNullObject
-        && Object.prototype.toString.call(val) !== '[object RegExp]'
-        && Object.prototype.toString.call(val) !== '[object Date]';
+export function isObject(item: any): boolean {
+    return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-function emptyTarget<T>(val: T): any {
-    return Array.isArray(val) ? [] : {};
-}
-
-function cloneIfNecessary<T>(value: T, options: DeepMergeOptions<T>): T {
-    let clone = options && options.clone === true;
-    return clone && isMergeableObject(value) ? deepMerge(emptyTarget(value), value, options) : value;
-}
-
-function defaultArrayMerge<T>(target: T[], source: T[], options: DeepMergeOptions<T>): T[] {
-    let destination = target.slice();
-    source.forEach(function(e, i) {
-        if(typeof destination[i] === 'undefined') {
-            destination[i] = cloneIfNecessary(e, options);
-        } else if(isMergeableObject(e)) {
-            destination[i] = deepMerge(target[i], e, options);
-        } else if(target.indexOf(e) === -1) {
-            destination.push(cloneIfNecessary(e, options));
-        }
-    });
-    return destination;
-}
-
-function mergeObject<T>(target: any, source: any, options: DeepMergeOptions<T>): T {
-    let destination: any = {};
-    if(isMergeableObject(target)) {
-        Object.keys(target).forEach(function(key) {
-            destination[key] = cloneIfNecessary(target[key], options)
+export function mergeDeep(target: any, source: any): any {
+    target = JSON.parse(JSON.stringify(target));
+    source = JSON.parse(JSON.stringify(source));
+    let output = Object.assign({}, target);
+    if (isObject(target) && isObject(source)) {
+        Object.keys(source).forEach((key: any) => {
+            if (isObject(source[key])) {
+                if (!(key in target)) {
+                    Object.assign(output, { [key]: source[key] });
+                } else {
+                    output[key] = mergeDeep(target[key], source[key]);
+                }
+            } else {
+                Object.assign(output, { [key]: source[key] });
+            }
         });
     }
-    Object.keys(source).forEach(function(key) {
-        if(!isMergeableObject(source[key]) || !target[key]) {
-            destination[key] = cloneIfNecessary(source[key], options);
-        } else {
-            destination[key] = deepMerge(target[key], source[key], options);
-        }
-    });
-    return destination;
+    return output;
 }
-
-export interface DeepMergeOptions<T> {
-    clone?: boolean;
-
-    arrayMerge?(destination: T, source: T, options?: DeepMergeOptions<T>): T;
-}
-
-export function deepMerge<T>(target: T, source: T, options?: DeepMergeOptions<T>): T {
-    let array = Array.isArray(source);
-    options = options || {arrayMerge: defaultArrayMerge} as any;
-    let arrayMerge: any = options.arrayMerge || defaultArrayMerge;
-
-    if(array) {
-        return Array.isArray(target) ? arrayMerge(target, source, options) : cloneIfNecessary(source, options);
-    } else {
-        return mergeObject(target, source, options);
-    }
-}
-/** End deep merge **/
