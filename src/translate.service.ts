@@ -1,4 +1,4 @@
-import {Injectable, EventEmitter, Inject, OpaqueToken} from "@angular/core";
+import {Injectable, EventEmitter, Inject, InjectionToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import "rxjs/add/observable/of";
@@ -16,7 +16,7 @@ import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./miss
 import {TranslateParser} from "./translate.parser";
 import {deepMerge, isDefined} from "./util";
 
-export const USE_STORE = new OpaqueToken('USE_STORE');
+export const USE_STORE = new InjectionToken<string>('USE_STORE');
 
 export interface TranslationChangeEvent {
     translations: any;
