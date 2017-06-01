@@ -3,6 +3,7 @@ import {TranslateLoader, TranslateFakeLoader} from "./src/translate.loader";
 import {TranslateService} from "./src/translate.service";
 import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./src/missing-translation-handler";
 import {TranslateParser, TranslateDefaultParser} from "./src/translate.parser";
+import {TranslateCompiler, TranslateFakeCompiler} from "./src/translate.compiler";
 import {TranslateDirective} from "./src/translate.directive";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateStore} from "./src/translate.store";
@@ -12,11 +13,13 @@ export * from "./src/translate.loader";
 export * from "./src/translate.service";
 export * from "./src/missing-translation-handler";
 export * from "./src/translate.parser";
+export * from "./src/translate.compiler";
 export * from "./src/translate.directive";
 export * from "./src/translate.pipe";
 
 export interface TranslateModuleConfig {
     loader?: Provider;
+    compiler?: Provider;
     parser?: Provider;
     missingTranslationHandler?: Provider;
     // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
@@ -44,6 +47,7 @@ export class TranslateModule {
             ngModule: TranslateModule,
             providers: [
                 config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
+                config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
                 config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
                 TranslateStore,
@@ -63,6 +67,7 @@ export class TranslateModule {
             ngModule: TranslateModule,
             providers: [
                 config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
+                config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
                 config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
                 {provide: USE_STORE, useValue: config.isolate},

@@ -74,15 +74,16 @@ export class SharedModule { }
 
 When you lazy load a module, you should use the `forChild` static method to import the `TranslateModule`.
 
-Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/parser/missing translations handler.
+Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/compiler/parser/missing translations handler.
 You can also isolate the service by using `isolate: true`. In which case the service is a completely isolated instance (for translations, current lang, events, ...).
-Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/parser/handler even if you don't isolate the service).
+Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/compiler/parser/handler even if you don't isolate the service).
 
 ```ts
 @NgModule({
     imports: [
         TranslateModule.forChild({
             loader: {provide: TranslateLoader, useClass: CustomLoader},
+            compiler: {provide: TranslateCompiler, useClass: CustomCompiler},
             parser: {provide: TranslateParser, useClass: CustomParser},
             missingTranslationHandler: {provide: MissingTranslationHandler, useClass: CustomHandler},
             isolate: true
@@ -342,6 +343,16 @@ Once you've defined your loader, you can provide it in your configuration by add
 })
 export class AppModule { }
 ```
+
+#### How to use a compiler to preprocess translation values
+
+By default, translation values are added "as-is". You can configure a `compiler` that implements `TranslateCompiler` to pre-process translation values when they are added (either manually or by a loader). A compiler has the following methods:
+
+- `compile(value: string, lang: string): string | Function`: Compiles a string to a function or another string.
+- `compileTranslations(translations: any, lang: string): any`:  Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values. 
+
+Using a compiler opens the door for powerful pre-processing of translation values. As long as the compiler outputs a compatible interpolation string or an interpolation function, arbitrary input syntax can be supported.
+
 
 #### How to handle missing translations
 
