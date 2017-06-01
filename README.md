@@ -384,9 +384,10 @@ export class AppModule { }
 If you need it for some reason, you can use the `TranslateParser` service.
 
 #### Methods:
-- `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
+- `interpolate(expr: string | Function, params?: any): string`: Interpolates a string to replace parameters or calls the interpolation function with the parameters.
 
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
+    `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
 - `getValue(target: any, key: string): any`:  Gets a value from an object by composed key
      `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
 
