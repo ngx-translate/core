@@ -134,7 +134,7 @@ export class AppModule { }
 
 ##### AoT
 
-If you want to configure a custom `TranslateLoader` while using [AoT compilation](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) or [Ionic 2](http://ionic.io/), you must use an exported function instead of an inline function.
+If you want to configure a custom `TranslateLoader` while using [AoT compilation](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) or [Ionic](http://ionic.io/), you must use an exported function instead of an inline function.
 
 ```ts
 export function createTranslateLoader(http: Http) {
@@ -295,7 +295,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 	  // do something
 	});
     ```
-    
+
 #### Methods:
 
 - `setDefaultLang(lang: string)`: Sets the default language to use as a fallback
@@ -372,7 +372,7 @@ Setup the Missing Translation Handler in your module import by adding it to the 
         })
     ],
     providers: [
-        
+
     ],
     bootstrap: [AppComponent]
 })
