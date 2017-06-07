@@ -103,6 +103,17 @@ describe('TranslateService', () => {
         });
     });
 
+    it('should return they key when getting an object as the translation if supplying half of a key', () => {
+        translate.use('en');
+
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).not.toEqual({"SUBTEST": "Dit is een test"});
+            expect(res).toEqual('TEST');
+        });
+
+        mockBackendResponse(connection, '{"TEST": {"SUBTEST": "Dit is een test"}}');
+    });
+
     it("should return the key when you haven't defined any translation", () => {
         translate.get('TEST').subscribe((res: string) => {
             expect(res).toEqual('TEST');
