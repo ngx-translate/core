@@ -6,7 +6,7 @@ Hopefully it shouldn't take long to update all of your code and be up and runnin
 The main steps are:
 - update the imports
 - update the npm packages
-- replace the `TranslateStaticLoader` ()if you use it) with the `TranslateHttpLoader`
+- replace the `TranslateStaticLoader` (if you use it) with the `TranslateHttpLoader`
 - update the module import
 
 Here is a detailed list of the changes that you need to make:
