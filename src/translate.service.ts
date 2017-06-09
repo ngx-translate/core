@@ -345,11 +345,11 @@ export class TranslateService {
         }
 
         if(translations) {
-            res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
+            res = this.parser.parse(translations, key, interpolateParams);
         }
 
         if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
-            res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
+            res = this.parser.parse(this.translations[this.defaultLang], key, interpolateParams);
         }
 
         if(typeof res === "undefined") {

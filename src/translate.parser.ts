@@ -3,29 +3,25 @@ import {isDefined} from "./util";
 
 export abstract class TranslateParser {
     /**
-     * Interpolates a string to replace parameters
+     * Retrieves a translated value from the a set of translations and interpolates it with the parameters provided
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
-     * @param expr
+     * @param translations
+     * @param key
      * @param params
      * @returns {string}
      */
-    abstract interpolate(expr: string, params?: any): string;
-
-    /**
-     * Gets a value from an object by composed key
-     * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
-     * @param target
-     * @param key
-     * @returns {string}
-     */
-    abstract getValue(target: any, key: string): string
+    abstract parse(translations: any, key: any, params?: any): string
 }
 
 @Injectable()
 export class TranslateDefaultParser extends TranslateParser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
-    public interpolate(expr: string, params?: any): string {
+    public parse(translations: any, key: any, params?: any): string {
+        return this.interpolate(this.getValue(translations, key), params);
+    }
+
+    protected interpolate(expr: any, params?: any): string {
         if(typeof expr !== 'string' || !params) {
             return expr;
         }
@@ -36,8 +32,8 @@ export class TranslateDefaultParser extends TranslateParser {
         });
     }
 
-    getValue(target: any, key: string): string {
-        let keys = key.split('.');
+    protected getValue(target: any, key: any): string {
+        let keys = key.toString().split('.');
         key = '';
         do {
             key += keys.shift();
