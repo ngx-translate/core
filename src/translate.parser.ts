@@ -18,7 +18,7 @@ export class TranslateDefaultParser extends TranslateParser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
     public parse(translations: any, key: any, params?: any): string {
-        return this.interpolate(TranslateDefaultParser.getValue(translations, key), params);
+        return this.interpolate(this.getValue(translations, key), params);
     }
 
     protected interpolate(expr: any, params?: any): string {
@@ -27,12 +27,12 @@ export class TranslateDefaultParser extends TranslateParser {
         }
 
         return expr.replace(this.templateMatcher, (substring: string, b: string) => {
-            let r = TranslateDefaultParser.getValue(params, b);
+            let r = this.getValue(params, b);
             return isDefined(r) ? r : substring;
         });
     }
 
-    protected static getValue(target: any, key: any): string {
+    protected getValue(target: any, key: any): string {
         let keys = key.toString().split('.');
         key = '';
         do {
