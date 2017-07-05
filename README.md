@@ -342,6 +342,7 @@ Once you've defined your loader, you can provide it in your configuration by add
 })
 export class AppModule { }
 ```
+[Another custom loader example with translations stored in Firebase](FIREBASE_EXAMPLE.md)
 
 #### How to handle missing translations
 
