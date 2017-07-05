@@ -1,4 +1,4 @@
-##Example: Custom loader for translations stored in Firebase Real-time Database
+## Example: Custom loader for translations stored in Firebase Real-time Database
 
 Dependency: [angularfire2](https://github.com/angular/angularfire2)
 
