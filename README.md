@@ -98,6 +98,12 @@ By default, there is no loader available. You can add translations manually usin
 You can write your own loader, or import an existing one.
 For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using Http.
 
+To use it, you need to install the http-loader package from @ngx-translate:
+
+```sh
+npm install @ngx-translate/http-loader --save
+```
+
 Once you've decided which loader to use, you have to setup the `TranslateModule` to use it.
 
 Here is how you would use the `TranslateHttpLoader` to load translations from "/assets/i18n/[lang].json" (`[lang]` is the lang that you're using, for english it could be `en`):
