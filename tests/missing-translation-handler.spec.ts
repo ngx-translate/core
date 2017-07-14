@@ -10,8 +10,14 @@ import {
 } from "../index";
 
 let translations: any = {"TEST": "This is a test"};
+let fakeTranslation: any = {"NOT_USED": "not used"};
+
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
+        if (lang === 'fake') {
+            return Observable.of(fakeTranslation);
+        }
+
         return Observable.of(translations);
     }
 }
@@ -33,11 +39,12 @@ describe('MissingTranslationHandler', () => {
         }
     }
 
-    let prepare = ((handlerClass: Function) => {
+    let prepare = ((handlerClass: Function, defaultLang: boolean = true) => {
         TestBed.configureTestingModule({
             imports: [
                 TranslateModule.forRoot({
-                    loader: {provide: TranslateLoader, useClass: FakeLoader}
+                    loader: {provide: TranslateLoader, useClass: FakeLoader},
+                    useDefaultLang: defaultLang
                 })
             ],
             providers: [
@@ -181,5 +188,29 @@ describe('MissingTranslationHandler', () => {
             nonExistingKey2: 'nonExistingKey2',
             nonExistingKey3: 'nonExistingKey3'
         } as any);
+    });
+
+    it ('should not return default translation, but missing handler', () => {
+        prepare(Missing, false);
+        translate.use('en');
+        translate.use('fake');
+
+        spyOn(missingTranslationHandler, 'handle').and.callThrough();
+        translate.get('TEST').subscribe((res: string) => {
+            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'TEST'}));
+            //test that the instance of the last called argument is string
+            expect(res).toEqual('handled');
+        });
+    });
+
+    it ('should return default translation', () => {
+        prepare(Missing, true);
+        translate.use('en');
+        translate.use('fake');
+
+        spyOn(missingTranslationHandler, 'handle').and.callThrough();
+        translate.get('TEST').subscribe((res: string) => {
+            expect(res).toEqual('This is a test');
+        });
     });
 });

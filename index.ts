@@ -7,6 +7,7 @@ import {TranslateDirective} from "./src/translate.directive";
 import {TranslatePipe} from "./src/translate.pipe";
 import {TranslateStore} from "./src/translate.store";
 import {USE_STORE} from "./src/translate.service";
+import {USE_DEFAULT_LANG} from "./src/translate.service";
 
 export * from "./src/translate.loader";
 export * from "./src/translate.service";
@@ -21,6 +22,7 @@ export interface TranslateModuleConfig {
     missingTranslationHandler?: Provider;
     // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
     isolate?: boolean;
+    useDefaultLang?: boolean;
 }
 
 @NgModule({
@@ -48,6 +50,7 @@ export class TranslateModule {
                 config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
                 TranslateStore,
                 {provide: USE_STORE, useValue: config.isolate},
+                {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
                 TranslateService
             ]
         };
@@ -66,6 +69,7 @@ export class TranslateModule {
                 config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
                 config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
                 {provide: USE_STORE, useValue: config.isolate},
+                {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
                 TranslateService
             ]
         };
