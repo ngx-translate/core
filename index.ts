@@ -41,7 +41,7 @@ export class TranslateModule {
      * @param {TranslateModuleConfig} config
      * @returns {ModuleWithProviders}
      */
-    static forRoot(config: TranslateModuleConfig = {useDefaultLang: true}): ModuleWithProviders {
+    static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders {
         return {
             ngModule: TranslateModule,
             providers: [
@@ -61,7 +61,7 @@ export class TranslateModule {
      * @param {TranslateModuleConfig} config
      * @returns {ModuleWithProviders}
      */
-    static forChild(config: TranslateModuleConfig = {useDefaultLang: true}): ModuleWithProviders {
+    static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders {
         return {
             ngModule: TranslateModule,
             providers: [
