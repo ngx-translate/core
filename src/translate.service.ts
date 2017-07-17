@@ -6,7 +6,6 @@ import "rxjs/add/operator/concat";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/merge";
-import "rxjs/add/operator/switchMap";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
 
@@ -202,6 +201,11 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public use(lang: string): Observable<any> {
+        // don't change the language if the language given is already selected
+        if(lang === this.currentLang) {
+            return Observable.of(this.translations[lang]);
+        }
+        
         let pending: Observable<any> = this.retrieveTranslations(lang);
 
         if(typeof pending !== "undefined") {
