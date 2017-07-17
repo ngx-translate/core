@@ -475,11 +475,6 @@ export class TranslateService {
      * @param lang
      */
     private changeLang(lang: string): void {
-        // don't change the language if the language given is already selected
-        if(lang === this.currentLang) {
-            return;
-        }
-        
         this.currentLang = lang;
         this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
 
