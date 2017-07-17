@@ -17,6 +17,7 @@ import {TranslateParser} from "./translate.parser";
 import {mergeDeep, isDefined} from "./util";
 
 export const USE_STORE = new OpaqueToken('USE_STORE');
+export const USE_DEFAULT_LANG = new OpaqueToken('USE_DEFAULT_LANG');
 
 export interface TranslationChangeEvent {
     translations: any;
@@ -154,11 +155,13 @@ export class TranslateService {
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
      * @param isolate whether this service should use the store or not
+     * @param useDefaultLang whether we should use default language translation when current language translation is missing.
      */
     constructor(public store: TranslateStore,
                 public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
+                @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
                 @Inject(USE_STORE) private isolate: boolean = false) {
     }
 
@@ -348,7 +351,7 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
         }
 
-        if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang) {
+        if(typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang && this.useDefaultLang) {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
