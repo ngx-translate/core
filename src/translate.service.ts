@@ -161,7 +161,7 @@ export class TranslateService {
                 public currentLoader: TranslateLoader,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
-                @Inject(USE_DEFAULT_LANG)private useDefaultLang: boolean = true,
+                @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
                 @Inject(USE_STORE) private isolate: boolean = false) {
     }
 
