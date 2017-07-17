@@ -205,6 +205,11 @@ export class TranslateService {
      * @returns {Observable<*>}
      */
     public use(lang: string): Observable<any> {
+        // don't change the language if the language given is already selected
+        if(lang === this.currentLang) {
+            return Observable.of(this.translations[lang]);
+        }
+        
         let pending: Observable<any> = this.retrieveTranslations(lang);
 
         if(typeof pending !== "undefined") {
