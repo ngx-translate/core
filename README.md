@@ -104,7 +104,7 @@ To use it, you need to install the http-loader package from @ngx-translate:
 npm install @ngx-translate/http-loader --save
 ```
 
-**NB: if you're still on Angular >4.3, please use Http from @angular/http with http-loader@0.1.0.**
+**NB: if you're still on Angular <4.3, please use Http from @angular/http with http-loader@0.1.0.**
 
 Once you've decided which loader to use, you have to setup the `TranslateModule` to use it.
 
