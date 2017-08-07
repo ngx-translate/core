@@ -96,13 +96,15 @@ export class LazyLoadedModule { }
 
 By default, there is no loader available. You can add translations manually using `setTranslation` but it is better to use a loader.
 You can write your own loader, or import an existing one.
-For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using Http.
+For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using HttpClient.
 
 To use it, you need to install the http-loader package from @ngx-translate:
 
 ```sh
 npm install @ngx-translate/http-loader --save
 ```
+
+**NB: if you're still on Angular >4.3, please use Http from @angular/http with http-loader@0.1.0.**
 
 Once you've decided which loader to use, you have to setup the `TranslateModule` to use it.
 
@@ -143,19 +145,19 @@ export class AppModule { }
 If you want to configure a custom `TranslateLoader` while using [AoT compilation](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) or [Ionic](http://ionic.io/), you must use an exported function instead of an inline function.
 
 ```ts
-export function createTranslateLoader(http: Http) {
+export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 @NgModule({
     imports: [
         BrowserModule,
-        HttpModule,
+        HttpClientModule,
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
                 useFactory: (createTranslateLoader),
-                deps: [Http]
+                deps: [HttpClient]
             }
         })
     ],
