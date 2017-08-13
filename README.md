@@ -60,7 +60,7 @@ you can export the `TranslateModule` to make sure you don't have to import it in
 
 ```ts
 @NgModule({
-    exports: [
+    imports: [
         CommonModule,
         TranslateModule
     ]
