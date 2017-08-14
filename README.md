@@ -74,15 +74,16 @@ export class SharedModule { }
 
 When you lazy load a module, you should use the `forChild` static method to import the `TranslateModule`.
 
-Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/parser/missing translations handler.
+Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/compiler/parser/missing translations handler.
 You can also isolate the service by using `isolate: true`. In which case the service is a completely isolated instance (for translations, current lang, events, ...).
-Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/parser/handler even if you don't isolate the service).
+Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/compiler/parser/handler even if you don't isolate the service).
 
 ```ts
 @NgModule({
     imports: [
         TranslateModule.forChild({
             loader: {provide: TranslateLoader, useClass: CustomLoader},
+            compiler: {provide: TranslateCompiler, useClass: CustomCompiler},
             parser: {provide: TranslateParser, useClass: CustomParser},
             missingTranslationHandler: {provide: MissingTranslationHandler, useClass: CustomHandler},
             isolate: true
@@ -352,6 +353,16 @@ export class AppModule { }
 ```
 [Another custom loader example with translations stored in Firebase](FIREBASE_EXAMPLE.md)
 
+#### How to use a compiler to preprocess translation values
+
+By default, translation values are added "as-is". You can configure a `compiler` that implements `TranslateCompiler` to pre-process translation values when they are added (either manually or by a loader). A compiler has the following methods:
+
+- `compile(value: string, lang: string): string | Function`: Compiles a string to a function or another string.
+- `compileTranslations(translations: any, lang: string): any`:  Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values. 
+
+Using a compiler opens the door for powerful pre-processing of translation values. As long as the compiler outputs a compatible interpolation string or an interpolation function, arbitrary input syntax can be supported.
+
+
 #### How to handle missing translations
 
 You can setup a provider for the `MissingTranslationHandler` in the bootstrap of your application (recommended), or in the `providers` property of a component. It will be called when the requested translation is not available. The only required method is `handle` where you can do whatever you want. If this method returns a value or an observable (that should return a string), then this will be used. Just don't forget that it will be called synchronously from the `instant` method.
@@ -396,9 +407,10 @@ export class AppModule { }
 If you need it for some reason, you can use the `TranslateParser` service.
 
 #### Methods:
-- `interpolate(expr: string, params?: any): string`: Interpolates a string to replace parameters.
+- `interpolate(expr: string | Function, params?: any): string`: Interpolates a string to replace parameters or calls the interpolation function with the parameters.
 
     `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
+    `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
 - `getValue(target: any, key: string): any`:  Gets a value from an object by composed key
      `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
 

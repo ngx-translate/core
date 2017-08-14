@@ -12,6 +12,7 @@ import "rxjs/add/operator/take";
 
 import {TranslateStore} from "./translate.store";
 import {TranslateLoader} from "./translate.loader";
+import {TranslateCompiler} from "./translate.compiler";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateParser} from "./translate.parser";
 import {mergeDeep, isDefined} from "./util";
@@ -152,6 +153,7 @@ export class TranslateService {
      *
      * @param store an instance of the store (that is supposed to be unique)
      * @param currentLoader An instance of the loader currently used
+     * @param compiler An instance of the compiler currently used
      * @param parser An instance of the parser currently used
      * @param missingTranslationHandler A handler for missing translations.
      * @param isolate whether this service should use the store or not
@@ -159,6 +161,7 @@ export class TranslateService {
      */
     constructor(public store: TranslateStore,
                 public currentLoader: TranslateLoader,
+                public compiler: TranslateCompiler,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
                 @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
@@ -250,6 +253,7 @@ export class TranslateService {
 
     /**
      * Gets an object of translations for a given language with the current loader
+     * and passes it through the compiler
      * @param lang
      * @returns {Observable<*>}
      */
@@ -259,7 +263,7 @@ export class TranslateService {
 
         this.loadingTranslations.take(1)
             .subscribe((res: Object) => {
-                this.translations[lang] = res;
+                this.translations[lang] = this.compiler.compileTranslations(res, lang);
                 this.updateLangs();
                 this.pending = false;
             }, (err: any) => {
@@ -271,11 +275,13 @@ export class TranslateService {
 
     /**
      * Manually sets an object of translations for a given language
+     * after passing it through the compiler
      * @param lang
      * @param translations
      * @param shouldMerge
      */
     public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
+        translations = this.compiler.compileTranslations(translations, lang);
         if(shouldMerge && this.translations[lang]) {
             this.translations[lang] = mergeDeep(this.translations[lang], translations);
         } else {
@@ -462,13 +468,13 @@ export class TranslateService {
     }
 
     /**
-     * Sets the translated value of a key
+     * Sets the translated value of a key, after compiling it
      * @param key
      * @param value
      * @param lang
      */
     public set(key: string, value: string, lang: string = this.currentLang): void {
-        this.translations[lang][key] = value;
+        this.translations[lang][key] = this.compiler.compile(value, lang);
         this.updateLangs();
         this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
     }
