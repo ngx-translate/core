@@ -5,10 +5,12 @@ import "rxjs/add/observable/of";
 import "rxjs/add/operator/concat";
 import "rxjs/add/operator/share";
 import "rxjs/add/operator/map";
-import "rxjs/add/operator/merge";
+import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/switchMap";
 import "rxjs/add/operator/toArray";
 import "rxjs/add/operator/take";
+import "rxjs/add/operator/filter";
+import "rxjs/add/observable/from";
 
 import {TranslateStore} from "./translate.store";
 import {TranslateLoader} from "./translate.loader";
@@ -337,23 +339,19 @@ export class TranslateService {
                     observables = true;
                 }
             }
-            if(observables) {
-                let mergedObs: any;
-                for(let k of key) {
-                    let obs = typeof result[k].subscribe === "function" ? result[k] : Observable.of(result[k]);
-                    if(typeof mergedObs === "undefined") {
-                        mergedObs = obs;
-                    } else {
-                        mergedObs = mergedObs.merge(obs);
-                    }
-                }
-                return mergedObs.toArray().map((arr: Array<string>) => {
-                    let obj: any = {};
-                    arr.forEach((value: string, index: number) => {
-                        obj[key[index]] = value;
+            if (observables) {
+                return Observable.from(Object.keys(result))
+                    .filter(k => typeof result[k].subscribe === 'function')
+                    .mergeMap(k => {
+                        return result[k].map((val: any) => ({key: k, val}));
+                    })
+                    .toArray()
+                    .map((array: Array<{ key: string, val: any }>) => {
+                        return array.reduce((acc, keyValPair) => {
+                            acc[keyValPair.key] = keyValPair.val;
+                            return acc;
+                        }, result);
                     });
-                    return obj;
-                });
             }
             return result;
         }
