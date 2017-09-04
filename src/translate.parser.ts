@@ -9,7 +9,7 @@ export abstract class TranslateParser {
      * @param params
      * @returns {string}
      */
-    abstract interpolate(expr: string, params?: any): string;
+    abstract interpolate(expr: string | Function, params?: any): string;
 
     /**
      * Gets a value from an object by composed key
@@ -18,25 +18,29 @@ export abstract class TranslateParser {
      * @param key
      * @returns {string}
      */
-    abstract getValue(target: any, key: string): string
+    abstract getValue(target: any, key: string): any
 }
 
 @Injectable()
 export class TranslateDefaultParser extends TranslateParser {
     templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
-    public interpolate(expr: string, params?: any): string {
-        if(typeof expr !== 'string' || !params) {
-            return expr;
+    public interpolate(expr: string | Function, params?: any): string {
+        let result: string;
+
+        if(typeof expr === 'string') {
+            result = this.interpolateString(expr, params);
+        } else if(typeof expr === 'function') {
+            result =  this.interpolateFunction(expr, params);
+        } else {
+            // this should not happen, but an unrelated TranslateService test depends on it
+            result = expr as string;
         }
 
-        return expr.replace(this.templateMatcher, (substring: string, b: string) => {
-            let r = this.getValue(params, b);
-            return isDefined(r) ? r : substring;
-        });
+        return result;
     }
 
-    getValue(target: any, key: string): string {
+    getValue(target: any, key: string): any {
         let keys = key.split('.');
         key = '';
         do {
@@ -52,5 +56,20 @@ export class TranslateDefaultParser extends TranslateParser {
         } while(keys.length);
 
         return target;
+    }
+
+    private interpolateFunction(fn: Function, params?: any) {
+        return fn(params);
+    }
+
+    private interpolateString(expr: string, params?: any) {
+        if (!params) {
+            return expr;
+        }
+
+        return expr.replace(this.templateMatcher, (substring: string, b: string) => {
+            let r = this.getValue(params, b);
+            return isDefined(r) ? r : substring;
+        });
     }
 }
