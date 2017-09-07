@@ -404,7 +404,7 @@ export class TranslateService {
                     observer.error(err);
                 };
                 this.loadingTranslations.subscribe((res: any) => {
-                    res = this.getParsedResult(res, key, interpolateParams);
+                    res = this.getParsedResult(this.compiler.compileTranslations(res, this.currentLang), key, interpolateParams);
                     if(typeof res.subscribe === "function") {
                         res.subscribe(onComplete, onError);
                     } else {
