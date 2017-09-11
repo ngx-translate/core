@@ -1,12 +1,8 @@
 import { Component } from '@angular/core';
-import { Platform, Config } from 'ionic-angular';
-
-import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-
+import { StatusBar } from '@ionic-native/status-bar';
 import { TranslateService } from '@ngx-translate/core';
-
-import { TabsPage } from '../pages/tabs/tabs';
+import { Config, Platform } from 'ionic-angular';
 
 
 @Component({
@@ -14,7 +10,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 })
 export class MyApp {
 
-  rootPage: any = TabsPage;
+  rootPage: any = 'TabsPage';
 
   constructor(private platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private translate: TranslateService, private config: Config) {
     this.initTranslate();
@@ -32,6 +28,7 @@ export class MyApp {
   initTranslate() {
     // Set the default language for translation strings, and the current language.
     this.translate.setDefaultLang('en');
+
 
     if (this.translate.getBrowserLang() !== undefined) {
       this.translate.use(this.translate.getBrowserLang());
