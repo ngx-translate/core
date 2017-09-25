@@ -394,13 +394,17 @@ export class TranslateService {
                     observer.next(res);
                     observer.complete();
                 };
+                
+                 let next = (res: string) => {
+                    observer.next(res);
+                };
                 let onError = (err: any) => {
                     observer.error(err);
                 };
                 this.loadingTranslations.subscribe((res: any) => {
                     res = this.getParsedResult(res, key, interpolateParams);
                     if(typeof res.subscribe === "function") {
-                        res.subscribe(onComplete, onError);
+                        res.subscribe(next, onError);
                     } else {
                         onComplete(res);
                     }
