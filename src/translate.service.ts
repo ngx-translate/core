@@ -526,16 +526,16 @@ export class TranslateService {
      *
      * @returns string
      */
-    public getBrowserLang(): string {
+    public getBrowserLang(): string | null  {
         if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
-            return undefined;
+            return null;
         }
 
         let browserLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
         browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
 
         if(!browserLang) {
-            return undefined;
+            return null;
         }
 
         if(browserLang.indexOf('-') !== -1) {
