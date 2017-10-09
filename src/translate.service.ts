@@ -366,7 +366,7 @@ export class TranslateService {
             res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
         }
 
-        if(typeof res === "undefined") {
+        if(typeof res === "undefined" || res === "") {
             let params: MissingTranslationHandlerParams = {key, translateService: this};
             if(typeof interpolateParams !== 'undefined') {
                 params.interpolateParams = interpolateParams;
