@@ -14,6 +14,18 @@ export class TranslateStore {
     public currentLang: string = this.defaultLang;
 
     /**
+     * The lang currently used
+     * @type {string}
+     */
+    public sourceLang: string;
+
+    /**
+     * If source language should be translated
+     * @type {boolean}
+     */
+    public translateSourceLang: boolean;
+
+    /**
      * a list of translations per lang
      * @type {{}}
      */

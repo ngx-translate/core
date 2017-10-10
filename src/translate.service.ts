@@ -49,6 +49,8 @@ export class TranslateService {
     private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
     private _defaultLang: string;
     private _currentLang: string;
+    private _sourceLang: string;
+    private _translateSourceLang: boolean;
     private _langs: Array<string> = [];
     private _translations: any = {};
     private _translationRequests: any  = {};
@@ -98,6 +100,36 @@ export class TranslateService {
             this._defaultLang = defaultLang;
         } else {
             this.store.defaultLang = defaultLang;
+        }
+    }
+
+    /**
+     * The source lang if you use language keys instead of syntetic keys
+     */
+    get sourceLang(): string {
+        return this.isolate ? this._sourceLang : this.store.sourceLang;
+    }
+
+    set sourceLang(sourceLang: string) {
+        if(this.isolate) {
+            this._sourceLang = sourceLang;
+        } else {
+            this.store.sourceLang = sourceLang;
+        }
+    }
+    
+     /**
+     * The default lang to fallback when translations are missing on the current lang
+     */
+    get translateSourceLang(): boolean {
+        return this.isolate ? this._translateSourceLang : this.store.translateSourceLang;
+    }
+
+    set translateSourceLang(translateSourceLang: boolean) {
+        if(this.isolate) {
+            this._translateSourceLang = translateSourceLang;
+        } else {
+            this.store.translateSourceLang = translateSourceLang;
         }
     }
 
@@ -211,6 +243,10 @@ export class TranslateService {
         // don't change the language if the language given is already selected
         if(lang === this.currentLang) {
             return Observable.of(this.translations[lang]);
+        }
+        if((lang === this.sourceLang && !this.translateSourceLang)) {
+          this.changeLang(lang);
+          return Observable.of({});
         }
         
         let pending: Observable<any> = this.retrieveTranslations(lang);
@@ -387,6 +423,11 @@ export class TranslateService {
         if(!isDefined(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
+
+        if(this.sourceLang === this.currentLang && !this.translateSourceLang) {
+          return Observable.of(key);
+        }
+        
         // check if we are loading a new translation to use
         if(this.pending) {
             return Observable.create((observer: Observer<string>) => {
