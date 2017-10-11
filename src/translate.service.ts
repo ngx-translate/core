@@ -554,9 +554,9 @@ export class TranslateService {
      *
      * @returns string
      */
-    public getBrowserCultureLang(): string {
+    public getBrowserCultureLang(): string | null {
         if(typeof window === 'undefined' || typeof window.navigator === 'undefined') {
-            return undefined;
+            return null;
         }
 
         let browserCultureLang: any = window.navigator.languages ? window.navigator.languages[0] : null;

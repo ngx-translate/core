@@ -321,7 +321,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 - `reloadLang(lang: string): Observable<string|Object>`: Calls resetLang and retrieves the translations object for the current loader
 - `resetLang(lang: string)`: Removes the current translations for this lang. /!\ You will have to call `use`, `reloadLang` or `getTranslation` again to be able to get translations
 - `getBrowserLang(): string | null`: Returns the current browser lang if available, or null otherwise
-- `getBrowserCultureLang(): string | undefined`: Returns the current browser culture language name (e.g. "de-DE" if available, or undefined otherwise
+- `getBrowserCultureLang(): string | null`: Returns the current browser culture language name (e.g. "de-DE") if available, or null otherwise
 
 #### Write & use your own loader
 
