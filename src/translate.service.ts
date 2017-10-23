@@ -280,7 +280,7 @@ export class TranslateService {
      * @param translations
      * @param shouldMerge
      */
-    public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
+    public setTranslation(lang: string, translations: Object, shouldMerge: boolean = true): void {
         translations = this.compiler.compileTranslations(translations, lang);
         if(shouldMerge && this.translations[lang]) {
             this.translations[lang] = mergeDeep(this.translations[lang], translations);
