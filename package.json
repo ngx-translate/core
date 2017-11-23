@@ -1,13 +1,11 @@
 {
   "name": "@ngx-translate/core",
   "description": "The internationalization (i18n) library for Angular",
-  "version": "9.0.0",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "clean": "rimraf bundles coverage src/**/*.d.ts src/**/*.metadata.json src/**/*.js tests/**/*.d.ts tests/**/*.metadata.json tests/**/*.js index.d.ts index.metadata.json index.js",
     "commit": "git-cz",
     "lint": "npm run clean && tslint --project tsconfig.json lib/src/**/*.ts",
-    "release": "standard-version",
     "test": "karma start",
     "test-watch": "karma start --singleRun=false --autoWatch=true"
   },
@@ -67,7 +65,6 @@
     "rimraf": "2.6.2",
     "rxjs": "5.5.2",
     "source-map-loader": "0.2.3",
-    "standard-version": "^4.2.0",
     "ts-helpers": "1.1.2",
     "tslint": "5.8.0",
     "tslint-loader": "3.5.3",
