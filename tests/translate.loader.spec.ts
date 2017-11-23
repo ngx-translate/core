@@ -1,12 +1,13 @@
 import {Injector} from "@angular/core";
 import {TestBed, getTestBed} from "@angular/core/testing";
-import {TranslateService, TranslateModule, TranslateLoader} from "../index";
+import {TranslateService, TranslateModule, TranslateLoader} from "../lib/index";
 import {Observable} from "rxjs/Observable";
+import {of} from 'rxjs/observable/of';
 
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
-        return Observable.of(translations);
+        return of(translations);
     }
 }
 
@@ -45,7 +46,7 @@ describe('TranslateLoader', () => {
     it('should be able to provide any TranslateLoader', () => {
         class CustomLoader implements TranslateLoader {
             getTranslation(lang: string): Observable<any> {
-                return Observable.of({"TEST": "This is also a test"});
+                return of({"TEST": "This is also a test"});
             }
         }
         TestBed.configureTestingModule({

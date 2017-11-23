@@ -1,21 +1,18 @@
-import {Injectable, EventEmitter, Inject, InjectionToken} from "@angular/core";
+import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
-import "rxjs/add/observable/of";
-import "rxjs/add/operator/concat";
-import "rxjs/add/operator/share";
-import "rxjs/add/operator/map";
-import "rxjs/add/operator/merge";
-import "rxjs/add/operator/switchMap";
-import "rxjs/add/operator/toArray";
-import "rxjs/add/operator/take";
+import {concat, share, map, merge, switchMap, toArray, take} from "rxjs/operators"
+import {of} from "rxjs/observable/of";
+import {
+  MissingTranslationHandler,
+  MissingTranslationHandlerParams
+} from "./missing-translation-handler";
+import {TranslateCompiler} from "./translate.compiler";
+import {TranslateLoader} from "./translate.loader";
+import {TranslateParser} from "./translate.parser";
 
 import {TranslateStore} from "./translate.store";
-import {TranslateLoader} from "./translate.loader";
-import {TranslateCompiler} from "./translate.compiler";
-import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
-import {TranslateParser} from "./translate.parser";
-import {mergeDeep, isDefined} from "./util";
+import {isDefined, mergeDeep} from "./util";
 
 export const USE_STORE = new InjectionToken<string>('USE_STORE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -185,7 +182,7 @@ export class TranslateService {
                 this.defaultLang = lang;
             }
 
-            pending.take(1)
+            pending.pipe(take(1))
                 .subscribe((res: any) => {
                     this.changeDefaultLang(lang);
                 });
@@ -210,9 +207,9 @@ export class TranslateService {
     public use(lang: string): Observable<any> {
         // don't change the language if the language given is already selected
         if(lang === this.currentLang) {
-            return Observable.of(this.translations[lang]);
+            return of(this.translations[lang]);
         }
-        
+
         let pending: Observable<any> = this.retrieveTranslations(lang);
 
         if(typeof pending !== "undefined") {
@@ -221,7 +218,7 @@ export class TranslateService {
                 this.currentLang = lang;
             }
 
-            pending.take(1)
+            pending.pipe(take(1))
                 .subscribe((res: any) => {
                     this.changeLang(lang);
                 });
@@ -230,7 +227,7 @@ export class TranslateService {
         } else { // we have this language, return an Observable
             this.changeLang(lang);
 
-            return Observable.of(this.translations[lang]);
+            return of(this.translations[lang]);
         }
     }
 
@@ -259,10 +256,10 @@ export class TranslateService {
      */
     public getTranslation(lang: string): Observable<any> {
         this.pending = true;
-        this.loadingTranslations = this.currentLoader.getTranslation(lang).share();
+        this.loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
 
-        this.loadingTranslations.take(1)
-            .subscribe((res: Object) => {
+        this.loadingTranslations.pipe(take(1))
+          .subscribe((res: Object) => {
                 this.translations[lang] = this.compiler.compileTranslations(res, lang);
                 this.updateLangs();
                 this.pending = false;
@@ -338,22 +335,25 @@ export class TranslateService {
                 }
             }
             if(observables) {
-                let mergedObs: any;
+                let mergedObs: Observable<string>;
                 for(let k of key) {
-                    let obs = typeof result[k].subscribe === "function" ? result[k] : Observable.of(result[k]);
+                    let obs = typeof result[k].subscribe === "function" ? result[k] : of(result[k] as string);
                     if(typeof mergedObs === "undefined") {
                         mergedObs = obs;
                     } else {
-                        mergedObs = mergedObs.merge(obs);
+                        mergedObs = mergedObs.pipe(merge(obs));
                     }
                 }
-                return mergedObs.toArray().map((arr: Array<string>) => {
+                return mergedObs.pipe(
+                  toArray(),
+                  map((arr: Array<string>) => {
                     let obj: any = {};
                     arr.forEach((value: string, index: number) => {
-                        obj[key[index]] = value;
+                      obj[key[index]] = value;
                     });
                     return obj;
-                });
+                  })
+                );
             }
             return result;
         }
@@ -411,7 +411,7 @@ export class TranslateService {
             if(typeof res.subscribe === "function") {
                 return res;
             } else {
-                return Observable.of(res);
+                return of(res);
             }
         }
     }
@@ -429,15 +429,19 @@ export class TranslateService {
         }
 
         return this
-            .get(key, interpolateParams)
-            .concat(this.onLangChange.switchMap((event: LangChangeEvent) => {
+          .get(key, interpolateParams)
+          .pipe(
+            concat(this.onLangChange.pipe(
+              switchMap((event: LangChangeEvent) => {
                 const res = this.getParsedResult(event.translations, key, interpolateParams);
-                if(typeof res.subscribe === "function") {
-                    return res;
+                if (typeof res.subscribe === "function") {
+                  return res;
                 } else {
-                    return Observable.of(res);
+                  return of(res);
                 }
-            }));
+              })
+            ))
+          );
     }
 
     /**

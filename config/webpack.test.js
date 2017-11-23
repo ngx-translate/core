@@ -22,7 +22,7 @@ module.exports = {
 
     resolve: {
         extensions: ['.ts', '.js'],
-        modules: [helpers.root('src'), 'node_modules']
+        modules: [helpers.root('lib/src'), 'node_modules']
     },
 
     module: {
@@ -55,7 +55,7 @@ module.exports = {
             enforce: 'post',
             test: /\.(js|ts)$/,
             loader: 'istanbul-instrumenter-loader',
-            include: helpers.root('src'),
+            include: helpers.root('lib/src'),
             exclude: [/\.spec\.ts$/, /\.e2e\.ts$/, /node_modules/]
         }]
     },
@@ -64,7 +64,7 @@ module.exports = {
         // fix the warning in ./~/@angular/core/src/linker/system_js_ng_module_factory_loader.js
         new webpack.ContextReplacementPlugin(
             /angular(\\|\/)core(\\|\/)@angular/,
-            helpers.root('./src')
+            helpers.root('lib/src')
         ),
 
         new LoaderOptionsPlugin({
@@ -80,7 +80,7 @@ module.exports = {
                 tslint: {
                     emitErrors: false,
                     failOnHint: false,
-                    resourcePath: 'src'
+                    resourcePath: 'lib/src'
                 }
             }
         })

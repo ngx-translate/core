@@ -1,28 +1,20 @@
 language: node_js
-
 cache: yarn
-
 sudo: false
-
 notifications:
   email: false
-
 node_js:
-  - '7'
-
-branches:
-  except:
-    - "/^v\\d+\\.\\d+\\.\\d+$/"
-
+  - '8'
 before_install:
   - export CHROME_BIN=chromium-browser
-
-before_script:
-  - npm prune
-
 after_success:
-  - npm run semantic-release
-
+  - npm run build
+  - cd dist
+  - yarn install
+  - yarn semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start

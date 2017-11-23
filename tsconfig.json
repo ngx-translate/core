@@ -16,17 +16,13 @@
     "lib": ["es2015", "dom"]
   },
   "files": [
-    "index.ts",
-    "./src/translate.pipe.ts",
-    "./src/translate.service.ts",
-    "./src/translate.parser.ts",
-    "tests/translate.parser.spec.ts",
-    "tests/translate.service.spec.ts",
-    "tests/translate.pipe.spec.ts"
+    "lib/index.ts"
   ],
   "exclude": [
     "node_modules",
-    "bundles"
+    "dist",
+    "examples",
+    "tests"
   ],
   "angularCompilerOptions": {
     "strictMetadataEmit": true,

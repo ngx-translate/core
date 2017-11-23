@@ -1,12 +1,12 @@
 # @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://img.shields.io/npm/v/@ngx-translate/core.svg)](https://www.npmjs.com/package/@ngx-translate/core)
 
-The internationalization (i18n) library for Angular 2+.
+The internationalization (i18n) library for Angular.
 
 Simple example using ngx-translate: https://plnkr.co/edit/WccVZSBM0rUgq2sXSUbe?p=preview
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
-**This is the documentation for the 6.x version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
+**This is the documentation for the 6+ version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
 
 * [Installation](#installation)
 * [Usage](#usage)

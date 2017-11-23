@@ -3,7 +3,7 @@ import {Location} from '@angular/common';
 import {Route, Router, RouterModule} from "@angular/router";
 import {SpyNgModuleFactoryLoader, RouterTestingModule} from "@angular/router/testing";
 import {ComponentFixture, TestBed, tick, inject, fakeAsync, getTestBed} from "@angular/core/testing";
-import {TranslateModule, TranslateService} from "../index";
+import {TranslateModule, TranslateService} from "../lib/index";
 
 @Component({
     selector: 'root-cmp',

@@ -1,13 +1,14 @@
 import {Injector} from "@angular/core";
 import {TestBed, getTestBed} from "@angular/core/testing";
-import {TranslateService, TranslateModule, TranslateLoader, TranslateCompiler, TranslateFakeCompiler} from "../index";
+import {TranslateService, TranslateModule, TranslateLoader, TranslateCompiler, TranslateFakeCompiler} from "../lib/index";
 import {Observable} from "rxjs/Observable";
+import {of} from 'rxjs/observable/of';
 
 let translations: any = {LOAD: 'This is a test'};
 
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
-        return Observable.of(translations);
+        return of(translations);
     }
 }
 

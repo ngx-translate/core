@@ -18,6 +18,8 @@ npm-debug.log
 coverage
 *.metadata.json
 bundles
+build
+dist
 
 #################
 ## JetBrains

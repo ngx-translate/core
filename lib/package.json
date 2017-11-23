@@ -1,0 +1,31 @@
+{
+  "name": "@ngx-translate/core",
+  "description": "The internationalization (i18n) library for Angular",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngx-translate/core.git"
+  },
+  "keywords": [
+    "angular",
+    "angular 2",
+    "translate",
+    "i18n",
+    "ngx-translate"
+  ],
+  "author": "Olivier Combe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ngx-translate/core/issues"
+  },
+  "homepage": "https://github.com/ocombe/ngx-translate",
+  "peerDependencies": {
+    "@angular/core": ">=5.0.0",
+    "rxjs": ">=5.5.2"
+  },
+  "devDependencies": {
+    "semantic-release": "8.2.0"
+  },
+  "scripts": {
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  }
+}
