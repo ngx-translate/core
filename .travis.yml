@@ -7,8 +7,9 @@ node_js:
   - '8'
 before_install:
   - export CHROME_BIN=chromium-browser
+  - npm i -g npm@3 # fix for https://github.com/npm/npm/issues/19222
 after_success:
-  - npm run build
+  - yarn build
   - cd dist
   - yarn install
   - yarn semantic-release
