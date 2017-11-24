@@ -26,6 +26,6 @@
     "semantic-release": "8.2.3"
   },
   "scripts": {
-    "semantic-release": "semantic-release pre && npm publish"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
 }

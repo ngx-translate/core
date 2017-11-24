@@ -10,10 +10,9 @@ before_install:
   - npm i -g npm@3 # fix for https://github.com/npm/npm/issues/19222
 after_success:
   - yarn build
+  - cp .git dist/ -r # required by semantic release
   - cd dist
   - yarn install
-  - yarn semantic-release
-  - cd ..
   - yarn semantic-release
 branches:
   except:

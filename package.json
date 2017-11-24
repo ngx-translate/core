@@ -7,8 +7,7 @@
     "commit": "git-cz",
     "lint": "npm run clean && tslint --project tsconfig.json lib/src/**/*.ts",
     "test": "karma start",
-    "test-watch": "karma start --singleRun=false --autoWatch=true",
-    "semantic-release": "semantic-release pre && semantic-release post"
+    "test-watch": "karma start --singleRun=false --autoWatch=true"
   },
   "repository": {
     "type": "git",
@@ -65,7 +64,6 @@
     "reflect-metadata": "0.1.10",
     "rimraf": "2.6.2",
     "rxjs": "5.5.2",
-    "semantic-release": "8.2.3",
     "source-map-loader": "0.2.3",
     "ts-helpers": "1.1.2",
     "tslint": "5.8.0",
