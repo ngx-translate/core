@@ -1,7 +1,13 @@
 import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
-import {concat, share, map, merge, switchMap, toArray, take} from "rxjs/operators"
+import {concat} from "rxjs/operators/concat";
+import {share} from "rxjs/operators/share";
+import {map} from "rxjs/operators/map";
+import {merge} from "rxjs/operators/merge";
+import {switchMap} from "rxjs/operators/switchMap";
+import {toArray} from "rxjs/operators/toArray";
+import {take} from "rxjs/operators/take";
 import {of} from "rxjs/observable/of";
 import {
   MissingTranslationHandler,
