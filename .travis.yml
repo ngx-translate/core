@@ -13,6 +13,8 @@ after_success:
   - cd dist
   - yarn install
   - yarn semantic-release
+  - cd ..
+  - yarn semantic-release
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/
