@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/ngx-translate/core/issues"
   },
-  "homepage": "https://github.com/ocombe/ngx-translate",
+  "homepage": "https://github.com/ngx-translate/core",
   "peerDependencies": {
     "@angular/core": ">=5.0.0",
     "rxjs": ">=5.5.2"
