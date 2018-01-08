@@ -24,6 +24,16 @@ First you need to install the npm module:
 npm install @ngx-translate/core --save
 ```
 
+---
+
+**NB: If you still use the Angular 4** get the latest compatible version ([7.2.2](https://github.com/ngx-translate/core/releases/tag/v7.2.2)):
+
+```sh
+npm install @ngx-translate/core@^7.2.2 --save
+```
+
+---
+
 **If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/XXwyUYS6ZL7qVD9I2l0g?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
 If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
 
