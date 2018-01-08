@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+  "src": "lib",
+  "dest": "dist",
+  "workingDirectory": ".ng_build",
+  "lib": {
+    "entryFile": "index.ts",
+    "externals": {
+      "rxjs/operators": "Rx.Observable.prototype",
+      "rxjs/operator": "Rx.Observable.prototype",
+      "rxjs/observable": "Rx.Observable",
+      "rxjs/operators/share": "Rx.Observable.prototype",
+      "rxjs/operators/map": "Rx.Observable.prototype",
+      "rxjs/operators/merge": "Rx.Observable.prototype",
+      "rxjs/operators/switchMap": "Rx.Observable.prototype",
+      "rxjs/operators/toArray": "Rx.Observable.prototype",
+      "rxjs/operators/take": "Rx.Observable.prototype"
+    }
+  }
+}

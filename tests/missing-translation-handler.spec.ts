@@ -1,13 +1,14 @@
 import {Injector} from "@angular/core";
 import {TestBed, getTestBed} from "@angular/core/testing";
 import {Observable} from "rxjs/Observable";
+import {of} from 'rxjs/observable/of';
 import {
     TranslateService,
     MissingTranslationHandler,
     MissingTranslationHandlerParams,
     TranslateModule,
     TranslateLoader
-} from "../index";
+} from "../lib/index";
 
 let translations: any = {"TEST": "This is a test"};
 let fakeTranslation: any = {"NOT_USED": "not used"};
@@ -15,10 +16,10 @@ let fakeTranslation: any = {"NOT_USED": "not used"};
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
         if (lang === 'fake') {
-            return Observable.of(fakeTranslation);
+            return of(fakeTranslation);
         }
 
-        return Observable.of(translations);
+        return of(translations);
     }
 }
 
@@ -35,7 +36,7 @@ describe('MissingTranslationHandler', () => {
 
     class MissingObs implements MissingTranslationHandler {
         handle(params: MissingTranslationHandlerParams): Observable<any> {
-            return Observable.of(`handled: ${params.key}`);
+            return of(`handled: ${params.key}`);
         }
     }
 

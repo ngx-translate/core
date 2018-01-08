@@ -1,28 +1,22 @@
 language: node_js
-
 cache: yarn
-
 sudo: false
-
 notifications:
   email: false
-
 node_js:
-  - '7'
-
-branches:
-  except:
-    - "/^v\\d+\\.\\d+\\.\\d+$/"
-
+  - '8'
 before_install:
   - export CHROME_BIN=chromium-browser
-
-before_script:
-  - npm prune
-
+  - npm i -g npm@3 # fix for https://github.com/npm/npm/issues/19222
 after_success:
-  - npm run semantic-release
-
+  - yarn build
+  - cp .git dist/ -r # required by semantic release
+  - cd dist
+  - yarn install
+  - yarn semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start

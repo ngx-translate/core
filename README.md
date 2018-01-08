@@ -1,12 +1,12 @@
 # @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://img.shields.io/npm/v/@ngx-translate/core.svg)](https://www.npmjs.com/package/@ngx-translate/core)
 
-The internationalization (i18n) library for Angular 2+.
+The internationalization (i18n) library for Angular.
 
-Simple example using ngx-translate: https://plnkr.co/edit/WccVZSBM0rUgq2sXSUbe?p=preview
+Simple example using ngx-translate: https://plnkr.co/edit/XXwyUYS6ZL7qVD9I2l0g?p=preview
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
-**This is the documentation for the 6.x version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
+**This is the documentation for the 6+ version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
 
 * [Installation](#installation)
 * [Usage](#usage)
@@ -24,7 +24,17 @@ First you need to install the npm module:
 npm install @ngx-translate/core --save
 ```
 
-**If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/WccVZSBM0rUgq2sXSUbe?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
+---
+
+**NB: If you still use the Angular 4** get the latest compatible version ([7.2.2](https://github.com/ngx-translate/core/releases/tag/v7.2.2)):
+
+```sh
+npm install @ngx-translate/core@^7.2.2 --save
+```
+
+---
+
+**If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/XXwyUYS6ZL7qVD9I2l0g?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
 If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
 
 
@@ -430,6 +440,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [.po files Loader](https://github.com/biesbjerg/ngx-translate-po-http-loader) by @biesbjerg: Use .po translation files with ngx-translate
 - [ngx-translate-extract](https://github.com/biesbjerg/ngx-translate-extract) by @biesbjerg: Extract translatable strings from your projects
 - [MessageFormat Compiler](https://github.com/lephyrus/ngx-translate-messageformat-compiler) by @lephyrus: Compiler for ngx-translate that uses messageformat.js to compile translations using ICU syntax for handling pluralization, gender, and more
+- [ngx-translate-zombies](https://marketplace.visualstudio.com/items?itemName=seveseves.ngx-translate-zombies) by @seveves: A vscode extension that finds unused translation keys and shows them in a diff view (so called zombies).
 
 ## Additional Framework Support
 

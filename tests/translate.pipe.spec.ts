@@ -1,8 +1,8 @@
-import {TranslatePipe} from '../src/translate.pipe';
-import {TranslateService, TranslateModule, TranslateLoader, LangChangeEvent, DefaultLangChangeEvent} from "../index";
+import {TranslatePipe, TranslateService, TranslateModule, TranslateLoader, LangChangeEvent, DefaultLangChangeEvent} from "../lib/index";
 import {Component, Injector, ChangeDetectorRef, ChangeDetectionStrategy, Injectable, ViewContainerRef} from "@angular/core";
 import {getTestBed, TestBed} from "@angular/core/testing";
 import {Observable} from "rxjs/Observable";
+import {of} from 'rxjs/observable/of';
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
     markForCheck(): void {}
@@ -33,7 +33,7 @@ class App {
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
-        return Observable.of(translations);
+        return of(translations);
     }
 }
 

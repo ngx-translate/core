@@ -1,7 +1,0 @@
-{
-  "HOME": {
-    "TITLE": "Bonjour Angular 2 avec ngx-translate !",
-    "SELECT": "Changer la langue"
-  },
-  "LAZY": "Je suis chargé de façon asynchrone (lazy load)!"
-}

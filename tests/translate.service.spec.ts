@@ -1,17 +1,15 @@
 import {Injector} from "@angular/core";
-import {TranslateService, TranslateLoader, LangChangeEvent, TranslationChangeEvent, TranslateModule} from '../index';
+import {TranslateService, TranslateLoader, LangChangeEvent, TranslationChangeEvent, TranslateModule} from '../lib/index';
 import {Observable} from "rxjs/Observable";
 import {getTestBed, TestBed, fakeAsync, tick} from "@angular/core/testing";
-
-import 'rxjs/add/observable/timer';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/zip';
+import {take, toArray, mapTo, zip} from 'rxjs/operators';
+import {timer} from 'rxjs/observable/timer';
+import {of} from 'rxjs/observable/of';
 
 let translations: any = {"TEST": "This is a test"};
 class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
-        return Observable.of(translations);
+        return of(translations);
     }
 }
 
@@ -222,7 +220,7 @@ describe('TranslateService', () => {
         translations = {"TEST": "This is a test"};
         translate.use('en');
 
-        translate.stream('TEST').zip(translate.get('TEST')).subscribe((value: [string, string]) => {
+        translate.stream('TEST').pipe(zip(translate.get('TEST'))).subscribe((value: [string, string]) => {
             const [streamed, nonStreamed] = value;
             expect(streamed).toEqual('This is a test');
             expect(streamed).toEqual(nonStreamed);
@@ -234,7 +232,7 @@ describe('TranslateService', () => {
         translations = {"TEST": "This is a test"};
         translate.use('en');
 
-        translate.stream('TEST').take(3).toArray().subscribe((res: string[]) => {
+        translate.stream('TEST').pipe(take(3), toArray()).subscribe((res: string[]) => {
             const expected = ['This is a test', 'Dit is een test', 'This is a test'];
             expect(res).toEqual(expected);
             done();
@@ -251,7 +249,7 @@ describe('TranslateService', () => {
         translate.setTranslation('en', en);
         translate.use('en');
 
-        translate.stream(['TEST', 'TEST2']).take(3).toArray().subscribe((res: any[]) => {
+        translate.stream(['TEST', 'TEST2']).pipe(take(3), toArray()).subscribe((res: any[]) => {
             const expected = [en, nl, en];
             expect(res).toEqual(expected);
             done();
@@ -266,7 +264,7 @@ describe('TranslateService', () => {
         translations = {"TEST": "This is a test {{param}}"};
         translate.use('en');
 
-        translate.stream('TEST', { param: 'with param' }).take(3).toArray().subscribe((res: string[]) => {
+        translate.stream('TEST', { param: 'with param' }).pipe(take(3), toArray()).subscribe((res: string[]) => {
             const expected = [
                 'This is a test with param',
                 'Dit is een test with param',
@@ -390,7 +388,7 @@ describe('TranslateService', () => {
         let getTranslationCalls = 0;
         spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
             getTranslationCalls += 1;
-            return Observable.timer(1000).mapTo(Observable.of(translations));
+            return timer(1000).pipe(mapTo(of(translations)));
         });
         translate.use('en');
         translate.use('en');
