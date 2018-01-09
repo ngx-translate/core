@@ -61,8 +61,6 @@ export function isObject(item: any): boolean {
 }
 
 export function mergeDeep(target: any, source: any): any {
-    target = JSON.parse(JSON.stringify(target));
-    source = JSON.parse(JSON.stringify(source));
     let output = Object.assign({}, target);
     if (isObject(target) && isObject(source)) {
         Object.keys(source).forEach((key: any) => {
