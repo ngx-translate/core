@@ -572,6 +572,6 @@ export class TranslateService {
         let browserCultureLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
         browserCultureLang = browserCultureLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
 
-        return browserCultureLang;
+        return browserCultureLang || null;
     }
 }
