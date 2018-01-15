@@ -183,6 +183,20 @@ describe('TranslateService', () => {
         });
     });
 
+    it("should merge non-valid JSON translations if option shouldMerge is true", () => {
+        translations = {};
+        translate.setTranslation('en', { "TEST": { "sub1": () => "value1" } }, true);
+        translate.setTranslation('en', { "TEST": { "sub2": () => "value2" } }, true);
+        translate.use('en');
+
+        translate.get('TEST.sub1').subscribe((res: string) => {
+          expect(res).toEqual('value1');
+        });
+        translate.get('TEST.sub2').subscribe((res: string) => {
+          expect(res).toEqual('value2');
+        });
+    });
+
     it("shouldn't call the current loader if you set the translation yourself", (done: Function) => {
         translations = {};
         translate.setTranslation('en', {"TEST": "This is a test"});
