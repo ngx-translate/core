@@ -146,7 +146,7 @@ export class TranslateService {
 
     set translations(translations: any) {
         if(this.isolate) {
-            this._currentLang = translations;
+            this._translations = translations;
         } else {
             this.store.translations = translations;
         }
