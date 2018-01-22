@@ -264,7 +264,7 @@ export class TranslateService {
         this.pending = true;
         this.loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
 
-        this.loadingTranslations.pipe()
+        this.loadingTranslations
           .subscribe((res: Object) => {
                 this.translations[lang] = this.compiler.compileTranslations(res, lang);
                 //Merge the new values for the translation with the old ones.
