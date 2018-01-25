@@ -13,6 +13,7 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
 * [API](#api)
 * [FAQ](#faq)
 * [Plugins](#plugins)
+* [Editors](#editors)
 * [Additional Framework Support](#additional-framework-support)
 
 
@@ -441,6 +442,9 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [ngx-translate-extract](https://github.com/biesbjerg/ngx-translate-extract) by @biesbjerg: Extract translatable strings from your projects
 - [MessageFormat Compiler](https://github.com/lephyrus/ngx-translate-messageformat-compiler) by @lephyrus: Compiler for ngx-translate that uses messageformat.js to compile translations using ICU syntax for handling pluralization, gender, and more
 - [ngx-translate-zombies](https://marketplace.visualstudio.com/items?itemName=seveseves.ngx-translate-zombies) by @seveves: A vscode extension that finds unused translation keys and shows them in a diff view (so called zombies).
+
+## Editors
+- [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
 
 ## Additional Framework Support
 
