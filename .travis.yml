@@ -11,6 +11,7 @@ before_install:
 after_success:
   - yarn build
   - cp .git dist/ -r # required by semantic release
+  - cp README.md dist/
   - cd dist
   - yarn install
   - yarn semantic-release
