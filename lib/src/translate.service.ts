@@ -249,7 +249,7 @@ export class TranslateService {
         let pending: Observable<any>;
 
         // if this language is unavailable, ask for it
-        if(!this._fetchedLangs.includes(lang)) {
+        if(this._fetchedLangs.indexOf(lang) === -1) {
             this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
             pending = this._translationRequests[lang];
         }
