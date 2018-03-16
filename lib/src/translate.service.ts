@@ -1,4 +1,4 @@
-import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
+import {EventEmitter, Inject, Injectable, InjectionToken, NgZone} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {Observer} from "rxjs/Observer";
 import {concat} from "rxjs/operators/concat";
@@ -169,6 +169,7 @@ export class TranslateService {
                 public compiler: TranslateCompiler,
                 public parser: TranslateParser,
                 public missingTranslationHandler: MissingTranslationHandler,
+                public zone: NgZone,
                 @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
                 @Inject(USE_STORE) private isolate: boolean = false,
                 @Inject(SHOULD_MERGE) private shouldMerge: boolean = false) {
@@ -270,13 +271,20 @@ export class TranslateService {
 
         this.loadingTranslations.pipe(take(1))
           .subscribe((res: Object) => {
-                if(this.shouldMerge && this.translations[lang]) {
-                    this.translations[lang] = mergeDeep(this.translations[lang], this.compiler.compileTranslations(res, lang));
+                const translations = this.compiler.compileTranslations(res, lang);
+                const merge: boolean = this.shouldMerge && (this.translations[lang] !== undefined);
+                if(merge) {
+                    this.translations[lang] = mergeDeep(this.translations[lang], translations);
                 } else {
-                    this.translations[lang] = this.compiler.compileTranslations(res, lang);
+                    this.translations[lang] = translations;
                 }
                 this.updateLangs();
                 this.pending = false;
+                if(merge) {
+                    this.zone.run(() => {
+                        setTimeout(() => this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]}), 0);
+                    });
+                }
             }, (err: any) => {
                 this.pending = false;
             });
