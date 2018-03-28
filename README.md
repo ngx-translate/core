@@ -1,4 +1,4 @@
-# @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://img.shields.io/npm/v/@ngx-translate/core.svg)](https://www.npmjs.com/package/@ngx-translate/core)
+# @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
 The internationalization (i18n) library for Angular.
 
