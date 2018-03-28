@@ -12,7 +12,9 @@
 
 
 **Reproduction of the problem**
-If the current behavior is a bug or you can illustrate your feature request better with an example, please provide the steps to reproduce and if possible a minimal demo of the problem via https://plnkr.co or similar. You can use this template as a starting point: http://plnkr.co/edit/tpl:01UjWY3TKfP6pgwXKuEa
+If the current behavior is a bug or you can illustrate your feature request better with an example,
+please provide the steps to reproduce and if possible a minimal demo of the problem via https://stackblitz.com/ or https://plnkr.co.
+You can use this template as a starting point: https://stackblitz.com/github/ngx-translate/example
 
 
 **What is the expected behavior?**
@@ -23,8 +25,8 @@ If the current behavior is a bug or you can illustrate your feature request bett
 
 **Please tell us about your environment:**
 
-* **ngx-translate version:** x.x.x
+* **ngx-translate version:** 10.x.x
 
-* **Angular version:** 2.x.x
+* **Angular version:** 6.x.x
  
 * **Browser:** [all | Chrome XX | Firefox XX | IE XX | Safari XX | Mobile Chrome XX | Android X.X Web Browser | iOS XX Safari | iOS XX UIWebView | iOS XX WKWebView ]

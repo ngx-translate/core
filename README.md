@@ -2,7 +2,7 @@
 
 The internationalization (i18n) library for Angular.
 
-Simple example using ngx-translate: https://plnkr.co/edit/01UjWY3TKfP6pgwXKuEa?p=preview
+Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/example
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
