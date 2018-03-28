@@ -2,8 +2,9 @@
   "name": "@ngx-translate/core",
   "description": "The internationalization (i18n) library for Angular",
   "scripts": {
+    "prebuild": "npm run clean",
     "build": "ng-packagr -p lib/ng-package.json && mv lib/dist ./ && mv lib/dist.tgz ./",
-    "clean": "rimraf bundles coverage src/**/*.d.ts src/**/*.metadata.json src/**/*.js tests/**/*.d.ts tests/**/*.metadata.json tests/**/*.js index.d.ts index.metadata.json index.js",
+    "clean": "rimraf dist dist.tgz bundles coverage src/**/*.d.ts src/**/*.metadata.json src/**/*.js tests/**/*.d.ts tests/**/*.metadata.json tests/**/*.js index.d.ts index.metadata.json index.js",
     "commit": "git-cz",
     "lint": "npm run clean && tslint --project tsconfig.json lib/src/**/*.ts",
     "test": "karma start",
