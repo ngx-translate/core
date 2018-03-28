@@ -20,6 +20,7 @@ coverage
 bundles
 build
 dist
+dist.tgz
 
 #################
 ## JetBrains

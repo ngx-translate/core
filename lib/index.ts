@@ -41,8 +41,6 @@ export interface TranslateModuleConfig {
 export class TranslateModule {
     /**
      * Use this method in your root module to provide the TranslateService
-     * @param {TranslateModuleConfig} config
-     * @returns {ModuleWithProviders}
      */
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders {
         return {
@@ -62,8 +60,6 @@ export class TranslateModule {
 
     /**
      * Use this method in your other (non root) modules to import the directive/pipe
-     * @param {TranslateModuleConfig} config
-     * @returns {ModuleWithProviders}
      */
     static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders {
         return {
