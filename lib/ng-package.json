@@ -3,6 +3,6 @@
   "dest": "dist",
   "workingDirectory": ".ng_build",
   "lib": {
-    "entryFile": "lib/index.ts"
+    "entryFile": "index.ts"
   }
 }
