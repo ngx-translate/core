@@ -137,6 +137,28 @@ describe('TranslateDirective', () => {
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual("C'est un test");
   });
 
+  it('should update the DOM when the lang changes and the translation ends with space', () => {
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('TEST');
+
+    const en="  This is a test - with spaces ";
+    const fr="  C'est un test - pardon, je ne parle pas francais :) ";
+
+    translate.setTranslation('en', {"TEST": en});
+    translate.setTranslation('fr', {"TEST": fr});
+
+    translate.use('en');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(en);
+    expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual(en);
+    expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual(en);
+
+    translate.use('fr');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(fr);
+    expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual(fr);
+    expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual(fr);
+  });
+
   it('should update the DOM when the default lang changes', () => {
     expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
 
