@@ -6,9 +6,9 @@ Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
-**This is the documentation for the 6+ version, if you're using 5.x or less, refer to [this document](https://github.com/ngx-translate/core/blob/fb02ca5920aae405048ebab50e09db67d5bf12a2/README.md).**
-
 **If you're still using Angular v5, please use ngx-translate 9.x, version 10 and above are only compatible with Angular v6. If you need to use RxJS 5, update to 5.6 and use the rxjs-compat library (see [the RxJS update guide](https://docs.google.com/document/d/12nlLt71VLKb-z3YaSGzUfx6mJbc34nsMXtByPUN35cg/preview#)).**
+
+**If you are using Ionic 3 you currently have to use Angular v5 with ngx-translate v9. [Ionic+Angular+NgxTranslate Example](https://stackblitz.com/github/ngx-translate/ionic-example)**
 
 * [Installation](#installation)
 * [Usage](#usage)
