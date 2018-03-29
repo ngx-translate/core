@@ -483,8 +483,17 @@ export class TranslateService {
 
   /**
    * Returns the language code name from the browser, e.g. "de"
+   * @deprecated Use the static method TranslateService.getBrowserLang() instead
+   * @returns {string}
    */
   public getBrowserLang(): string {
+      return TranslateService.getBrowserLang();
+  }
+
+  /**
+   * Returns the language code name from the browser, e.g. "de"
+   */
+  public static getBrowserLang(): string {
     if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
       return undefined;
     }
@@ -505,8 +514,17 @@ export class TranslateService {
 
   /**
    * Returns the culture language code name from the browser, e.g. "de-DE"
+   * @deprecated Use the static method TranslateService.getBrowserCultureLang() instead
+   * @returns {string}
    */
   public getBrowserCultureLang(): string {
+      return TranslateService.getBrowserCultureLang();
+  }
+
+  /**
+   * Returns the culture language code name from the browser, e.g. "de-DE"
+   */
+  public static getBrowserCultureLang(): string {
     if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
       return undefined;
     }
