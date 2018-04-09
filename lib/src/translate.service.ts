@@ -207,7 +207,7 @@ export class TranslateService {
       pending.pipe(take(1))
         .subscribe((res: any) => {
           this.changeLang(lang);
-        });
+        }, err => { });
 
       return pending;
     } else { // we have this language, return an Observable
