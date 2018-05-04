@@ -1,5 +1,5 @@
 ---
-name: Feature request
+name: "✨ Feature request"
 about: Suggesting new features for this library. Please check if a similar feature
   request exists before submitting
 

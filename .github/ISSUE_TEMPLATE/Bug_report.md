@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: "⚠️ Bug report"
 about: Report a bug for this library. Please check the FAQ and search github/stackoverflow
   for a similar issue before submitting
 
