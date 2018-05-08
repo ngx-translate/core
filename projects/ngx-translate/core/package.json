@@ -10,7 +10,7 @@
     "ngx-translate"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/ngx-translate/ngx-translate/projects/ngx-translate/core",
+  "homepage": "https://github.com/ngx-translate/core",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ngx-translate/core.git"
