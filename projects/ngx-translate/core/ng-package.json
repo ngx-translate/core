@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../../dist/@ngx-translate/core",
+  "deleteDestPath": false,
+  "keepLifecycleScripts": true,
+  "lib": {
+    "entryFile": "src/public_api.ts"
+  }
+}

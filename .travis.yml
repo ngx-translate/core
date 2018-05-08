@@ -1,20 +1,19 @@
 language: node_js
-cache: yarn
 sudo: false
 notifications:
   email: false
 node_js:
-  - '8'
+  - '10'
 before_install:
   - export CHROME_BIN=chromium-browser
-  - npm i -g npm@3 # fix for https://github.com/npm/npm/issues/19222
+  - if [[ `npm -v` != 6* ]]; then npm i -g npm@6; fi
 after_success:
-  - yarn build
-  - cp .git dist/ -r # required by semantic release
-  - cp README.md dist/
-  - cd dist
-  - yarn install
-  - yarn semantic-release
+  - npm run build
+  - cp .git dist/@ngx-translate/core/ -r # required by semantic release
+  - cp README.md dist/@ngx-translate/core/
+  - cd dist/@ngx-translate/core/
+  - npm install
+  - npm run semantic-release
 branches:
   except:
     - /^v\d+\.\d+\.\d+$/

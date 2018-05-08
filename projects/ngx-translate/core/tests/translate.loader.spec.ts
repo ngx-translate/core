@@ -1,6 +1,6 @@
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {TranslateLoader, TranslateModule, TranslateService} from "../lib/index";
+import {TranslateLoader, TranslateModule, TranslateService} from "../src/public_api";
 
 let translations: any = {"TEST": "This is a test"};
 

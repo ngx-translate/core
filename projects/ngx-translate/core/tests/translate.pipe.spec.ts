@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef} from "@angular/core";
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../lib/index";
+import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../src/public_api";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {

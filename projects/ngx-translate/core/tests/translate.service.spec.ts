@@ -1,7 +1,7 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
 import {Observable, of, timer, zip} from "rxjs";
 import {mapTo, take, toArray} from 'rxjs/operators';
-import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../lib/index';
+import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 
 let translations: any = {"TEST": "This is a test"};
 

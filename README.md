@@ -6,12 +6,7 @@ Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/
 
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
-# **If you're still using Angular v5, please use ngx-translate 9.x because version 10 and above are only compatible with Angular v6. If you try to use v10 with Angular v5 you will get an error message `TypeError: Object(...) is not a function`. **
-
-**If you need to use RxJS 5, update to 5.6 and use the rxjs-compat library (see [the RxJS update guide](https://docs.google.com/document/d/12nlLt71VLKb-z3YaSGzUfx6mJbc34nsMXtByPUN35cg/preview#)).**
-
-**If you are using Ionic 3 you currently have to use Angular v5 with ngx-translate v9. [Ionic+Angular+NgxTranslate Example](https://stackblitz.com/github/ngx-translate/ionic-example)**
-
+## Table of Contents
 * [Installation](#installation)
 * [Usage](#usage)
 * [API](#api)
@@ -29,13 +24,14 @@ First you need to install the npm module:
 npm install @ngx-translate/core --save
 ```
 
----
+Choose the version corresponding to your Angular version:
 
-**NB: If you still use the Angular 4** get the latest compatible version ([7.2.2](https://github.com/ngx-translate/core/releases/tag/v7.2.2)):
-
-```sh
-npm install @ngx-translate/core@^7.2.2 --save
-```
+ Angular     | @ngx-translate/core | @ngx-translate/http-loader
+ ----------- | ------------------- | --------------------------
+ 6           | 10.x+               | 3.x+
+ 5           | 8.x to 9.x          | 1.x to 2.x
+ 4.3         | 7.x or less         | 1.x to 2.x
+ 2 to 4.2.x  | 7.x or less         | 0.x
 
 ---
 

@@ -1,48 +1,39 @@
-#################
-## Misc
-#################
-**/.DS_Store
-nbproject
-manifest.mf
-build.xml
-node_modules/*
-npm-debug.log
-*.js
-!config/*
-!karma.conf.js
-!webpack.config.js
-*.map
-*.d.ts
-!make.js
-!examples/**/*.js
-coverage
-*.metadata.json
-bundles
-build
-dist
-dist.tgz
+# See http://help.github.com/ignore-files/ for more about ignoring files.
 
-#################
-## JetBrains
-#################
-.idea
+# compiled output
+/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
 .project
-.settings
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-############
-## Windows
-############
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# Windows image file caches
-Thumbs.db
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
 
-# Folder config file
-Desktop.ini
-
-############
-## Mac
-############
-
-# Mac crap
+# System Files
 .DS_Store
-
+Thumbs.db

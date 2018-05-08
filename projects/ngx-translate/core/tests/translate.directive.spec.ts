@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {TranslateModule, TranslateService} from '../lib/index';
+import {TranslateModule, TranslateService} from '../src/public_api';
 
 @Injectable()
 @Component({

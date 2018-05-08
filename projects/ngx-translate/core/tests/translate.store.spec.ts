@@ -3,7 +3,7 @@ import {Component, ModuleWithProviders, NgModule, NgModuleFactoryLoader} from "@
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from "@angular/core/testing";
 import {Route, Router, RouterModule} from "@angular/router";
 import {RouterTestingModule, SpyNgModuleFactoryLoader} from "@angular/router/testing";
-import {TranslateModule, TranslateService} from "../lib/index";
+import {TranslateModule, TranslateService} from "../src/public_api";
 
 @Component({
   selector: 'root-cmp',
