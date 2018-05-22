@@ -17,6 +17,7 @@ export * from "./lib/translate.parser";
 export * from "./lib/translate.compiler";
 export * from "./lib/translate.directive";
 export * from "./lib/translate.pipe";
+export * from "./lib/translate.store";
 
 export interface TranslateModuleConfig {
   loader?: Provider;
