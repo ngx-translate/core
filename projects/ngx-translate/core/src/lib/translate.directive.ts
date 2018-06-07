@@ -82,7 +82,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             if (content !== node.currentValue) {
               key = trimmedContent;
               // the content was changed from the user, we'll use it as a reference if needed
-              node.originalContent = this.getContent(node);
+              node.originalContent = this.getContent(node).trim();
             } else if (node.originalContent && forceUpdate) { // the content seems ok, but the lang has changed
               node.lastKey = null;
               // the current content is the translation, not the key, use the last real content as key
