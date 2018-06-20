@@ -36,7 +36,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   }
 
   transform(query: string, ...args: any[]): any {
-    if (!query || query.length === 0 || window.desactivate_ngx_translate ) {
+    if (!query || query.length === 0 || (window as any).desactivate_ngx_translate ) {
       return query;
     }
 
