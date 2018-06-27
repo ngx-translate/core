@@ -9,6 +9,7 @@ import {TranslatePipe} from "./lib/translate.pipe";
 import {TranslateStore} from "./lib/translate.store";
 import {USE_STORE} from "./lib/translate.service";
 import {USE_DEFAULT_LANG} from "./lib/translate.service";
+import {SHOULD_MERGE} from "./lib/translate.service";
 
 export * from "./lib/translate.loader";
 export * from "./lib/translate.service";
@@ -27,6 +28,7 @@ export interface TranslateModuleConfig {
   // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
   isolate?: boolean;
   useDefaultLang?: boolean;
+  shouldMerge?: boolean;
 }
 
 @NgModule({
@@ -54,6 +56,7 @@ export class TranslateModule {
         TranslateStore,
         {provide: USE_STORE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
+        {provide: SHOULD_MERGE, useValue: config.shouldMerge},
         TranslateService
       ]
     };
@@ -72,6 +75,7 @@ export class TranslateModule {
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
         {provide: USE_STORE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
+        {provide: SHOULD_MERGE, useValue: config.shouldMerge},
         TranslateService
       ]
     };

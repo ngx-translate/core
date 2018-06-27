@@ -11,6 +11,7 @@ import {isDefined, mergeDeep} from "./util";
 
 export const USE_STORE = new InjectionToken<string>('USE_STORE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
+export const SHOULD_MERGE = new InjectionToken<string>('SHOULD_MERGE');
 
 export interface TranslationChangeEvent {
   translations: any;
@@ -45,6 +46,7 @@ export class TranslateService {
   private _langs: Array<string> = [];
   private _translations: any = {};
   private _translationRequests: any = {};
+  private _fetchedLangs: Array<string> = [];
 
   /**
    * An EventEmitter to listen to translation change events
@@ -145,6 +147,7 @@ export class TranslateService {
    * @param missingTranslationHandler A handler for missing translations.
    * @param isolate whether this service should use the store or not
    * @param useDefaultLang whether we should use default language translation when current language translation is missing.
+   * @param shouldMerge whether we should merge translations into already existing languages
    */
   constructor(public store: TranslateStore,
               public currentLoader: TranslateLoader,
@@ -152,7 +155,8 @@ export class TranslateService {
               public parser: TranslateParser,
               public missingTranslationHandler: MissingTranslationHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
-              @Inject(USE_STORE) private isolate: boolean = false) {
+              @Inject(USE_STORE) private isolate: boolean = false,
+              @Inject(SHOULD_MERGE) private shouldMerge: boolean = false) {
   }
 
   /**
@@ -224,7 +228,8 @@ export class TranslateService {
     let pending: Observable<any>;
 
     // if this language is unavailable, ask for it
-    if (typeof this.translations[lang] === "undefined") {
+    if (this._fetchedLangs.indexOf(lang) === -1)
+    {
       this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
       pending = this._translationRequests[lang];
     }
@@ -238,13 +243,23 @@ export class TranslateService {
    */
   public getTranslation(lang: string): Observable<any> {
     this.pending = true;
+    this._fetchedLangs.push(lang);
     this.loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
 
     this.loadingTranslations.pipe(take(1))
       .subscribe((res: Object) => {
-        this.translations[lang] = this.compiler.compileTranslations(res, lang);
+        const translations = this.compiler.compileTranslations(res, lang);
+        const merge: boolean = this.shouldMerge && (this.translations[lang] !== undefined);
+        if (merge) {
+          this.translations[lang] = mergeDeep(this.translations[lang], translations);
+        } else {
+          this.translations[lang] = translations;
+        }
         this.updateLangs();
         this.pending = false;
+        if (merge) {
+          this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
+        }
       }, (err: any) => {
         this.pending = false;
       });
