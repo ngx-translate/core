@@ -45,7 +45,7 @@ If you're importing directly from `node_modules`, you should edit your systemjs 
 
 Finally, you can use ngx-translate in your Angular project. You have to import `TranslateModule.forRoot()` in the root NgModule of your application.
 
-The [`forRoot`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#core-for-root) static method is a convention that provides and configures services at the same time.
+The [`forRoot`](https://angular.io/api/router/RouterModule#forroot) static method is a convention that provides and configures services at the same time.
 Make sure you only call this method in the root module of your application, most of the time called `AppModule`.
 This method allows you to configure the `TranslateModule` by specifying a loader, a parser and/or a missing translations handler.
 
