@@ -446,6 +446,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 
 ## Editors
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
+- [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 
 ## Additional Framework Support
 
