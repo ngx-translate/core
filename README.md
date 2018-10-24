@@ -28,7 +28,8 @@ Choose the version corresponding to your Angular version:
 
  Angular     | @ngx-translate/core | @ngx-translate/http-loader
  ----------- | ------------------- | --------------------------
- 6           | 10.x+               | 3.x+
+ 7           | 11.x+               | 4.x+
+ 6           | 10.x                | 3.x
  5           | 8.x to 9.x          | 1.x to 2.x
  4.3         | 7.x or less         | 1.x to 2.x
  2 to 4.2.x  | 7.x or less         | 0.x
