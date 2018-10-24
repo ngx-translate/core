@@ -4,7 +4,6 @@ notifications:
   email: false
 node_js:
   - '10'
-  - '11'
 before_install:
   - export CHROME_BIN=chromium-browser
   - if [[ `npm -v` != 6* ]]; then npm i -g npm@6; fi
