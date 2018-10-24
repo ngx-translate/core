@@ -27,7 +27,7 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+    autoWatch: !process.env.TRAVIS,
     browsers: ['Chrome'],
     customLaunchers: {
       ChromeTravisCi: {
@@ -35,7 +35,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox']
       }
     },
-    singleRun: false
+    singleRun: process.env.TRAVIS
   };
 
   if (process.env.TRAVIS){
