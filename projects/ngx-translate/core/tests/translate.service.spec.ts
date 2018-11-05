@@ -406,4 +406,30 @@ describe('TranslateService', () => {
 
     expect(getTranslationCalls).toEqual(1);
   }));
+
+  it('should compile translations only once, even when subscribing to translations while translations are loading', fakeAsync(() => {
+    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+      return timer(1000).pipe(mapTo(of(translations)));
+    });
+
+    let translateCompilerCallCount = 0;
+    spyOn(translate.compiler, 'compile').and.callFake((value) => {
+      ++translateCompilerCallCount;
+      return value;
+    });
+    spyOn(translate.compiler, 'compileTranslations').and.callFake((value) => {
+      ++translateCompilerCallCount;
+      return value;
+    });
+
+    translate.setDefaultLang('en-US');
+    translate.get('TEST1').subscribe();
+    translate.get('TEST2').subscribe();
+    translate.get('TEST3').subscribe();
+    translate.get('TEST4').subscribe();
+
+    tick(1001);
+
+    expect(translateCompilerCallCount).toBe(1);
+  }));
 });
