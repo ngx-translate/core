@@ -1,6 +1,6 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
 import {Observable, of, timer, zip, defer} from "rxjs";
-import {mapTo, take, toArray} from 'rxjs/operators';
+import {mapTo, take, toArray, first} from 'rxjs/operators';
 import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 
 let translations: any = {"TEST": "This is a test"};
@@ -297,6 +297,37 @@ describe('TranslateService', () => {
     translate.setTranslation('nl', {"TEST": "Dit is een test"});
     translate.use('nl');
     translate.use('en');
+  });
+
+  it('should update lazy streaming translations on translation change', (done: Function) => {
+    translations = {"TEST": "This is a test"};
+    translate.use('en');
+
+    const translation$ = translate.getStreamOnTranslationChange('TEST');
+
+    translate.setTranslation('en', {"TEST": "This is a test2"});
+
+    translation$.pipe(first()).subscribe((res: string[]) => {
+      const expected = "This is a test2";
+      expect(res).toEqual(expected);
+      done();
+    });
+  });
+
+  it('should update lazy streaming translations on language change', (done: Function) => {
+    translations = {"TEST": "This is a test"};
+    translate.use('en');
+
+    const translation$ = translate.stream('TEST');
+
+    translate.setTranslation('nl', {"TEST": "Dit is een test"});
+    translate.use('nl');
+
+    translation$.pipe(first()).subscribe((res: string[]) => {
+      const expected = 'Dit is een test';
+      expect(res).toEqual(expected);
+      done();
+    });
   });
 
   it('should update streaming translations of an array on language change', (done: Function) => {
