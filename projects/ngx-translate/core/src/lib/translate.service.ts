@@ -238,18 +238,23 @@ export class TranslateService {
    */
   public getTranslation(lang: string): Observable<any> {
     this.pending = true;
-    this.loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
+    const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
+    this.loadingTranslations = loadingTranslations.pipe(
+      take(1),
+      map((res: Object) => this.compiler.compileTranslations(res, lang)),
+      share()
+    );
 
-    this.loadingTranslations.pipe(take(1))
+    this.loadingTranslations
       .subscribe((res: Object) => {
-        this.translations[lang] = this.compiler.compileTranslations(res, lang);
+        this.translations[lang] = res;
         this.updateLangs();
         this.pending = false;
       }, (err: any) => {
         this.pending = false;
       });
 
-    return this.loadingTranslations;
+    return loadingTranslations;
   }
 
   /**
@@ -369,7 +374,7 @@ export class TranslateService {
           observer.error(err);
         };
         this.loadingTranslations.subscribe((res: any) => {
-          res = this.getParsedResult(this.compiler.compileTranslations(res, this.currentLang), key, interpolateParams);
+          res = this.getParsedResult(res, key, interpolateParams);
           if (typeof res.subscribe === "function") {
             res.subscribe(onComplete, onError);
           } else {
