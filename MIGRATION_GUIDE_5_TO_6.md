@@ -65,8 +65,20 @@ If you don't use this loader, go directly to point 5.
         missingTranslationHandler: {provide: MissingTranslationHandler, useClass: CustomHandler}
     })
     ```
+
+7. If you call the new `TranslateHttpLoader`, make sure your `prefix` parameter ends in a slash.
+
+    ```ts
+    new TranslateStaticLoader(http, "/custom-dir/assets/i18n", "-lang.json");
+    ```
+
+    Is now:
+
+    ```ts
+    new TranslateHttpLoader(http, "/custom-dir/assets/i18n/", "-lang.json");
+    ```
     
-7. If you use lazy loaded modules, a new `forChild` method has been added.
+8. If you use lazy loaded modules, a new `forChild` method has been added.
 It has the benefit to declare the pipe/directive/service for your module, but it doesn't declare a new instance of the `TranslateStore`.
 In this new release, the store has been added to link all instances of the service. It is used behind the scenes by the service and you don't have to use it yourself.
 
