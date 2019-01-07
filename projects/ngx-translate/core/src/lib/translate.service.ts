@@ -446,7 +446,7 @@ export class TranslateService {
   public set(key: string, value: string, lang: string = this.currentLang): void {
     this.translations[lang][key] = this.compiler.compile(value, lang);
     this.updateLangs();
-    this.onTranslationChange.emit({ lang: lang, translations: this.translations[lang] });
+    this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
   }
 
   /**
@@ -454,7 +454,7 @@ export class TranslateService {
    */
   private changeLang(lang: string): void {
     this.currentLang = lang;
-    this.onLangChange.emit({ lang: lang, translations: this.translations[lang] });
+    this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
 
     // if there is no default lang, use the one that we just set
     if (!this.defaultLang) {
@@ -467,7 +467,7 @@ export class TranslateService {
    */
   private changeDefaultLang(lang: string): void {
     this.defaultLang = lang;
-    this.onDefaultLangChange.emit({ lang: lang, translations: this.translations[lang] });
+    this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
   }
 
   /**
