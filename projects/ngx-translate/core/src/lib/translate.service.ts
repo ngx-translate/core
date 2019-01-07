@@ -36,7 +36,7 @@ declare const window: Window;
 @Injectable()
 export class TranslateService {
   private loadingTranslations: Observable<any>;
-  private pending: { string: boolean } | {} = {};
+  private pending: {string: boolean } | {} = {};
   private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
   private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
   private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
@@ -346,7 +346,7 @@ export class TranslateService {
 
     if (typeof res === "undefined") {
       let params: MissingTranslationHandlerParams = {key, translateService: this};
-      if (typeof interpolateParams !== 'undefined') {
+      if (typeof interpolateParams !== "undefined") {
         params.interpolateParams = interpolateParams;
       }
       res = this.missingTranslationHandler.handle(params);
@@ -426,7 +426,7 @@ export class TranslateService {
     }
 
     let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-    if (typeof res.subscribe !== 'undefined') {
+    if (typeof res.subscribe !== "undefined") {
       if (key instanceof Array) {
         let obj: any = {};
         key.forEach((value: string, index: number) => {
@@ -490,7 +490,7 @@ export class TranslateService {
    * Returns the language code name from the browser, e.g. "de"
    */
   public getBrowserLang(): string {
-    if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+    if (typeof window === "undefined" || typeof window.navigator === "undefined") {
       return undefined;
     }
 
@@ -512,7 +512,7 @@ export class TranslateService {
    * Returns the culture language code name from the browser, e.g. "de-DE"
    */
   public getBrowserCultureLang(): string {
-    if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
+    if (typeof window === "undefined" || typeof window.navigator === "undefined") {
       return undefined;
     }
 
