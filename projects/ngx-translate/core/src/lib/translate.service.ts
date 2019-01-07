@@ -407,7 +407,7 @@ export class TranslateService {
       this.onLangChange.pipe(
         switchMap((event: LangChangeEvent) => {
           const res = this.getParsedResult(event.translations, key, interpolateParams);
-          if (typeof res.subscribe === 'function') {
+          if (typeof res.subscribe === "function") {
             return res;
           } else {
             return of(res);
