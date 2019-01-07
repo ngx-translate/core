@@ -36,7 +36,7 @@ declare const window: Window;
 @Injectable()
 export class TranslateService {
   private loadingTranslations: Observable<any>;
-  private pending: boolean = false;
+  private pending: { string: boolean } | {} = {};
   private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
   private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
   private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
@@ -237,7 +237,7 @@ export class TranslateService {
    * and passes it through the compiler
    */
   public getTranslation(lang: string): Observable<any> {
-    this.pending = true;
+    this.pending[lang] = true;
     const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
     this.loadingTranslations = loadingTranslations.pipe(
       take(1),
@@ -249,9 +249,9 @@ export class TranslateService {
       .subscribe((res: Object) => {
         this.translations[lang] = res;
         this.updateLangs();
-        this.pending = false;
+        this.pending[lang] = false;
       }, (err: any) => {
-        this.pending = false;
+        this.pending[lang] = false;
       });
 
     return loadingTranslations;
@@ -364,7 +364,7 @@ export class TranslateService {
       throw new Error(`Parameter "key" required`);
     }
     // check if we are loading a new translation to use
-    if (this.pending) {
+    if (Object.values(this.pending).some(el => el === true)) {
       return Observable.create((observer: Observer<string>) => {
         let onComplete = (res: string) => {
           observer.next(res);
@@ -407,7 +407,7 @@ export class TranslateService {
       this.onLangChange.pipe(
         switchMap((event: LangChangeEvent) => {
           const res = this.getParsedResult(event.translations, key, interpolateParams);
-          if (typeof res.subscribe === "function") {
+          if (typeof res.subscribe === 'function') {
             return res;
           } else {
             return of(res);
@@ -426,7 +426,7 @@ export class TranslateService {
     }
 
     let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-    if (typeof res.subscribe !== "undefined") {
+    if (typeof res.subscribe !== 'undefined') {
       if (key instanceof Array) {
         let obj: any = {};
         key.forEach((value: string, index: number) => {
@@ -446,7 +446,7 @@ export class TranslateService {
   public set(key: string, value: string, lang: string = this.currentLang): void {
     this.translations[lang][key] = this.compiler.compile(value, lang);
     this.updateLangs();
-    this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onTranslationChange.emit({ lang: lang, translations: this.translations[lang] });
   }
 
   /**
@@ -454,7 +454,7 @@ export class TranslateService {
    */
   private changeLang(lang: string): void {
     this.currentLang = lang;
-    this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onLangChange.emit({ lang: lang, translations: this.translations[lang] });
 
     // if there is no default lang, use the one that we just set
     if (!this.defaultLang) {
@@ -467,7 +467,7 @@ export class TranslateService {
    */
   private changeDefaultLang(lang: string): void {
     this.defaultLang = lang;
-    this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onDefaultLangChange.emit({ lang: lang, translations: this.translations[lang] });
   }
 
   /**
