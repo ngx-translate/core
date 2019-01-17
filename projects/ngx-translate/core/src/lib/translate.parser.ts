@@ -5,6 +5,7 @@ export abstract class TranslateParser {
   /**
    * Interpolates a string to replace parameters
    * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
+   * "This is a { key }" ==> "This is a value", with params = { key: "value" }
    * @param expr
    * @param params
    */
@@ -21,7 +22,7 @@ export abstract class TranslateParser {
 
 @Injectable()
 export class TranslateDefaultParser extends TranslateParser {
-  templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
+  templateMatcher: RegExp = /{{1,2}\s?([^{}\s]*)\s?}{1,2}/g;
 
   public interpolate(expr: string | Function, params?: any): string {
     let result: string;
