@@ -2,6 +2,7 @@
   "name": "@ngx-translate/core",
   "description": "The internationalization (i18n) library for Angular",
   "author": "Olivier Combe",
+  "version": "11.0.3",
   "keywords": [
     "angular",
     "angular 2",
