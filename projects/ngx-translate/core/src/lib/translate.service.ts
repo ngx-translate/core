@@ -10,6 +10,7 @@ import {TranslateStore} from "./translate.store";
 import {isDefined, mergeDeep} from "./util";
 
 export const USE_STORE = new InjectionToken<string>('USE_STORE');
+export const MERGE_STORE = new InjectionToken<string>('MERGE_STORE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
 
 export interface TranslationChangeEvent {
@@ -152,7 +153,8 @@ export class TranslateService {
               public parser: TranslateParser,
               public missingTranslationHandler: MissingTranslationHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
-              @Inject(USE_STORE) private isolate: boolean = false) {
+              @Inject(USE_STORE) private isolate: boolean = false,
+              @Inject(MERGE_STORE) private mergeStore: boolean = false) {
   }
 
   /**
@@ -213,6 +215,7 @@ export class TranslateService {
     } else { // we have this language, return an Observable
       this.changeLang(lang);
 
+
       return of(this.translations[lang]);
     }
   }
@@ -224,7 +227,7 @@ export class TranslateService {
     let pending: Observable<any>;
 
     // if this language is unavailable, ask for it
-    if (typeof this.translations[lang] === "undefined") {
+    if (typeof this.translations[lang] === "undefined" || this.mergeStore) {
       this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
       pending = this._translationRequests[lang];
     }

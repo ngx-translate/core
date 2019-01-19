@@ -1,6 +1,6 @@
 import {NgModule, ModuleWithProviders, Provider} from "@angular/core";
 import {TranslateLoader, TranslateFakeLoader} from "./lib/translate.loader";
-import {TranslateService} from "./lib/translate.service";
+import {MERGE_STORE, TranslateService} from './lib/translate.service'
 import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./lib/missing-translation-handler";
 import {TranslateParser, TranslateDefaultParser} from "./lib/translate.parser";
 import {TranslateCompiler, TranslateFakeCompiler} from "./lib/translate.compiler";
@@ -19,6 +19,8 @@ export * from "./lib/translate.directive";
 export * from "./lib/translate.pipe";
 export * from "./lib/translate.store";
 
+
+
 export interface TranslateModuleConfig {
   loader?: Provider;
   compiler?: Provider;
@@ -26,6 +28,7 @@ export interface TranslateModuleConfig {
   missingTranslationHandler?: Provider;
   // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
   isolate?: boolean;
+  mergeStore?: boolean;
   useDefaultLang?: boolean;
 }
 
@@ -53,6 +56,7 @@ export class TranslateModule {
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
         TranslateStore,
         {provide: USE_STORE, useValue: config.isolate},
+        {provide: MERGE_STORE, useValue: config.mergeStore},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
         TranslateService
       ]
@@ -71,6 +75,7 @@ export class TranslateModule {
         config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
         {provide: USE_STORE, useValue: config.isolate},
+        {provide: MERGE_STORE, useValue: config.mergeStore},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
         TranslateService
       ]
