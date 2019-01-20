@@ -1,6 +1,6 @@
 import {NgModule, ModuleWithProviders, Provider} from "@angular/core";
 import {TranslateLoader, TranslateFakeLoader} from "./lib/translate.loader";
-import {MERGE_STORE, TranslateService} from './lib/translate.service'
+import {TranslateService} from './lib/translate.service'
 import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./lib/missing-translation-handler";
 import {TranslateParser, TranslateDefaultParser} from "./lib/translate.parser";
 import {TranslateCompiler, TranslateFakeCompiler} from "./lib/translate.compiler";
@@ -8,6 +8,7 @@ import {TranslateDirective} from "./lib/translate.directive";
 import {TranslatePipe} from "./lib/translate.pipe";
 import {TranslateStore} from "./lib/translate.store";
 import {USE_STORE} from "./lib/translate.service";
+import {MERGE_STORE} from "./lib/translate.service";
 import {USE_DEFAULT_LANG} from "./lib/translate.service";
 
 export * from "./lib/translate.loader";

@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/ng-packagr/ng-package.schema.json",
+  "lib": {
+    "entryFile": "public_api.ts",
+    "externals": {
+      "@angular/common": "^7.0.0",
+      "@angular/compiler": "^7.0.0",
+      "@angular/core": "^7.0.0",
+      "@angular/platform-browser": "^7.0.0",
+      "@angular/platform-browser-dynamic": "^7.0.0",
+      "@angular/router": "^7.0.0",
+      "core-js": "^2.5.7",
+      "rxjs": "^6.3.3",
+      "zone.js": "^0.8.26"
+    }
+  }
+}
