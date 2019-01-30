@@ -145,6 +145,7 @@ export class TranslateService {
    * @param parser An instance of the parser currently used
    * @param missingTranslationHandler A handler for missing translations.
    * @param isolate whether this service should use the store or not
+   * @param mergeStore whether this service should use a unique store when isolated
    * @param useDefaultLang whether we should use default language translation when current language translation is missing.
    */
   constructor(public store: TranslateStore,
