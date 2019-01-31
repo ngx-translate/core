@@ -450,6 +450,12 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 
+### Extensions
+
+#### VScode
+- [Generate Translation](https://marketplace.visualstudio.com/items?itemName=thiagocordeirooo.generate-translation) by [@thiagocordeirooo](https://github.com/thiagocordeirooo): A visual studio code extension for you to generate the translations without leaving the current file.
+
+
 ## Additional Framework Support
 
 * [Use with NativeScript](https://github.com/NathanWalker/nativescript-ng2-translate/issues/5#issuecomment-257606661)
