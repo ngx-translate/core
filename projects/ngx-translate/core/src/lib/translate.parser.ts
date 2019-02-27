@@ -39,7 +39,7 @@ export class TranslateDefaultParser extends TranslateParser {
   }
 
   getValue(target: any, key: string): any {
-    let keys = key.split('.');
+    let keys = typeof key === 'string' ? key.split('.') : [key];
     key = '';
     do {
       key += keys.shift();
