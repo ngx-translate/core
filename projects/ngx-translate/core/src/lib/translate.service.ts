@@ -397,7 +397,7 @@ export class TranslateService {
    * whenever the translation changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public streamOnTranslationChange(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+  public getStreamOnTranslationChange(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
