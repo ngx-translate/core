@@ -445,6 +445,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [ngx-translate-zombies](https://marketplace.visualstudio.com/items?itemName=seveseves.ngx-translate-zombies) by @seveves: A vscode extension that finds unused translation keys and shows them in a diff view (so called zombies).
 - [ngx-translate-multi-http-loader](https://github.com/denniske/ngx-translate-multi-http-loader) by @denniske: Fetch multiple translation files with ngx-translate.
 - [ngx-translate-cache](https://github.com/jgpacheco/ngx-translate-cache) by @jgpacheco: Simplified version of localize-router. If you are already using localize-router you don't need this extension. This extension is aimed only to facilitate language caching.
+- [ngx-translate-module-loader](https://github.com/larscom/ngx-translate-module-loader) by @larscom: Fetch multiple translation files (http) with ngx-translate. Each translation file gets it's own namespace out of the box and the configuration is very flexible.
 
 ## Editors
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
