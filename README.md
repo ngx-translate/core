@@ -67,7 +67,7 @@ export class AppModule { }
 
 ##### SharedModule
 
-If you use a [`SharedModule`](https://angular.io/docs/ts/latest/guide/ngmodule.html#!#shared-modules) that you import in multiple other feature modules,
+If you use a [`SharedModule`](https://angular.io/guide/sharing-ngmodules) that you import in multiple other feature modules,
 you can export the `TranslateModule` to make sure you don't have to import it in every module.
 
 ```ts
