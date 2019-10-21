@@ -15,11 +15,14 @@ describe('Parser', () => {
 
   it('should interpolate strings', () => {
     expect(parser.interpolate("This is a {{ key }}", {key: "value"})).toEqual("This is a value");
+    expect(parser.interpolate("This is a { key }", {key: "value"})).toEqual("This is a value");
   });
 
   it('should interpolate strings with falsy values', () => {
     expect(parser.interpolate("This is a {{ key }}", {key: ""})).toEqual("This is a ");
     expect(parser.interpolate("This is a {{ key }}", {key: 0})).toEqual("This is a 0");
+    expect(parser.interpolate("This is a { key }", {key: ""})).toEqual("This is a ");
+    expect(parser.interpolate("This is a { key }", {key: 0})).toEqual("This is a 0");
   });
 
   it('should interpolate strings with object properties', () => {
