@@ -448,6 +448,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [ngx-translate-module-loader](https://github.com/larscom/ngx-translate-module-loader) by @larscom: Fetch multiple translation files (http) with ngx-translate. Each translation file gets it's own namespace out of the box and the configuration is very flexible.
 - [ngx-translate-all](https://github.com/irustm/ngx-translate-all) by @irustm: Automate translations for Angular projects.
 - [ngx-translate-migrate](https://github.com/irustm/ngx-translate-migrate) by @irustm: Automate migrations from ngx-translate to Angular i18n.
+- [ngx-translate-lint](https://github.com/svoboda-rabstvo/ngx-translate-lint) by @svoboda-rabstvo: Simple CLI tools for check ngx-translate keys in whole app
 
 ## Editors
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
