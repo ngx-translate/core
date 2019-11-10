@@ -1,5 +1,5 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import { defer, Observable, of, timer, zip } from 'rxjs';
+import {Observable, of, timer, zip, defer} from "rxjs";
 import {mapTo, take, toArray} from 'rxjs/operators';
 import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 

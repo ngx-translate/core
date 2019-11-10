@@ -1,5 +1,5 @@
 import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, forkJoin, isObservable, Observable, Observer, of} from "rxjs";
+import {concat, forkJoin, isObservable, Observable, of} from "rxjs";
 import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
