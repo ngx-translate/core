@@ -7,6 +7,8 @@ node_js:
 before_install:
   - export CHROME_BIN=chromium-browser
   - if [[ `npm -v` != 6* ]]; then npm i -g npm@6; fi
+services:
+ - xvfb
 after_success:
   - npm run build
   - cp .git dist/@ngx-translate/core/ -r # required by semantic release
