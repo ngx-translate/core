@@ -11,6 +11,7 @@ import {isDefined, mergeDeep} from "./util";
 
 export const USE_STORE = new InjectionToken<string>('USE_STORE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
+export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
 
 export interface TranslationChangeEvent {
   translations: any;
@@ -152,7 +153,8 @@ export class TranslateService {
               public parser: TranslateParser,
               public missingTranslationHandler: MissingTranslationHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
-              @Inject(USE_STORE) private isolate: boolean = false) {
+              @Inject(USE_STORE) private isolate: boolean = false,
+              @Inject(USE_EXTEND) private extend: boolean = false) {
   }
 
   /**
@@ -223,8 +225,8 @@ export class TranslateService {
   private retrieveTranslations(lang: string): Observable<any> {
     let pending: Observable<any>;
 
-    // if this language is unavailable, ask for it
-    if (typeof this.translations[lang] === "undefined") {
+    // if this language is unavailable or extend is true, ask for it
+    if (typeof this.translations[lang] === "undefined" || this.extend) {
       this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
       pending = this._translationRequests[lang];
     }
@@ -252,7 +254,7 @@ export class TranslateService {
     this.loadingTranslations
       .subscribe({
         next: (res: Object) => {
-          this.translations[lang] = res;
+          this.translations[lang] = this.extend && this.translations[lang] ? { ...res, ...this.translations[lang] } : res;
           this.updateLangs();
           this.pending = false;
         },
@@ -270,7 +272,7 @@ export class TranslateService {
    */
   public setTranslation(lang: string, translations: Object, shouldMerge: boolean = false): void {
     translations = this.compiler.compileTranslations(translations, lang);
-    if (shouldMerge && this.translations[lang]) {
+    if ((shouldMerge || this.extend) && this.translations[lang]) {
       this.translations[lang] = mergeDeep(this.translations[lang], translations);
     } else {
       this.translations[lang] = translations;
