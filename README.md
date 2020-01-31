@@ -370,7 +370,7 @@ export class AppModule { }
 By default, translation values are added "as-is". You can configure a `compiler` that implements `TranslateCompiler` to pre-process translation values when they are added (either manually or by a loader). A compiler has the following methods:
 
 - `compile(value: string, lang: string): string | Function`: Compiles a string to a function or another string.
-- `compileTranslations(translations: any, lang: string): any`:  Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values. 
+- `compileTranslations(translations: any, lang: string): any`:  Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values.
 
 Using a compiler opens the door for powerful pre-processing of translation values. As long as the compiler outputs a compatible interpolation string or an interpolation function, arbitrary input syntax can be supported.
 
@@ -449,6 +449,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 - [ngx-translate-all](https://github.com/irustm/ngx-translate-all) by @irustm: Automate translations for Angular projects.
 - [ngx-translate-migrate](https://github.com/irustm/ngx-translate-migrate) by @irustm: Automate migrations from ngx-translate to Angular i18n.
 - [ngx-translate-lint](https://github.com/svoboda-rabstvo/ngx-translate-lint) by @svoboda-rabstvo: Simple CLI tools for check ngx-translate keys in whole app
+- [ngx-translate-cut](https://github.com/bartholomej/ngx-translate-cut) by @bartholomej: Simple and useful pipe for cutting translations ✂️
 
 ## Editors
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
