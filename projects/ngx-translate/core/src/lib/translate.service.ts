@@ -169,7 +169,7 @@ export class TranslateService {
 
     if (typeof pending !== "undefined") {
       // on init set the defaultLang immediately
-      if (!this.defaultLang) {
+      if (this.defaultLang == null) {
         this.defaultLang = lang;
       }
 
@@ -340,7 +340,7 @@ export class TranslateService {
       res = this.parser.interpolate(this.parser.getValue(translations, key), interpolateParams);
     }
 
-    if (typeof res === "undefined" && this.defaultLang && this.defaultLang !== this.currentLang && this.useDefaultLang) {
+    if (typeof res === "undefined" && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang) {
       res = this.parser.interpolate(this.parser.getValue(this.translations[this.defaultLang], key), interpolateParams);
     }
 
@@ -438,7 +438,7 @@ export class TranslateService {
     this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
 
     // if there is no default lang, use the one that we just set
-    if (!this.defaultLang) {
+    if (this.defaultLang == null) {
       this.changeDefaultLang(lang);
     }
   }
