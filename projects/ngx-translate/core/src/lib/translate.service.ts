@@ -1,6 +1,6 @@
 import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, merge, Observable, Observer, of} from "rxjs";
-import {map, share, switchMap, take, toArray} from "rxjs/operators";
+import {concat, forkJoin, isObservable, Observable, of} from "rxjs";
+import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
 import {TranslateLoader} from "./translate.loader";
@@ -238,20 +238,27 @@ export class TranslateService {
    */
   public getTranslation(lang: string): Observable<any> {
     this.pending = true;
-    const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(share());
-    this.loadingTranslations = loadingTranslations.pipe(
+    const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(
+      shareReplay(1),
       take(1),
+    );
+
+    this.loadingTranslations = loadingTranslations.pipe(
       map((res: Object) => this.compiler.compileTranslations(res, lang)),
-      share()
+      shareReplay(1),
+      take(1),
     );
 
     this.loadingTranslations
-      .subscribe((res: Object) => {
-        this.translations[lang] = res;
-        this.updateLangs();
-        this.pending = false;
-      }, (err: any) => {
-        this.pending = false;
+      .subscribe({
+        next: (res: Object) => {
+          this.translations[lang] = res;
+          this.updateLangs();
+          this.pending = false;
+        },
+        error: (err: any) => {
+          this.pending = false;
+        }
       });
 
     return loadingTranslations;
@@ -308,22 +315,13 @@ export class TranslateService {
         observables: boolean = false;
       for (let k of key) {
         result[k] = this.getParsedResult(translations, k, interpolateParams);
-        if (typeof result[k].subscribe === "function") {
+        if (isObservable(result[k])) {
           observables = true;
         }
       }
       if (observables) {
-        let mergedObs: Observable<string>;
-        for (let k of key) {
-          let obs = typeof result[k].subscribe === "function" ? result[k] : of(result[k] as string);
-          if (typeof mergedObs === "undefined") {
-            mergedObs = obs;
-          } else {
-            mergedObs = merge(mergedObs, obs);
-          }
-        }
-        return mergedObs.pipe(
-          toArray(),
+        const sources = key.map(k => isObservable(result[k]) ? result[k] : of(result[k] as string));
+        return forkJoin(sources).pipe(
           map((arr: Array<string>) => {
             let obj: any = {};
             arr.forEach((value: string, index: number) => {
@@ -365,30 +363,15 @@ export class TranslateService {
     }
     // check if we are loading a new translation to use
     if (this.pending) {
-      return Observable.create((observer: Observer<string>) => {
-        let onComplete = (res: string) => {
-          observer.next(res);
-          observer.complete();
-        };
-        let onError = (err: any) => {
-          observer.error(err);
-        };
-        this.loadingTranslations.subscribe((res: any) => {
+      return this.loadingTranslations.pipe(
+        concatMap((res: any) => {
           res = this.getParsedResult(res, key, interpolateParams);
-          if (typeof res.subscribe === "function") {
-            res.subscribe(onComplete, onError);
-          } else {
-            onComplete(res);
-          }
-        }, onError);
-      });
+          return isObservable(res) ? res : of(res);
+        }),
+      );
     } else {
       let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-      if (typeof res.subscribe === "function") {
-        return res;
-      } else {
-        return of(res);
-      }
+      return isObservable(res) ? res : of(res);
     }
   }
 
@@ -407,11 +390,7 @@ export class TranslateService {
       this.onLangChange.pipe(
         switchMap((event: LangChangeEvent) => {
           const res = this.getParsedResult(event.translations, key, interpolateParams);
-          if (typeof res.subscribe === "function") {
-            return res;
-          } else {
-            return of(res);
-          }
+          return isObservable(res) ? res : of(res);
         })
       ));
   }
@@ -426,7 +405,7 @@ export class TranslateService {
     }
 
     let res = this.getParsedResult(this.translations[this.currentLang], key, interpolateParams);
-    if (typeof res.subscribe !== "undefined") {
+    if (isObservable(res)) {
       if (key instanceof Array) {
         let obj: any = {};
         key.forEach((value: string, index: number) => {

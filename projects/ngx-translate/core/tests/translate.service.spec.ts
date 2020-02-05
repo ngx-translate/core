@@ -1,5 +1,5 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Observable, of, timer, zip} from "rxjs";
+import {Observable, of, timer, zip, defer} from "rxjs";
 import {mapTo, take, toArray} from 'rxjs/operators';
 import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 
@@ -393,7 +393,7 @@ describe('TranslateService', () => {
     expect(typeof browserCultureLand === 'string').toBeTruthy();
   });
 
-  it('should not make duplicate requests', fakeAsync(() => {
+  it('should not make duplicate getTranslation calls', fakeAsync(() => {
     let getTranslationCalls = 0;
     spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
       getTranslationCalls += 1;
@@ -406,6 +406,22 @@ describe('TranslateService', () => {
 
     expect(getTranslationCalls).toEqual(1);
   }));
+
+  it('should subscribe to the loader just once', () => {
+    let subscriptions = 0;
+    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+      return defer(() => {
+        subscriptions++;
+        return of(translations);
+      });
+    });
+    translate.use('en');
+    translate.use('en');
+    translate.use('en').subscribe();
+    translate.use('en').subscribe();
+
+    expect(subscriptions).toEqual(1);
+  });
 
   it('should compile translations only once, even when subscribing to translations while translations are loading', fakeAsync(() => {
     spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {

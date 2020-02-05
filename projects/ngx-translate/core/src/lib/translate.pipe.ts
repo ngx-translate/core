@@ -1,4 +1,5 @@
 import {ChangeDetectorRef, EventEmitter, Injectable, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import {isObservable} from 'rxjs';
 import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
 import {equals, isDefined} from './util';
 
@@ -26,7 +27,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     };
     if (translations) {
       let res = this.translate.getParsedResult(translations, key, interpolateParams);
-      if (typeof res.subscribe === 'function') {
+      if (isObservable(res.subscribe)) {
         res.subscribe(onTranslation);
       } else {
         onTranslation(res);

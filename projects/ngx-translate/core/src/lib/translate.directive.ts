@@ -1,5 +1,5 @@
 import {AfterViewChecked, ChangeDetectorRef, Directive, ElementRef, Input, OnDestroy} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Subscription, isObservable} from 'rxjs';
 import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
 import {equals, isDefined} from './util';
 
@@ -118,7 +118,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
       if (isDefined(translations)) {
         let res = this.translateService.getParsedResult(translations, key, this.currentParams);
-        if (typeof res.subscribe === "function") {
+        if (isObservable(res)) {
           res.subscribe(onTranslation);
         } else {
           onTranslation(res);
