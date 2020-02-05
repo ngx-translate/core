@@ -7,7 +7,9 @@ import {TranslateModule, TranslateService} from '../src/public_api';
   selector: 'hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-      <div #noKey translate>TEST</div>
+      <div #noKey translate>
+        TEST
+      </div>
       <div #withKey [translate]="'TEST'">Some init content</div>
       <div #noContent [translate]="'TEST'"></div>
       <div #withOtherElements translate>TEST1 <span>Hey</span> TEST2</div>
@@ -53,12 +55,12 @@ describe('TranslateDirective', () => {
   });
 
   it('should translate a string using the container value', () => {
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' TEST ');
 
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
 
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' This is a test ');
   });
 
   it('should translate a string using the key value', () => {
@@ -79,6 +81,16 @@ describe('TranslateDirective', () => {
     translate.use('en');
 
     expect(fixture.componentInstance.withOtherElements.nativeElement.innerHTML).toEqual('Awesome <span>Hey</span> it works');
+  });
+
+  it('should translate first child strings without recursion', () => {
+    // replace the content with the key
+    expect(fixture.componentInstance.withOtherElements.nativeElement.innerHTML).toEqual('TEST1 <span>Hey</span> TEST2');
+
+    translate.setTranslation('en', {"TEST1": "TEST2", "TEST2": "it works"});
+    translate.use('en');
+
+    expect(fixture.componentInstance.withOtherElements.nativeElement.innerHTML).toEqual('TEST2 <span>Hey</span> it works');
   });
 
   it('should translate a string with params and a key', () => {
@@ -119,7 +131,7 @@ describe('TranslateDirective', () => {
   });
 
   it('should update the DOM when the lang changes', () => {
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' TEST ');
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('TEST');
 
@@ -127,18 +139,18 @@ describe('TranslateDirective', () => {
     translate.setTranslation('fr', {"TEST": "C'est un test"});
 
     translate.use('en');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' This is a test ');
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('This is a test');
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('This is a test');
 
     translate.use('fr');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(" C'est un test ");
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual("C'est un test");
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual("C'est un test");
   });
 
   it('should update the DOM when the lang changes and the translation ends with space', () => {
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' TEST ');
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual('TEST');
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual('TEST');
 
@@ -149,26 +161,26 @@ describe('TranslateDirective', () => {
     translate.setTranslation('fr', {"TEST": fr});
 
     translate.use('en');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(en);
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(` ${en} `);
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual(en);
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual(en);
 
     translate.use('fr');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(fr);
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(` ${fr} `);
     expect(fixture.componentInstance.withParams.nativeElement.innerHTML).toEqual(fr);
     expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual(fr);
   });
 
   it('should update the DOM when the default lang changes', () => {
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('TEST');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' TEST ');
 
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.setTranslation('fr', {"TEST": "C'est un test"});
     translate.setDefaultLang('en');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual('This is a test');
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(' This is a test ');
 
     translate.setDefaultLang('fr');
-    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
+    expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(" C'est un test ");
   });
 
   it('should unsubscribe from lang change subscription on destroy', () => {
