@@ -161,6 +161,15 @@ describe('TranslatePipe', () => {
     }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`);
   });
 
+  it("should return given falsey or non length query", () => {
+    translate.setTranslation('en', {"TEST": "This is a test"});
+    translate.use('en');
+
+    expect(translatePipe.transform(null)).toBeNull();
+    expect(translatePipe.transform(undefined)).toBeUndefined();
+    expect(translatePipe.transform(1234 as any)).toBe(1234);
+  });
+
   describe('should update translations on lang change', () => {
     it('with fake loader', (done) => {
       translate.setTranslation('en', {"TEST": "This is a test"});
