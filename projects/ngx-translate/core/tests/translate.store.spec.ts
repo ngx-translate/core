@@ -12,7 +12,10 @@ import {TranslateModule, TranslateService} from "../src/public_api";
 })
 class RootCmp {
   constructor(public translate: TranslateService) {
-    translate.setTranslation('en', {"TEST": "Root"});
+    translate.setTranslation('en', {
+      "TEST": "Root",
+      'ROOT': 'Root'
+    });
     translate.use('en');
   }
 }
@@ -28,7 +31,10 @@ function getLazyLoadedModule(importedModule: ModuleWithProviders) {
   @Component({selector: 'lazy', template: 'lazy-loaded-child'})
   class ChildLazyLoadedComponent {
     constructor(public translate: TranslateService) {
-      translate.setTranslation('en', {"TEST": "Lazy"});
+      translate.setTranslation('en', {
+        "TEST": "Lazy",
+        'CHILD': 'Child'
+      });
       translate.use('en');
       expect(translate.instant('TEST')).toEqual('Lazy');
     }
@@ -195,6 +201,26 @@ describe("module", () => {
 
       expect(spy).toHaveBeenCalledTimes(0);
       sub.unsubscribe();
+    }))
+  );
+
+  it('should extend translations with extend true', fakeAsync(inject(
+    [Router, Location, NgModuleFactoryLoader],
+    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
+      let loadedModule = getLazyLoadedModule(TranslateModule.forChild({ extend: true }));
+      loader.stubbedModules = { expected: loadedModule };
+
+      const fixture = createRoot(router, RootCmp);
+      const translate: TranslateService = TestBed.get(TranslateService);
+
+      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+
+      router.navigateByUrl('/lazy/loaded/child');
+      advance(fixture);
+
+      expect(translate.instant('TEST')).toEqual('Lazy');
+      expect(translate.instant('ROOT')).toEqual('Root');
+      expect(translate.instant('CHILD')).toEqual('Child');
     }))
   );
 });
