@@ -204,6 +204,53 @@ describe('TranslateService', () => {
     });
   });
 
+  it('should be able to get a stream array', (done: Function) => {
+    let tr = {"TEST": "This is a test", "TEST2": "This is a test2"};
+    translate.setTranslation('en', tr);
+    translate.use('en');
+
+    translate.getStreamOnTranslationChange(['TEST', 'TEST2']).subscribe((res: any) => {
+      expect(res).toEqual(tr);
+      done();
+    });
+  });
+
+  it('should initially return the same value for getStreamOnTranslationChange and non-streaming get', (done: Function) => {
+    translations = {"TEST": "This is a test"};
+    translate.use('en');
+
+    zip(translate.getStreamOnTranslationChange('TEST'), translate.get('TEST')).subscribe((value: [string, string]) => {
+      const [streamed, nonStreamed] = value;
+      expect(streamed).toEqual('This is a test');
+      expect(streamed).toEqual(nonStreamed);
+      done();
+    });
+  });
+
+  it('should be able to stream a translation on translation change', (done: Function) => {
+    translations = {"TEST": "This is a test"};
+    translate.use('en');
+
+    translate.getStreamOnTranslationChange('TEST').pipe(take(3), toArray()).subscribe((res: string[]) => {
+      const expected = ['This is a test', 'I changed the test value!', 'I changed it again!'];
+      expect(res).toEqual(expected);
+      done();
+    });
+    translate.setTranslation('en', {"TEST": "I changed the test value!"});
+    translate.setTranslation('en', {"TEST": "I changed it again!"});
+  });
+
+  it('should interpolate the same param into each streamed value when get strean on translation change', (done: Function) => {
+    translations = {"TEST": "This is a test {{param}}"};
+    translate.use('en');
+
+    translate.getStreamOnTranslationChange('TEST', {param: 'with param'}).subscribe((res: string[]) => {
+      const expected = 'This is a test with param';
+      expect(res).toEqual(expected);
+      done();
+    });
+  });
+
   it('should be able to stream a translation for the current language', (done: Function) => {
     translations = {"TEST": "This is a test"};
     translate.use('en');
