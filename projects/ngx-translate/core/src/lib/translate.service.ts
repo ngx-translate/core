@@ -503,6 +503,10 @@ export class TranslateService {
     let browserLang: any = window.navigator.languages ? window.navigator.languages[0] : null;
     browserLang = browserLang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
 
+    if (typeof browserLang === 'undefined') {
+      return undefined
+    }
+
     if (browserLang.indexOf('-') !== -1) {
       browserLang = browserLang.split('-')[0];
     }
