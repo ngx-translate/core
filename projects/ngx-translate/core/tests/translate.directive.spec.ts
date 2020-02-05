@@ -19,12 +19,12 @@ import {TranslateModule, TranslateService} from '../src/public_api';
 })
 class App {
   viewContainerRef: ViewContainerRef;
-  @ViewChild('noKey') noKey: ElementRef;
-  @ViewChild('withKey') withKey: ElementRef;
-  @ViewChild('withOtherElements') withOtherElements: ElementRef;
-  @ViewChild('withParams') withParams: ElementRef;
-  @ViewChild('withParamsNoKey') withParamsNoKey: ElementRef;
-  @ViewChild('noContent') noContent: ElementRef;
+  @ViewChild('noKey', {static: true}) noKey: ElementRef;
+  @ViewChild('withKey', {static: true}) withKey: ElementRef;
+  @ViewChild('withOtherElements', {static: true}) withOtherElements: ElementRef;
+  @ViewChild('withParams', {static: true}) withParams: ElementRef;
+  @ViewChild('withParamsNoKey', {static: true}) withParamsNoKey: ElementRef;
+  @ViewChild('noContent', {static: true}) noContent: ElementRef;
   value = {value: 'ok'};
 
   constructor(viewContainerRef: ViewContainerRef) {

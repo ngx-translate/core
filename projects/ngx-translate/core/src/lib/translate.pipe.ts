@@ -2,6 +2,7 @@ import {ChangeDetectorRef, EventEmitter, Injectable, OnDestroy, Pipe, PipeTransf
 import {isObservable} from 'rxjs';
 import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
 import {equals, isDefined} from './util';
+import { Subscription } from 'rxjs';
 
 @Injectable()
 @Pipe({
@@ -12,9 +13,9 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   value: string = '';
   lastKey: string;
   lastParams: any[];
-  onTranslationChange: EventEmitter<TranslationChangeEvent>;
-  onLangChange: EventEmitter<LangChangeEvent>;
-  onDefaultLangChange: EventEmitter<DefaultLangChangeEvent>;
+  onTranslationChange: Subscription;
+  onLangChange: Subscription;
+  onDefaultLangChange: Subscription;
 
   constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
   }
