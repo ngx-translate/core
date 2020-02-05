@@ -262,6 +262,39 @@ And in your component define `param` like this:
 param = {value: 'world'};
 ```
 
+You can construct the translation keys dynamically by using simple string concatenation inside the template:
+
+```html
+<ul *ngFor="let language of languages">
+  <li>{{ 'LANGUAGES.' + language | translate }}</li>
+</ul>
+```
+
+Where `languages` is an array member of your component:
+
+```ts
+languages = ['EN', 'FR', 'BG'];
+```
+
+You can also use the output of the built-in pipes `uppercase` and `lowercase` in order to guarantee that your dynamically generated translation keys are either all uppercase or all lowercase. For example:
+
+```html
+<p>{{ 'ROLES.' + role | uppercase | translate }}</p>
+```
+
+```ts
+role = 'admin';
+```
+
+will match the following translation:
+```json
+{
+  "ROLES": {
+    "ADMIN": "Administrator"
+  }
+}
+```
+
 This is how you use the **directive**:
 ```html
 <div [translate]="'HELLO'" [translateParams]="{value: 'world'}"></div>
