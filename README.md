@@ -440,6 +440,9 @@ If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`n
 
 If you're using an old version of Angular and ngx-translate requires a newer version then you should consider upgrading your application to use the newer angular 2 version. There is always a reason when I upgrade the minimum dependencies of the library. Often it is because Angular had a breaking changes. If it's not an option for you, then check [the changelog](/releases) to know which version is the last compatible version for you.
 
+#### I want to hot reload the translations in my application but `reloadLang` does not work
+
+If you want to reload the translations and see the update on all your components without reloading the page, you have to load the translations manually and call `setTranslation` function which triggers `onTranslationChange`.
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
