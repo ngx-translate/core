@@ -1,5 +1,5 @@
 import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, forkJoin, isObservable, Observable, of} from "rxjs";
+import {concat, forkJoin, isObservable, Observable, of, defer} from "rxjs";
 import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
@@ -388,7 +388,7 @@ export class TranslateService {
     }
 
     return concat(
-      this.get(key, interpolateParams),
+      defer(() => this.get(key, interpolateParams)),
       this.onTranslationChange.pipe(
         switchMap((event: TranslationChangeEvent) => {
           const res = this.getParsedResult(event.translations, key, interpolateParams);
@@ -413,7 +413,7 @@ export class TranslateService {
     }
 
     return concat(
-      this.get(key, interpolateParams),
+      defer(() => this.get(key, interpolateParams)),
       this.onLangChange.pipe(
         switchMap((event: LangChangeEvent) => {
           const res = this.getParsedResult(event.translations, key, interpolateParams);
