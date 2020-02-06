@@ -10,22 +10,22 @@
     "test": "ng test"
   },
   "dependencies": {
-    "@angular/common": "^8.2.14",
-    "@angular/compiler": "^8.2.14",
-    "@angular/core": "^8.2.14",
-    "@angular/platform-browser": "^8.2.14",
-    "@angular/platform-browser-dynamic": "^8.2.14",
-    "@angular/router": "^8.2.14",
+    "@angular/common": "9.0.0",
+    "@angular/compiler": "9.0.0",
+    "@angular/core": "9.0.0",
+    "@angular/platform-browser": "9.0.0",
+    "@angular/platform-browser-dynamic": "9.0.0",
+    "@angular/router": "9.0.0",
     "core-js": "^3.6.4",
     "rxjs": "^6.5.4",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.803.24",
-    "@angular-devkit/build-ng-packagr": "~0.803.24",
-    "@angular/cli": "^8.3.24",
-    "@angular/compiler-cli": "^8.2.14",
-    "@angular/language-service": "^8.2.14",
+    "@angular-devkit/build-angular": "~0.900.0",
+    "@angular-devkit/build-ng-packagr": "~0.900.0",
+    "@angular/cli": "9.0.0",
+    "@angular/compiler-cli": "9.0.0",
+    "@angular/language-service": "9.0.0",
     "@types/jasmine": "^3.3.13",
     "@types/jasminewd2": "^2.0.6",
     "@types/node": "^12.0.10",
@@ -40,12 +40,12 @@
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
     "karma-mocha-reporter": "^2.2.5",
-    "ng-packagr": "^5.7.1",
+    "ng-packagr": "9.0.0",
     "ts-node": "^8.3.0",
     "tsickle": "^0.35.0",
     "tslib": "^1.10.0",
     "tslint": "^5.20.1",
-    "typescript": "<3.5"
+    "typescript": "3.7.5"
   },
   "config": {
     "commitizen": {
