@@ -46,7 +46,7 @@ export class TranslateModule {
   /**
    * Use this method in your root module to provide the TranslateService
    */
-  static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders {
+  static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
     return {
       ngModule: TranslateModule,
       providers: [
@@ -66,7 +66,7 @@ export class TranslateModule {
   /**
    * Use this method in your other (non root) modules to import the directive/pipe
    */
-  static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders {
+  static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
     return {
       ngModule: TranslateModule,
       providers: [
