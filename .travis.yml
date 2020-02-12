@@ -15,7 +15,7 @@ after_success:
   - cp .git dist/@ngx-translate/core/ -r # required by semantic release
   - cp README.md dist/@ngx-translate/core/
   - cd dist/@ngx-translate/core/
-  - npm install
+  - npm install semantic-release@8.2.3
   - npm run semantic-release
 branches:
   except:
