@@ -11,6 +11,7 @@ import {isDefined, mergeDeep} from "./util";
 
 export const USE_STORE = new InjectionToken<string>('USE_STORE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
+export const DEFAULT_LANGUAGE = new InjectionToken<string>('DEFAULT_LANGUAGE');
 export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
 
 export interface TranslationChangeEvent {
@@ -144,8 +145,10 @@ export class TranslateService {
    * @param compiler An instance of the compiler currently used
    * @param parser An instance of the parser currently used
    * @param missingTranslationHandler A handler for missing translations.
-   * @param isolate whether this service should use the store or not
    * @param useDefaultLang whether we should use default language translation when current language translation is missing.
+   * @param isolate whether this service should use the store or not
+   * @param extend To make a child module extend (and use) translations from parent modules.
+   * @param defaultLanguage Set the default language using configuration
    */
   constructor(public store: TranslateStore,
               public currentLoader: TranslateLoader,
@@ -154,7 +157,12 @@ export class TranslateService {
               public missingTranslationHandler: MissingTranslationHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang: boolean = true,
               @Inject(USE_STORE) private isolate: boolean = false,
-              @Inject(USE_EXTEND) private extend: boolean = false) {
+              @Inject(USE_EXTEND) private extend: boolean = false,
+              @Inject(DEFAULT_LANGUAGE) defaultLanguage: string) {
+    /** set the default language from configuration */
+    if (defaultLanguage) {
+      this.setDefaultLang(defaultLanguage);
+    }
   }
 
   /**

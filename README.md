@@ -204,7 +204,25 @@ export function createTranslateLoader(http: HttpClient) {
 export class AppModule { }
 ```
 
-#### 2. Init the `TranslateService` for your application:
+#### 2. Define the `default language` for the application
+
+```ts
+@NgModule({
+    imports: [
+        BrowserModule,
+        TranslateModule.forRoot({
+            defaultLanguage: 'en'
+        })
+    ],
+    providers: [
+
+    ],
+    bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+#### 3. Init the `TranslateService` for your application:
 
 ```ts
 import {Component} from '@angular/core';
@@ -229,7 +247,7 @@ export class AppComponent {
 }
 ```
 
-#### 3. Define the translations:
+#### 4. Define the translations:
 
 Once you've imported the `TranslateModule`, you can put your translations in a json file that will be imported with the `TranslateHttpLoader`. The following translations should be stored in `en.json`.
 
@@ -259,7 +277,7 @@ The `TranslateParser` understands nested JSON objects. This means that you can h
 
 You can then access the value by using the dot notation, in this case `HOME.HELLO`.
 
-#### 4. Use the service, the pipe or the directive:
+#### 5. Use the service, the pipe or the directive:
 
 You can either use the `TranslateService`, the `TranslatePipe` or the `TranslateDirective` to get your translation values.
 
@@ -326,7 +344,7 @@ Or even simpler using the content of your element as a key:
 <div translate [translateParams]="{value: 'world'}">HELLO</div>
 ```
 
-#### 5. Use HTML tags:
+#### 6. Use HTML tags:
 
 You can easily use raw HTML tags within your translations.
 
