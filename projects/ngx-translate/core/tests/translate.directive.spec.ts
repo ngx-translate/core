@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injectable, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TranslateModule, TranslateService} from '../src/public_api';
 
@@ -17,12 +17,14 @@ import {TranslateModule, TranslateService} from '../src/public_api';
     <div #leadingSpaceNoKeyNoParams translate> TEST</div>
     <div #trailingSpaceNoKeyNoParams translate>TEST </div>
     <div #withSpaceAndLineBreakNoKeyNoParams translate>
-      TEST
+      NESTED.TEST.KEY
+    </div>
+    <div #interpolatedWithSpaceAndLineBreakNoKeyNoParams translate>
+      {{ myInterpolatedTranslationKey }}
     </div>
   `
 })
 class App {
-  viewContainerRef: ViewContainerRef;
   @ViewChild('noKey', {static: true}) noKey: ElementRef;
   @ViewChild('contentAsKey', {static: true}) contentAsKey: ElementRef;
   @ViewChild('withKey', {static: true}) withKey: ElementRef;
@@ -33,12 +35,12 @@ class App {
   @ViewChild('leadingSpaceNoKeyNoParams') leadingSpaceNoKeyNoParams: ElementRef;
   @ViewChild('trailingSpaceNoKeyNoParams') trailingSpaceNoKeyNoParams: ElementRef;
   @ViewChild('withSpaceAndLineBreakNoKeyNoParams') withSpaceAndLineBreakNoKeyNoParams: ElementRef;
+  @ViewChild('interpolatedWithSpaceAndLineBreakNoKeyNoParams') interpolatedWithSpaceAndLineBreakNoKeyNoParams: ElementRef;
   value = {value: 'ok'};
+  myInterpolatedTranslationKey = 'Placeholder Text';
 
-  constructor(viewContainerRef: ViewContainerRef) {
-    this.viewContainerRef = viewContainerRef;
+  constructor(public changeDetectorRef: ChangeDetectorRef) { }
   }
-}
 
 describe('TranslateDirective', () => {
   let translate: TranslateService;
@@ -51,7 +53,7 @@ describe('TranslateDirective', () => {
       ],
       declarations: [App]
     });
-    translate = TestBed.inject(TranslateService);
+    translate = TestBed.get(TranslateService);
 
     fixture = (<any>TestBed).createComponent(App);
     fixture.detectChanges();
@@ -164,19 +166,53 @@ describe('TranslateDirective', () => {
   });
 
   it('should update the DOM when the lang changes and the translation key has line breaks and spaces', () => {
-    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(' TEST ');
+    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(' NESTED.TEST.KEY ');
 
     const en = "This is a test - with trailing spaces in translation key";
     const fr = "C'est un test - avec un espace de fuite dans la clé de traduction";
-    const whiteSpaceFromKey = ' ';
-    translate.setTranslation('en', {"TEST": en});
-    translate.setTranslation('fr', {"TEST": fr});
+    translate.setTranslation("en", { "NESTED": { "TEST": { "KEY": en } } });
+    translate.setTranslation("fr", { "NESTED": { "TEST": { "KEY": fr } } });
 
     translate.use('en');
-    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(whiteSpaceFromKey + en + whiteSpaceFromKey);
+    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${en} `);
 
     translate.use('fr');
-    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(whiteSpaceFromKey + fr + whiteSpaceFromKey);
+    expect(fixture.componentInstance.withSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${fr} `);
+  });
+
+  it('should update the DOM when the lang changes and the translation key is interpolated', async () => {
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(' Placeholder Text ');
+
+    const en1="This is a test - with trailing spaces in interpolated translation key";
+    const en2="Another test";
+    const fr1="C'est un test - pardon, je ne parle pas francais :)";
+    const fr2="Un autre test";
+    const setKey = key => {
+      fixture.componentInstance.myInterpolatedTranslationKey = key;
+      fixture.componentInstance.changeDetectorRef.markForCheck(); // Needed when changeDetection is ChangeDetectionStrategy.OnPush
+      fixture.detectChanges();
+    };
+
+    translate.setTranslation("en", { "NESTED": { "TEST3": en1, "TEST4": en2 } });
+    translate.setTranslation("fr", { "NESTED": { "TEST3": fr1, "TEST4": fr2 } });
+    translate.use('en');
+
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(' Placeholder Text ');
+
+    setKey('NESTED.TEST3');
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${en1} `);
+
+    setKey('NESTED.TEST4');
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${en2} `);
+
+    translate.use('fr');
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${fr2} `);
+
+    setKey('NESTED.TEST3');
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(` ${fr1} `);
+
+    setKey(''); // display nothing
+    expect(fixture.componentInstance.interpolatedWithSpaceAndLineBreakNoKeyNoParams.nativeElement.innerHTML).toEqual(`  `);
   });
 
   it('should update the DOM when the lang changes and the translation key ends with space', () => {
