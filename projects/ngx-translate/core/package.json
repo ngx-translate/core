@@ -22,9 +22,6 @@
     "@angular/core": ">=8.0.0",
     "rxjs": ">=6.3.0"
   },
-  "devDependencies": {
-    "semantic-release": "8.2.3"
-  },
   "scripts": {
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
