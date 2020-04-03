@@ -216,7 +216,10 @@ export class TranslateService {
 
       pending.pipe(take(1))
         .subscribe((res: any) => {
-          this.changeLang(lang);
+          // If someone else already loaded another language, just let it go
+          if (lang === this.currentLang) {
+            this.changeLang(lang);
+          }
         });
 
       return pending;
