@@ -1,11 +1,12 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Observable, of, timer, zip, defer} from "rxjs";
+import {Observable, of, Subject, timer, zip, defer} from "rxjs";
 import {mapTo, take, toArray, first} from 'rxjs/operators';
 import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 
 let translations: any = {"TEST": "This is a test"};
 
 class FakeLoader implements TranslateLoader {
+  loaders: Map<string, Observable<any>> = new Map();
   getTranslation(lang: string): Observable<any> {
     return of(translations);
   }
@@ -13,6 +14,7 @@ class FakeLoader implements TranslateLoader {
 
 describe('TranslateService', () => {
   let translate: TranslateService;
+  let loader: FakeLoader;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,6 +25,7 @@ describe('TranslateService', () => {
       ]
     });
     translate = TestBed.get(TranslateService);
+    loader = TestBed.get(TranslateLoader);
   });
 
   afterEach(() => {
@@ -525,5 +528,22 @@ describe('TranslateService', () => {
     tick(1001);
 
     expect(translateCompilerCallCount).toBe(1);
+  }));
+
+  it('should load the last language requested even if another took longer to load', fakeAsync(() => {
+    translate.setTranslation('en', {"TEST": "This is a test"});
+	  translate.use('en');
+
+	  const nlLoader: Subject<any> = new Subject();
+	  loader.loaders.set('nl', nlLoader);
+	  translate.use('nl');
+	  translate.use('en');
+
+	  expect(translate.instant('TEST')).toEqual('This is a test');
+
+	  nlLoader.next({"TEST": "Dit is een test"});
+	  nlLoader.compete();
+
+	  expect(translate.instant('TEST')).toEqual('This is a test');
   }));
 });
