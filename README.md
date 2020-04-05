@@ -531,6 +531,7 @@ If you want to reload the translations and see the update on all your components
 - [ngx-translate-migrate](https://github.com/irustm/ngx-translate-migrate) by @irustm: Automate migrations from ngx-translate to Angular i18n.
 - [ngx-translate-lint](https://github.com/svoboda-rabstvo/ngx-translate-lint) by @svoboda-rabstvo: Simple CLI tools for check ngx-translate keys in whole app
 - [ngx-translate-cut](https://github.com/bartholomej/ngx-translate-cut) by @bartholomej: Simple and useful pipe for cutting translations ✂️
+- [ngx-translate-testing](https://github.com/mwootendev/ngx-translate-plugins/tree/develop/projects/testing) by @mwootendev: Utilities for unit testing components with translations.
 
 ## Editors
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
