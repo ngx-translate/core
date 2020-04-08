@@ -1,6 +1,6 @@
 import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, forkJoin, isObservable, Observable, of, defer} from "rxjs";
-import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
+import {concat, forkJoin, isObservable, Observable, of, defer, Subject} from "rxjs";
+import {concatMap, map, shareReplay, switchMap, take, takeUntil, tap} from "rxjs/operators";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
 import {TranslateLoader} from "./translate.loader";
@@ -42,6 +42,7 @@ export class TranslateService {
   private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
   private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
   private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+  private _onRequestLangChange: Subject<unknown>() = new Subject<unknown>();
   private _defaultLang: string;
   private _currentLang: string;
   private _langs: Array<string> = [];
@@ -201,6 +202,7 @@ export class TranslateService {
    * Changes the lang currently used
    */
   public use(lang: string): Observable<any> {
+    this._onRequestLangChange.next();
     // don't change the language if the language given is already selected
     if (lang === this.currentLang) {
       return of(this.translations[lang]);
@@ -214,14 +216,14 @@ export class TranslateService {
         this.currentLang = lang;
       }
 
-      pending.pipe(take(1))
-        .subscribe((res: any) => {
-          // If someone else already loaded another language, just let it go
-          if (lang === this.currentLang) {
+      pending = pending.pipe(
+          takeUntil(this._onRequestLangChange),
+          take(1),
+          tap((res: any) => {
             this.changeLang(lang);
-          }
-        });
-
+          }),
+          shareReplay());
+      pending.subscribe();
       return pending;
     } else { // we have this language, return an Observable
       this.changeLang(lang);
