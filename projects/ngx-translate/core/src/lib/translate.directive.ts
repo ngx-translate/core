@@ -82,7 +82,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
           if (trimmedContent.length) {
             node.lookupKey = trimmedContent;
             // we want to use the content as a key, not the translation value
-            if (content !== node.currentValue) {
+            if (trimmedContent !== node.currentValue) {
               key = trimmedContent;
               // the content was changed from the user, we'll use it as a reference if needed
               node.originalContent = content || node.originalContent;
