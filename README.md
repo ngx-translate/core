@@ -541,6 +541,8 @@ If you want to reload the translations and see the update on all your components
 
 #### VScode
 - [Generate Translation](https://marketplace.visualstudio.com/items?itemName=thiagocordeirooo.generate-translation) by [@thiagocordeirooo](https://github.com/thiagocordeirooo): A visual studio code extension for you to generate the translations without leaving the current file.
+- [Lingua](https://marketplace.visualstudio.com/items?itemName=chr33z.lingua-vscode&utm_source=www.vsixhub.com) by [@chr33z](https://github.com/chr33z): A visual studio code extension to help managing translations for ngx-translate - featuring inline translation lookup and in-place translation creation and editing.
+
 
 
 ## Additional Framework Support
