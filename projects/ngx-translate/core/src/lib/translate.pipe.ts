@@ -22,6 +22,8 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
 
   updateValue(key: string, interpolateParams?: Object, translations?: any): void {
     let onTranslation = (res: string) => {
+      if (res === key) { return; }
+
       this.value = res !== undefined ? res : key;
       this.lastKey = key;
       this._ref.markForCheck();
