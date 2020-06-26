@@ -19,8 +19,8 @@
     "url": "https://github.com/ngx-translate/core/issues"
   },
   "peerDependencies": {
-    "@angular/core": ">=8.0.0",
-    "rxjs": ">=6.3.0"
+    "@angular/core": ">=10.0.0",
+    "rxjs": ">=6.5.3"
   },
   "scripts": {
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"

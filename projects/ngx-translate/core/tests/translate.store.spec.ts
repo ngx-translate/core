@@ -27,7 +27,7 @@ class RootCmp {
 class ParentLazyLoadedComponent {
 }
 
-function getLazyLoadedModule(importedModule: ModuleWithProviders) {
+function getLazyLoadedModule<T>(importedModule: ModuleWithProviders<T>) {
   @Component({selector: 'lazy', template: 'lazy-loaded-child'})
   class ChildLazyLoadedComponent {
     constructor(public translate: TranslateService) {
