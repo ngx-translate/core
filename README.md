@@ -34,6 +34,7 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
   * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
 * [Plugins](#plugins)
 * [Editors](#editors)
+* [UI Tools](#ui-tools)
 * [Additional Framework Support](#additional-framework-support)
 
 
@@ -545,7 +546,9 @@ If you want to reload the translations and see the update on all your components
 - [Generate Translation](https://marketplace.visualstudio.com/items?itemName=thiagocordeirooo.generate-translation) by [@thiagocordeirooo](https://github.com/thiagocordeirooo): A visual studio code extension for you to generate the translations without leaving the current file.
 - [Lingua](https://marketplace.visualstudio.com/items?itemName=chr33z.lingua-vscode&utm_source=www.vsixhub.com) by [@chr33z](https://github.com/chr33z): A visual studio code extension to help managing translations for ngx-translate - featuring inline translation lookup and in-place translation creation and editing.
 
+## UI Tools
 
+- [ngx-flag-picker](https://github.com/iamartyom/ngx-flag-picker) - Customizable Angular component which containing a dropdown with country flags
 
 ## Additional Framework Support
 
