@@ -37,9 +37,13 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     this.translate.get(key, interpolateParams).subscribe(onTranslation);
   }
 
-  transform(query: string, ...args: any[]): any {
+  transform(query: string|string[], ...args: any[]): any {
     if (!query || !query.length) {
       return query;
+    }
+
+    if (Array.isArray(query)) {
+      return this.transformArray(query, args);
     }
 
     // if we ask another time for the same key, return the last value
@@ -108,6 +112,12 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     return this.value;
+  }
+
+  transformArray(queries: string[], ...args: any[]): any {
+    return queries
+      .map( query => this.transform(query, args))
+      .join('');
   }
 
   /**
