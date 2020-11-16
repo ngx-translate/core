@@ -1,10 +1,8 @@
-import {ChangeDetectorRef, EventEmitter, Injectable, OnDestroy, Pipe, PipeTransform} from '@angular/core';
-import {isObservable} from 'rxjs';
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
+import {ChangeDetectorRef, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import {isObservable, Subscription} from 'rxjs';
+import {LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
 import {equals, isDefined} from './util';
-import { Subscription } from 'rxjs';
 
-@Injectable()
 @Pipe({
   name: 'translate',
   pure: false // required to update the value when the promise is resolved

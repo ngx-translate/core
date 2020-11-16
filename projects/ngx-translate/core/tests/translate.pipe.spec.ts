@@ -1,7 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef} from "@angular/core";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewContainerRef} from "@angular/core";
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../src/public_api";
+import {
+  DefaultLangChangeEvent,
+  LangChangeEvent,
+  TranslateLoader,
+  TranslateModule,
+  TranslatePipe,
+  TranslateService
+} from "../src/public_api";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {
@@ -20,7 +27,6 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
   }
 }
 
-@Injectable()
 @Component({
   selector: 'hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,

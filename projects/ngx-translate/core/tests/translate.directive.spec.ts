@@ -1,8 +1,7 @@
-import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild, ViewContainerRef} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TranslateModule, TranslateService} from '../src/public_api';
 
-@Injectable()
 @Component({
   selector: 'hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -10,6 +9,8 @@ import {TranslateModule, TranslateService} from '../src/public_api';
     <div #noKey translate>TEST</div>
     <div #contentAsKey translate>TEST.VALUE</div>
     <div #withKey [translate]="'TEST'">Some init content</div>
+    <div #attributeWithValue translate="TEST">Should be changed</div>
+    <div #attributeWithValueAndParams translate="TEST" [translateParams]="{value: 'great'}">Should be changed</div>
     <div #noContent [translate]="'TEST'"></div>
     <div #withOtherElements translate>TEST1 <span>Hey</span> TEST2</div>
     <div #withParams [translate]="'TEST'" [translateParams]="value">Some init content</div>
@@ -26,6 +27,8 @@ class App {
   @ViewChild('noKey', {static: true}) noKey: ElementRef;
   @ViewChild('contentAsKey', {static: true}) contentAsKey: ElementRef;
   @ViewChild('withKey', {static: true}) withKey: ElementRef;
+  @ViewChild('attributeWithValue', {static: true}) attributeWithValue: ElementRef;
+  @ViewChild('attributeWithValueAndParams', {static: true}) attributeWithValueAndParams: ElementRef;
   @ViewChild('withOtherElements', {static: true}) withOtherElements: ElementRef;
   @ViewChild('withParams', {static: true}) withParams: ElementRef;
   @ViewChild('withParamsNoKey', {static: true}) withParamsNoKey: ElementRef;
@@ -88,6 +91,24 @@ describe('TranslateDirective', () => {
     translate.use('en');
 
     expect(fixture.componentInstance.withKey.nativeElement.innerHTML).toEqual('This is a test');
+  });
+
+  it('should translate a string using HTML attribute with value', () => {
+    expect(fixture.componentInstance.attributeWithValue.nativeElement.innerHTML).toEqual('TEST');
+
+    translate.setTranslation('en', {"TEST": "This is a test"});
+    translate.use('en');
+
+    expect(fixture.componentInstance.attributeWithValue.nativeElement.innerHTML).toEqual('This is a test');
+  });
+
+  it('should translate a string using HTML attribute with value and with params', () => {
+    expect(fixture.componentInstance.attributeWithValueAndParams.nativeElement.innerHTML).toEqual('TEST');
+
+    translate.setTranslation('en', {"TEST": "It is {{value}}"});
+    translate.use('en');
+
+    expect(fixture.componentInstance.attributeWithValueAndParams.nativeElement.innerHTML).toEqual('It is great');
   });
 
   it('should translate first child strings with elements in the middle', () => {
