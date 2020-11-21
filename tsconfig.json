@@ -4,7 +4,7 @@
     "baseUrl": "./",
     "downlevelIteration": true,
     "importHelpers": true,
-    "module": "esnext",
+    "module": "es2020",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
