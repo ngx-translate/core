@@ -10,7 +10,7 @@ export class TranslateStore {
   /**
    * The lang currently used
    */
-  public currentLang: string = this.defaultLang;
+  public currentLang: string;
 
   /**
    * a list of translations per lang
@@ -45,4 +45,8 @@ export class TranslateStore {
      * });
    */
   public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+
+  constructor() {
+    this.currentLang = this.currentLang;
+  }
 }
