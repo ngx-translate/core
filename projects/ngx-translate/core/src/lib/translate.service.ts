@@ -434,7 +434,9 @@ export class TranslateService {
    * Returns a translation instantly from the internal state of loaded translation.
    * All rules regarding the current language, the preferred language of even fallback languages will be used except any promise handling.
    */
-  public instant(key: string | Array<string>, interpolateParams?: Object): string | any {
+  public instant<T extends string>(key: Array<T>, interpolateParams?: Object): Record<T, string>;
+  public instant(key: string, interpolateParams?: Object): string;
+  public instant(key: string | Array<string>, interpolateParams?: Object): string | Record<string, string> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
