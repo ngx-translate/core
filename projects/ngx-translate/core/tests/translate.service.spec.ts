@@ -1,6 +1,6 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Observable, of, timer, zip, defer} from "rxjs";
-import {mapTo, take, toArray, first} from 'rxjs/operators';
+import {Observable, of, timer, zip, defer, throwError} from "rxjs";
+import {mapTo, take, toArray, first, catchError} from 'rxjs/operators';
 import {LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, TranslationChangeEvent} from '../src/public_api';
 
 let translations: any = {"TEST": "This is a test"};
@@ -526,4 +526,14 @@ describe('TranslateService', () => {
 
     expect(translateCompilerCallCount).toBe(1);
   }));
+
+  it('should not throw unhandled exception', () => {
+    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+      return throwError(new Error('Not found'));
+    });
+    translate.use('en').pipe(catchError(() => of({}))).subscribe();
+    window.onerror = function() {
+      fail('You have unhandled exceptions');
+    }
+  });
 });

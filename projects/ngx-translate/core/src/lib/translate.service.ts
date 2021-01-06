@@ -215,9 +215,13 @@ export class TranslateService {
       }
 
       pending.pipe(take(1))
-        .subscribe((res: any) => {
-          this.changeLang(lang);
-        });
+        .subscribe(
+          (res: any) => {
+            this.changeLang(lang);
+          },
+          // prevent from throwing an unhandled exception
+          () => {}
+        );
 
       return pending;
     } else { // we have this language, return an Observable
