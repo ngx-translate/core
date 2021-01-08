@@ -538,6 +538,7 @@ If you want to reload the translations and see the update on all your components
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 - [Crowdl.io](https://crowdl.io) — Free translation management and crowd-translations tool with support for JSON files
+- [ngx-translate-editor](https://github.com/svoboda-rabstvo/ngx-translate-editor) - Simple GUI for CRUD translate files of `ngx-translate`, which included `ngx-translate-lint`
 
 ### Extensions
 
