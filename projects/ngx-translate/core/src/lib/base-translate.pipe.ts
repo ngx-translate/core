@@ -1,0 +1,134 @@
+import { ChangeDetectorRef, OnDestroy, PipeTransform } from '@angular/core';
+import { isObservable } from 'rxjs';
+import { LangChangeEvent, TranslateService, TranslationChangeEvent } from './translate.service';
+import { equals, isDefined } from './util';
+import { Subscription } from 'rxjs';
+
+export abstract class BaseTranslatePipe implements PipeTransform, OnDestroy {
+
+  protected abstract getParsedResult(translations: any, key: string | Array<string>, interpolateParams?: Object);
+  protected abstract get(key: string | Array<string>, interpolateParams?: Object);
+  protected abstract pipeName: string;
+
+  value: string = '';
+  lastKey: string;
+  lastParams: any[];
+  onTranslationChange: Subscription;
+  onLangChange: Subscription;
+  onDefaultLangChange: Subscription;
+
+  constructor(protected translate: TranslateService, private _ref: ChangeDetectorRef) {
+  }
+
+  updateValue(key: string, interpolateParams?: Object, translations?: any): void {
+    let onTranslation = (res: string) => {
+      this.value = res !== undefined ? res : key;
+      this.lastKey = key;
+      this._ref.markForCheck();
+    };
+    if (translations) {
+      let res = this.getParsedResult(translations, key, interpolateParams);
+      if (isObservable(res.subscribe)) {
+        res.subscribe(onTranslation);
+      } else {
+        onTranslation(res);
+      }
+    }
+    this.get(key, interpolateParams).subscribe(onTranslation);
+  }
+
+  transform(query: string, ...args: any[]): any {
+    if (!query || !query.length) {
+      return query;
+    }
+
+    // if we ask another time for the same key, return the last value
+    if (equals(query, this.lastKey) && equals(args, this.lastParams)) {
+      return this.value;
+    }
+
+    let interpolateParams: Object;
+    if (isDefined(args[0]) && args.length) {
+      if (typeof args[0] === 'string' && args[0].length) {
+        // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
+        // which is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
+        let validArgs: string = args[0]
+          .replace(/(\')?([a-zA-Z0-9_]+)(\')?(\s)?:/g, '"$2":')
+          .replace(/:(\s)?(\')(.*?)(\')/g, ':"$3"');
+        try {
+          interpolateParams = JSON.parse(validArgs);
+        } catch (e) {
+          throw new SyntaxError(`Wrong parameter in ${this.pipeName}. Expected a valid Object, received: ${args[0]}`);
+        }
+      } else if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
+        interpolateParams = args[0];
+      }
+    }
+
+    // store the query, in case it changes
+    this.lastKey = query;
+
+    // store the params, in case they change
+    this.lastParams = args;
+
+    // set the value
+    this.updateValue(query, interpolateParams);
+
+    // if there is a subscription to onLangChange, clean it
+    this._dispose();
+
+    // subscribe to onTranslationChange event, in case the translations change
+    if (!this.onTranslationChange) {
+      this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
+        if (this.lastKey && event.lang === this.translate.currentLang) {
+          this.lastKey = null;
+          this.updateValue(query, interpolateParams, event.translations);
+        }
+      });
+    }
+
+    // subscribe to onLangChange event, in case the language changes
+    if (!this.onLangChange) {
+      this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
+        if (this.lastKey) {
+          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+          this.updateValue(query, interpolateParams, event.translations);
+        }
+      });
+    }
+
+    // subscribe to onDefaultLangChange event, in case the default language changes
+    if (!this.onDefaultLangChange) {
+      this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe(() => {
+        if (this.lastKey) {
+          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+          this.updateValue(query, interpolateParams);
+        }
+      });
+    }
+
+    return this.value;
+  }
+
+  /**
+   * Clean any existing subscription to change events
+   */
+  private _dispose(): void {
+    if (typeof this.onTranslationChange !== 'undefined') {
+      this.onTranslationChange.unsubscribe();
+      this.onTranslationChange = undefined;
+    }
+    if (typeof this.onLangChange !== 'undefined') {
+      this.onLangChange.unsubscribe();
+      this.onLangChange = undefined;
+    }
+    if (typeof this.onDefaultLangChange !== 'undefined') {
+      this.onDefaultLangChange.unsubscribe();
+      this.onDefaultLangChange = undefined;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._dispose();
+  }
+}
