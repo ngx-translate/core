@@ -7,34 +7,38 @@ Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
 ## Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Import the TranslateModule](#1-import-the-translatemodule)
-    * [SharedModule](#sharedmodule)
-    * [Lazy loaded modules](#lazy-loaded-modules)
-    * [Configuration](#configuration)
-    * [AoT](#aot)
-  * [Define the default language for the application](#2-define-the-default-language-for-the-application)
-  * [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
-  * [Define the translations](#4-define-the-translations)
-  * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
-  * [Use HTML tags](#6-use-html-tags)
-* [API](#api)
-  * [TranslateService](#translateservice)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Write & use your own loader](#write--use-your-own-loader)
-      * [Example](#example)
-    * [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
-    * [How to handle missing translations](#how-to-handle-missing-translations)
-      * [Example](#example-1)
-  * [Parser](#parser)
-    * [Methods](#methods)
-* [FAQ](#faq)
-  * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
-* [Plugins](#plugins)
-* [Editors](#editors)
-* [Additional Framework Support](#additional-framework-support)
+  - [Installation](#installation)
+  - [Usage](#usage)
+      - [1. Import the `TranslateModule`:](#1-import-the-translatemodule)
+        - [SharedModule](#sharedmodule)
+        - [Lazy loaded modules](#lazy-loaded-modules)
+        - [Configuration](#configuration)
+        - [AoT](#aot)
+      - [2. Define the `default language` for the application](#2-define-the-default-language-for-the-application)
+      - [3. Init the `TranslateService` for your application:](#3-init-the-translateservice-for-your-application)
+      - [4. Define the translations:](#4-define-the-translations)
+      - [5. Use the service, the pipe or the directive:](#5-use-the-service-the-pipe-or-the-directive)
+      - [6. Use HTML tags:](#6-use-html-tags)
+      - [7. Use the namespace-translate service, pipe or directive:](#7-use-the-namespace-translate-service-pipe-or-directive)
+  - [API](#api)
+    - [TranslateService](#translateservice)
+      - [Properties:](#properties)
+      - [Methods:](#methods)
+      - [Write & use your own loader](#write--use-your-own-loader)
+        - [Example](#example)
+      - [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
+      - [How to handle missing translations](#how-to-handle-missing-translations)
+        - [Example:](#example-1)
+    - [Parser](#parser)
+      - [Methods:](#methods-1)
+  - [FAQ](#faq)
+      - [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
+      - [I want to hot reload the translations in my application but `reloadLang` does not work](#i-want-to-hot-reload-the-translations-in-my-application-but-reloadlang-does-not-work)
+  - [Plugins](#plugins)
+  - [Editors](#editors)
+    - [Extensions](#extensions)
+      - [VScode](#vscode)
+  - [Additional Framework Support](#additional-framework-support)
 
 
 ## Installation
@@ -47,16 +51,16 @@ npm install @ngx-translate/core --save
 
 Choose the version corresponding to your Angular version:
 
- Angular     | @ngx-translate/core | @ngx-translate/http-loader
- ----------- | ------------------- | --------------------------
- 10          | 13.x+               | 6.x+
- 9           | 12.x+               | 5.x+
- 8           | 12.x+               | 4.x+
- 7           | 11.x+               | 4.x+
- 6           | 10.x                | 3.x
- 5           | 8.x to 9.x          | 1.x to 2.x
- 4.3         | 7.x or less         | 1.x to 2.x
- 2 to 4.2.x  | 7.x or less         | 0.x
+ | Angular    | @ngx-translate/core | @ngx-translate/http-loader |
+ | ---------- | ------------------- | -------------------------- |
+ | 10         | 13.x+               | 6.x+                       |
+ | 9          | 12.x+               | 5.x+                       |
+ | 8          | 12.x+               | 4.x+                       |
+ | 7          | 11.x+               | 4.x+                       |
+ | 6          | 10.x                | 3.x                        |
+ | 5          | 8.x to 9.x          | 1.x to 2.x                 |
+ | 4.3        | 7.x or less         | 1.x to 2.x                 |
+ | 2 to 4.2.x | 7.x or less         | 0.x                        |
 
 ---
 
@@ -363,6 +367,60 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 <div [innerHTML]="'HELLO' | translate"></div>
 ```
 
+#### 7. Use the namespace-translate service, pipe or directive:
+
+If you have a big complex application it can be tedious to provide the sometimes pretty long path to the translations for the specific component.
+For this reason we provide a `NamespaceTranslateService`, `NamespaceTranslatePipe`  and `NamespaceTranslateDirective`.
+
+> The NamespaceTranslateService only provides functions to get translations for a specific key. It does not provide functions to set translations, language or do anything else. For all other things than getting the translations continue using the TranslateService!
+
+To use one of these you have to provide the namespace-translate service to the component via the `namespaceTranslateServiceProvider` as shown in the following example:
+
+```ts
+import {Component} from '@angular/core';
+import {NamespaceTranslateService, namespaceTranslateServiceProvider} from '@ngx-translate/core';
+
+@Component({
+    selector: 'my-deep-nested-component',
+    template: `
+        <div>{{ 'HELLO' | namespaceTranslate:param }}</div>
+        <div namespace-translate [translateParams]="{value: 'world'}" >Hello</div>
+    `,
+    providers: [namespaceTranslateServiceProvider(
+        "PATH.TO.MY.DEEP.NESTED.COMPONENT"
+      )]
+})
+export class MyDeepNestedComponent {
+    param = {value: 'world'};
+
+    constructor(namespaceTranslate: NamespaceTranslateService) {
+      const instant = namespaceTranslate.instant("HELLO", param);
+      
+      const observable = namespaceTranslate.get("HELLO", param);
+    }
+}
+```
+
+The translation object for the example above would look like the following:
+
+```json
+{
+  "PATH":{
+    "TO":{
+      "MY":{
+        "DEEP":{
+          "NESTED":{
+            "COMPONENT":{
+              "HELLO": "hello {{value}}"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## API
 
 ### TranslateService
@@ -493,6 +551,19 @@ Setup the Missing Translation Handler in your module import by adding it to the 
 })
 export class AppModule { }
 ```
+
+### NamespaceTranslateService
+
+#### Properties:
+- `private readonly namespace: string`: The namespace with which all keys given to one of the function of this instance should be prefixed.
+- `private readonly translate: TranslateService`: The global instance of the [`TranslateService`](###TranslateService)
+
+#### Methods:
+
+- `get(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Gets the translated value of a key (or an array of keys) or the key if the value was not found
+- `getStreamOnTranslationChange(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Returns a stream of translated values of a key (or an array of keys) or the key if the value was not found. Without any `onTranslationChange` events this returns the same value as `get` but it will also emit new values whenever the translation changes.
+- `stream(key: string|Array<string>, interpolateParams?: Object): Observable<string|Object>`: Returns a stream of translated values of a key (or an array of keys) or the key if the value was not found. Without any `onLangChange` events this returns the same value as `get` but it will also emit new values whenever the used language changes.
+- `instant(key: string|Array<string>, interpolateParams?: Object): string|Object`: Gets the instant translated value of a key (or an array of keys). /!\ This method is **synchronous** and the default file loader is asynchronous. You are responsible for knowing when your translations have been loaded and it is safe to use this method. If you are not sure then you should use the `get` method instead.
 
 ### Parser
 
