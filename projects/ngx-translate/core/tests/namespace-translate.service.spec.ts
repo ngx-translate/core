@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { Observable, of, zip } from "rxjs";
 import { take, toArray, first } from 'rxjs/operators';
-import { TranslateLoader, TranslateModule, TranslateService, NamespaceTranslateService, namespaceTranslateServiceProvider } from '../src/public_api';
+import { TranslateLoader, TranslateModule, TranslateService, NamespaceTranslateService, TRANSLATION_NAMESPACE } from '../src/public_api';
 import * as flatten from "flat";
 
 let translations: any = { "NAMESPACE": { "TEST": "This is a namespace test" } };
@@ -25,7 +25,7 @@ describe('NamespaceTranslateService', () => {
             loader: { provide: TranslateLoader, useClass: FakeLoader }
           })
         ],
-        providers: [namespaceTranslateServiceProvider("NAMESPACE")]
+        providers: [{ provide: TRANSLATION_NAMESPACE, useValue: "NAMESPACE" }]
       });
       namespaceTranslate = TestBed.inject(NamespaceTranslateService);
       translate = TestBed.inject(TranslateService);
@@ -91,7 +91,7 @@ describe('NamespaceTranslateService', () => {
             loader: { provide: TranslateLoader, useClass: FakeLoader }
           })
         ],
-        providers: [namespaceTranslateServiceProvider("NAMESPACE")]
+        providers: [{ provide: TRANSLATION_NAMESPACE, useValue: "NAMESPACE" }]
       });
       namespaceTranslate = TestBed.inject(NamespaceTranslateService);
       translate = TestBed.inject(TranslateService);

@@ -372,13 +372,25 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 If you have a big complex application it can be tedious to provide the sometimes pretty long path to the translations for the specific component.
 For this reason we provide a `NamespaceTranslateService`, `NamespaceTranslatePipe`  and `NamespaceTranslateDirective`.
 
-> The NamespaceTranslateService only provides functions to get translations for a specific key. It does not provide functions to set translations, language or do anything else. For all other things than getting the translations continue using the TranslateService!
+> The NamespaceTranslateService only provides functions to get translations for a specific key(s). It does not provide functions to set translations, language or do anything else. For all other things than getting the translations continue using the TranslateService!
 
-To use one of these you have to provide the namespace-translate service to the component via the `namespaceTranslateServiceProvider` as shown in the following example:
+The NamespaceTranslateService is not provided via the TranslateModule!
+
+To use the NamespaceTranslateService, Pipe or Module you have to provide a `TRANSLATION_NAMESPACE` AND the `NamespaceTranslateService` in your component or directive. 
+
+<b>Read this if you don't know the specifics how Angular DI works:</b>
+
+If you provide the `TRANSLATION_NAMESPACE` and the `NamespaceTranslateService` in a module, every component and directive declared by the module will share the namespace, unless you provide the booth the `TRANSLATION_NAMESPACE` AND `NamespaceTranslateService` in the `providers` section.
+
+> Also be aware of the fact, that all the child components/directives of a component/directive have access to things provided in the `providers` section of a parent component/directive!
+
+So if you don't provide booth the `TRANSLATION_NAMESPACE` and the `NamespaceTranslateService` in the providers section you will share either the instance of the `NamespaceTranslateService` or the `TRANSLATION_NAMESPACE` with the parent component/directive.
+
+<b> Example usage:
 
 ```ts
 import {Component} from '@angular/core';
-import {NamespaceTranslateService, namespaceTranslateServiceProvider} from '@ngx-translate/core';
+import {NamespaceTranslateServiceNamespaceTranslateProvider} from '@ngx-translate/core';
 
 @Component({
     selector: 'my-deep-nested-component',
@@ -386,9 +398,7 @@ import {NamespaceTranslateService, namespaceTranslateServiceProvider} from '@ngx
         <div>{{ 'HELLO' | namespaceTranslate:param }}</div>
         <div namespace-translate [translateParams]="{value: 'world'}" >Hello</div>
     `,
-    providers: [namespaceTranslateServiceProvider(
-        "PATH.TO.MY.DEEP.NESTED.COMPONENT"
-      )]
+    providers: [{ provide: TRANSLATION_NAMESPACE, useValue: "PATH.TO.MY.DEEP.NESTED.COMPONENT"}, NamespaceTranslateService]
 })
 export class MyDeepNestedComponent {
     param = {value: 'world'};

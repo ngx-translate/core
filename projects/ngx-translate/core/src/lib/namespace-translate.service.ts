@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { TranslateService } from './translate.service';
 import { isDefined } from './util';
 
-const TRANSLATION_NAMESPACE = new InjectionToken<string>('TRANSLATION_NAMESPACE');
+export const TRANSLATION_NAMESPACE = new InjectionToken<string>('TRANSLATION_NAMESPACE');
 
 /**
  * Wraps the `getParsedResult`, `get`, `getStreamOnTranslationChange`, `stream` and `instant` functions of the
@@ -12,7 +12,7 @@ const TRANSLATION_NAMESPACE = new InjectionToken<string>('TRANSLATION_NAMESPACE'
  * To access the functionality of this service in your html files use the `namespace-translate` pipe or
  * the `namespaceTranslate` directive
  *
- * Use the @see `namespaceTranslateServiceProvider` function to provide this service
+ * Use the @see `NamespaceTranslateProvider.forChild` function to provide this service
  * to your component, service, pipe, module, ...
  */
 @Injectable()
@@ -88,19 +88,22 @@ export class NamespaceTranslateService {
   }
 }
 
-const namespaceTranslateFactory = (namespace: string) => (translate: TranslateService) => {
-  return new NamespaceTranslateService(translate, namespace);
-}
+// const namespaceTranslateFactory = (namespace: string) => (translate: TranslateService) => {
+//   return new NamespaceTranslateService(translate, namespace);
+// }
 
-/**
- * provides the NamespaceTranslateService to your component, service, pipe, module, ...
- * @param namespace The namespace that should be prefixed to keys given functions of the NamespaceTranslateService.
- * It should not end with a "." because it inserted automatically between the namespace and the key!
- */
-export function namespaceTranslateServiceProvider(namespace: string): Provider {
-  return {
-    provide: NamespaceTranslateService,
-    useFactory: namespaceTranslateFactory(namespace),
-    deps: [TranslateService]
-  }
-}
+// // @dynamic
+// export class NamespaceTranslateProvider {
+//   /**
+//    * provides the NamespaceTranslateService to your component, service, pipe, module, ...
+//    * @param namespace The namespace that should be prefixed to keys given functions of the NamespaceTranslateService.
+//    * It should not end with a "." because it inserted automatically between the namespace and the key!
+//    */
+//   static forChild(namespace: string): Provider {
+//     return {
+//       provide: NamespaceTranslateService,
+//       useFactory: namespaceTranslateFactory(namespace),
+//       deps: [TranslateService]
+//     }
+//   }
+// }

@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
-import { DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslateService } from "../src/public_api";
-import { NamespaceTranslatePipe } from '../src/lib/namespace-translate.pipe';
-import { NamespaceTranslateService, namespaceTranslateServiceProvider } from '../src/lib/namespace-translate.service';
+import { DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslateService, NamespaceTranslatePipe, NamespaceTranslateService, TRANSLATION_NAMESPACE } from "../src/public_api";
+
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {
@@ -57,7 +56,7 @@ describe('NamespaceTranslatePipe', () => {
           loader: { provide: TranslateLoader, useClass: FakeLoader }
         })
       ],
-      providers: [namespaceTranslateServiceProvider("NAMESPACE")],
+      providers: [{ provide: TRANSLATION_NAMESPACE, useValue: "NAMESPACE" }],
       declarations: [App]
     });
     translate = TestBed.inject(TranslateService);

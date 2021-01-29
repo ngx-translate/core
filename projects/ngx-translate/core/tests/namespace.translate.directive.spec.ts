@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { namespaceTranslateServiceProvider, TranslateModule, TranslateService } from '../src/public_api';
+import { TranslateModule, TranslateService, TRANSLATION_NAMESPACE } from '../src/public_api';
 
 @Injectable()
 @Component({
   selector: 'hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [namespaceTranslateServiceProvider("NAMESPACE")],
+  providers: [{ provide: TRANSLATION_NAMESPACE, useValue: "NAMESPACE" }],
   template: `
     <div #noKey namespace-translate>TEST</div>
     <div #contentAsKey namespace-translate>TEST.VALUE</div>
