@@ -7,34 +7,39 @@ Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/
 Get the complete changelog here: https://github.com/ngx-translate/core/releases
 
 ## Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Import the TranslateModule](#1-import-the-translatemodule)
-    * [SharedModule](#sharedmodule)
-    * [Lazy loaded modules](#lazy-loaded-modules)
-    * [Configuration](#configuration)
-    * [AoT](#aot)
-  * [Define the default language for the application](#2-define-the-default-language-for-the-application)
-  * [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
-  * [Define the translations](#4-define-the-translations)
-  * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
-  * [Use HTML tags](#6-use-html-tags)
-* [API](#api)
-  * [TranslateService](#translateservice)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Write & use your own loader](#write--use-your-own-loader)
-      * [Example](#example)
-    * [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
-    * [How to handle missing translations](#how-to-handle-missing-translations)
-      * [Example](#example-1)
-  * [Parser](#parser)
-    * [Methods](#methods)
-* [FAQ](#faq)
-  * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
-* [Plugins](#plugins)
-* [Editors](#editors)
-* [Additional Framework Support](#additional-framework-support)
+- [@ngx-translate/core ![Build Status](https://travis-ci.org/ngx-translate/core) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)](#ngx-translatecore--)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+      - [1. Import the `TranslateModule`:](#1-import-the-translatemodule)
+        - [SharedModule](#sharedmodule)
+        - [Lazy loaded modules](#lazy-loaded-modules)
+        - [Configuration](#configuration)
+        - [AoT](#aot)
+      - [2. Define the `default language` for the application](#2-define-the-default-language-for-the-application)
+      - [3. Init the `TranslateService` for your application:](#3-init-the-translateservice-for-your-application)
+      - [4. Define the translations:](#4-define-the-translations)
+      - [5. Use the service, the pipe or the directive:](#5-use-the-service-the-pipe-or-the-directive)
+      - [6. Use HTML tags:](#6-use-html-tags)
+  - [API](#api)
+    - [TranslateService](#translateservice)
+      - [Properties:](#properties)
+      - [Methods:](#methods)
+      - [Write & use your own loader](#write--use-your-own-loader)
+        - [Example](#example)
+      - [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
+      - [How to handle missing translations](#how-to-handle-missing-translations)
+        - [Example:](#example-1)
+    - [Parser](#parser)
+      - [Methods:](#methods-1)
+  - [FAQ](#faq)
+      - [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
+      - [I want to hot reload the translations in my application but `reloadLang` does not work](#i-want-to-hot-reload-the-translations-in-my-application-but-reloadlang-does-not-work)
+  - [Plugins](#plugins)
+  - [Editors](#editors)
+    - [Extensions](#extensions)
+      - [VScode](#vscode)
+  - [Additional Framework Support](#additional-framework-support)
 
 
 ## Installation
@@ -539,6 +544,7 @@ If you want to reload the translations and see the update on all your components
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 - [Crowdl.io](https://crowdl.io) — Free translation management and crowd-translations tool with support for JSON files
 - [ngx-translate-editor](https://github.com/svoboda-rabstvo/ngx-translate-editor) - Simple GUI for CRUD translate files of `ngx-translate`, which included `ngx-translate-lint`
+- [JTM: JSON Translation Manager](https://marketplace.visualstudio.com/items?itemName=Mohammed.json-translations-manager) `The fastest and simplest way manage your translation files` - A <b>VSCode</b> extension to manage translation files and keep them in sync. it allows you to edit multiple languages easily at the same time.
 
 ### Extensions
 
