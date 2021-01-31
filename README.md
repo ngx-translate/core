@@ -544,13 +544,13 @@ If you want to reload the translations and see the update on all your components
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 - [Crowdl.io](https://crowdl.io) — Free translation management and crowd-translations tool with support for JSON files
 - [ngx-translate-editor](https://github.com/svoboda-rabstvo/ngx-translate-editor) - Simple GUI for CRUD translate files of `ngx-translate`, which included `ngx-translate-lint`
-- [JTM: JSON Translation Manager](https://marketplace.visualstudio.com/items?itemName=Mohammed.json-translations-manager) `The fastest and simplest way manage your translation files` - A <b>VSCode</b> extension to manage translation files and keep them in sync. it allows you to edit multiple languages easily at the same time.
 
 ### Extensions
 
 #### VScode
 - [Generate Translation](https://marketplace.visualstudio.com/items?itemName=thiagocordeirooo.generate-translation) by [@thiagocordeirooo](https://github.com/thiagocordeirooo): A visual studio code extension for you to generate the translations without leaving the current file.
 - [Lingua](https://marketplace.visualstudio.com/items?itemName=chr33z.lingua-vscode&utm_source=www.vsixhub.com) by [@chr33z](https://github.com/chr33z): A visual studio code extension to help managing translations for ngx-translate - featuring inline translation lookup and in-place translation creation and editing.
+- [JTM: JSON Translation Manager](https://marketplace.visualstudio.com/items?itemName=Mohammed.json-translations-manager) `The fastest and simplest way manage your translation files` - A <b>VSCode</b> extension to manage translation files and keep them in sync. it allows you to edit multiple languages easily at the same time.
 
 
 
