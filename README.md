@@ -514,7 +514,7 @@ If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer d
 
 If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`npm WARN!`), warning are just informative and if everything works then don't worry !
 
-If you're using an old version of Angular and ngx-translate requires a newer version then you should consider upgrading your application to use the newer angular 2 version. There is always a reason when I upgrade the minimum dependencies of the library. Often it is because Angular had a breaking changes. If it's not an option for you, then check [the changelog](/releases) to know which version is the last compatible version for you.
+If you're using an old version of Angular and ngx-translate requires a newer version then you should consider upgrading your application to use the newer angular 2 version. There is always a reason when I upgrade the minimum dependencies of the library. Often it is because Angular had a breaking changes. If it's not an option for you, then check [the changelog](https://github.com/ngx-translate/core/releases) to know which version is the last compatible version for you.
 
 #### I want to hot reload the translations in my application but `reloadLang` does not work
 
