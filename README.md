@@ -539,6 +539,7 @@ If you want to reload the translations and see the update on all your components
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 - [Crowdl.io](https://crowdl.io) — Free translation management and crowd-translations tool with support for JSON files
 - [ngx-translate-editor](https://github.com/svoboda-rabstvo/ngx-translate-editor) - Simple GUI for CRUD translate files of `ngx-translate`, which included `ngx-translate-lint`
+- [tl8.io](https://tl8.io) - A multi-platform application to enable the whole product team, including non-developers, to modify translations. WYSIWYG interface. Results can be downloaded as JSON and copied in the project as is.
 
 ### Extensions
 
