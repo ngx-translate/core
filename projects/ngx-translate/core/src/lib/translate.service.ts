@@ -35,6 +35,8 @@ declare interface Window {
 
 declare const window: Window;
 
+export type TranslationKey = string | Array<string>;
+
 @Injectable()
 export class TranslateService {
   private loadingTranslations: Observable<any>;
@@ -317,7 +319,7 @@ export class TranslateService {
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
+  public getParsedResult(translations: any, key: TranslationKey, interpolateParams?: Object): any {
     let res: string | Observable<string>;
 
     if (key instanceof Array) {
@@ -367,7 +369,7 @@ export class TranslateService {
    * Gets the translated value of a key (or an array of keys)
    * @returns the translated key, or an object of translated keys
    */
-  public get(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+  public get(key: TranslationKey, interpolateParams?: Object): Observable<string | any> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
@@ -390,7 +392,7 @@ export class TranslateService {
    * whenever the translation changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public getStreamOnTranslationChange(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+  public getStreamOnTranslationChange(key: TranslationKey, interpolateParams?: Object): Observable<string | any> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
@@ -415,7 +417,7 @@ export class TranslateService {
    * whenever the language changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public stream(key: string | Array<string>, interpolateParams?: Object): Observable<string | any> {
+  public stream(key: TranslationKey, interpolateParams?: Object): Observable<string | any> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
@@ -434,7 +436,7 @@ export class TranslateService {
    * Returns a translation instantly from the internal state of loaded translation.
    * All rules regarding the current language, the preferred language of even fallback languages will be used except any promise handling.
    */
-  public instant(key: string | Array<string>, interpolateParams?: Object): string | any {
+  public instant(key: TranslationKey, interpolateParams?: Object): string | any {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
