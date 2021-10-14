@@ -49,7 +49,7 @@ Choose the version corresponding to your Angular version:
 
  Angular     | @ngx-translate/core | @ngx-translate/http-loader
  ----------- | ------------------- | --------------------------
- 10          | 13.x+               | 6.x+
+ 10/11/12    | 13.x+               | 6.x+
  9           | 12.x+               | 5.x+
  8           | 12.x+               | 4.x+
  7           | 11.x+               | 4.x+
