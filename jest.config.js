@@ -5,6 +5,7 @@ const { paths } = require('./tsconfig.json').compilerOptions;
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
   preset: 'jest-preset-angular',
+  modulePathIgnorePatterns: ["<rootDir>/dist/"],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
   setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
 };
