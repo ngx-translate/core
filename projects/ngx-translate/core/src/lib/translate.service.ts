@@ -37,13 +37,13 @@ declare const window: Window;
 
 @Injectable()
 export class TranslateService {
-  private loadingTranslations: Observable<any>;
+  private loadingTranslations!: Observable<any>;
   private pending: boolean = false;
   private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
   private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
   private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
-  private _defaultLang: string;
-  private _currentLang: string;
+  private _defaultLang!: string;
+  private _currentLang!: string;
   private _langs: Array<string> = [];
   private _translations: any = {};
   private _translationRequests: any = {};
@@ -173,7 +173,7 @@ export class TranslateService {
       return;
     }
 
-    let pending: Observable<any> = this.retrieveTranslations(lang);
+    let pending = this.retrieveTranslations(lang);
 
     if (typeof pending !== "undefined") {
       // on init set the defaultLang immediately
@@ -206,7 +206,7 @@ export class TranslateService {
       return of(this.translations[lang]);
     }
 
-    let pending: Observable<any> = this.retrieveTranslations(lang);
+    let pending = this.retrieveTranslations(lang);
 
     if (typeof pending !== "undefined") {
       // on init set the currentLang immediately
@@ -230,8 +230,8 @@ export class TranslateService {
   /**
    * Retrieves the given translations
    */
-  private retrieveTranslations(lang: string): Observable<any> {
-    let pending: Observable<any>;
+  private retrieveTranslations(lang: string): Observable<any> | undefined {
+    let pending: Observable<any> | undefined;
 
     // if this language is unavailable or extend is true, ask for it
     if (typeof this.translations[lang] === "undefined" || this.extend) {
@@ -318,7 +318,7 @@ export class TranslateService {
    * Returns the parsed result of the translations
    */
   public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
-    let res: string | Observable<string>;
+    let res: string | Observable<string> | undefined;
 
     if (key instanceof Array) {
       let result: any = {},
@@ -503,7 +503,7 @@ export class TranslateService {
   /**
    * Returns the language code name from the browser, e.g. "de"
    */
-  public getBrowserLang(): string {
+  public getBrowserLang(): string | undefined {
     if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
       return undefined;
     }
@@ -529,7 +529,7 @@ export class TranslateService {
   /**
    * Returns the culture language code name from the browser, e.g. "de-DE"
    */
-  public getBrowserCultureLang(): string {
+  public getBrowserCultureLang(): string | undefined {
     if (typeof window === 'undefined' || typeof window.navigator === 'undefined') {
       return undefined;
     }

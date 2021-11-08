@@ -7,12 +7,12 @@ import {equals, isDefined} from './util';
   selector: '[translate],[ngx-translate]'
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
-  key: string;
+  key!: string;
   lastParams: any;
   currentParams: any;
-  onLangChangeSub: Subscription;
-  onDefaultLangChangeSub: Subscription;
-  onTranslationChangeSub: Subscription;
+  onLangChangeSub!: Subscription;
+  onDefaultLangChangeSub!: Subscription;
+  onTranslationChangeSub!: Subscription;
 
   @Input() set translate(key: string) {
     if (key) {
@@ -68,7 +68,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     for (let i = 0; i < nodes.length; ++i) {
       let node: any = nodes[i];
       if (node.nodeType === 3) { // node type 3 is a text node
-        let key: string;
+        let key!: string;
         if (forceUpdate) {
           node.lastKey = null;
         }
@@ -110,7 +110,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
       this.lastParams = this.currentParams;
 
-      let onTranslation = (res: string) => {
+      let onTranslation = (res: unknown) => {
         if (res !== key) {
           node.lastKey = key;
         }
@@ -126,7 +126,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
       if (isDefined(translations)) {
         let res = this.translateService.getParsedResult(translations, key, this.currentParams);
         if (isObservable(res)) {
-          res.subscribe(onTranslation);
+          res.subscribe({next: onTranslation});
         } else {
           onTranslation(res);
         }

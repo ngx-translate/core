@@ -23,7 +23,7 @@ describe('TranslateCompiler', () => {
           })
         ],
       });
-      translate = TestBed.get(TranslateService);
+      translate = TestBed.inject(TranslateService);
 
       translate.use('en');
     });
@@ -74,7 +74,7 @@ describe('TranslateCompiler', () => {
           })
         ],
       });
-      translate = TestBed.get(TranslateService);
+      translate = TestBed.inject(TranslateService);
 
       translate.use('en');
     });

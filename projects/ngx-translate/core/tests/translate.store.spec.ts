@@ -1,8 +1,8 @@
 import {Location} from '@angular/common';
-import {Component, ModuleWithProviders, NgModule, NgModuleFactoryLoader} from "@angular/core";
+import {Component, ModuleWithProviders, NgModule} from "@angular/core";
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from "@angular/core/testing";
 import {Route, Router, RouterModule} from "@angular/router";
-import {RouterTestingModule, SpyNgModuleFactoryLoader} from "@angular/router/testing";
+import {RouterTestingModule} from "@angular/router/testing";
 import {TranslateModule, TranslateService} from "../src/public_api";
 
 @Component({
@@ -82,17 +82,16 @@ describe("module", () => {
   });
 
   it("should work when lazy loaded using forChild", fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
-      loader.stubbedModules = {expected: LoadedModule};
+    [Router, Location],
+    (router: Router, location: Location) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
 
       const fixture = createRoot(router, RootCmp),
-        translate = TestBed.get(TranslateService);
+        translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
@@ -107,17 +106,16 @@ describe("module", () => {
   );
 
   it("should create 2 instances of the service when lazy loaded using forRoot", fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let LoadedModule = getLazyLoadedModule(TranslateModule.forRoot());
-      loader.stubbedModules = {expected: LoadedModule};
+    [Router, Location],
+    (router: Router, location: Location) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forRoot());
 
       const fixture = createRoot(router, RootCmp),
-        translate = TestBed.get(TranslateService);
+        translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
@@ -132,17 +130,16 @@ describe("module", () => {
   );
 
   it("should create 2 instances of the service when lazy loaded using forChild and isolate true", fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
-      loader.stubbedModules = {expected: LoadedModule};
+    [Router, Location],
+    (router: Router, location: Location) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
 
       const fixture = createRoot(router, RootCmp),
-        translate = TestBed.get(TranslateService);
+        translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
@@ -157,20 +154,19 @@ describe("module", () => {
   );
 
   it("should relay events when lazy loading & using forChild with isolate false", fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
-      loader.stubbedModules = {expected: LoadedModule};
+    [Router],
+    (router: Router) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
 
       const fixture = createRoot(router, RootCmp),
-        translate = TestBed.get(TranslateService);
+        translate = TestBed.inject(TranslateService);
 
-      let spy = jasmine.createSpy('TranslationChange');
+      let spy = jest.fn();
       let sub = translate.onTranslationChange.subscribe(spy);
 
       expect(spy).toHaveBeenCalledTimes(0);
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
@@ -181,20 +177,19 @@ describe("module", () => {
   );
 
   it("should not relay events when lazy loading & using forChild with isolate true", fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
-      loader.stubbedModules = {expected: LoadedModule};
+    [Router],
+    (router: Router) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
 
       const fixture = createRoot(router, RootCmp),
-        translate = TestBed.get(TranslateService);
+        translate = TestBed.inject(TranslateService);
 
-      let spy = jasmine.createSpy('TranslationChange');
+      let spy = jest.fn();
       let sub = translate.onTranslationChange.subscribe(spy);
 
       expect(spy).toHaveBeenCalledTimes(0);
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
@@ -205,15 +200,14 @@ describe("module", () => {
   );
 
   it('should extend translations with extend true', fakeAsync(inject(
-    [Router, Location, NgModuleFactoryLoader],
-    (router: Router, location: Location, loader: SpyNgModuleFactoryLoader) => {
-      let loadedModule = getLazyLoadedModule(TranslateModule.forChild({ extend: true }));
-      loader.stubbedModules = { expected: loadedModule };
+    [Router],
+    (router: Router) => {
+      const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({ extend: true }));
 
       const fixture = createRoot(router, RootCmp);
-      const translate: TranslateService = TestBed.get(TranslateService);
+      const translate: TranslateService = TestBed.inject(TranslateService);
 
-      router.resetConfig([{path: 'lazy', loadChildren: 'expected'}]);
+      router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);

@@ -5,7 +5,7 @@ export class TranslateStore {
   /**
    * The default lang to fallback when translations are missing on the current lang
    */
-  public defaultLang: string;
+  public defaultLang!: string;
 
   /**
    * The lang currently used

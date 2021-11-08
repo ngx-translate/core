@@ -43,23 +43,21 @@ describe('MissingTranslationHandler', () => {
         {provide: MissingTranslationHandler, useClass: handlerClass}
       ]
     });
-    translate = TestBed.get(TranslateService);
-    missingTranslationHandler = TestBed.get(MissingTranslationHandler);
+    translate = TestBed.inject(TranslateService);
+    missingTranslationHandler = TestBed.inject(MissingTranslationHandler);
   });
 
   afterEach(() => {
-    translate = undefined;
     translations = {"TEST": "This is a test"};
-    missingTranslationHandler = undefined;
   });
 
   it('should use the MissingTranslationHandler when the key does not exist', () => {
     prepare(Missing);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     translate.get('nonExistingKey').subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({key: 'nonExistingKey'}));
       //test that the instance of the last called argument is string
       expect(res).toEqual('handled');
     });
@@ -68,11 +66,11 @@ describe('MissingTranslationHandler', () => {
   it('should propagate interpolation params when the key does not exist', () => {
     prepare(Missing);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
     let interpolateParams = {some: 'params'};
 
     translate.get('nonExistingKey', interpolateParams).subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({interpolateParams: interpolateParams}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({interpolateParams: interpolateParams}));
       //test that the instance of the last called argument is string
       expect(res).toEqual('handled');
     });
@@ -81,11 +79,11 @@ describe('MissingTranslationHandler', () => {
   it('should propagate TranslationService params when the key does not exist', () => {
     prepare(Missing);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
     let interpolateParams = {some: 'params'};
 
     translate.get('nonExistingKey', interpolateParams).subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({translateService: translate}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({translateService: translate}));
       //test that the instance of the last called argument is string
       expect(res).toEqual('handled');
     });
@@ -99,10 +97,10 @@ describe('MissingTranslationHandler', () => {
 
     prepare(MissingUndef);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     translate.get('nonExistingKey').subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({key: 'nonExistingKey'}));
       expect(res).toEqual('nonExistingKey');
     });
   });
@@ -110,7 +108,7 @@ describe('MissingTranslationHandler', () => {
   it('should not call the MissingTranslationHandler when the key exists', () => {
     prepare(Missing);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     translate.get('TEST').subscribe(() => {
       expect(missingTranslationHandler.handle).not.toHaveBeenCalled();
@@ -120,19 +118,19 @@ describe('MissingTranslationHandler', () => {
   it('should use the MissingTranslationHandler when the key does not exist & we use instant translation', () => {
     prepare(Missing);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     expect(translate.instant('nonExistingKey')).toEqual('handled');
-    expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
+    expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({key: 'nonExistingKey'}));
   });
 
   it('should wait for the MissingTranslationHandler when it returns an observable & we use get', () => {
     prepare(MissingObs);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     translate.get('nonExistingKey').subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({key: 'nonExistingKey'}));
       expect(res).toEqual('handled: nonExistingKey');
     });
   });
@@ -146,7 +144,7 @@ describe('MissingTranslationHandler', () => {
 
     prepare(MissingObs);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     translate.get(Object.keys(tr)).subscribe((res: string) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledTimes(3);
@@ -157,7 +155,7 @@ describe('MissingTranslationHandler', () => {
   it('should not wait for the MissingTranslationHandler when it returns an observable & we use instant', () => {
     prepare(MissingObs);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     expect(translate.instant('nonExistingKey')).toEqual('nonExistingKey');
   });
@@ -171,7 +169,7 @@ describe('MissingTranslationHandler', () => {
 
     prepare(MissingObs);
     translate.use('en');
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
 
     expect(translate.instant(Object.keys(tr))).toEqual({
       nonExistingKey1: 'nonExistingKey1',
@@ -185,9 +183,9 @@ describe('MissingTranslationHandler', () => {
     translate.use('en');
     translate.use('fake');
 
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
     translate.get('TEST').subscribe((res: string) => {
-      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'TEST'}));
+      expect(missingTranslationHandler.handle).toHaveBeenCalledWith(expect.objectContaining({key: 'TEST'}));
       //test that the instance of the last called argument is string
       expect(res).toEqual('handled');
     });
@@ -198,7 +196,7 @@ describe('MissingTranslationHandler', () => {
     translate.use('en');
     translate.use('fake');
 
-    spyOn(missingTranslationHandler, 'handle').and.callThrough();
+    jest.spyOn(missingTranslationHandler, 'handle');
     translate.get('TEST').subscribe((res: string) => {
       expect(res).toEqual('This is a test');
     });

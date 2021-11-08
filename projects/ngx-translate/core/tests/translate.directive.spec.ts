@@ -23,16 +23,16 @@ import {TranslateModule, TranslateService} from '../src/public_api';
 })
 class App {
   viewContainerRef: ViewContainerRef;
-  @ViewChild('noKey', {static: true}) noKey: ElementRef;
-  @ViewChild('contentAsKey', {static: true}) contentAsKey: ElementRef;
-  @ViewChild('withKey', {static: true}) withKey: ElementRef;
-  @ViewChild('withOtherElements', {static: true}) withOtherElements: ElementRef;
-  @ViewChild('withParams', {static: true}) withParams: ElementRef;
-  @ViewChild('withParamsNoKey', {static: true}) withParamsNoKey: ElementRef;
-  @ViewChild('noContent', {static: true}) noContent: ElementRef;
-  @ViewChild('leadingSpaceNoKeyNoParams') leadingSpaceNoKeyNoParams: ElementRef;
-  @ViewChild('trailingSpaceNoKeyNoParams') trailingSpaceNoKeyNoParams: ElementRef;
-  @ViewChild('withSpaceAndLineBreakNoKeyNoParams') withSpaceAndLineBreakNoKeyNoParams: ElementRef;
+  @ViewChild('noKey', {static: true}) noKey!: ElementRef;
+  @ViewChild('contentAsKey', {static: true}) contentAsKey!: ElementRef;
+  @ViewChild('withKey', {static: true}) withKey!: ElementRef;
+  @ViewChild('withOtherElements', {static: true}) withOtherElements!: ElementRef;
+  @ViewChild('withParams', {static: true}) withParams!: ElementRef;
+  @ViewChild('withParamsNoKey', {static: true}) withParamsNoKey!: ElementRef;
+  @ViewChild('noContent', {static: true}) noContent!: ElementRef;
+  @ViewChild('leadingSpaceNoKeyNoParams') leadingSpaceNoKeyNoParams!: ElementRef;
+  @ViewChild('trailingSpaceNoKeyNoParams') trailingSpaceNoKeyNoParams!: ElementRef;
+  @ViewChild('withSpaceAndLineBreakNoKeyNoParams') withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
   value = {value: 'ok'};
 
   constructor(viewContainerRef: ViewContainerRef) {
@@ -55,11 +55,6 @@ describe('TranslateDirective', () => {
 
     fixture = (<any>TestBed).createComponent(App);
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    translate = undefined;
-    fixture = undefined;
   });
 
   it('should translate a string using the container value', () => {

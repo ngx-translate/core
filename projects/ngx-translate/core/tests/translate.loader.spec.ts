@@ -21,7 +21,7 @@ describe('TranslateLoader', () => {
         })
       ],
     });
-    translate = TestBed.get(TranslateService);
+    translate = TestBed.inject(TranslateService);
 
     expect(translate).toBeDefined();
     expect(translate.currentLoader).toBeDefined();
@@ -50,7 +50,7 @@ describe('TranslateLoader', () => {
         })
       ]
     });
-    translate = TestBed.get(TranslateService);
+    translate = TestBed.inject(TranslateService);
 
     expect(translate).toBeDefined();
     expect(translate.currentLoader).toBeDefined();

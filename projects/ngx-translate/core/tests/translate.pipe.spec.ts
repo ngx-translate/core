@@ -56,15 +56,13 @@ describe('TranslatePipe', () => {
       ],
       declarations: [App]
     });
-    translate = TestBed.get(TranslateService);
+    translate = TestBed.inject(TranslateService);
     ref = new FakeChangeDetectorRef();
     translatePipe = new TranslatePipe(translate, ref);
   });
 
   afterEach(() => {
-    translate = undefined;
     translations = {"TEST": "This is a test"};
-    translatePipe = undefined;
     ref = undefined;
   });
 
@@ -84,7 +82,7 @@ describe('TranslatePipe', () => {
   it('should call markForChanges when it translates a string', () => {
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
-    spyOn(ref, 'markForCheck').and.callThrough();
+    jest.spyOn(ref, 'markForCheck');
 
     translatePipe.transform('TEST');
     expect(ref.markForCheck).toHaveBeenCalled();
@@ -139,8 +137,8 @@ describe('TranslatePipe', () => {
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
 
-    spyOn(translatePipe, 'updateValue').and.callThrough();
-    spyOn(ref, 'markForCheck').and.callThrough();
+    jest.spyOn(translatePipe, 'updateValue');
+    jest.spyOn(ref, 'markForCheck');
 
     expect(translatePipe.transform('TEST', {param: "with param"})).toEqual("This is a test with param");
     // same value, shouldn't call 'updateValue' again
@@ -165,8 +163,8 @@ describe('TranslatePipe', () => {
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
 
-    expect(translatePipe.transform(null)).toBeNull();
-    expect(translatePipe.transform(undefined)).toBeUndefined();
+    expect(translatePipe.transform(null as any)).toBeNull();
+    expect(translatePipe.transform(undefined as any)).toBeUndefined();
     expect(translatePipe.transform(1234 as any)).toBe(1234);
   });
 

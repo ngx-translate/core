@@ -1,8 +1,8 @@
 {
-  "name": "@ngx-translate/core",
-  "description": "The internationalization (i18n) library for Angular",
+  "name": "@ngx-translate/http-loader",
+  "description": "A loader for ngx-translate that loads translations using http",
   "author": "Olivier Combe",
-  "version": "14.0.0",
+  "version": "7.0.0",
   "keywords": [
     "angular",
     "i18n",
@@ -19,7 +19,8 @@
     "url": "https://github.com/ngx-translate/core/issues"
   },
   "peerDependencies": {
-    "@angular/core": ">=13.0.0",
+    "@ngx-translate/core": ">=14.0.0",
+    "@angular/common": ">=13.0.0",
     "rxjs": "^6.5.3 || ^7.4.0"
   }
 }

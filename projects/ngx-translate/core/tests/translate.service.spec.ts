@@ -22,11 +22,10 @@ describe('TranslateService', () => {
         })
       ]
     });
-    translate = TestBed.get(TranslateService);
+    translate = TestBed.inject(TranslateService);
   });
 
   afterEach(() => {
-    translate = undefined;
     translations = {"TEST": "This is a test"};
   });
 
@@ -135,7 +134,7 @@ describe('TranslateService', () => {
     translate.use('en');
 
     expect(() => {
-      translate.get(undefined);
+      translate.get(undefined as any);
     }).toThrowError('Parameter "key" required');
 
     expect(() => {
@@ -143,11 +142,11 @@ describe('TranslateService', () => {
     }).toThrowError('Parameter "key" required');
 
     expect(() => {
-      translate.get(null);
+      translate.get(null as any);
     }).toThrowError('Parameter "key" required');
 
     expect(() => {
-      translate.instant(undefined);
+      translate.instant(undefined as any);
     }).toThrowError('Parameter "key" required');
   });
 
@@ -473,7 +472,7 @@ describe('TranslateService', () => {
 
   it('should not make duplicate getTranslation calls', fakeAsync(() => {
     let getTranslationCalls = 0;
-    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+    jest.spyOn(translate.currentLoader, 'getTranslation').mockImplementation(() => {
       getTranslationCalls += 1;
       return timer(1000).pipe(mapTo(of(translations)));
     });
@@ -487,7 +486,7 @@ describe('TranslateService', () => {
 
   it('should subscribe to the loader just once', () => {
     let subscriptions = 0;
-    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+    jest.spyOn(translate.currentLoader, 'getTranslation').mockImplementation(() => {
       return defer(() => {
         subscriptions++;
         return of(translations);
@@ -502,16 +501,16 @@ describe('TranslateService', () => {
   });
 
   it('should compile translations only once, even when subscribing to translations while translations are loading', fakeAsync(() => {
-    spyOn(translate.currentLoader, 'getTranslation').and.callFake(() => {
+    jest.spyOn(translate.currentLoader, 'getTranslation').mockImplementation(() => {
       return timer(1000).pipe(mapTo(of(translations)));
     });
 
     let translateCompilerCallCount = 0;
-    spyOn(translate.compiler, 'compile').and.callFake((value) => {
+    jest.spyOn(translate.compiler, 'compile').mockImplementation((value) => {
       ++translateCompilerCallCount;
       return value;
     });
-    spyOn(translate.compiler, 'compileTranslations').and.callFake((value) => {
+    jest.spyOn(translate.compiler, 'compileTranslations').mockImplementation((value) => {
       ++translateCompilerCallCount;
       return value;
     });

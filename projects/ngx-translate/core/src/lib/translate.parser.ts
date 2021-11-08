@@ -8,7 +8,7 @@ export abstract class TranslateParser {
    * @param expr
    * @param params
    */
-  abstract interpolate(expr: string | Function, params?: any): string;
+  abstract interpolate(expr: string | Function, params?: any): string | undefined;
 
   /**
    * Gets a value from an object by composed key
