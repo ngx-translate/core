@@ -59,11 +59,6 @@ Choose the version corresponding to your Angular version:
  4.3           | 7.x or less         | 1.x to 2.x
  2 to 4.2.x    | 7.x or less         | 0.x
 
----
-
-**If you use SystemJS** to load your files, you can check the [plunkr example](https://plnkr.co/edit/XXwyUYS6ZL7qVD9I2l0g?p=preview) for a working setup that uses the cdn [https://unpkg.com/](https://unpkg.com/).
-If you're importing directly from `node_modules`, you should edit your systemjs config file and add `'@ngx-translate/core': 'node_modules/@ngx-translate/core/bundles'` in the map and `'@ngx-translate/core' : { defaultExtension: 'js' }` in packages.
-
 
 ## Usage
 
@@ -145,8 +140,6 @@ To use it, you need to install the http-loader package from @ngx-translate:
 ```sh
 npm install @ngx-translate/http-loader --save
 ```
-
-**NB: if you're still on Angular <4.3, please use Http from @angular/http with http-loader@0.1.0.**
 
 Once you've decided which loader to use, you have to setup the `TranslateModule` to use it.
 
