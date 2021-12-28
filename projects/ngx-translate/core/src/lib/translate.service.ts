@@ -455,6 +455,14 @@ export class TranslateService {
   }
 
   /**
+   * Returns all values translation instantly from the internal state of loaded translation.
+   * All rules regarding the current language, the preferred language of even fallback languages will be used except any promise handling.
+   */
+  public instantAll(): Array<string> | any {
+    return this.translations[this.currentLang];
+  }
+
+  /**
    * Sets the translated value of a key, after compiling it
    */
   public set(key: string, value: string, lang: string = this.currentLang): void {
