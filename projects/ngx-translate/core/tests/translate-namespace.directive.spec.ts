@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateContextDirective } from '../src/lib/translate-context.directive';
+import { TranslateNamespaceDirective } from '../src/lib/translate-namespace.directive';
 import { TranslateModule, TranslateService } from '../src/public_api';
 
 
 const labels = {
-  LABEL: 'context: {{param1}} {{param2}} {{param3}}',
-
   gc: {
     key1: 'gc.k1',
     key2: 'gc.k2',
@@ -25,8 +23,7 @@ const labels = {
 @Component({
   selector: 'root-component',
   template: `
-    <div *translateContext="rootContext; namespace 'overrides'">
-      <div class="root-with-context" translate="LABEL"></div>
+    <div *translateNamespace="'overrides'">
       <child-component></child-component>
     </div>
 
@@ -39,12 +36,7 @@ class RootComponent {
 @Component({
   selector: 'child-component',
   template: `
-    <div class="child-no-context" translate="LABEL"></div>
-
-    <div *translateContext="childContext">
-      <div class="child-with-context" translate="LABEL"></div>
-      <grandchild-component></grandchild-component>
-    </div>
+    <grandchild-component></grandchild-component>
   `
 })
 class ChildComponent {
@@ -54,16 +46,9 @@ class ChildComponent {
 @Component({
   selector: 'grandchild-component',
   template: `
-    <div class="grandchild-no-context" translate="LABEL"></div>
-
-    <div *translateContext="grandchildContext">
-      <div class="grandchild-with-context" translate="LABEL"></div>
-    </div>
-
-
     <div class="grandchild-key1" translate="gc.key1"></div>
 
-    <div *translateContext="{}; namespace 'gc'">
+    <div *translateNamespace="'gc'">
       <div class="grandchild-key2" translate="key2"></div>
       <div class="grandchild-key3" translate="key3"></div>
     </div>
@@ -74,13 +59,13 @@ class GrandChildComponent {
 }
 
 
-describe('TranslateContextDirective', () => {
+describe('TranslateNamespaceDirective', () => {
   let fixture: ComponentFixture<RootComponent>;
   let nativeElement: HTMLElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RootComponent, ChildComponent, GrandChildComponent, TranslateContextDirective],
+      declarations: [RootComponent, ChildComponent, GrandChildComponent, TranslateNamespaceDirective],
       imports: [TranslateModule.forRoot()]
     })
       .compileComponents();
@@ -96,27 +81,6 @@ describe('TranslateContextDirective', () => {
     nativeElement = fixture.nativeElement;
   });
 
-
-
-  it('should provide context params for immediate view children', () => {
-    expect(nativeElement.getElementsByClassName('root-with-context')[0].innerHTML).toBe('context: r1 r2 r3');
-  });
-
-  it('should inherit context params from parent component', () => {
-    expect(nativeElement.getElementsByClassName('child-no-context')[0].innerHTML).toBe('context: r1 r2 r3');
-  });
-
-  it('should merge context params over inherited context', () => {
-    expect(nativeElement.getElementsByClassName('child-with-context')[0].innerHTML).toBe('context: r1 c2 r3');
-  });
-
-  it('should inherit context params from parent and grand parent components', () => {
-    expect(nativeElement.getElementsByClassName('grandchild-no-context')[0].innerHTML).toBe('context: r1 c2 r3');
-  });
-
-  it('should merge context params over parent and grand parent context', () => {
-    expect(nativeElement.getElementsByClassName('grandchild-with-context')[0].innerHTML).toBe('context: r1 c2 gc3');
-  });
 
   it('should prefix the key with the context namespace', () => {
     expect(nativeElement.getElementsByClassName('grandchild-key1')[0].innerHTML).toBe('root.k1');

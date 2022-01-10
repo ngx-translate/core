@@ -2,11 +2,12 @@ import { Directive, Inject, Input, Self, TemplateRef, ViewContainerRef } from '@
 import { TranslateContextService } from './translate-context.service';
 import { TranslateService } from './translate.service';
 
+
 @Directive({
-  selector: '[translateContext],[ngx-translateContext]',
+  selector: '[translateNamespace],[ngx-translateNamespace]',
   providers: [{ provide: TranslateService, useClass: TranslateContextService }]
 })
-export class TranslateContextDirective {
+export class TranslateNamespaceDirective {
 
   constructor(
     @Inject(TranslateService) @Self() private contextTranslateService: TranslateContextService,
@@ -15,13 +16,9 @@ export class TranslateContextDirective {
   ) { }
 
 
-  @Input() set translateContext(params: {}) {
-    this.contextTranslateService.params = params;
+  @Input() set translateNamespace(namespace: string) {
+    this.contextTranslateService.namespace = namespace;
     this.viewContainer.clear();
     this.viewContainer.createEmbeddedView(this.templateRef);
-  }
-
-  @Input() set translateContextNamespace(namespace: string) {
-    this.contextTranslateService.namespace = namespace;
   }
 }
