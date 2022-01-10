@@ -19,6 +19,9 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
   * [Define the translations](#4-define-the-translations)
   * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
   * [Use HTML tags](#6-use-html-tags)
+  * [Use translateNamespace directive](#7-use-translate-namespace)
+  * [Use translateContext directive](#8-use-translate-context)
+
 * [API](#api)
   * [TranslateService](#translateservice)
     * [Properties](#properties)
@@ -355,6 +358,85 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 
 ```html
 <div [innerHTML]="'HELLO' | translate"></div>
+```
+
+#### 7. Use translate namespace:
+
+You can namespace your keys using the `*translateNamespace` structural directive
+
+```html
+<ul *translateNamespace="'somApp.pageX.contentComponent'">
+  <li translate>key1</li>
+  <li translate>key2</li>
+  <li translate>key3</li>
+</ul>
+```
+
+Would translate the `somApp.pageX.contentComponent.key1`, `somApp.pageX.contentComponent.key2` and `somApp.pageX.contentComponent.key3` keys.
+
+The namespaces directive are also stackable:
+
+```html
+// app.component.html
+<div *translateNamespace="'someApp'">
+  <router-outlet></router-outlet>
+</div>
+```
+
+```html
+// pageX.component.html
+<div *translateNamespace="'pageX'">
+  <content-component></content-component>
+</div>
+```
+
+```html
+// content.component.html
+<ul *translateNamespace="'contentComponent'">
+  <li translate>key1</li>
+  <li translate>key2</li>
+  <li translate>key3</li>
+</ul>
+```
+
+> **Note:**
+>
+> To avoid breaking changes, the translation resolution will fallback to a non namespaced key if the key isn't found in a given namespace.
+
+#### 8. Use translate context:
+
+You can use the `*translateContext` structural directive to provide the context of all child translation to avoir to repeat the translateParams directive.
+
+```json
+{
+  "person": {
+    "bio": {
+      "nameColumn": "{{firstName}} {{lastName}}",
+      "addressColumn": "{{address}} {{city}} {{state}}",
+      "age": "{{age}} years old"
+    }
+  }
+}
+```
+
+```html
+<ul *translateContext="person">
+  <li translate>person.bio.nameColumn</li>
+  <li translate>person.bio.addressColumn</li>
+  <li translate>person.bio.age</li>
+</ul>
+```
+
+The context are also stackable. Meaning that context from parent dom element will be inherited and merged with the current context.
+
+Since `*translateNamespace` and `*translateContext` are structural directives and Angular limits one structural directive per element, it is possible to provide the namespace on the `*translateContext` directive:
+
+```html
+<ul *translateContext="person; namespace: 'person.bio' ">
+  <li translate>nameColumn</li>
+  <li translate>addressColumn</li>
+  <li translate>age</li>
+</ul>
 ```
 
 ## API

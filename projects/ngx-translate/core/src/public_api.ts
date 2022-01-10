@@ -7,6 +7,8 @@ import {TranslateDirective} from "./lib/translate.directive";
 import {TranslatePipe} from "./lib/translate.pipe";
 import {TranslateStore} from "./lib/translate.store";
 import {USE_DEFAULT_LANG, DEFAULT_LANGUAGE, USE_STORE, TranslateService, USE_EXTEND} from "./lib/translate.service";
+import { TranslateContextDirective } from "./lib/translate-context.directive";
+import { TranslateNamespaceDirective } from "./lib/translate-namespace.directive";
 
 export * from "./lib/translate.loader";
 export * from "./lib/translate.service";
@@ -33,11 +35,15 @@ export interface TranslateModuleConfig {
 @NgModule({
   declarations: [
     TranslatePipe,
-    TranslateDirective
+    TranslateDirective,
+    TranslateContextDirective,
+    TranslateNamespaceDirective
   ],
   exports: [
     TranslatePipe,
-    TranslateDirective
+    TranslateDirective,
+    TranslateContextDirective,
+    TranslateNamespaceDirective
   ]
 })
 export class TranslateModule {
