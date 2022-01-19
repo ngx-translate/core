@@ -202,8 +202,9 @@ export class TranslateService {
    */
   public use(lang: string): Observable<any> {
     // don't change the language if the language given is already selected
+    let changeLang = true;
     if (lang === this.currentLang) {
-      return of(this.translations[lang]);
+      changeLang = false;
     }
 
     let pending = this.retrieveTranslations(lang);
@@ -216,12 +217,16 @@ export class TranslateService {
 
       pending.pipe(take(1))
         .subscribe((res: any) => {
-          this.changeLang(lang);
+          if (changeLang) {
+            this.changeLang(lang);
+          }
         });
 
       return pending;
     } else { // we have this language, return an Observable
-      this.changeLang(lang);
+      if (changeLang) {
+        this.changeLang(lang);
+      }
 
       return of(this.translations[lang]);
     }
