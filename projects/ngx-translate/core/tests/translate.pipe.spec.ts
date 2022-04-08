@@ -133,6 +133,28 @@ describe('TranslatePipe', () => {
       .toEqual("This is a test with param-1 and param-2");
   });
 
+  it('should translate an object', () => {
+    translate.setTranslation('en', {
+      OBJECT: {
+        TEST: 'This is a test'
+      }
+    });
+    translate.use('en');
+
+    expect(translatePipe.transform('OBJECT')).toEqual({ TEST: 'This is a test' });
+  });
+
+  it('should translate an object with another object as string parameters', () => {
+    translate.setTranslation('en', {
+      OBJECT: {
+        TEST: 'This is a test {{param}}'
+      }
+    });
+    translate.use('en');
+
+    expect(translatePipe.transform('OBJECT', { param: 'with param-1' })).toEqual({ TEST: 'This is a test with param-1' });
+  });
+
   it('should update the value when the parameters change', () => {
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
