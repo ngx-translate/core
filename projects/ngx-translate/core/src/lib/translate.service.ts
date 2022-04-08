@@ -318,7 +318,7 @@ export class TranslateService {
    * Returns the parsed result of the translations
    */
   public getParsedResult(translations: any, key: any, interpolateParams?: Object): any {
-    let res: string | Observable<string> | undefined;
+    let res: string | Observable<string> | object | undefined;
 
     if (key instanceof Array) {
       let result: any = {},

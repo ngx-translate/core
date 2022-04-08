@@ -8,7 +8,7 @@ export abstract class TranslateParser {
    * @param expr
    * @param params
    */
-  abstract interpolate(expr: string | Function, params?: any): string | undefined;
+  abstract interpolate(expr: string | Function | object, params?: any): string | object | undefined;
 
   /**
    * Gets a value from an object by composed key
@@ -23,13 +23,20 @@ export abstract class TranslateParser {
 export class TranslateDefaultParser extends TranslateParser {
   templateMatcher: RegExp = /{{\s?([^{}\s]*)\s?}}/g;
 
-  public interpolate(expr: string | Function, params?: any): string {
+  public interpolate(expr: string | Function | object, params?: any): string | object {
     let result: string;
 
     if (typeof expr === 'string') {
       result = this.interpolateString(expr, params);
     } else if (typeof expr === 'function') {
       result = this.interpolateFunction(expr, params);
+    } else if (typeof expr === 'object') {
+      return Object.fromEntries(
+        Object.entries(expr).map(([key, value]) => [
+          key,
+          this.interpolate(value, params)
+        ])
+      );
     } else {
       // this should not happen, but an unrelated TranslateService test depends on it
       result = expr as string;

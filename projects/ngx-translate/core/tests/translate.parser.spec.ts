@@ -27,6 +27,10 @@ describe('Parser', () => {
     expect(parser.interpolate("This is a {{ key1.key2.key3 }}", {key1: {key2: {key3: "value3"}}})).toEqual("This is a value3");
   });
 
+  it('should interpolate objects', () => {
+    expect(parser.interpolate({ TEST: 'This is a {{ key }}' }, { key: 'value' })).toEqual({ TEST: 'This is a value' });
+  });
+
   it('should support interpolation functions', () => {
     expect(parser.interpolate((v: string) => v.toUpperCase() + ' YOU!', 'bless')).toBe('BLESS YOU!');
   });
