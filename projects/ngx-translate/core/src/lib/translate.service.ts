@@ -302,7 +302,7 @@ export class TranslateService {
   public addLangs(langs: Array<string>): void {
     langs.forEach((lang: string) => {
       if (this.langs.indexOf(lang) === -1) {
-        this.langs.push(lang);
+        this.langs = [...this.langs, lang];
       }
     });
   }
