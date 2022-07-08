@@ -458,7 +458,15 @@ export class TranslateService {
    * Sets the translated value of a key, after compiling it
    */
   public set(key: string, value: string, lang: string = this.currentLang): void {
-    this.translations[lang][key] = this.compiler.compile(value, lang);
+    const keys = key.split('.');
+    const translationKey = keys.pop() as string;
+    const translation = keys.reduce((translation, subKey) => {
+      if (!translation[subKey] || typeof translation[subKey] !== 'object') {
+        translation[subKey] = {};
+      }
+      return translation[subKey];
+    } , this.translations[lang]);
+    translation[translationKey] = this.compiler.compile(value, lang);
     this.updateLangs();
     this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
   }

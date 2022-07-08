@@ -397,6 +397,21 @@ describe('TranslateService', () => {
     translate.set("TEST", "This is a test", 'en');
   });
 
+  it('should set a nested property in the translation value', () => {
+    const translation = { name: 'Name' } as any;
+    const defaultLang = 'en';
+    translate.setTranslation(defaultLang, translation);
+    translate.set('profile.name', 'Profile Name', defaultLang);
+    expect(translation?.profile?.name).toEqual('Profile Name');
+  });
+
+  it('should replace an existing translation ', () => {
+    const translation = { name: 'OldName' } as any;
+    translate.setTranslation('en', translation);
+    translate.set('name', 'New Name', 'en');
+    expect(translation.name).toEqual('New Name');
+  });
+
   it('should trigger an event when the lang changes', () => {
     let tr = {"TEST": "This is a test"};
     translate.setTranslation('en', tr);
