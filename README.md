@@ -154,7 +154,7 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {AppComponent} from './app';
 
 // AoT requires an exported function for factories
-export function HttpLoaderFactory(http: HttpClient) {
+export function httpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     return new TranslateHttpLoader(http);
 }
 
@@ -165,7 +165,7 @@ export function HttpLoaderFactory(http: HttpClient) {
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
-                useFactory: HttpLoaderFactory,
+                useFactory: httpLoaderFactory,
                 deps: [HttpClient]
             }
         })
@@ -180,7 +180,7 @@ export class AppModule { }
 If you want to configure a custom `TranslateLoader` while using [AoT compilation](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) or [Ionic](http://ionic.io/), you must use an exported function instead of an inline function.
 
 ```ts
-export function createTranslateLoader(http: HttpClient) {
+export function createTranslateLoader(http: HttpClient): TranslateHttpLoader {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
