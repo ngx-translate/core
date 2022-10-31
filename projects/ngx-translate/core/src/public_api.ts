@@ -18,6 +18,8 @@ export * from "./lib/translate.compiler";
 export * from "./lib/translate.directive";
 export * from "./lib/translate.pipe";
 export * from "./lib/translate.store";
+export * from "./lib/translate-context.directive";
+export * from "./lib/translate-namespace.directive";
 
 export interface TranslateModuleConfig {
   loader?: Provider;
