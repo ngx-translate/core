@@ -405,7 +405,7 @@ The namespaces directive are also stackable:
 
 #### 8. Use translate context:
 
-You can use the `*translateContext` structural directive to provide the context of all child translation to avoir to repeat the translateParams directive.
+You can use the `*translateContext` structural directive to provide translation params to all child elements.
 
 ```json
 {
