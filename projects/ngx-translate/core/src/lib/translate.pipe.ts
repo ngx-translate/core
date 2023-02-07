@@ -28,7 +28,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     };
     if (translations) {
       let res = this.translate.getParsedResult(translations, key, interpolateParams);
-      if (isObservable(res.subscribe)) {
+      if (isObservable(res)) {
         res.subscribe(onTranslation);
       } else {
         onTranslation(res);
