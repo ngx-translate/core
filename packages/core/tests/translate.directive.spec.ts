@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {TranslateModule, TranslateService} from '../src/public_api';
+import {TranslateModule, TranslateService} from '../public-api';
 
 @Injectable()
 @Component({
@@ -21,7 +21,7 @@ import {TranslateModule, TranslateService} from '../src/public_api';
     </div>
   `
 })
-class App {
+class AppComponent {
   viewContainerRef: ViewContainerRef;
   @ViewChild('noKey', {static: true}) noKey!: ElementRef;
   @ViewChild('contentAsKey', {static: true}) contentAsKey!: ElementRef;
@@ -42,18 +42,18 @@ class App {
 
 describe('TranslateDirective', () => {
   let translate: TranslateService;
-  let fixture: ComponentFixture<App>;
+  let fixture: ComponentFixture<AppComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot()
       ],
-      declarations: [App]
+      declarations: [AppComponent]
     });
     translate = TestBed.inject(TranslateService);
 
-    fixture = (<any>TestBed).createComponent(App);
+    fixture = (<any>TestBed).createComponent(AppComponent);
     fixture.detectChanges();
   });
 

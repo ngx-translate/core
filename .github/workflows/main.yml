@@ -1,0 +1,52 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  BIT_TOKEN: ${{ secrets.BIT_TOKEN }}
+
+jobs:
+  # Test angular
+  default-angular:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    container:
+      image: docker://bitcli/bit:latest-node-16.15.0
+    steps:
+      - uses: teambit/setup-action@v2.02
+        with:
+          name: angular-github-actions
+          BIT_TOKEN: ${{ env.BIT_TOKEN }}
+
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: bit install --log error
+
+      - name: Bit test
+        run: bit test --log error
+
+      - name: Bit lint
+        run: bit lint --log error
+
+      - name: Bit status
+        run: bit status --log error
+
+      - name: Bit build core
+        run: bit build core --log error
+
+      - name: Bit build http-loader
+        run: bit build http-loader --skip-tests --log error
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: debug-log
+          path: $HOME/Library/Caches/Bit/logs

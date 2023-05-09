@@ -3,14 +3,14 @@ import {Component, ModuleWithProviders, NgModule} from "@angular/core";
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from "@angular/core/testing";
 import {Route, Router, RouterModule} from "@angular/router";
 import {RouterTestingModule} from "@angular/router/testing";
-import {TranslateModule, TranslateService} from "../src/public_api";
+import {TranslateModule, TranslateService} from "../public-api";
 
 @Component({
   selector: 'root-cmp',
   template: `
       <router-outlet></router-outlet>`
 })
-class RootCmp {
+class RootComponent {
   constructor(public translate: TranslateService) {
     translate.setTranslation('en', {
       "TEST": "Root",
@@ -27,7 +27,7 @@ class RootCmp {
 class ParentLazyLoadedComponent {
 }
 
-function getLazyLoadedModule<T>(importedModule: ModuleWithProviders<T>) {
+function getLazyLoadedModule(importedModule: ModuleWithProviders<{}>) {
   @Component({selector: 'lazy', template: 'lazy-loaded-child'})
   class ChildLazyLoadedComponent {
     constructor(public translate: TranslateService) {
@@ -77,7 +77,7 @@ describe("module", () => {
         RouterTestingModule,
         TranslateModule.forRoot(),
       ],
-      declarations: [RootCmp]
+      declarations: [RootComponent]
     });
   });
 
@@ -86,7 +86,7 @@ describe("module", () => {
     (router: Router, location: Location) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
 
-      const fixture = createRoot(router, RootCmp),
+      const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
@@ -110,7 +110,7 @@ describe("module", () => {
     (router: Router, location: Location) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forRoot());
 
-      const fixture = createRoot(router, RootCmp),
+      const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
@@ -134,7 +134,7 @@ describe("module", () => {
     (router: Router, location: Location) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
 
-      const fixture = createRoot(router, RootCmp),
+      const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
       expect(translate.instant('TEST')).toEqual('Root');
@@ -158,7 +158,7 @@ describe("module", () => {
     (router: Router) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forChild());
 
-      const fixture = createRoot(router, RootCmp),
+      const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
       let spy = jest.fn();
@@ -181,7 +181,7 @@ describe("module", () => {
     (router: Router) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({isolate: true}));
 
-      const fixture = createRoot(router, RootCmp),
+      const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
       let spy = jest.fn();
@@ -204,7 +204,7 @@ describe("module", () => {
     (router: Router) => {
       const LoadedModule = getLazyLoadedModule(TranslateModule.forChild({ extend: true }));
 
-      const fixture = createRoot(router, RootCmp);
+      const fixture = createRoot(router, RootComponent);
       const translate: TranslateService = TestBed.inject(TranslateService);
 
       router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);

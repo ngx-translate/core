@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef} from "@angular/core";
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../src/public_api";
+import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../public-api";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {
@@ -26,7 +26,7 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `{{'TEST' | translate}}`
 })
-class App {
+class AppComponent {
   viewContainerRef: ViewContainerRef;
 
   constructor(viewContainerRef: ViewContainerRef) {
@@ -54,7 +54,7 @@ describe('TranslatePipe', () => {
           loader: {provide: TranslateLoader, useClass: FakeLoader}
         })
       ],
-      declarations: [App]
+      declarations: [AppComponent]
     });
     translate = TestBed.inject(TranslateService);
     ref = new FakeChangeDetectorRef();
@@ -207,7 +207,7 @@ describe('TranslatePipe', () => {
     });
 
     it('should detect changes with OnPush', () => {
-      let fixture = (<any>TestBed).createComponent(App);
+      let fixture = (<any>TestBed).createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
       translate.use('en');
@@ -255,7 +255,7 @@ describe('TranslatePipe', () => {
     });
 
     it('should detect changes with OnPush', () => {
-      let fixture = (<any>TestBed).createComponent(App);
+      let fixture = (<any>TestBed).createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
       translate.setDefaultLang('en');

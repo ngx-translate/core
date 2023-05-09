@@ -1,4 +1,4 @@
-import {TranslateDefaultParser, TranslateParser} from '../src/public_api';
+import {TranslateDefaultParser, TranslateParser} from '../public-api';
 
 describe('Parser', () => {
   let parser: TranslateParser;

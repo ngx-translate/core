@@ -1,42 +1,5 @@
 {
   "name": "ngx-translate",
   "description": "The internationalization (i18n) library for Angular",
-  "private": true,
-  "scripts": {
-    "prebuild": "rm dist -Rf",
-    "build": "ng build @ngx-translate/core && ng build @ngx-translate/http-loader",
-    "test": "jest",
-    "test-watch": "jest --watch"
-  },
-  "dependencies": {
-    "@angular/animations": "~13.0.0",
-    "@angular/common": "~13.0.0",
-    "@angular/compiler": "~13.0.0",
-    "@angular/core": "~13.0.0",
-    "@angular/forms": "~13.0.0",
-    "@angular/platform-browser": "~13.0.0",
-    "@angular/platform-browser-dynamic": "~13.0.0",
-    "@angular/router": "~13.0.0",
-    "rxjs": "~7.4.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.11.4"
-  },
-  "devDependencies": {
-    "@angular-devkit/build-angular": "~13.0.1",
-    "@angular/cli": "~13.0.1",
-    "@angular/compiler-cli": "~13.0.0",
-    "@types/jasmine": "~3.10.0",
-    "@types/jest": "^27.0.2",
-    "@types/node": "^12.11.1",
-    "jasmine-core": "~3.10.0",
-    "jest": "^27.3.1",
-    "jest-preset-angular": "v11.0.0-rc.2",
-    "karma": "~6.3.0",
-    "karma-chrome-launcher": "~3.1.0",
-    "karma-coverage": "~2.0.3",
-    "karma-jasmine": "~4.0.0",
-    "karma-jasmine-html-reporter": "~1.7.0",
-    "ng-packagr": "^13.0.0",
-    "typescript": "~4.4.3"
-  }
+  "private": true
 }

@@ -2,7 +2,7 @@ import {HttpClient} from "@angular/common/http";
 import {HttpClientTestingModule, HttpTestingController} from "@angular/common/http/testing";
 import {TestBed} from "@angular/core/testing";
 import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate/core";
-import {TranslateHttpLoader} from "../src/public_api";
+import {TranslateHttpLoader} from "../public-api";
 
 describe('TranslateLoader', () => {
   let translate: TranslateService;
