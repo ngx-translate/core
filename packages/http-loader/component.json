@@ -25,7 +25,7 @@
         "peerDependencies": {
           "@angular/core": ">=16.0.0",
           "@angular/common": ">=16.0.0",
-          "@ngx-translate/core": ">=14.0.0"
+          "@ngx-translate/core": ">=15.0.0"
         }
       }
     },

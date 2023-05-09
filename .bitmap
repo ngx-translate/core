@@ -10,14 +10,14 @@
 
 {
     "core": {
-        "scope": "",
-        "version": "",
+        "scope": "ngx-translate.packages",
+        "version": "15.0.0",
         "mainFile": "public-api.ts",
         "rootDir": "packages/core"
     },
     "http-loader": {
-        "scope": "",
-        "version": "",
+        "scope": "ngx-translate.packages",
+        "version": "8.0.0",
         "mainFile": "public-api.ts",
         "rootDir": "packages/http-loader"
     },
