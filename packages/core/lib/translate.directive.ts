@@ -111,7 +111,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
       this.lastParams = this.currentParams;
 
       let onTranslation = (res: unknown) => {
-        if (res !== key) {
+        if (res !== key || || !node.lastKey) {
           node.lastKey = key;
         }
         if (!node.originalContent) {
