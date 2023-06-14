@@ -165,7 +165,7 @@ export class TranslateService {
     }
 
     if (this.extend) {
-      this.use(this.currentLang);
+      this.use(this.currentLang, true);
     }
   }
 
