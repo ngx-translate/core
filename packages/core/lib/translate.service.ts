@@ -161,19 +161,23 @@ export class TranslateService {
               @Inject(DEFAULT_LANGUAGE) defaultLanguage: string) {
     /** set the default language from configuration */
     if (defaultLanguage) {
-      this.setDefaultLang(defaultLanguage);
+      this.setDefaultLang(defaultLanguage, this.extend);
+    }
+
+    if (this.extend) {
+      this.use(this.currentLang);
     }
   }
 
   /**
    * Sets the default language to use as a fallback
    */
-  public setDefaultLang(lang: string): void {
-    if (lang === this.defaultLang) {
+  public setDefaultLang(lang: string, forceLoad: boolean = false): void {
+    if (lang === this.defaultLang && !forceLoad) {
       return;
     }
 
-    let pending = this.retrieveTranslations(lang);
+    let pending = this.retrieveTranslations(lang, forceLoad);
 
     if (typeof pending !== "undefined") {
       // on init set the defaultLang immediately
@@ -200,13 +204,13 @@ export class TranslateService {
   /**
    * Changes the lang currently used
    */
-  public use(lang: string): Observable<any> {
+  public use(lang: string, forceLoad: boolean = false): Observable<any> {
     // don't change the language if the language given is already selected
-    if (lang === this.currentLang) {
+    if (lang === this.currentLang && !forceLoad) {
       return of(this.translations[lang]);
     }
 
-    let pending = this.retrieveTranslations(lang);
+    let pending = this.retrieveTranslations(lang, forceLoad);
 
     if (typeof pending !== "undefined") {
       // on init set the currentLang immediately
@@ -230,7 +234,11 @@ export class TranslateService {
   /**
    * Retrieves the given translations
    */
-  private retrieveTranslations(lang: string): Observable<any> | undefined {
+  private retrieveTranslations(lang: string, forceLoad: boolean = false): Observable<any> | undefined {
+    if (forceLoad) {
+      return this.getTranslation(lang);
+    }
+
     let pending: Observable<any> | undefined;
 
     // if this language is unavailable or extend is true, ask for it
