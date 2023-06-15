@@ -161,18 +161,22 @@ export class TranslateService {
               @Inject(DEFAULT_LANGUAGE) defaultLanguage: string) {
     /** set the default language from configuration */
     if (defaultLanguage) {
-      this.setDefaultLang(defaultLanguage, this.extend);
+      this._setDefaultLang(defaultLanguage, this.extend);
     }
 
     if (this.extend) {
-      this.use(this.currentLang, true);
+      this._use(this.currentLang, true);
     }
   }
 
   /**
    * Sets the default language to use as a fallback
    */
-  public setDefaultLang(lang: string, forceLoad: boolean = false): void {
+  public setDefaultLang(lang: string): void {
+    this._setDefaultLang(lang);
+  }
+
+  protected _setDefaultLang(lang: string, forceLoad: boolean = false): void {
     if (lang === this.defaultLang && !forceLoad) {
       return;
     }
@@ -204,7 +208,11 @@ export class TranslateService {
   /**
    * Changes the lang currently used
    */
-  public use(lang: string, forceLoad: boolean = false): Observable<any> {
+  public use(lang: string): Observable<any> {
+    return this._use(lang);
+  }
+
+  protected _use(lang: string, forceLoad: boolean = false): Observable<any> {
     // don't change the language if the language given is already selected
     if (lang === this.currentLang && !forceLoad) {
       return of(this.translations[lang]);
