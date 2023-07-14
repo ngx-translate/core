@@ -4,6 +4,7 @@ import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationCh
 import {equals, isDefined} from './util';
 
 @Directive({
+  standalone: true,
   selector: '[translate],[ngx-translate]'
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {

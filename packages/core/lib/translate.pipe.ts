@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 
 @Injectable()
 @Pipe({
+  standalone: true,
   name: 'translate',
   pure: false // required to update the value when the promise is resolved
 })
