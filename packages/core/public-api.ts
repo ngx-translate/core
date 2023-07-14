@@ -31,7 +31,7 @@ export interface TranslateModuleConfig {
 }
 
 @NgModule({
-  declarations: [
+  imports: [
     TranslatePipe,
     TranslateDirective
   ],
