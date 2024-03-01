@@ -11,6 +11,7 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
 * [Usage](#usage)
     * [Import the TranslateModule](#1-import-the-translatemodule)
         * [SharedModule](#sharedmodule)
+        * [Standalone components](#standalone-components)
         * [Lazy loaded modules](#lazy-loaded-modules)
         * [Configuration](#configuration)
         * [AoT](#aot)
@@ -99,6 +100,32 @@ you can export the `TranslateModule` to make sure you don't have to import it in
     ]
 })
 export class SharedModule { }
+```
+
+##### Standalone components
+
+For [`Standalone component`](https://angular.io/api/core/Component#standalone) based applications you have to include providers from `TranslateModule` inside your bootstrap configuration options
+
+```ts
+bootstrapApplication(AppComponent, {
+    providers: [
+        ...
+        importProvidersFrom(HttpClientModule), // or provideHttpClient() in Angular v15+
+        importProvidersFrom(TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: createTranslateLoader,
+                deps: [HttpClient]
+           }
+        }),
+    ]
+})
+```
+
+Then you can import `TranslateModule` in your standalone imports:
+
+```ts
+@Component({ standalone: true, imports: [ CommonModule, TranslateModule ] })
 ```
 
 > Note: Never call a `forRoot` static method in the `SharedModule`. You might end up with different instances of the service in your injector tree. But you can use `forChild` if necessary.
