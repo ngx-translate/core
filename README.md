@@ -117,7 +117,7 @@ bootstrapApplication(AppComponent, {
                 useFactory: createTranslateLoader,
                 deps: [HttpClient]
            }
-        }),
+        })),
     ]
 })
 ```
