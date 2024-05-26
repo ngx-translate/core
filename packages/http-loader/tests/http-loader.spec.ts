@@ -98,4 +98,28 @@ describe('TranslateLoader', () => {
     // mock response after the xhr request, otherwise it will be undefined
     http.expectOne('/assets/i18n/en.json').flush({"TEST": "This is a test"});
   });
+
+  it('should get last requested lang', (done: Function) => {
+    // request en, fr then en
+    translate.use('en');
+    translate.use('fr');
+    translate.use('en');
+    jest.spyOn(http, 'expectOne');
+
+    // this will request the translation from the backend because we use a static files loader for TranslateService
+    translate.get('TEST').subscribe((res: string) => {
+      expect(res).toEqual('This is a test');
+      done()
+    });
+
+
+    // mock response after the xhr request, otherwise it will be undefined
+    http.expectOne('/assets/i18n/en.json').flush({"TEST": "This is a test"});
+    // mock late fr response
+    setTimeout(()=> {
+      http.expectOne('/assets/i18n/fr.json').flush({"TEST": "This is a fr test"});
+    }, 10)
+
+  });
 });
+

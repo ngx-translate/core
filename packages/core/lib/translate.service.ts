@@ -39,6 +39,7 @@ declare const window: Window;
 export class TranslateService {
   private loadingTranslations!: Observable<any>;
   private pending: boolean = false;
+  private lastLangUseRequest?: string;
   private _onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
   private _onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
   private _onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
@@ -201,6 +202,9 @@ export class TranslateService {
    * Changes the lang currently used
    */
   public use(lang: string): Observable<any> {
+    // set the last requested language
+    this.lastLangUseRequest = lang
+
     // don't change the language if the language given is already selected
     if (lang === this.currentLang) {
       return of(this.translations[lang]);
@@ -375,7 +379,8 @@ export class TranslateService {
     if (this.pending) {
       return this.loadingTranslations.pipe(
         concatMap((res: any) => {
-          res = this.getParsedResult(res, key, interpolateParams);
+          // get the last requested language
+          res = this.getParsedResult(this.lastLangUseRequest ? this.translations[this.lastLangUseRequest] : res, key, interpolateParams);
           return isObservable(res) ? res : of(res);
         }),
       );
@@ -464,9 +469,12 @@ export class TranslateService {
   }
 
   /**
-   * Changes the current lang
+   * Changes the current lang if it's the last language requested
    */
   private changeLang(lang: string): void {
+    // set the language only if it's the last language requested
+    if (this.lastLangUseRequest !== lang) return;
+
     this.currentLang = lang;
     this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
 
