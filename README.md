@@ -1,12 +1,44 @@
-# @ngx-translate/core ![Build Status](https://github.com/ngx-translate/core/actions/workflows/main.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/core [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
 The internationalization (i18n) library for Angular.
+<br/>
 
-Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/example
+## Angular 17, 18+
 
-Get the complete changelog here: https://github.com/ngx-translate/core/releases
+The [new documentation](https://ngx-translate.org/) now covers installation on 
+Angular 18+ and is divided into smaller, more readable sections, making it 
+easier to digest than this big README. It also documents the additional 
+interfaces and explains how to develop custom plugins.
+    
+New documentation: **https://ngx-translate.org/**
 
-## Table of Contents
+In addition to that, a getting started tutorial is available here:  
+[How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
+
+This [Demo project](https://github.com/CodeAndWeb/ngx-translate-demo) 
+contains 3 simple example projects for Standalone components, NgModules, and 
+how to use the message format compiler. The branches contain the same 
+projects for older Angular versions.
+
+The complete changelog of ngx-translate: https://github.com/ngx-translate/core/releases
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+## Angular <=16
+
+This documentation is still available for older versions of Angular. Newer 
+versions of Angular use Standalone Components by default, which are not 
+explained here.
+
+Simple example using ngx-translate:  
+https://stackblitz.com/github/ngx-translate/example
+
+### Table of Contents
 * [Installation](#installation)
 * [Usage](#usage)
     * [Import the TranslateModule](#1-import-the-translatemodule)
@@ -37,7 +69,7 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
 * [Additional Framework Support](#additional-framework-support)
 
 
-## Installation
+### Installation
 
 First you need to install the npm module:
 
@@ -61,7 +93,7 @@ Choose the version corresponding to your Angular version:
  2 to 4.2.x    | 7.x or less         | 0.x
 
 
-## Usage
+### Usage
 
 #### 1. Import the `TranslateModule`:
 
@@ -358,7 +390,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 <div [innerHTML]="'HELLO' | translate"></div>
 ```
 
-## API
+### API
 
 ### TranslateService
 
