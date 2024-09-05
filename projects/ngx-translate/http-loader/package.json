@@ -19,7 +19,7 @@
     "url": "https://github.com/ngx-translate/core/issues"
   },
   "peerDependencies": {
-    "@ngx-translate/core": ">=14.0.0",
+    "@ngx-translate/core": ">=15.0.0",
     "@angular/common": ">=13.0.0",
     "rxjs": "^6.5.3 || ^7.4.0"
   }
