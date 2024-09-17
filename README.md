@@ -1,12 +1,44 @@
-# @ngx-translate/core [![Build Status](https://travis-ci.org/ngx-translate/core.svg?branch=master)](https://travis-ci.org/ngx-translate/core) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/core [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
 The internationalization (i18n) library for Angular.
+<br/>
 
-Simple example using ngx-translate: https://stackblitz.com/github/ngx-translate/example
+## Angular 17, 18+
 
-Get the complete changelog here: https://github.com/ngx-translate/core/releases
+The [new documentation](https://ngx-translate.org/) now covers installation on
+Angular 18+ and is divided into smaller, more readable sections, making it
+easier to digest than this big README. It also documents the additional
+interfaces and explains how to develop custom plugins.
 
-## Table of Contents
+New documentation: **https://ngx-translate.org/**
+
+In addition to that, a getting started tutorial is available here:  
+[How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
+
+This [Demo project](https://github.com/CodeAndWeb/ngx-translate-demo)
+contains 3 simple example projects for Standalone components, NgModules, and
+how to use the message format compiler. The branches contain the same
+projects for older Angular versions.
+
+The complete changelog of ngx-translate: https://github.com/ngx-translate/core/releases
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+## Angular <=16
+
+This documentation is still available for older versions of Angular. Newer
+versions of Angular use Standalone Components by default, which are not
+explained here.
+
+Simple example using ngx-translate:  
+https://stackblitz.com/github/ngx-translate/example
+
+### Table of Contents
 * [Installation](#installation)
 * [Usage](#usage)
   * [Import the TranslateModule](#1-import-the-translatemodule)
@@ -37,7 +69,7 @@ Get the complete changelog here: https://github.com/ngx-translate/core/releases
 * [Additional Framework Support](#additional-framework-support)
 
 
-## Installation
+### Installation
 
 First you need to install the npm module:
 
@@ -48,8 +80,9 @@ npm install @ngx-translate/core --save
 Choose the version corresponding to your Angular version:
 
  Angular       | @ngx-translate/core | @ngx-translate/http-loader
- ------------- | ------------------- | --------------------------
- 13 (ivy only) | 14.x+               | 7.x+
+ ------------- |---------------------| --------------------------
+ 16+           | 15.x+               | 8.x+
+ 13+ (ivy only)| 14.x+               | 7.x+
  10/11/12/13   | 13.x+               | 6.x+
  9             | 12.x+               | 5.x+
  8             | 12.x+               | 4.x+
@@ -60,7 +93,7 @@ Choose the version corresponding to your Angular version:
  2 to 4.2.x    | 7.x or less         | 0.x
 
 
-## Usage
+### Usage
 
 #### 1. Import the `TranslateModule`:
 
@@ -301,8 +334,8 @@ param = {value: 'world'};
 You can construct the translation keys dynamically by using simple string concatenation inside the template:
 
 ```html
-<ul *ngFor="let language of languages">
-  <li>{{ 'LANGUAGES.' + language | translate }}</li>
+<ul>
+  <li *ngFor="let language of languages">{{ 'LANGUAGES.' + language | translate }}</li>
 </ul>
 ```
 
@@ -357,7 +390,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 <div [innerHTML]="'HELLO' | translate"></div>
 ```
 
-## API
+### API
 
 ### TranslateService
 
@@ -367,7 +400,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 - `currentLoader`: An instance of the loader currently used (static loader by default)
 - `onLangChange`: An EventEmitter to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-    example:
+  example:
     ```ts
     onLangChange.subscribe((event: LangChangeEvent) => {
 	  // do something
@@ -375,7 +408,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
     ```
 - `onTranslationChange`: An EventEmitter to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-    example:
+  example:
     ```ts
     onTranslationChange.subscribe((event: TranslationChangeEvent) => {
 	  // do something
@@ -383,7 +416,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
     ```
 - `onDefaultLangChange`: An EventEmitter to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-    example:
+  example:
     ```ts
     onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
 	  // do something
@@ -495,10 +528,10 @@ If you need it for some reason, you can use the `TranslateParser` service.
 #### Methods:
 - `interpolate(expr: string | Function, params?: any): string`: Interpolates a string to replace parameters or calls the interpolation function with the parameters.
 
-    `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
-    `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
+  `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
+  `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
 - `getValue(target: any, key: string): any`:  Gets a value from an object by composed key
-     `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
+  `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
 
 ## FAQ
 
