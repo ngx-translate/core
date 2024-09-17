@@ -38,3 +38,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+packages/core/.idea
+packages/http-loader/.idea
