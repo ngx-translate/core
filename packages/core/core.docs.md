@@ -302,8 +302,8 @@ param = {value: 'world'};
 You can construct the translation keys dynamically by using simple string concatenation inside the template:
 
 ```html
-<ul *ngFor="let language of languages">
-  <li>{{ 'LANGUAGES.' + language | translate }}</li>
+<ul>
+  <li *ngFor="let language of languages">{{ 'LANGUAGES.' + language | translate }}</li>
 </ul>
 ```
 
