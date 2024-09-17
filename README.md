@@ -1,6 +1,5 @@
-# @ngx-translate/core [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/core ![Buildstatus](https://github.com/CodeAndWeb/ngx-translate/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
-https://github.com/CodeAndWeb/ngx-translate/actions/workflows/ngx-translate-test.yml/badge.svg
 
 The internationalization (i18n) library for Angular.
 <br/>
