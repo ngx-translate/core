@@ -2,7 +2,7 @@
   "name": "@ngx-translate/core",
   "description": "The internationalization (i18n) library for Angular",
   "author": "Olivier Combe",
-  "version": "14.0.0",
+  "version": "15.0.0",
   "keywords": [
     "angular",
     "i18n",
