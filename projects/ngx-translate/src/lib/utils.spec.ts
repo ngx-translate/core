@@ -1,0 +1,210 @@
+import {equals, mergeDeep} from "./util";
+
+
+describe("Utils", () =>
+{
+
+  describe("deepMerge", () =>
+  {
+
+    it("should merge properties from source into target", () =>
+    {
+      const target = {a: 1, b: 2};
+      const source = {b: 3, c: 4};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: 1, b: 3, c: 4});
+    });
+
+    it("should merge nested objects", () =>
+    {
+      const target = {a: {b: 2}};
+      const source = {a: {c: 3}};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: {b: 2, c: 3}});
+    });
+
+    it("should not modify the original target object", () =>
+    {
+      const target = {a: {b: 2}};
+      const source = {a: {c: 3}};
+      const result = mergeDeep(target, source);
+
+      expect(result).not.toBe(target);
+      expect(target).toEqual({a: {b: 2}}); // Ensure target is unchanged
+    });
+
+    it("should handle non-object properties in source", () =>
+    {
+      const target = {a: {b: 2}};
+      const source = {a: 3};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: 3});
+    });
+
+    it("should handle non-object properties in target", () =>
+    {
+      const target = {a: 2};
+      const source = {a: {b: 3}};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: {b: 3}});
+    });
+
+    it("should handle merging of arrays", () =>
+    {
+      const target = {a: [1, 2, 3]};
+      const source = {a: [4, 5]};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: [4, 5]});
+    });
+
+    it("should merge deeply nested objects", () =>
+    {
+      const target = {a: {b: {c: 1}}};
+      const source = {a: {b: {d: 2}}};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: {b: {c: 1, d: 2}}});
+    });
+
+    it("should add new properties from the source if they do not exist in the target", () =>
+    {
+      const target = {a: 1};
+      const source = {b: 2};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: 1, b: 2});
+    });
+
+    it("should handle empty target object", () =>
+    {
+      const target = {};
+      const source = {a: 1, b: {c: 2}};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: 1, b: {c: 2}});
+    });
+
+    it("should handle empty source object", () =>
+    {
+      const target = {a: 1, b: 2};
+      const source = {};
+      const result = mergeDeep(target, source);
+
+      expect(result).toEqual({a: 1, b: 2});
+    });
+
+  });
+
+  describe("equals", () =>
+  {
+
+
+    it("should return true for strictly equal primitives", () =>
+    {
+      expect(equals(1, 1)).toBeTrue();
+      expect(equals("test", "test")).toBeTrue();
+      expect(equals(true, true)).toBeTrue();
+    });
+
+    it("should return false for different primitives", () =>
+    {
+      expect(equals(1, 2)).toBeFalse();
+      expect(equals("test", "other")).toBeFalse();
+      expect(equals(true, false)).toBeFalse();
+    });
+
+    it("should return true for null comparisons", () =>
+    {
+      expect(equals(null, null)).toBeTrue();
+    });
+
+    it("should return false if one value is null", () =>
+    {
+      expect(equals(null, 1)).toBeFalse();
+      expect(equals({}, null)).toBeFalse();
+    });
+
+    it("should return true for NaN comparisons", () =>
+    {
+      expect(equals(NaN, NaN)).toBeTrue();
+    });
+
+    it("should return true for equal arrays", () =>
+    {
+      expect(equals([1, 2, 3], [1, 2, 3])).toBeTrue();
+      expect(equals([], [])).toBeTrue();
+    });
+
+    it("should return false for arrays of different lengths", () =>
+    {
+      expect(equals([1, 2], [1, 2, 3])).toBeFalse();
+    });
+
+    it("should return false for arrays with different elements", () =>
+    {
+      expect(equals([1, 2, 3], [1, 2, 4])).toBeFalse();
+    });
+
+    it("should return true for deeply nested arrays", () =>
+    {
+      expect(equals([1, [2, [3]]], [1, [2, [3]]])).toBeTrue();
+    });
+
+    it("should return true for equal objects", () =>
+    {
+      expect(equals({a: 1, b: 2}, {a: 1, b: 2})).toBeTrue();
+    });
+
+    it("should return false for objects with different properties", () =>
+    {
+      expect(equals({a: 1, b: 2}, {a: 1, c: 3})).toBeFalse();
+    });
+
+    it("should use strictly equal comparison", () =>
+    {
+      expect(equals({a: 1}, {a: "1"})).toBeFalse();
+    });
+
+    it("should return false for objects with different property values", () =>
+    {
+      expect(equals({a: 1, b: 2}, {a: 1, b: 3})).toBeFalse();
+    });
+
+    it("should return true for deeply nested objects", () =>
+    {
+      expect(equals({a: {b: {c: 1}}}, {a: {b: {c: 1}}})).toBeTrue();
+    });
+
+    it("should return false for objects and arrays", () =>
+    {
+      expect(equals({a: 1}, [1])).toBeFalse();
+    });
+
+    it("should return false for arrays and objects", () =>
+    {
+      expect(equals([1], {0: 1})).toBeFalse();
+    });
+
+    it("should handle undefined properties correctly", () =>
+    {
+      expect(equals({a: 1, b: undefined}, {a: 1})).toBeTrue();
+      expect(equals({a: 1}, {a: 1, b: undefined})).toBeTrue();
+      expect(equals({a: 1, b: 2}, {a: 1, b: undefined})).toBeFalse();
+    });
+
+    it("should return false when o2 has a property not present in o1", () =>
+    {
+      const o1 = {a: 1, b: 2};
+      const o2 = {a: 1, b: 2, c: 3}; // `c` is not present in `o1`
+
+      expect(equals(o1, o2)).toBeFalse();
+    });
+
+  });
+
+});

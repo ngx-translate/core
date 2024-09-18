@@ -1,38 +1,35 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "paths": {
-      "@ngx-translate/core": [
-        "dist/@ngx-translate/core/ngx-translate-core",
-        "dist/@ngx-translate/core"
-      ],
-      "@ngx-translate/http-loader": [
-        "dist/@ngx-translate/http-loader/ngx-translate-http-loader",
-        "dist/@ngx-translate/http-loader"
-      ]
-    },
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "paths": {
+      "@codeandweb/http-loader": [
+        "./dist/http-loader"
+      ],
+      "@codeandweb/ngx-translate": [
+        "./dist/ngx-translate"
+      ]
+    },
+    "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
-    "target": "es2017",
-    "module": "es2020",
+    "target": "ES2022",
+    "module": "ES2022",
     "lib": [
-      "es2020",
+      "ES2022",
       "dom"
-    ],
-    "types": [
-      "jest"
     ]
   },
   "angularCompilerOptions": {

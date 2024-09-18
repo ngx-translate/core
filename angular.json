@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "@ngx-translate/core": {
+    "ngx-translate": {
       "projectType": "library",
-      "root": "projects/ngx-translate/core",
-      "sourceRoot": "projects/ngx-translate/core/src",
+      "root": "projects/ngx-translate",
+      "sourceRoot": "projects/ngx-translate/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngx-translate/core/ng-package.json"
+            "project": "projects/ngx-translate/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngx-translate/core/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngx-translate/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngx-translate/core/tsconfig.lib.json"
+              "tsConfig": "projects/ngx-translate/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,30 +27,43 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/ngx-translate/core/src/test.ts",
-            "tsConfig": "projects/ngx-translate/core/tsconfig.spec.json",
-            "karmaConfig": "projects/ngx-translate/core/karma.conf.js"
+            "tsConfig": "./tsconfig.spec.json",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngx-translate/**/*.ts",
+              "projects/ngx-translate/**/*.html"
+            ],
+            "eslintConfig": "projects/ngx-translate/eslint.config.js"
           }
         }
       }
     },
-    "@ngx-translate/http-loader": {
+    "http-loader": {
       "projectType": "library",
-      "root": "projects/ngx-translate/http-loader",
-      "sourceRoot": "projects/ngx-translate/http-loader/src",
+      "root": "projects/http-loader",
+      "sourceRoot": "projects/http-loader/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngx-translate/http-loader/ng-package.json"
+            "project": "projects/http-loader/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngx-translate/http-loader/tsconfig.lib.prod.json"
+              "tsConfig": "projects/http-loader/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngx-translate/http-loader/tsconfig.lib.json"
+              "tsConfig": "projects/http-loader/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -58,13 +71,25 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/ngx-translate/http-loader/src/test.ts",
-            "tsConfig": "projects/ngx-translate/http-loader/tsconfig.spec.json",
-            "karmaConfig": "projects/ngx-translate/http-loader/karma.conf.js"
+            "tsConfig": "./tsconfig.spec.json",
+            "karmaConfig": "./karma.conf.js",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/http-loader/**/*.ts",
+              "projects/http-loader/**/*.html"
+            ],
+            "eslintConfig": "projects/http-loader/eslint.config.js"
           }
         }
       }
     }
-  },
-  "defaultProject": "@ngx-translate/core"
+  }
 }
