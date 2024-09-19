@@ -1,78 +1,79 @@
 import {Injectable} from "@angular/core";
-import {isDefined} from "./util";
+import {getValue, isDefined, isObject} from "./util";
+import {
+  InterpolatableTranslation,
+  InterpolatableTranslationObject, Translation,
+  TranslationObject
+} from "./translate.service";
 
-export type InterpolateFunction = (params:any) => string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type InterpolationParameters = any;
+
+export type InterpolateFunction = (params: InterpolationParameters) => string;
 
 
-export abstract class TranslateParser {
+export abstract class TranslateParser
+{
   /**
    * Interpolates a string to replace parameters
    * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
    * @param expr
    * @param params
    */
-  abstract interpolate(expr: string | InterpolateFunction, params?: any): string | undefined;
-
-  /**
-   * Gets a value from an object by composed key
-   * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
-   * @param target
-   * @param key
-   */
-  abstract getValue(target: any, key: string): any
+  abstract interpolate(expr: InterpolatableTranslation, params?: InterpolationParameters): Translation;
 }
 
+
 @Injectable()
-export class TranslateDefaultParser extends TranslateParser {
+export class TranslateDefaultParser extends TranslateParser
+{
   templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
 
-  public interpolate(expr: string | InterpolateFunction, params?: any): string {
-    let result: string;
-
-    if (typeof expr === 'string') {
-      result = this.interpolateString(expr, params);
-    } else if (typeof expr === 'function') {
-      result = this.interpolateFunction(expr, params);
-    } else {
-      // this should not happen, but an unrelated TranslateService test depends on it
-      result = expr as string;
+  public interpolate(expr: InterpolatableTranslation, params?: InterpolationParameters): Translation
+  {
+    if (typeof expr === "string")
+    {
+      return this.interpolateString(expr, params);
     }
-
-    return result;
+    else if (typeof expr === "function")
+    {
+      return this.interpolateFunction(expr, params);
+    }
+    else if (Array.isArray(expr))
+    {
+      return expr.map((item) => this.interpolate(item, params));
+    }
+    else if (isObject(expr)) {
+      const exprObject = expr as InterpolatableTranslationObject;
+      return Object.keys(exprObject).reduce((acc, key) => {
+        const value  = this.interpolate(exprObject[key], params);
+        if(value !== undefined)
+        {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as TranslationObject);
+    }
   }
 
-  getValue(target: any, key: string): any {
-
-    const keys = key.split('.');
-
-    key = '';
-    do {
-      key += keys.shift();
-      if (isDefined(target) && isDefined(target[key]) && (typeof target[key] === 'object' || !keys.length)) {
-        target = target[key];
-        key = '';
-      } else if (!keys.length) {
-        target = undefined;
-      } else {
-        key += '.';
-      }
-    } while (keys.length);
-
-    return target;
-  }
-
-  private interpolateFunction(fn: InterpolateFunction, params?: any): string {
+  private interpolateFunction(fn: InterpolateFunction, params?: InterpolationParameters): string
+  {
     return fn(params);
   }
 
-  private interpolateString(expr: string, params?: any): string {
-    if (!params) {
+  private interpolateString(expr: string, params?: InterpolationParameters): string
+  {
+    if (!params)
+    {
       return expr;
     }
 
-    return expr.replace(this.templateMatcher, (substring: string, b: string) => {
-      const r = this.getValue(params, b);
-      return isDefined(r) ? r : substring;
+    return expr.replace(this.templateMatcher, (substring: string, b: string) =>
+    {
+      const r = getValue(params, b);
+      return isDefined(r)
+             ? r
+             : substring;
     });
   }
 }

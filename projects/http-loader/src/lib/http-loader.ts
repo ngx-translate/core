@@ -1,5 +1,5 @@
 import {HttpClient} from "@angular/common/http";
-import {TranslateLoader} from "@codeandweb/ngx-translate";
+import {TranslateLoader, TranslationObject} from "@codeandweb/ngx-translate";
 import {Observable} from 'rxjs';
 
 export class TranslateHttpLoader implements TranslateLoader {
@@ -8,7 +8,7 @@ export class TranslateHttpLoader implements TranslateLoader {
   /**
    * Gets the translations from the server
    */
-  public getTranslation(lang: string): Observable<object> {
-    return this.http.get(`${this.prefix}${lang}${this.suffix}`);
+  public getTranslation(lang: string): Observable<TranslationObject> {
+    return this.http.get(`${this.prefix}${lang}${this.suffix}`) as Observable<TranslationObject>;
   }
 }

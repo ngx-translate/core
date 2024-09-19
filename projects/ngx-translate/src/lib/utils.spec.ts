@@ -1,4 +1,4 @@
-import {equals, mergeDeep} from "./util";
+import {equals, getValue, mergeDeep} from "./util";
 
 
 describe("Utils", () =>
@@ -206,5 +206,43 @@ describe("Utils", () =>
     });
 
   });
+
+
+  describe('getValue()', () => {
+    it('should get the addressed value', () => {
+
+      expect(getValue({key1: {key2: "value2"}}, 'key1.key2')).toEqual("value2");
+      expect(getValue({key1: {key2: "value"}}, 'keyWrong.key2')).not.toBeDefined();
+      expect(getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.key3')).toEqual("value3");
+      expect(getValue({key1: {key2: {key3: "value3"}}}, 'key1.keyWrong.key3')).not.toBeDefined();
+      expect(getValue({key1: {key2: {key3: "value3"}}}, 'key1.key2.keyWrong')).not.toBeDefined();
+
+
+      expect(getValue({'key1.key2': {key3: "value3"}}, 'key1.key2.key3')).toEqual("value3");
+      expect(getValue({key1: {'key2.key3': "value3"}}, 'key1.key2.key3')).toEqual("value3");
+      expect(getValue({'key1.key2.key3': "value3"}, 'key1.key2.key3')).toEqual("value3");
+      expect(getValue({'key1.key2': {key3: "value3"}}, 'key1.key2.keyWrong')).not.toBeDefined();
+      expect(getValue({
+        'key1': "value1",
+        'key1.key2': "value2"
+      }, 'key1.key2')).toEqual("value2");
+
+      expect(getValue({'key1.key2': {key3: "value3"}}, 'key1.key2')).toEqual({key3: "value3"});
+    });
+
+
+    it('should handle edge cases', () => {
+
+      // strange cases that are currently permitted but don't make much sense
+      expect(getValue(['A', 'B', 'C'], '1')).toEqual("B");
+      expect(getValue(['A', ['a', 'b', 'c'], 'C'], '1.2')).toEqual("c");
+
+      expect(getValue("test", 'key')).not.toBeDefined();
+
+      expect(getValue("test", '1')).toEqual("e"); /// useless: substring
+    })
+
+  });
+
 
 });

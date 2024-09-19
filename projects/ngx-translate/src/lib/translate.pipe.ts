@@ -1,8 +1,15 @@
 import {ChangeDetectorRef, Injectable, OnDestroy, Pipe, PipeTransform} from '@angular/core';
 import {isObservable} from 'rxjs';
-import {LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
+import {
+  InterpolatableTranslationObject,
+  LangChangeEvent,
+  TranslateService,
+  TranslationChangeEvent,
+  Translation
+} from "./translate.service";
 import {equals, isDefined} from './util';
 import {Subscription} from 'rxjs';
+import {InterpolationParameters} from "./translate.parser";
 
 @Injectable()
 @Pipe({
@@ -10,9 +17,9 @@ import {Subscription} from 'rxjs';
   pure: false // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-  value = '';
+  value:Translation = '';
   lastKey: string | null = null;
-  lastParams: any[] = [];
+  lastParams: InterpolationParameters[] = [];
   onTranslationChange: Subscription | undefined;
   onLangChange: Subscription | undefined;
   onDefaultLangChange: Subscription | undefined;
@@ -20,15 +27,15 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
   }
 
-  updateValue(key: string, interpolateParams?: object, translations?: any): void {
-    const onTranslation = (res: string) => {
+  updateValue(key: string, interpolateParams?: object, translations?: InterpolatableTranslationObject): void {
+    const onTranslation = (res: Translation) => {
       this.value = res !== undefined ? res : key;
       this.lastKey = key;
       this._ref.markForCheck();
     };
     if (translations) {
       const res = this.translate.getParsedResult(translations, key, interpolateParams);
-      if (isObservable(res.subscribe)) {
+      if (isObservable(res)) {
         res.subscribe(onTranslation);
       } else {
         onTranslation(res);
@@ -37,6 +44,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     this.translate.get(key, interpolateParams).subscribe(onTranslation);
   }
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   transform(query: string, ...args: any[]): any {
     if (!query || !query.length) {
       return query;

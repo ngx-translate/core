@@ -1,7 +1,15 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef} from "@angular/core";
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateLoader, TranslateModule, TranslatePipe, TranslateService} from "../public-api";
+import {
+  DefaultLangChangeEvent,
+  LangChangeEvent,
+  TranslateLoader,
+  TranslateModule,
+  TranslatePipe,
+  TranslateService,
+  TranslationObject
+} from "../public-api";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {
@@ -39,10 +47,10 @@ class AppComponent {
   }
 }
 
-let translations: any = {"TEST": "This is a test"};
+let translations: TranslationObject = {"TEST": "This is a test"};
 
 class FakeLoader implements TranslateLoader {
-  getTranslation(lang: string): Observable<any> {
+  getTranslation(lang: string): Observable<TranslationObject> {
     void lang;
     return of(translations);
   }
@@ -51,7 +59,7 @@ class FakeLoader implements TranslateLoader {
 describe('TranslatePipe', () => {
   let translate: TranslateService;
   let translatePipe: TranslatePipe;
-  let ref: any;
+  let ref: FakeChangeDetectorRef;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -69,7 +77,6 @@ describe('TranslatePipe', () => {
 
   afterEach(() => {
     translations = {"TEST": "This is a test"};
-    ref = undefined;
   });
 
   it('is defined', () => {
@@ -174,8 +181,13 @@ describe('TranslatePipe', () => {
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
 
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     expect(translatePipe.transform(null as any)).toBeNull();
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     expect(translatePipe.transform(undefined as any)).toBeUndefined();
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     expect(translatePipe.transform(1234 as any)).toBe(1234);
   });
 
@@ -218,7 +230,7 @@ describe('TranslatePipe', () => {
     });
 
     it('should detect changes with OnPush', () => {
-      const fixture = (TestBed as any).createComponent(AppComponent);
+      const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
       translate.use('en');
@@ -266,7 +278,7 @@ describe('TranslatePipe', () => {
     });
 
     it('should detect changes with OnPush', () => {
-      const fixture = (TestBed as any).createComponent(AppComponent);
+      const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
       translate.setDefaultLang('en');

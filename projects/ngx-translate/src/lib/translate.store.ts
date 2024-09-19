@@ -1,5 +1,9 @@
 import {EventEmitter} from "@angular/core";
-import {DefaultLangChangeEvent, LangChangeEvent, TranslationChangeEvent} from "./translate.service";
+import {
+  DefaultLangChangeEvent, InterpolatableTranslationObject,
+  LangChangeEvent,
+  TranslationChangeEvent
+} from "./translate.service";
 
 export class TranslateStore {
   /**
@@ -15,7 +19,7 @@ export class TranslateStore {
   /**
    * a list of translations per lang
    */
-  public translations: any = {};
+  public translations: Record<string, InterpolatableTranslationObject> = {};
 
   /**
    * an array of langs

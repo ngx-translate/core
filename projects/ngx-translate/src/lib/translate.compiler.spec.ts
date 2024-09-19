@@ -1,11 +1,19 @@
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {TranslateCompiler, TranslateFakeCompiler, TranslateLoader, TranslateModule, TranslateService} from "../public-api";
+import {
+  InterpolatableTranslationObject,
+  TranslateCompiler,
+  TranslateFakeCompiler,
+  TranslateLoader,
+  TranslateModule,
+  TranslateService,
+  TranslationObject, Translation
+} from "../public-api";
 
-const translations: any = {LOAD: 'This is a test'};
+const translations: TranslationObject = {LOAD: 'This is a test'};
 
 class FakeLoader implements TranslateLoader {
-  getTranslation(lang: string): Observable<any> {
+  getTranslation(lang: string): Observable<TranslationObject> {
     void lang;
     return of(translations);
   }
@@ -36,7 +44,7 @@ describe('TranslateCompiler', () => {
     });
 
     it('should use the compiler on loading translations', () => {
-      translate.get('LOAD').subscribe((res: string) => {
+      translate.get('LOAD').subscribe((res: Translation) => {
         expect(res).toBe('This is a test');
       });
     });
@@ -59,9 +67,9 @@ describe('TranslateCompiler', () => {
         return value + '|compiled';
       }
 
-      compileTranslations(translation: any, lang: string): object {
+      compileTranslations(translation: InterpolatableTranslationObject, lang: string): InterpolatableTranslationObject {
         void lang;
-        return Object.keys(translation).reduce((acc: any, key) => {
+        return Object.keys(translation).reduce((acc: InterpolatableTranslationObject, key) => {
           acc[key] = () => translation[key] + '|compiled';
           return acc;
         }, {});
@@ -89,7 +97,7 @@ describe('TranslateCompiler', () => {
     });
 
     it('should use the compiler on loading translations', () => {
-      translate.get('LOAD').subscribe((res: string) => {
+      translate.get('LOAD').subscribe((res: Translation) => {
         expect(res).toBe('This is a test|compiled');
       });
     });

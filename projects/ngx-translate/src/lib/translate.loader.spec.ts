@@ -1,11 +1,17 @@
 import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
-import {TranslateFakeLoader, TranslateLoader, TranslateModule, TranslateService} from "../public-api";
+import {
+  TranslateFakeLoader,
+  TranslateLoader,
+  TranslateModule,
+  TranslateService,
+  TranslationObject, Translation
+} from "../public-api";
 
-const translations: any = {"TEST": "This is a test"};
+const translations: TranslationObject = {"TEST": "This is a test"};
 
 class FakeLoader implements TranslateLoader {
-  getTranslation(): Observable<any> {
+  getTranslation(): Observable<TranslationObject> {
     return of(translations);
   }
 }
@@ -31,14 +37,14 @@ describe('TranslateLoader', () => {
     translate.use('en');
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.get('TEST').subscribe((res: string) => {
+    translate.get('TEST').subscribe((res: Translation) => {
       expect(res).toEqual('This is a test');
     });
   });
 
   it('should be able to provide any TranslateLoader', () => {
     class CustomLoader implements TranslateLoader {
-      getTranslation(): Observable<any> {
+      getTranslation(): Observable<TranslationObject> {
         return of({"TEST": "This is also a test"});
       }
     }
@@ -60,7 +66,7 @@ describe('TranslateLoader', () => {
     translate.use('en');
 
     // this will request the translation from the CustomLoader
-    translate.get('TEST').subscribe((res: string) => {
+    translate.get('TEST').subscribe((res: Translation) => {
       expect(res).toEqual('This is also a test');
     });
   });
@@ -83,7 +89,7 @@ describe('TranslateLoader', () => {
     translate.use('en');
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.getTranslation('en').subscribe((res: any) => {
+    translate.getTranslation('en').subscribe((res: Translation) => {
       expect(res).toEqual({});
     });
   });

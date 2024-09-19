@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Determines if two objects or two values are equivalent.
  *
@@ -79,4 +81,36 @@ export function mergeDeep(target: any, source: any): any {
   return output;
 }
 
+
+/**
+ * Gets a value from an object by composed key
+ * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
+ * @param target
+ * @param key
+ */
+export function getValue(target: any, key: string): any
+{
+  const keys = key.split(".");
+
+  key = "";
+  do
+  {
+    key += keys.shift();
+    if (isDefined(target) && isDefined(target[key]) && (typeof target[key] === "object" || !keys.length))
+    {
+      target = target[key];
+      key = "";
+    }
+    else if (!keys.length)
+    {
+      target = undefined;
+    }
+    else
+    {
+      key += ".";
+    }
+  } while (keys.length);
+
+  return target;
+}
 

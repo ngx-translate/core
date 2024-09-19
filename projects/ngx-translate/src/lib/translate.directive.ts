@@ -1,15 +1,33 @@
 import {AfterViewChecked, ChangeDetectorRef, Directive, ElementRef, Input, OnDestroy} from '@angular/core';
 import {Subscription, isObservable} from 'rxjs';
-import {DefaultLangChangeEvent, LangChangeEvent, TranslateService, TranslationChangeEvent} from './translate.service';
+import {
+  DefaultLangChangeEvent,
+  InterpolatableTranslation,
+  LangChangeEvent,
+  TranslateService,
+  TranslationChangeEvent,
+  Translation
+} from "./translate.service";
 import {equals, isDefined} from './util';
+import {InterpolationParameters} from "./translate.parser";
+
+interface ExtendedNode extends Text {
+  originalContent: string;
+  currentValue: Translation;
+  lookupKey: string;
+  lastKey: string|null;
+  data: string;
+}
+
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[translate],[ngx-translate]'
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
   key!: string;
-  lastParams: any;
-  currentParams: any;
+  lastParams: InterpolationParameters;
+  currentParams: InterpolationParameters;
   onLangChangeSub!: Subscription;
   onDefaultLangChangeSub!: Subscription;
   onTranslationChangeSub!: Subscription;
@@ -21,7 +39,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     }
   }
 
-  @Input() set translateParams(params: any) {
+  @Input() set translateParams(params: InterpolationParameters) {
     if (!equals(this.currentParams, params)) {
       this.currentParams = params;
       this.checkNodes(true);
@@ -58,7 +76,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     this.checkNodes();
   }
 
-  checkNodes(forceUpdate = false, translations?: any) {
+
+  checkNodes(forceUpdate = false, translations?: InterpolatableTranslation) {
     let nodes: NodeList = this.element.nativeElement.childNodes;
     // if the element is empty
     if (!nodes.length) {
@@ -66,8 +85,9 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
       this.setContent(this.element.nativeElement, this.key);
       nodes = this.element.nativeElement.childNodes;
     }
-    for (let i = 0; i < nodes.length; ++i) {
-      const node: any = nodes[i];
+
+    nodes.forEach(( n) => {
+      const node= n as ExtendedNode;
       if (node.nodeType === 3) { // node type 3 is a text node
         let key!: string;
         if (forceUpdate) {
@@ -95,10 +115,10 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         }
         this.updateValue(key, node, translations);
       }
-    }
+    })
   }
 
-  updateValue(key: string, node: any, translations: any) {
+  updateValue(key: string, node: ExtendedNode, translations?: InterpolatableTranslation) {
     if (key) {
       if (node.lastKey === key && this.lastParams === this.currentParams) {
         return;
@@ -106,7 +126,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
       this.lastParams = this.currentParams;
 
-      const onTranslation = (res: unknown) => {
+      const onTranslation = (res: Translation) => {
         if (res !== key) {
           node.lastKey = key;
         }
@@ -120,7 +140,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
       };
 
       if (isDefined(translations)) {
-        const res = this.translateService.getParsedResult(translations, key, this.currentParams);
+        const res = this.translateService.getParsedResult(translations as InterpolatableTranslation, key, this.currentParams);
         if (isObservable(res)) {
           res.subscribe({next: onTranslation});
         } else {
@@ -132,11 +152,11 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     }
   }
 
-  getContent(node: any): string {
-    return isDefined(node.textContent) ? node.textContent : node.data;
+  getContent(node: ExtendedNode): string {
+    return (isDefined(node.textContent) ? node.textContent : node.data) as string;
   }
 
-  setContent(node: any, content: string): void {
+  setContent(node: ExtendedNode, content: string): void {
     if (isDefined(node.textContent)) {
       node.textContent = content;
     } else {

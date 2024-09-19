@@ -1,7 +1,7 @@
 import {HttpClient, provideHttpClient} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {TestBed} from "@angular/core/testing";
-import {TranslateLoader, TranslateModule, TranslateService} from "@codeandweb/ngx-translate";
+import {TranslateLoader, TranslateModule, TranslateService, Translation} from "@codeandweb/ngx-translate";
 import {TranslateHttpLoader} from "../public-api";
 
 describe('TranslateLoader', () => {
@@ -39,7 +39,7 @@ describe('TranslateLoader', () => {
     translate.use('en');
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.get('TEST').subscribe((res: string) => {
+    translate.get('TEST').subscribe((res: Translation) => {
       expect(res).toEqual('This is a test');
     });
 
@@ -50,7 +50,7 @@ describe('TranslateLoader', () => {
     });
 
     // this will request the translation from downloaded translations without making a request to the backend
-    translate.get('TEST2').subscribe((res: string) => {
+    translate.get('TEST2').subscribe((res: Translation) => {
       expect(res).toEqual('This is another test');
     });
   });
@@ -59,7 +59,7 @@ describe('TranslateLoader', () => {
     translate.use('en');
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.get('TEST').subscribe((res: string) => {
+    translate.get('TEST').subscribe((res: Translation) => {
       expect(res).toEqual('This is a test');
 
       // reset the lang as if it was never initiated
@@ -79,7 +79,7 @@ describe('TranslateLoader', () => {
     spyOn(http, 'expectOne').and.callThrough();
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.get('TEST').subscribe((res: string) => {
+    translate.get('TEST').subscribe((res: Translation) => {
       expect(res).toEqual('This is a test');
       expect(http.expectOne).toHaveBeenCalledTimes(1);
 
@@ -90,7 +90,7 @@ describe('TranslateLoader', () => {
 
       // use set timeout because no request is really made and we need to trigger zone to resolve the observable
       setTimeout(() => {
-        translate.get('TEST').subscribe((res2: string) => {
+        translate.get('TEST').subscribe((res2: Translation) => {
           expect(res2).toEqual('TEST'); // because the loader is "pristine" as if it was never called
           expect(http.expectOne).toHaveBeenCalledTimes(1);
           done();
