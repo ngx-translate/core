@@ -22,7 +22,8 @@ interface ExtendedNode extends Text {
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[translate],[ngx-translate]'
+  selector: '[translate],[ngx-translate]',
+  standalone: true
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
   key!: string;

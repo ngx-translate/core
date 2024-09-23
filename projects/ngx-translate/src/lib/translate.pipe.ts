@@ -14,6 +14,7 @@ import {InterpolationParameters} from "./translate.parser";
 @Injectable()
 @Pipe({
   name: 'translate',
+  standalone: true,
   pure: false // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
