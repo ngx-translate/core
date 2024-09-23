@@ -1,24 +1,10 @@
-# HttpLoader
+# @codeandweb/http-loader ![Buildstatus](https://github.com/CodeAndWeb/ngx-translate/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.0.
+HTTP loader for ngx-translate
 
-## Code scaffolding
+Forked from @ngx-translate/http-loader after the maintainer abandoned the library.
 
-Run `ng generate component component-name --project http-loader` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project http-loader`.
-> Note: Don't forget to add `--project http-loader` or else it will be added to the default project in your `angular.json` file. 
+Documentation: https://ngx-translate.org/
 
-## Build
-
-Run `ng build http-loader` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Publishing
-
-After building your library with `ng build http-loader`, go to the dist folder `cd dist/http-loader` and run `npm publish`.
-
-## Running unit tests
-
-Run `ng test http-loader` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+In addition to that, a getting started tutorial is available here:  
+[How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)

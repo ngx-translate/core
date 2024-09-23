@@ -1,6 +1,7 @@
 {
   "name": "@codeandweb/ngx-translate",
-  "version": "16.0.0",
+  "version": "16.0.0-beta.0",
+  "license": "MIT",
   "peerDependencies": {
     "@angular/common": "^18.2.0",
     "@angular/core": "^18.2.0"
