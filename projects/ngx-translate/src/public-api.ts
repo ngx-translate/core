@@ -1,4 +1,4 @@
-import {NgModule, ModuleWithProviders, Provider} from "@angular/core";
+import {NgModule, ModuleWithProviders, Provider, EnvironmentProviders, makeEnvironmentProviders} from "@angular/core";
 import {TranslateLoader, TranslateFakeLoader} from "./lib/translate.loader";
 import {MissingTranslationHandler, FakeMissingTranslationHandler} from "./lib/missing-translation-handler";
 import {TranslateParser, TranslateDefaultParser} from "./lib/translate.parser";
@@ -29,6 +29,23 @@ export interface TranslateModuleConfig {
   useDefaultLang?: boolean;
   defaultLanguage?: string;
 }
+
+export const provideTranslateService = (config: TranslateModuleConfig = {}): EnvironmentProviders =>
+{
+  return makeEnvironmentProviders([
+    config.loader || {provide: TranslateLoader, useClass: TranslateFakeLoader},
+    config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
+    config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
+    config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+    TranslateStore,
+    {provide: USE_STORE, useValue: config.isolate},
+    {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
+    {provide: USE_EXTEND, useValue: config.extend},
+    {provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage},
+    TranslateService
+  ]);
+}
+
 
 @NgModule({
   imports: [
