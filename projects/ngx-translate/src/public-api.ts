@@ -10,7 +10,7 @@ import {
   USE_DEFAULT_LANG,
   DEFAULT_LANGUAGE,
   USE_EXTEND,
-  USE_STORE,
+  ISOALTE_TRANSLATE_SERVICE,
   TranslateService
 } from "./lib/translate.service";
 
@@ -44,7 +44,7 @@ export const provideTranslateService = (config: TranslateModuleConfig = {}): Env
     config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
     config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
     TranslateStore,
-    {provide: USE_STORE, useValue: config.isolate},
+    {provide: ISOALTE_TRANSLATE_SERVICE, useValue: config.isolate},
     {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
     {provide: USE_EXTEND, useValue: config.extend},
     {provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage},
@@ -76,7 +76,7 @@ export class TranslateModule {
         config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
         TranslateStore,
-        {provide: USE_STORE, useValue: config.isolate},
+        {provide: ISOALTE_TRANSLATE_SERVICE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
         {provide: USE_EXTEND, useValue: config.extend},
         {provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage},
@@ -96,7 +96,7 @@ export class TranslateModule {
         config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
         config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
-        {provide: USE_STORE, useValue: config.isolate},
+        {provide: ISOALTE_TRANSLATE_SERVICE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
         {provide: USE_EXTEND, useValue: config.extend},
         {provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage},
