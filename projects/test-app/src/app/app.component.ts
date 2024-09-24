@@ -2,6 +2,7 @@ import {Component} from "@angular/core";
 import {RouterOutlet} from "@angular/router";
 import {TranslateService, TranslatePipe, TranslateDirective} from "@codeandweb/ngx-translate";
 import {StandaloneComponent} from "./standalone.component";
+import {_} from "@codeandweb/ngx-translate";
 
 
 @Component({
@@ -13,7 +14,7 @@ import {StandaloneComponent} from "./standalone.component";
 })
 export class AppComponent
 {
-    title = "test-app";
+    title = _("test-app");
 
     constructor(private translate: TranslateService) {
         this.translate.addLangs(['de', 'en']);
