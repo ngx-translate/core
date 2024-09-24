@@ -4,9 +4,8 @@ import {take, toArray, first, map} from "rxjs/operators";
 import {
   LangChangeEvent,
   TranslateLoader,
-  TranslateModule,
   TranslateService,
-  TranslationChangeEvent, TranslationObject, Translation
+  TranslationChangeEvent, TranslationObject, Translation, provideTranslateService
 } from "../public-api";
 
 
@@ -40,8 +39,8 @@ describe("TranslateService", () =>
   beforeEach(() =>
   {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: FakeLoader}
         })
       ]

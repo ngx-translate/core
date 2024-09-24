@@ -69,7 +69,7 @@ function createRoot<T>(router: Router, type: Type<T>): ComponentFixture<T> {
   return f;
 }
 
-describe("module", () => {
+describe("TranslateStore", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -78,7 +78,7 @@ describe("module", () => {
       ],
       declarations: [RootComponent],
       providers: [
-        provideRouter([])
+        provideRouter([]),
       ],
     });
   });

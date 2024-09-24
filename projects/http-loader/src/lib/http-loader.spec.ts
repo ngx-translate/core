@@ -1,7 +1,7 @@
 import {HttpClient, provideHttpClient} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {TestBed} from "@angular/core/testing";
-import {TranslateLoader, TranslateModule, TranslateService, Translation} from "@codeandweb/ngx-translate";
+import {TranslateLoader, provideTranslateService, TranslateService, Translation} from "@codeandweb/ngx-translate";
 import {TranslateHttpLoader} from "../public-api";
 
 describe('TranslateLoader', () => {
@@ -10,19 +10,18 @@ describe('TranslateLoader', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: (httpClient: HttpClient) => new TranslateHttpLoader(httpClient),
-            deps: [HttpClient]
-          }
-        })
-      ],
       providers: [
         TranslateService,
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTranslateService({
+            loader: {
+              provide: TranslateLoader,
+              useFactory: (httpClient: HttpClient) => new TranslateHttpLoader(httpClient),
+              deps: [HttpClient]
+            }
+          }
+        )
       ]
     });
     translate = TestBed.inject(TranslateService);

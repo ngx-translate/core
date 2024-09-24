@@ -84,7 +84,9 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
   return isObservable(value) ? value : of(value);
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TranslateService {
   private loadingTranslations!: Observable<InterpolatableTranslationObject>;
   private pending = false;

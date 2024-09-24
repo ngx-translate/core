@@ -3,9 +3,8 @@ import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
 import {
   DefaultLangChangeEvent,
-  LangChangeEvent,
+  LangChangeEvent, provideTranslateService,
   TranslateLoader,
-  TranslateModule,
   TranslatePipe,
   TranslateService,
   TranslationObject
@@ -36,6 +35,8 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
 @Injectable()
 @Component({
   selector: 'lib-hmx-app',
+  standalone: true,
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `{{'TEST' | translate}}`
 })
@@ -56,19 +57,18 @@ class FakeLoader implements TranslateLoader {
   }
 }
 
-describe('TranslatePipe', () => {
+describe('TranslatePipe (standalone)', () => {
   let translate: TranslateService;
   let translatePipe: TranslatePipe;
   let ref: FakeChangeDetectorRef;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: FakeLoader}
         })
-      ],
-      declarations: [AppComponent]
+      ]
     });
     translate = TestBed.inject(TranslateService);
     ref = new FakeChangeDetectorRef();

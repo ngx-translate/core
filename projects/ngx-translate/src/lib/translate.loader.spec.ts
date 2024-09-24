@@ -3,9 +3,10 @@ import {Observable, of} from "rxjs";
 import {
   TranslateFakeLoader,
   TranslateLoader,
-  TranslateModule,
   TranslateService,
-  TranslationObject, Translation
+  TranslationObject,
+  Translation,
+  provideTranslateService
 } from "../public-api";
 
 const translations: TranslationObject = {"TEST": "This is a test"};
@@ -21,8 +22,8 @@ describe('TranslateLoader', () => {
 
   it('should be able to provide TranslateStaticLoader', () => {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: FakeLoader}
         })
       ],
@@ -50,8 +51,8 @@ describe('TranslateLoader', () => {
     }
 
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: CustomLoader}
         })
       ]
@@ -73,8 +74,8 @@ describe('TranslateLoader', () => {
 
   it('TranslateFakeLoader should return empty object', () => {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
         })
       ],

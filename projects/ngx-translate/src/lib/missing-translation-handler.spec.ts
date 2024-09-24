@@ -2,12 +2,12 @@ import {TestBed} from "@angular/core/testing";
 import {Observable, of} from "rxjs";
 import {
   MissingTranslationHandler,
-  MissingTranslationHandlerParams,
+  MissingTranslationHandlerParams, provideTranslateService,
   TranslateLoader,
-  TranslateModule,
   TranslateService, Translation,
   TranslationObject
 } from "../public-api";
+import {Type} from "@angular/core";
 
 let translations: TranslationObject = {"TEST": "This is a test"};
 const fakeTranslation: TranslationObject = {"NOT_USED": "not used"};
@@ -39,16 +39,14 @@ describe('MissingTranslationHandler', () => {
     }
   }
 
-  const prepare = ((handlerClass: typeof MissingTranslationHandler, defaultLang = true) => {
+  const prepare = ((handlerClass: Type<MissingTranslationHandler>, defaultLang = true) => {
     TestBed.configureTestingModule({
-      imports: [
-        TranslateModule.forRoot({
+      providers: [
+        provideTranslateService({
           loader: {provide: TranslateLoader, useClass: FakeLoader},
+          missingTranslationHandler: {provide: MissingTranslationHandler, useClass: handlerClass},
           useDefaultLang: defaultLang
         })
-      ],
-      providers: [
-        {provide: MissingTranslationHandler, useClass: handlerClass}
       ]
     });
     translate = TestBed.inject(TranslateService);

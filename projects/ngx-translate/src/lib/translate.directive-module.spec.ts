@@ -40,7 +40,7 @@ class AppComponent {
   }
 }
 
-describe('TranslateDirective', () => {
+describe('TranslateDirective (modules)', () => {
   let translate: TranslateService;
   let fixture: ComponentFixture<AppComponent>;
 

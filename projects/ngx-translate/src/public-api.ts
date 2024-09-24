@@ -6,7 +6,13 @@ import {TranslateCompiler, TranslateFakeCompiler} from "./lib/translate.compiler
 import {TranslateDirective} from "./lib/translate.directive";
 import {TranslatePipe} from "./lib/translate.pipe";
 import {TranslateStore} from "./lib/translate.store";
-import {USE_DEFAULT_LANG, DEFAULT_LANGUAGE, USE_STORE, TranslateService, USE_EXTEND} from "./lib/translate.service";
+import {
+  USE_DEFAULT_LANG,
+  DEFAULT_LANGUAGE,
+  USE_EXTEND,
+  USE_STORE,
+  TranslateService
+} from "./lib/translate.service";
 
 export * from "./lib/translate.loader";
 export * from "./lib/translate.service";
