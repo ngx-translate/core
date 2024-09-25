@@ -517,7 +517,7 @@ describe("TranslateService", () =>
       expect(translate.instant("TEST2")).toEqual("TEST2");
     });
 
-    xit("should be able to get instant translations of an array", () =>
+    it("should be able to get instant translations of an array", () =>
     {
       const tr = {"TEST": "This is a test", "TEST2": "This is a test2"};
       translate.setTranslation("en", tr);
@@ -547,7 +547,7 @@ describe("TranslateService", () =>
       expect(translate.instant("a.b")).toEqual({x: "X", y: "Y"});
     });
 
-    xit("should be able to interpolate in sub-trees", () =>
+    it("should be able to interpolate in sub-trees", () =>
     {
       const tr = {a: {b: {x: "{{value}} 1", y: "{{value}} 2"}}};
       translate.setTranslation("en", tr);
@@ -565,7 +565,7 @@ describe("TranslateService", () =>
       expect(translate.instant("a.b")).toEqual(["X", "Y"]);
     });
 
-    xit("should be able to interpolate in arrays", () =>
+    it("should  interpolate in arrays", () =>
     {
       const tr = {a: {b: ["{{value}} 1", "{{value}} 2"]}};
       translate.setTranslation("en", tr);

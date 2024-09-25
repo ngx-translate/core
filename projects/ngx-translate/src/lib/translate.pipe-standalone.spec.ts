@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   Injectable,
-  Provider, Type,
+  Type,
   ViewContainerRef
 } from "@angular/core";
 import {TestBed} from "@angular/core/testing";
@@ -13,7 +13,7 @@ import {
   LangChangeEvent, MissingTranslationHandler, MissingTranslationHandlerParams, provideTranslateService,
   TranslateLoader,
   TranslatePipe,
-  TranslateService,
+  TranslateService, Translation,
   TranslationObject
 } from "../public-api";
 import {map} from "rxjs/operators";
@@ -66,13 +66,13 @@ class FakeLoader implements TranslateLoader {
 }
 
 class DelayedFrenchLoader implements TranslateLoader {
-  getTranslation(lang: string): Observable<any> {
+  getTranslation(lang: string): Observable<TranslationObject> {
     return lang === 'fr' ? timer(10).pipe(map(() => translations)) : of(translations);
   }
 }
 
 class MissingObs implements MissingTranslationHandler {
-  handle(params: MissingTranslationHandlerParams): Observable<any> {
+  handle(params: MissingTranslationHandlerParams): Translation|Observable<Translation> {
     return timer(1).pipe(map(() => `handled: ${params.key}`));
   }
 }
@@ -82,7 +82,7 @@ describe('TranslatePipe (standalone)', () => {
   let translatePipe: TranslatePipe;
   let ref: FakeChangeDetectorRef;
 
-  const prepare = ({handlerClass, loaderClass}: {handlerClass?: Type<any>; loaderClass?: Type<any>} = {}) => {
+  const prepare = ({handlerClass, loaderClass}: {handlerClass?: Type<MissingTranslationHandler>; loaderClass?: Type<TranslateLoader>} = {}) => {
 
       const missingTranslationHandler  = handlerClass
                                          ? {missingTranslationHandler:{provide: MissingTranslationHandler, useClass: handlerClass}}
@@ -177,6 +177,32 @@ describe('TranslatePipe (standalone)', () => {
       .toEqual("This is a test with param-1 and param-2");
     expect(translatePipe.transform('TEST', "{'param' : {'one': 'with param-1', 'two': 'and param-2'}}"))
       .toEqual("This is a test with param-1 and param-2");
+  });
+
+  it('should translate an object', () => {
+    prepare();
+
+    translate.setTranslation('en', {
+      OBJECT: {
+        TEST: 'This is a test'
+      }
+    });
+    translate.use('en');
+
+    expect(translatePipe.transform('OBJECT')).toEqual({ TEST: 'This is a test' });
+  });
+
+  it('should translate an object with another object as string parameters', () => {
+    prepare();
+
+    translate.setTranslation('en', {
+      OBJECT: {
+        TEST: 'This is a test {{param}}'
+      }
+    });
+    translate.use('en');
+
+    expect(translatePipe.transform('OBJECT', { param: 'with param-1' })).toEqual({ TEST: 'This is a test with param-1' });
   });
 
   it('should update the value when the parameters change', () => {
