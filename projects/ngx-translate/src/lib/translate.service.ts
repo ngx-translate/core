@@ -516,9 +516,7 @@ export class TranslateService {
    * Sets the translated value of a key, after compiling it
    */
   public set(key: string, value: Translation, lang: string = this.currentLang): void {
-    console.log(this.translations[lang]);
     setValue(this.translations[lang], key, this.compiler.compile(value, lang));
-    console.log(this.translations[lang]);
     this.updateLangs();
     this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
   }
