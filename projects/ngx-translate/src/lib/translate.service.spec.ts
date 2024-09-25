@@ -573,36 +573,49 @@ describe("TranslateService", () =>
 
       expect(translate.instant("a.b", {value: "world"})).toEqual(["world 1", "world 2"]);
     });
-
   });
 
-
-  it("should trigger an event when the translation value changes", () =>
-  {
-    translate.setTranslation("en", {});
-    translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
-    {
-      expect(event.translations).toBeDefined();
-      expect((event.translations)["TEST"]).toEqual("This is a test");
-      expect(event.lang).toBe("en");
+  describe("set()", () => {
+    it('should set translations with nested key (string)', () => {
+      translate.setTranslation("en", {profile: "test"});
+      translate.use("en");
+      translate.set('profile.name', 'Profile Name', "en");
+      expect(translate.instant("profile.name")).toEqual('Profile Name');
     });
-    translate.set("TEST", "This is a test", "en");
-  });
 
-  it("should set the translation of the current language", () =>
-  {
-    translate.setTranslation("en", {});
-    translate.use("en");
-
-    translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
-    {
-      expect(event.translations).toBeDefined();
-      expect((event.translations)["TEST"]).toEqual("This is a test");
-      expect(event.lang).toBe("en");
+    it('should set translations with nested key (object)', () => {
+      translate.setTranslation("en", {profile: "test"});
+      translate.use("en");
+      translate.set('a.b', {c: {d: "setting nested object"}}, "en");
+      expect(translate.instant("a.b.c.d")).toEqual("setting nested object");
     });
-    translate.set("TEST", "This is a test");
-  });
 
+    it("should trigger an event when the translation value changes", () =>
+    {
+      translate.setTranslation("en", {});
+      translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
+      {
+        expect(event.translations).toBeDefined();
+        expect((event.translations)["TEST"]).toEqual("This is a test");
+        expect(event.lang).toBe("en");
+      });
+      translate.set("TEST", "This is a test", "en");
+    });
+
+    it("should set the translation of the current language", () =>
+    {
+      translate.setTranslation("en", {});
+      translate.use("en");
+
+      translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
+      {
+        expect(event.translations).toBeDefined();
+        expect((event.translations)["TEST"]).toEqual("This is a test");
+        expect(event.lang).toBe("en");
+      });
+      translate.set("TEST", "This is a test");
+    });
+  });
 
   it("should trigger an event when the lang changes", () =>
   {

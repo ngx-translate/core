@@ -114,3 +114,29 @@ export function getValue(target: any, key: string): any
   return target;
 }
 
+/**
+ * Gets a value from an object by composed key
+ * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
+ * @param target an object
+ * @param key E.g. "a.b.c"
+ * @param value to set
+ */
+export function setValue(target: any, key: string, value: any): void {
+  const keys = key.split('.');
+  let current = target;
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+
+    // If we're at the last key, set the value
+    if (i === keys.length - 1) {
+      current[key] = value;
+    } else {
+      // If the key doesn't exist or isn't an object, create an empty object
+      if (!current[key] || typeof current[key] !== 'object') {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+  }
+}

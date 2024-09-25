@@ -7,7 +7,7 @@ import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
 
 import {TranslateStore} from "./translate.store";
-import {getValue, isDefined, mergeDeep} from "./util";
+import {getValue, isDefined, mergeDeep, setValue} from "./util";
 
 export const ISOALTE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOALTE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -515,8 +515,10 @@ export class TranslateService {
   /**
    * Sets the translated value of a key, after compiling it
    */
-  public set(key: string, value: string, lang: string = this.currentLang): void {
-    this.translations[lang][key] = this.compiler.compile(value, lang);
+  public set(key: string, value: Translation, lang: string = this.currentLang): void {
+    console.log(this.translations[lang]);
+    setValue(this.translations[lang], key, this.compiler.compile(value, lang));
+    console.log(this.translations[lang]);
     this.updateLangs();
     this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
   }
