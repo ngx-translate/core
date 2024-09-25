@@ -1,14 +1,22 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Injectable, ViewContainerRef} from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Injectable,
+  Provider, Type,
+  ViewContainerRef
+} from "@angular/core";
 import {TestBed} from "@angular/core/testing";
-import {Observable, of} from "rxjs";
+import {Observable, of, timer} from "rxjs";
 import {
   DefaultLangChangeEvent,
-  LangChangeEvent, provideTranslateService,
+  LangChangeEvent, MissingTranslationHandler, MissingTranslationHandlerParams, provideTranslateService,
   TranslateLoader,
   TranslatePipe,
   TranslateService,
   TranslationObject
 } from "../public-api";
+import {map} from "rxjs/operators";
 
 class FakeChangeDetectorRef extends ChangeDetectorRef {
   markForCheck(): void {
@@ -57,35 +65,55 @@ class FakeLoader implements TranslateLoader {
   }
 }
 
+class DelayedFrenchLoader implements TranslateLoader {
+  getTranslation(lang: string): Observable<any> {
+    return lang === 'fr' ? timer(10).pipe(map(() => translations)) : of(translations);
+  }
+}
+
+class MissingObs implements MissingTranslationHandler {
+  handle(params: MissingTranslationHandlerParams): Observable<any> {
+    return timer(1).pipe(map(() => `handled: ${params.key}`));
+  }
+}
+
 describe('TranslatePipe (standalone)', () => {
   let translate: TranslateService;
   let translatePipe: TranslatePipe;
   let ref: FakeChangeDetectorRef;
 
-  beforeEach(() => {
+  const prepare = ({handlerClass, loaderClass}: {handlerClass?: Type<any>; loaderClass?: Type<any>} = {}) => {
+
+      const missingTranslationHandler  = handlerClass
+                                         ? {missingTranslationHandler:{provide: MissingTranslationHandler, useClass: handlerClass}}
+                                         : {};
+
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService({
-          loader: {provide: TranslateLoader, useClass: FakeLoader}
-        })
-      ]
+        loader: { provide: TranslateLoader, useClass: loaderClass ?? FakeLoader },
+        ... missingTranslationHandler,
+        useDefaultLang: !handlerClass
+      })]
     });
     translate = TestBed.inject(TranslateService);
     ref = new FakeChangeDetectorRef();
     translatePipe = new TranslatePipe(translate, ref);
-  });
+  };
 
   afterEach(() => {
     translations = {"TEST": "This is a test"};
   });
 
   it('is defined', () => {
+    prepare();
     expect(TranslatePipe).toBeDefined();
     expect(translatePipe).toBeDefined();
     expect(translatePipe instanceof TranslatePipe).toBeTruthy();
   });
 
   it('should translate a string', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
 
@@ -93,6 +121,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should call markForChanges when it translates a string', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
     spyOn(ref, 'markForCheck').and.callThrough();
@@ -102,6 +131,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should translate a string with object parameters', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
 
@@ -109,6 +139,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should translate a string with object as string parameters', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
 
@@ -119,6 +150,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should translate a string with object as multiple string parameters', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param1}} {{param2}}"});
     translate.use('en');
 
@@ -133,6 +165,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should translate a string with object as nested string parameters', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param.one}} {{param.two}}"});
     translate.use('en');
 
@@ -147,6 +180,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it('should update the value when the parameters change', () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
 
@@ -168,6 +202,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it("should throw if you don't give an object parameter", () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test {{param}}"});
     translate.use('en');
     const param = 'param: "with param"';
@@ -178,6 +213,7 @@ describe('TranslatePipe (standalone)', () => {
   });
 
   it("should return given falsey or non length query", () => {
+    prepare();
     translate.setTranslation('en', {"TEST": "This is a test"});
     translate.use('en');
 
@@ -193,6 +229,7 @@ describe('TranslatePipe (standalone)', () => {
 
   describe('should update translations on lang change', () => {
     it('with fake loader', (done) => {
+      prepare();
       translate.setTranslation('en', {"TEST": "This is a test"});
       translate.setTranslation('fr', {"TEST": "C'est un test"});
       translate.use('en');
@@ -211,6 +248,7 @@ describe('TranslatePipe (standalone)', () => {
     });
 
     it('with file loader', (done) => {
+      prepare();
       translate.use('en');
       expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
@@ -230,6 +268,7 @@ describe('TranslatePipe (standalone)', () => {
     });
 
     it('should detect changes with OnPush', () => {
+      prepare();
       const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
@@ -241,6 +280,7 @@ describe('TranslatePipe (standalone)', () => {
 
   describe('should update translations on default lang change', () => {
     it('with fake loader', (done) => {
+      prepare();
       translate.setTranslation('en', {"TEST": "This is a test"});
       translate.setTranslation('fr', {"TEST": "C'est un test"});
       translate.setDefaultLang('en');
@@ -259,6 +299,7 @@ describe('TranslatePipe (standalone)', () => {
     });
 
     it('with file loader', (done) => {
+      prepare();
       translate.setDefaultLang('en');
       expect(translatePipe.transform('TEST')).toEqual("This is a test");
 
@@ -277,7 +318,26 @@ describe('TranslatePipe (standalone)', () => {
       translate.setDefaultLang('fr');
     });
 
+    it('without proper key', (done) => {
+      prepare({ handlerClass: MissingObs, loaderClass: DelayedFrenchLoader });
+      translate.use('en');
+      expect(translatePipe.transform('nonExistingKey')).toEqual("");
+
+      // this will be resolved at the next lang change
+      const subscription = translate.onLangChange.subscribe((res: DefaultLangChangeEvent) => {
+        expect(res.lang).toEqual('fr');
+        expect(translatePipe.transform('nonExistingKey')).toEqual("handled: nonExistingKey");
+        subscription.unsubscribe();
+        done();
+      });
+
+      translations = {"TEST": "C'est un test"};
+      translate.use('fr');
+    })
+
     it('should detect changes with OnPush', () => {
+      prepare();
+
       const fixture = TestBed.createComponent(AppComponent);
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
