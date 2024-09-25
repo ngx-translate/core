@@ -394,7 +394,7 @@ export class TranslateService {
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(translations: InterpolatableTranslation, key: string | string[], interpolateParams?: object): Translation|Observable<Translation> {
+  public getParsedResult(translations: InterpolatableTranslation, key: string | string[], interpolateParams?: object): Translation|TranslationObject|Observable<Translation|TranslationObject> {
 
     // handle a bunch of keys
     if (key instanceof Array) {
@@ -429,7 +429,7 @@ export class TranslateService {
    * Gets the translated value of a key (or an array of keys)
    * @returns the translated key, or an object of translated keys
    */
-  public get(key: string | string[], interpolateParams?: object): Observable<Translation> {
+  public get(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
@@ -450,7 +450,7 @@ export class TranslateService {
    * whenever the translation changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public getStreamOnTranslationChange(key: string | string[], interpolateParams?: object): Observable<Translation> {
+  public getStreamOnTranslationChange(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
@@ -471,7 +471,7 @@ export class TranslateService {
    * whenever the language changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public stream(key: string | string[], interpolateParams?: object): Observable<Translation> {
+  public stream(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
@@ -545,7 +545,7 @@ export class TranslateService {
   /**
    * Allows to reload the lang file from the file
    */
-  public reloadLang(lang: string): Observable<Translation> {
+  public reloadLang(lang: string): Observable<InterpolatableTranslationObject> {
     this.resetLang(lang);
     return this.getTranslation(lang);
   }
