@@ -5,11 +5,11 @@ import {
   LangChangeEvent,
   TranslateService,
   TranslationChangeEvent,
-  Translation
+  Translation,
+  InterpolationParameters
 } from "./translate.service";
-import {equals, isDefined} from './util';
+import {equals, isDefined, isDict, isString} from "./util";
 import {Subscription} from 'rxjs';
-import {InterpolationParameters} from "./translate.parser";
 
 @Injectable()
 @Pipe({
@@ -58,7 +58,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
 
     let interpolateParams: object | undefined = undefined;
     if (isDefined(args[0]) && args.length) {
-      if (typeof args[0] === 'string' && args[0].length) {
+      if (isString(args[0]) && args[0].length) {
         // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
         // which is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
         const validArgs: string = args[0]
@@ -70,7 +70,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
           void e;
           throw new SyntaxError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`);
         }
-      } else if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
+      } else if (isDict(args[0])) {
         interpolateParams = args[0];
       }
     }

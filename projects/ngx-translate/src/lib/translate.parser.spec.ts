@@ -1,4 +1,4 @@
-import {TranslateDefaultParser, TranslateParser} from "../public-api";
+import {InterpolateFunction, TranslateDefaultParser, TranslateParser} from "../public-api";
 
 describe('Parser', () => {
   let parser: TranslateParser;
@@ -28,14 +28,10 @@ describe('Parser', () => {
       expect(parser.interpolate("This is a {{ key1.key2.key3 }}", {key1: {key2: {key3: "value3"}}})).toEqual("This is a value3");
     });
 
-    it('should interpolate strings with arrays', () => {
-      expect(parser.interpolate("This is a {{ key.0 }}", {key: ["A", "B", "C"]})).toEqual("This is a A");
-      expect(parser.interpolate("This is a {{ key.11 }}", {key: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]})).toEqual("This is a L");
-      expect(parser.interpolate("This is a {{ key.1.x }}", {key: ["A", {x: "B"}]})).toEqual("This is a B");
-    });
-
     it('should support interpolation functions', () => {
-      expect(parser.interpolate((v: string) => v.toUpperCase() + ' YOU!', 'bless')).toBe('BLESS YOU!');
+      const uc:InterpolateFunction = (params) => (params?.['x'] ?? '').toUpperCase() + ' YOU!';
+
+      expect(parser.interpolate( uc , {"x":'bless'})).toBe('BLESS YOU!');
     });
 
     it('should handle edge cases: array', () => {

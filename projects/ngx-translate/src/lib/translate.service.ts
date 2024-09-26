@@ -7,13 +7,15 @@ import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
 
 import {TranslateStore} from "./translate.store";
-import {getValue, isDefined, mergeDeep, setValue} from "./util";
+import {getValue, isDefined, isArray, isString, mergeDeep, setValue, isDict} from "./util";
 
 export const ISOALTE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOALTE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
 export const DEFAULT_LANGUAGE = new InjectionToken<string>('DEFAULT_LANGUAGE');
 export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type InterpolationParameters = Record<string, any>;
 
 export type Translation =
   string |
@@ -288,18 +290,30 @@ export class TranslateService {
 
     // if this language is unavailable or extend is true, ask for it
     if (typeof this.translations[lang] === "undefined" || this.extend) {
-      this._translationRequests[lang] = this._translationRequests[lang] || this.getTranslation(lang);
+      this._translationRequests[lang] = this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
       pending = this._translationRequests[lang];
     }
 
     return pending;
   }
 
+
+
   /**
    * Gets an object of translations for a given language with the current loader
    * and passes it through the compiler
+   *
+   * @deprecated This function is meant for internal use. There should
+   * be no reason to use outside this service. You can plug into this
+   * functionality by using a customer TranslateLoader or TranslateCompiler.
+   * To load a new language use setDefaultLang() and/or use()
    */
-  public getTranslation(lang: string): Observable<TranslationObject> {
+  public getTranslation(lang: string): Observable<InterpolatableTranslationObject>
+  {
+      return this.loadAndCompileTranslations(lang);
+  }
+
+  private loadAndCompileTranslations(lang: string): Observable<InterpolatableTranslationObject> {
     this.pending = true;
     const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(
       shareReplay(1),
@@ -368,16 +382,16 @@ export class TranslateService {
     this.addLangs(Object.keys(this.translations));
   }
 
-  private getParsedResultForKey(translations: InterpolatableTranslation, key: string, interpolateParams?: object): Translation|Observable<Translation>
+  private getParsedResultForKey(translations: InterpolatableTranslation, key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
   {
       let res: Translation | Observable<Translation> | undefined;
 
       if (translations) {
-        res = this.parser.interpolate(getValue(translations, key), interpolateParams);
+        res = this.runInterpolation(getValue(translations, key), interpolateParams);
       }
 
       if (res === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang) {
-        res = this.parser.interpolate(getValue(this.translations[this.defaultLang], key), interpolateParams);
+        res = this.runInterpolation(getValue(this.translations[this.defaultLang], key), interpolateParams);
       }
 
       if (res === undefined) {
@@ -391,10 +405,30 @@ export class TranslateService {
       return res !== undefined ? res : key;
   }
 
+  private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation
+  {
+    if(isArray(translations))
+    {
+      return (translations as Translation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
+    }
+    else if (isDict(translations))
+    {
+      const result: TranslationObject = {};
+      for (const key in translations) {
+          result[key] = this.runInterpolation(translations[key], interpolateParams);
+      }
+      return result;
+    }
+    else
+    {
+      return this.parser.interpolate(translations, interpolateParams);
+    }
+  }
+
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(translations: InterpolatableTranslation, key: string | string[], interpolateParams?: object): Translation|TranslationObject|Observable<Translation|TranslationObject> {
+  public getParsedResult(translations: InterpolatableTranslation, key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject> {
 
     // handle a bunch of keys
     if (key instanceof Array) {
@@ -429,7 +463,7 @@ export class TranslateService {
    * Gets the translated value of a key (or an array of keys)
    * @returns the translated key, or an object of translated keys
    */
-  public get(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
+  public get(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
@@ -450,7 +484,7 @@ export class TranslateService {
    * whenever the translation changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public getStreamOnTranslationChange(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
+  public getStreamOnTranslationChange(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
@@ -471,7 +505,7 @@ export class TranslateService {
    * whenever the language changes.
    * @returns A stream of the translated key, or an object of translated keys
    */
-  public stream(key: string | string[], interpolateParams?: object): Observable<Translation|TranslationObject> {
+  public stream(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
     if (!isDefined(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
@@ -491,7 +525,7 @@ export class TranslateService {
    * All rules regarding the current language, the preferred language of even fallback languages
    * will be used except any promise handling.
    */
-  public instant(key: string | string[], interpolateParams?: object): Translation|TranslationObject
+  public instant(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject
   {
     if (!isDefined(key) || key.length === 0) {
       throw new Error('Parameter "key" is required and cannot be empty');
@@ -515,8 +549,12 @@ export class TranslateService {
   /**
    * Sets the translated value of a key, after compiling it
    */
-  public set(key: string, value: Translation, lang: string = this.currentLang): void {
-    setValue(this.translations[lang], key, this.compiler.compile(value, lang));
+  public set(key: string, translation: Translation, lang: string = this.currentLang): void {
+    setValue(this.translations[lang], key,
+      isString(translation)
+      ? this.compiler.compile(translation, lang)
+      : this.compiler.compileTranslations(translation, lang)
+    );
     this.updateLangs();
     this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
   }
@@ -547,7 +585,7 @@ export class TranslateService {
    */
   public reloadLang(lang: string): Observable<InterpolatableTranslationObject> {
     this.resetLang(lang);
-    return this.getTranslation(lang);
+    return this.loadAndCompileTranslations(lang);
   }
 
   /**

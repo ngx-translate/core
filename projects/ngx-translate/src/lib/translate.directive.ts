@@ -6,10 +6,10 @@ import {
   LangChangeEvent,
   TranslateService,
   TranslationChangeEvent,
-  Translation
+  Translation,
+  InterpolationParameters
 } from "./translate.service";
 import {equals, isDefined} from './util';
-import {InterpolationParameters} from "./translate.parser";
 
 interface ExtendedNode extends Text {
   originalContent: string;
@@ -27,8 +27,8 @@ interface ExtendedNode extends Text {
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
   key!: string;
-  lastParams: InterpolationParameters;
-  currentParams: InterpolationParameters;
+  lastParams?: InterpolationParameters;
+  currentParams?: InterpolationParameters;
   onLangChangeSub!: Subscription;
   onDefaultLangChangeSub!: Subscription;
   onTranslationChangeSub!: Subscription;

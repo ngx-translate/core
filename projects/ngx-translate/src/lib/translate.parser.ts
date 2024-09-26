@@ -1,15 +1,9 @@
 import {Injectable} from "@angular/core";
-import {getValue, isDefined, isObject} from "./util";
-import {
-  InterpolatableTranslation,
-  InterpolatableTranslationObject, Translation,
-  TranslationObject
-} from "./translate.service";
+import {getValue, isDefined, isString, isFunction} from "./util";
+import {InterpolationParameters} from "./translate.service";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type InterpolationParameters = any;
 
-export type InterpolateFunction = (params: InterpolationParameters) => string;
+export type InterpolateFunction = (params?: InterpolationParameters) => string;
 
 
 export abstract class TranslateParser
@@ -20,7 +14,7 @@ export abstract class TranslateParser
    * @param expr
    * @param params
    */
-  abstract interpolate(expr: InterpolatableTranslation, params?: InterpolationParameters): Translation;
+  abstract interpolate(expr: InterpolateFunction|string, params?: InterpolationParameters): string|undefined;
 }
 
 
@@ -29,31 +23,17 @@ export class TranslateDefaultParser extends TranslateParser
 {
   templateMatcher = /{{\s?([^{}\s]*)\s?}}/g;
 
-  public interpolate(expr: InterpolatableTranslation, params?: InterpolationParameters): Translation
+  public interpolate(expr: InterpolateFunction|string, params?: InterpolationParameters): string|undefined
   {
-    if (typeof expr === "string")
+    if (isString(expr))
     {
-      return this.interpolateString(expr, params);
+      return this.interpolateString(expr as string, params);
     }
-    else if (typeof expr === "function")
+    else if (isFunction(expr))
     {
-      return this.interpolateFunction(expr, params);
+      return this.interpolateFunction(expr as InterpolateFunction, params);
     }
-    else if (Array.isArray(expr))
-    {
-      return expr.map((item) => this.interpolate(item, params));
-    }
-    else if (isObject(expr)) {
-      const exprObject = expr as InterpolatableTranslationObject;
-      return Object.keys(exprObject).reduce((acc, key) => {
-        const value  = this.interpolate(exprObject[key], params);
-        if(value !== undefined)
-        {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as TranslationObject);
-    }
+    return undefined;
   }
 
   private interpolateFunction(fn: InterpolateFunction, params?: InterpolationParameters): string

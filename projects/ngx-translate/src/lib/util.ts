@@ -54,9 +54,28 @@ export function isDefined(value: any): boolean {
   return typeof value !== 'undefined' && value !== null;
 }
 
-export function isObject(item: any): boolean {
-  return (item && typeof item === 'object' && !Array.isArray(item));
+
+export function isDict(value: any): boolean {
+  return isObject(value) && !isArray(value);
 }
+
+
+export function isObject(value: any): boolean {
+  return typeof value === 'object';
+}
+
+export function isArray(value: any): boolean {
+  return Array.isArray(value);
+}
+
+export function isString(value: any): boolean {
+  return typeof value === 'string';
+}
+
+export function isFunction(value: any):boolean {
+  return typeof value === "function"
+}
+
 
 export function mergeDeep(target: any, source: any): any {
   const output = Object.assign({}, target);
@@ -67,11 +86,11 @@ export function mergeDeep(target: any, source: any): any {
 
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach((key: any) => {
-      if (isObject(source[key])) {
-        if (!(key in target)) {
-          Object.assign(output, {[key]: source[key]});
-        } else {
+      if (isDict(source[key])) {
+        if (key in target) {
           output[key] = mergeDeep(target[key], source[key]);
+        } else {
+          Object.assign(output, {[key]: source[key]});
         }
       } else {
         Object.assign(output, {[key]: source[key]});
@@ -96,7 +115,7 @@ export function getValue(target: any, key: string): any
   do
   {
     key += keys.shift();
-    if (isDefined(target) && isDefined(target[key]) && (typeof target[key] === "object" || !keys.length))
+    if (isDefined(target) && isDefined(target[key]) && (isDict(target[key]) ||isArray(target[key]) || !keys.length))
     {
       target = target[key];
       key = "";
@@ -133,10 +152,12 @@ export function setValue(target: any, key: string, value: any): void {
       current[key] = value;
     } else {
       // If the key doesn't exist or isn't an object, create an empty object
-      if (!current[key] || typeof current[key] !== 'object') {
+      if (!current[key] || !isDict(current[key])) {
         current[key] = {};
       }
       current = current[key];
     }
   }
 }
+
+
