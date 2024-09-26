@@ -100,7 +100,7 @@ export class TranslateService {
   private _langs: string[] = [];
   private _translations: Record<string, InterpolatableTranslationObject> = {};
   private _translationRequests: Record<string, Observable<TranslationObject>> = {};
-
+  private lastUseLanguage: string|null = null;
 
 
   /**
@@ -256,18 +256,25 @@ export class TranslateService {
    * Changes the lang currently used
    */
   public use(lang: string): Observable<InterpolatableTranslationObject> {
+
+    // remember the language that was called
+    // we need this with multiple fast calls to use()
+    // where translation loads might complete in random order
+    this.lastUseLanguage = lang;
+
     // don't change the language if the language given is already selected
     if (lang === this.currentLang) {
       return of(this.translations[lang]);
     }
 
+    // on init set the currentLang immediately
+    if (!this.currentLang) {
+      this.currentLang = lang;
+    }
+
     const pending = this.retrieveTranslations(lang);
 
-    if (typeof pending !== "undefined") {
-      // on init set the currentLang immediately
-      if (!this.currentLang) {
-        this.currentLang = lang;
-      }
+    if (isObservable(pending)) {
 
       pending.pipe(take(1))
         .subscribe(() => {
@@ -275,26 +282,50 @@ export class TranslateService {
         });
 
       return pending;
-    } else { // we have this language, return an Observable
+    }
+    else {
+      // we have this language, return an Observable
       this.changeLang(lang);
-
       return of(this.translations[lang]);
     }
   }
+
+
+  /**
+   * Changes the current lang
+   */
+  private changeLang(lang: string): void {
+
+    // received a new language file
+    // but this was not the one requested last
+    if(lang !== this.lastUseLanguage)
+    {
+      return;
+    }
+
+    this.currentLang = lang;
+
+    this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+
+    // if there is no default lang, use the one that we just set
+    if (this.defaultLang == null) {
+      this.changeDefaultLang(lang);
+    }
+  }
+
 
   /**
    * Retrieves the given translations
    */
   private retrieveTranslations(lang: string): Observable<TranslationObject> | undefined {
-    let pending: Observable<TranslationObject> | undefined;
 
     // if this language is unavailable or extend is true, ask for it
     if (typeof this.translations[lang] === "undefined" || this.extend) {
       this._translationRequests[lang] = this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
-      pending = this._translationRequests[lang];
+      return this._translationRequests[lang];
     }
 
-    return pending;
+    return undefined;
   }
 
 
@@ -314,7 +345,9 @@ export class TranslateService {
   }
 
   private loadAndCompileTranslations(lang: string): Observable<InterpolatableTranslationObject> {
+
     this.pending = true;
+
     const loadingTranslations = this.currentLoader.getTranslation(lang).pipe(
       shareReplay(1),
       take(1),
@@ -557,19 +590,6 @@ export class TranslateService {
     );
     this.updateLangs();
     this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
-  }
-
-  /**
-   * Changes the current lang
-   */
-  private changeLang(lang: string): void {
-    this.currentLang = lang;
-    this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
-
-    // if there is no default lang, use the one that we just set
-    if (this.defaultLang == null) {
-      this.changeDefaultLang(lang);
-    }
   }
 
   /**

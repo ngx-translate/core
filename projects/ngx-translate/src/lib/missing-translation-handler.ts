@@ -25,9 +25,10 @@ export abstract class MissingTranslationHandler {
    *
    * @param params context for resolving a missing translation
    * @returns a value or an observable
+   *
    * If it returns a value, then this value is used.
    * If it returns an observable, the value returned by this observable will be used (except if the method was "instant").
-   * If it doesn't return then the key will be used as a value
+   * If it returns undefined, the key will be used as a value
    */
   abstract handle(params: MissingTranslationHandlerParams): Translation|Observable<Translation>;
 }

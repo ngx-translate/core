@@ -30,6 +30,92 @@ class FakeLoader implements TranslateLoader
 }
 
 
+
+
+describe("TranslateService (Delayed loading)", () =>
+{
+  let translate: TranslateService;
+
+  class DelayedLoader implements TranslateLoader {
+    getTranslation(lang: string): Observable<TranslationObject> {
+      if(lang === "delay-10")
+      {
+        return timer(10).pipe(map(() => ({"x": "delay 10"}) ));
+      }
+      else if(lang === "delay-20")
+      {
+        return timer(20).pipe(map(() => ({"x": "delay 20"}) ));
+      }
+      else if(lang === "delay-0")
+      {
+        return of({"x": "no delay"});
+      }
+      else {
+        throw new Error(`Unknown language: ${lang}`);
+      }
+    }
+  }
+
+
+  beforeEach(() =>
+  {
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({
+          loader: {provide: TranslateLoader, useClass: DelayedLoader}
+        })
+      ]
+    });
+    translate = TestBed.inject(TranslateService);
+  });
+
+
+  it("currentLang should be the language, on which use() was called last - in order", fakeAsync(() =>
+  {
+    const completionOrder:string[] = [];
+
+    translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
+    expect(translate.currentLang).toEqual("delay-0");
+
+    translate.use("delay-10").subscribe(() => completionOrder.push("delay-10"));
+    expect(translate.currentLang).toEqual("delay-0"); // stays until loaded
+
+    translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
+    expect(translate.currentLang).toEqual("delay-0"); // stays until loaded
+
+    tick(50);
+
+    expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
+
+    expect(translate.currentLang).toEqual("delay-20");
+  }));
+
+
+  it("currentLang should be the language, on which use() was called last - reverse order", fakeAsync(() =>
+  {
+    const completionOrder: string[] = [];
+
+    expect(translate.currentLang).toBeUndefined();
+
+    translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
+    expect(translate.currentLang).toEqual("delay-20");
+
+    translate.use("delay-10").subscribe(() => completionOrder.push("delay-10"));
+    expect(translate.currentLang).toEqual("delay-20"); // stays until completed
+
+    translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
+    expect(translate.currentLang).toEqual("delay-0"); // this one completes immediately
+
+    tick(50);
+
+    expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
+
+    expect(translate.currentLang).toEqual("delay-0");
+  }));
+
+
+});
+
 describe("TranslateService", () =>
 {
   let translate: TranslateService;
@@ -69,7 +155,6 @@ describe("TranslateService", () =>
     {
       expect(res).toEqual("This is a test");
     });
-
 
     // this will request the translation from downloaded translations without making a request to the backend
     translate.get("TEST2").subscribe((res: Translation) =>
