@@ -5,7 +5,6 @@ import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./miss
 import {TranslateCompiler} from "./translate.compiler";
 import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
-
 import {TranslateStore} from "./translate.store";
 import {getValue, isDefined, isArray, isString, mergeDeep, setValue, isDict} from "./util";
 

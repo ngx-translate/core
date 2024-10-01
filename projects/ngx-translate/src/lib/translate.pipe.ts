@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Injectable, OnDestroy, Pipe, PipeTransform} from '@angular/core';
-import {isObservable} from 'rxjs';
+import {isObservable, Subscription} from 'rxjs';
 import {
   InterpolatableTranslationObject,
   LangChangeEvent,
@@ -9,7 +9,6 @@ import {
   InterpolationParameters
 } from "./translate.service";
 import {equals, isDefined, isDict, isString} from "./util";
-import {Subscription} from 'rxjs';
 
 @Injectable()
 @Pipe({

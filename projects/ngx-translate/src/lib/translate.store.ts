@@ -1,6 +1,7 @@
 import {EventEmitter} from "@angular/core";
 import {
-  DefaultLangChangeEvent, InterpolatableTranslationObject,
+  InterpolatableTranslationObject,
+  DefaultLangChangeEvent,
   LangChangeEvent,
   TranslationChangeEvent
 } from "./translate.service";
