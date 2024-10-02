@@ -1,0 +1,46 @@
+{
+  "name": "my-workspace",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build-all": "ng build ngx-translate && ng build http-loader",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test --code-coverage ",
+    "test-ci": "ng test --watch=false --browsers=ChromeHeadless --reporters=mocha",
+    "coverage": "ng test ngx-translate --code-coverage --watch=false --browsers=ChromeHeadless --reporters=mocha,coverage",
+    "lint": "ng lint"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^17",
+    "@angular/common": "^17",
+    "@angular/compiler": "^17",
+    "@angular/core": "^17",
+    "@angular/forms": "^17",
+    "@angular/platform-browser": "^17",
+    "@angular/platform-browser-dynamic": "^17",
+    "@angular/router": "^17",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^17",
+    "@angular/cli": "^17",
+    "@angular/compiler-cli": "^17",
+    "@types/jasmine": "~5.1.0",
+    "angular-eslint": "^18.3.1",
+    "eslint": "^9.9.1",
+    "jasmine-core": "~5.2.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "ng-packagr": "^17",
+    "typescript-eslint": "8.2.0"
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+}

@@ -1,13 +1,13 @@
 {
   "name": "@codeandweb/http-loader",
-  "version": "16.0.0-beta.1",
-  "description": "http loader for dynamically loading translation files for @codeandweb/ngx-translate",
+  "version": "16.0.0",
+  "description": "http loader for dynamically loading translation files for @codeandweb/ngx-translate - maintained fork of @ngx-translate/http-loader",
   "keywords": ["@ngx-translate", "ngx-translate", "@ngx-translate/http-loader", "@codeandweb/ngx-translate"],
   "author": "Andreas Löw / CodeAndWeb GmbH",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^18.2.0",
-    "@angular/core": "^18.2.0"
+    "@angular/common": ">=16",
+    "@angular/core": ">=16"
   },
   "sideEffects": false
 }
