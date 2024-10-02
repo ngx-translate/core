@@ -23,7 +23,7 @@ export * from "./lib/translate.directive";
 export * from "./lib/translate.pipe";
 export * from "./lib/translate.store";
 export * from "./lib/extraction-marker";
-
+export * from "./lib/util"
 
 export interface TranslateModuleConfig {
   loader?: Provider;

@@ -103,7 +103,7 @@ export function mergeDeep(target: any, source: any): any {
 
 /**
  * Gets a value from an object by composed key
- * parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
+ * getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
  * @param target
  * @param key
  */
