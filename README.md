@@ -5,7 +5,7 @@ The internationalization (i18n) library for Angular.
 
 Forked from @ngx-translate/core after library was abandoned by the maintainer.
 
-## Angular 17, 18+
+## Angular 16, 17, 18+
 
 The [new documentation](https://ngx-translate.org/) now covers installation on
 Angular 18+ and is divided into smaller, more readable sections, making it
@@ -31,7 +31,7 @@ The complete changelog of ngx-translate: https://github.com/ngx-translate/core/r
 <br/>
 <br/>
 
-## Angular <=16
+## Angular <=15
 
 This documentation is still available for older versions of Angular. Newer
 versions of Angular use Standalone Components by default, which are not
