@@ -12,10 +12,10 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "paths": {
-      "@codeandweb/http-loader": [
+      "@ngx-translate/http-loader": [
         "./dist/http-loader"
       ],
-      "@codeandweb/ngx-translate": [
+      "@ngx-translate/core": [
         "./dist/ngx-translate"
       ]
     },

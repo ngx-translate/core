@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {TranslatePipe, TranslateDirective} from "@codeandweb/ngx-translate";
+import {TranslatePipe, TranslateDirective} from "@ngx-translate/core";
 
 
 @Component({

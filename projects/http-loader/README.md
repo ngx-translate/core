@@ -1,4 +1,4 @@
-# @codeandweb/http-loader ![Buildstatus](https://github.com/CodeAndWeb/ngx-translate/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/http-loader ![Buildstatus](https://github.com/ngx-translate/core/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
 HTTP loader for ngx-translate
 

@@ -1,14 +1,12 @@
-# @codeandweb/ngx-translate ![Buildstatus](https://github.com/CodeAndWeb/ngx-translate/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/core ![Buildstatus](https://github.com/ngx-translate/core/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
 
 The internationalization (i18n) library for Angular.
 <br/>
 
-Forked from @ngx-translate/core after library was abandoned by the maintainer.
-
 ## Angular 16, 17, 18+
 
 The [new documentation](https://ngx-translate.org/) now covers installation on
-Angular 18+ and is divided into smaller, more readable sections, making it
+Angular 16+ and is divided into smaller, more readable sections, making it
 easier to digest than this big README. It also documents the additional
 interfaces and explains how to develop custom plugins.
 
@@ -33,7 +31,7 @@ The complete changelog of ngx-translate: https://github.com/ngx-translate/core/r
 
 ## Angular <=15
 
-This documentation is still available for older versions of Angular. Newer
+This documentation is still available for **older versions of Angular**. Newer
 versions of Angular use Standalone Components by default, which are not
 explained here.
 

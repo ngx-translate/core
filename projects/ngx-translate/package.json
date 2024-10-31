@@ -1,9 +1,9 @@
 {
-  "name": "@codeandweb/ngx-translate",
+  "name": "@ngx-translate/core",
   "version": "16.0.0",
-  "description": "Translation library (i18n) for Angular - maintained fork of @ngx-translate/core",
-  "keywords": ["@ngx-translate", "ngx-translate", "@ngx-translate/http-loader", "@codeandweb/ngx-translate"],
-  "author": "Andreas Löw / CodeAndWeb GmbH",
+  "description": "Translation library (i18n) for Angular",
+  "keywords": ["@ngx-translate", "ngx-translate", "@ngx-translate/http-loader"],
+  "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
   "license": "MIT",
   "peerDependencies": {
     "@angular/common": ">=16",

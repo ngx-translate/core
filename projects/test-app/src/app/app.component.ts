@@ -1,8 +1,8 @@
 import {Component} from "@angular/core";
 import {RouterOutlet} from "@angular/router";
-import {TranslateService, TranslatePipe, TranslateDirective} from "@codeandweb/ngx-translate";
+import {TranslateService, TranslatePipe, TranslateDirective} from "@ngx-translate/core";
 import {StandaloneComponent} from "./standalone.component";
-import {_} from "@codeandweb/ngx-translate";
+import {_} from "@ngx-translate/core";
 
 
 @Component({

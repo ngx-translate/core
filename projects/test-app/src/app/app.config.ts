@@ -3,7 +3,7 @@ import {provideRouter} from "@angular/router";
 
 import {routes} from "./app.routes";
 import {HttpClient, provideHttpClient} from "@angular/common/http";
-import {TranslateLoader, provideTranslateService} from "@codeandweb/ngx-translate";
+import {TranslateLoader, provideTranslateService} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "@codeandweb/http-loader";
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
