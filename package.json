@@ -1,13 +1,13 @@
 {
   "name": "my-workspace",
-  "version": "0.0.0",
+  "version": "1.0.0-rc.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "build-all": "ng build ngx-translate && ng build http-loader",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --code-coverage ",
+    "test": "ng test --code-coverage",
     "test-ci": "ng test --watch=false --browsers=ChromeHeadless --reporters=mocha",
     "coverage": "ng test ngx-translate --code-coverage --watch=false --browsers=ChromeHeadless --reporters=mocha,coverage",
     "lint": "ng lint"
