@@ -399,12 +399,12 @@ export class TranslateService {
   /**
    * Add available languages
    */
-  public addLangs(langs: string[]): void {
-    langs.forEach((lang: string) => {
-      if (this.langs.indexOf(lang) === -1) {
-        this.langs.push(lang);
-      }
-    });
+  public addLangs(langs: string[]): void
+  {
+    const newLangs = langs.filter(lang => !this.langs.includes(lang));
+    if (newLangs.length > 0) {
+      this.langs = [...this.langs, ...newLangs];
+    }
   }
 
   /**
