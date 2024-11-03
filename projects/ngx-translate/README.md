@@ -1,10 +1,14 @@
-# @ngx-translate/core ![Buildstatus](https://github.com/ngx-translate/core/actions/workflows/ngx-translate-test.yml/badge.svg) [![npm version](https://badge.fury.io/js/%40ngx-translate%2Fcore.svg)](https://badge.fury.io/js/%40ngx-translate%2Fcore)
+# @ngx-translate/core 
 
-The internationalization (i18n) library for Angular.
+## Overview
 
-Forked from @ngx-translate/core after the maintainer abandoned the library.
+`@ngx-translate/core` is the primary internationalization (i18n) library for Angular  
+applications, allowing developers to easily implement and manage multiple languages  
+in their projects. With `@ngx-translate/core`, you can dynamically switch languages  
+within the app, seamlessly adapting content to suit various locales.
 
-Documentation: https://ngx-translate.org/
+### Documentation
 
-In addition to that, a getting started tutorial is available here:  
-[How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
+- [Official Documentation](https://ngx-translate.org/)
+- [Getting Started Tutorial: How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
+
