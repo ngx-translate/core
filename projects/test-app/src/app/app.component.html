@@ -1,0 +1,12 @@
+<div class="title">
+    <h1>{{ 'demo.title' | translate }}</h1>
+</div>
+<div>
+    <h2>Simple translations without parameters</h2>
+
+    <p [translate]="'demo.simple.text-as-attribute'"></p>
+
+    <p translate>demo.simple.text-as-content</p>
+</div>
+
+<app-standalone-component/>
