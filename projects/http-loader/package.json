@@ -1,5 +1,5 @@
 {
-  "name": "@codeandweb/http-loader",
+  "name": "@ngx-translate/http-loader",
   "version": "16.0.0",
   "description": "http loader for dynamically loading translation files for @ngx-translate/core",
   "keywords": [
