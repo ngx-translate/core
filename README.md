@@ -81,19 +81,18 @@ npm install @ngx-translate/core --save
 
 Choose the version corresponding to your Angular version:
 
- Angular       | @ngx-translate/core | @ngx-translate/http-loader
- ------------- |---------------------| --------------------------
- 16+           | 15.x+               | 8.x+
- 13+ (ivy only)| 14.x+               | 7.x+
- 10/11/12/13   | 13.x+               | 6.x+
- 9             | 12.x+               | 5.x+
- 8             | 12.x+               | 4.x+
- 7             | 11.x+               | 4.x+
- 6             | 10.x                | 3.x
- 5             | 8.x to 9.x          | 1.x to 2.x
- 4.3           | 7.x or less         | 1.x to 2.x
- 2 to 4.2.x    | 7.x or less         | 0.x
-
+| Angular        | @ngx-translate/core | @ngx-translate/http-loader |
+|----------------|---------------------|----------------------------|
+| 16+            | 15.x+               | 8.x+                       |
+| 13+ (ivy only) | 14.x+               | 7.x+                       |
+| 10/11/12/13    | 13.x+               | 6.x+                       |
+| 9              | 12.x+               | 5.x+                       |
+| 8              | 12.x+               | 4.x+                       |
+| 7              | 11.x+               | 4.x+                       |
+| 6              | 10.x                | 3.x                        |
+| 5              | 8.x to 9.x          | 1.x to 2.x                 |
+| 4.3            | 7.x or less         | 1.x to 2.x                 |
+| 2 to 4.2.x     | 7.x or less         | 0.x                        |
 
 ### Usage
 
@@ -391,6 +390,42 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 ```html
 <div [innerHTML]="'HELLO' | translate"></div>
 ```
+#### 7. Preload Translations Module:
+
+In case of loading the translations module asynchronously, you have to preload the translations module early to ensure it is created before any component.
+
+```ts
+// app.module.ts
+import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
+// Create a function that initializes translations
+export function translateInitializerFactory(translate: TranslateService) {
+  return () => firstValueFrom(translate.use('id'));
+}
+
+@NgModule({
+  declarations: [],
+  imports: [
+    // ...
+    TranslateModule.forRoot({
+      // ...
+    }),
+  ],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: translateInitializerFactory,
+      deps: [TranslateService],
+      multi: true,
+    },
+  ],
+  // ...
+})
+export class AppModule {}
+
+```
+
 
 ### API
 
@@ -406,7 +441,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
     ```ts
     onLangChange.subscribe((event: LangChangeEvent) => {
 	  // do something
-	});
+	  });
     ```
 - `onTranslationChange`: An EventEmitter to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
@@ -414,7 +449,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
     ```ts
     onTranslationChange.subscribe((event: TranslationChangeEvent) => {
 	  // do something
-	});
+	  });
     ```
 - `onDefaultLangChange`: An EventEmitter to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
@@ -422,7 +457,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
     ```ts
     onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
 	  // do something
-	});
+	  });
     ```
 
 #### Methods:
