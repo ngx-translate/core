@@ -5,12 +5,14 @@ The internationalization (i18n) library for Angular.
 
 ## Angular 16, 17, 18+
 
-The [new documentation](https://ngx-translate.org/) now covers installation on
+The new [documentation](https://ngx-translate.org/) now covers installation on
 Angular 16+ and is divided into smaller, more readable sections, making it
 easier to digest than this big README. It also documents the additional
 interfaces and explains how to develop custom plugins.
 
-New documentation: **https://ngx-translate.org/**
+- [Full documentation](https://ngx-translate.org) 
+- [Migration guide v15 -> v16](https://ngx-translate.org/getting-started/migration-guide/)
+- [Release Notes](https://github.com/ngx-translate/core/releases)
 
 In addition to that, a getting started tutorial is available here:  
 [How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
