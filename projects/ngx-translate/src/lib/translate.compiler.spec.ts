@@ -10,9 +10,11 @@ import {
   Translation,
   provideTranslateService
 } from "../public-api";
+import {Injectable} from "@angular/core";
 
 const translations: TranslationObject = {LOAD: 'This is a test'};
 
+@Injectable()
 class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
     void lang;

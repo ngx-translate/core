@@ -58,6 +58,7 @@ class AppComponent {
 
 let translations: TranslationObject = {"TEST": "This is a test"};
 
+@Injectable()
 class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
     void lang;
@@ -65,12 +66,14 @@ class FakeLoader implements TranslateLoader {
   }
 }
 
+@Injectable()
 class DelayedFrenchLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
     return lang === 'fr' ? timer(10).pipe(map(() => translations)) : of(translations);
   }
 }
 
+@Injectable()
 class MissingObs implements MissingTranslationHandler {
   handle(params: MissingTranslationHandlerParams): Translation|Observable<Translation> {
     return timer(1).pipe(map(() => `handled: ${params.key}`));

@@ -49,6 +49,7 @@ class AppComponent {
 
 let translations: TranslationObject = {"TEST": "This is a test"};
 
+@Injectable()
 class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
     void lang;

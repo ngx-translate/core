@@ -7,11 +7,12 @@ import {
   TranslateService, Translation,
   TranslationObject
 } from "../public-api";
-import {Type} from "@angular/core";
+import {Injectable, Type} from "@angular/core";
 
 let translations: TranslationObject = {"TEST": "This is a test"};
 const fakeTranslation: TranslationObject = {"NOT_USED": "not used"};
 
+@Injectable()
 class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<TranslationObject> {
     if (lang === 'fake') {
@@ -26,6 +27,7 @@ describe('MissingTranslationHandler', () => {
   let translate: TranslateService;
   let missingTranslationHandler: MissingTranslationHandler;
 
+  @Injectable()
   class Missing implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams) {
       void params;
@@ -33,6 +35,7 @@ describe('MissingTranslationHandler', () => {
     }
   }
 
+  @Injectable()
   class MissingObs implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams): Observable<Translation> {
       return of(`handled: ${params.key}`);
