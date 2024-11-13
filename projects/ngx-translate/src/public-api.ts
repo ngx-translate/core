@@ -88,7 +88,7 @@ export class TranslateModule {
   }
 
   /**
-   * Use this method in your other (non root) modules to import the directive/pipe
+   * Use this method in your other (non-root) modules to import the directive/pipe
    */
   static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
     return {
