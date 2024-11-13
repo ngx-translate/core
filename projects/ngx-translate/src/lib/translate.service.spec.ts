@@ -1,12 +1,14 @@
 import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Observable, of, timer, zip, defer} from "rxjs";
+import {Observable, of, timer, zip, defer, EMPTY} from "rxjs";
 import {take, toArray, first, map} from "rxjs/operators";
 import {
   LangChangeEvent,
   TranslateLoader,
   TranslateService,
-  TranslationChangeEvent, TranslationObject, Translation, provideTranslateService
+  TranslationChangeEvent, TranslationObject, Translation, provideTranslateService, TranslatePipe, TranslateModule
 } from "../public-api";
+import {Component} from "@angular/core";
+import {Router, RouterOutlet} from "@angular/router";
 
 
 let translations: TranslationObject = {"TEST": "This is a test"};
@@ -1039,6 +1041,126 @@ describe("TranslateService", () =>
       expect(translate.getBrowserCultureLang()).toBeUndefined();
     });
   });
-
-
 });
+
+
+describe('TranslateService (isolate)', () => {
+  const translationsRoot = {
+    en: {test : "en-root"},
+    de: {test : "de-root"}
+  }
+
+  const translationsChild = {
+    en: {test: "en-child"},
+    de: {test : "de-child"}
+  }
+
+  class StaticTranslateLoader implements TranslateLoader {
+    constructor(private translations: Record<string, unknown>) {
+    }
+
+    getTranslation(lang: string) {
+      const translations = this.translations[lang];
+      if (translations) {
+        return of(translations)
+      } else {
+        return EMPTY;
+      }
+    }
+  }
+
+  @Component({
+    standalone: true,
+    selector: "lib-isolated-child",
+    template: `
+      <div class="isolated-child">{{ 'test' | translate }}</div>
+    `,
+    imports: [
+      TranslatePipe
+    ],
+    providers: [
+      TranslateModule.forChild({
+        isolate: true,
+        loader: {
+          provide: TranslateLoader,
+          useFactory: () => new StaticTranslateLoader(translationsChild),
+        },
+      }).providers!
+    ]
+  })
+  class IsolatedChildComponent
+  {
+    constructor(private translate:TranslateService)
+    {
+      translate.use("de");
+    }
+  }
+
+  @Component({
+    standalone: true,
+    selector: "lib-shared-child",
+    template: `
+      <div class="shared-child">{{ 'test' | translate }}</div>
+    `,
+    imports: [
+      TranslatePipe
+    ],
+    providers: [
+      TranslateModule.forChild({}).providers!
+    ]
+  })
+  class SharedChildComponent
+  {
+  }
+
+  @Component({
+    standalone: true,
+    imports: [RouterOutlet, IsolatedChildComponent, SharedChildComponent, TranslatePipe],
+    selector: "lib-test",
+    template: `
+      <div class="root">{{ 'test' | translate }}</div>
+      <lib-isolated-child/>
+      <lib-shared-child/>
+    `
+  })
+  class AppTestComponent {
+    constructor(private translate:TranslateService)
+    {
+      translate.use("en");
+    }
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({
+          extend: true,
+          loader: {
+            provide: TranslateLoader,
+            useFactory: () => new StaticTranslateLoader(translationsRoot)
+          }
+        }),
+      ]
+    }).compileComponents();
+  })
+
+  it('switches root and child component independently', async () => {
+    const fixture = TestBed.createComponent(AppTestComponent);
+
+    const app = fixture.nativeElement
+
+    fixture.detectChanges();
+
+    expect(app.querySelector("div.root").textContent).toEqual("en-root");
+    expect(app.querySelector("div.isolated-child").textContent).toEqual("de-child");
+    expect(app.querySelector("div.shared-child").textContent).toEqual("en-root");
+
+    // switch root
+    TestBed.inject(TranslateService).use("de");
+    fixture.detectChanges();
+
+    expect(app.querySelector("div.root").textContent).toEqual("de-root");
+    expect(app.querySelector("div.isolated-child").textContent).toEqual("de-child");
+    expect(app.querySelector("div.shared-child").textContent).toEqual("de-root");
+  })
+})
