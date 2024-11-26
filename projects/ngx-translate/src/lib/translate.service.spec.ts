@@ -165,6 +165,18 @@ describe("TranslateService", () =>
     });
   });
 
+  it("translates text using 'default' translation Id", () =>
+  {
+    translations = {"default": "Default text"};
+    translate.use("en");
+
+    // this will request the translation from the backend because we use a static files loader for TranslateService
+    translate.get("default").subscribe((res: Translation) =>
+    {
+      expect(res).toEqual("Default text");
+    });
+  });
+
   it("should be able to get an array translations", () =>
   {
     translations = {"TEST": "This is a test", "TEST2": "This is another test2"};
@@ -702,6 +714,16 @@ describe("TranslateService", () =>
       });
       translate.set("TEST", "This is a test");
     });
+
+
+    it("should translate 'default'", () =>
+    {
+      translate.setTranslation("en", {"default": "This is the default message"});
+      translate.use("en");
+
+      expect(translate.instant("default")).toEqual("This is the default message");
+    });
+
   });
 
   it("should trigger an event when the lang changes", () =>

@@ -46,6 +46,23 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
   standalone: true,
   imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `{{'default' | translate}}`
+})
+class AppTranslationIdDefaultComponent {
+  viewContainerRef: ViewContainerRef;
+
+  constructor(viewContainerRef: ViewContainerRef) {
+    this.viewContainerRef = viewContainerRef;
+  }
+}
+
+
+@Injectable()
+@Component({
+  selector: 'lib-hmx-app',
+  standalone: true,
+  imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `{{'TEST' | translate}}`
 })
 class AppComponent {
@@ -121,6 +138,15 @@ describe('TranslatePipe (standalone)', () => {
     translate.use('en');
 
     expect(translatePipe.transform('TEST')).toEqual("This is a test");
+  });
+
+  it("should translate 'default'", () =>
+  {
+    prepare();
+    translate.setTranslation("en", {"default": "This is the default message"});
+    translate.use("en");
+
+    expect(translatePipe.transform("default")).toEqual("This is the default message");
   });
 
   it('should call markForChanges when it translates a string', () => {
@@ -373,6 +399,21 @@ describe('TranslatePipe (standalone)', () => {
       translate.setDefaultLang('en');
       fixture.detectChanges();
       expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
+    });
+
+
+    it("translate text with 'default' message id" , () => {
+      prepare();
+
+      const fixture = TestBed.createComponent(AppTranslationIdDefaultComponent);
+
+      translate.setTranslation("en", {"default": "This is some default text"});
+
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.innerHTML).toEqual("default");
+      translate.setDefaultLang('en');
+      fixture.detectChanges();
+      expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is some default text");
     });
   });
 });
