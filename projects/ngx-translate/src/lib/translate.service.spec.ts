@@ -7,8 +7,9 @@ import {
   TranslateService,
   TranslationChangeEvent, TranslationObject, Translation, provideTranslateService, TranslatePipe, TranslateModule
 } from "../public-api";
-import {Component} from "@angular/core";
-import {Router, RouterOutlet} from "@angular/router";
+import {Component, ENVIRONMENT_INITIALIZER, inject} from "@angular/core";
+import {provideRouter, Router, RouterOutlet} from "@angular/router";
+import {provideLocationMocks} from "@angular/common/testing";
 
 
 let translations: TranslationObject = {"TEST": "This is a test"};
@@ -1042,6 +1043,150 @@ describe("TranslateService", () =>
     });
   });
 });
+
+
+
+describe("TranslateService (extends, setTranslations)", () =>
+{
+  let translate: TranslateService;
+
+  beforeEach(() =>
+  {
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({
+          loader: {provide: TranslateLoader, useClass: FakeLoader},
+          extend: true
+        })
+      ]
+    });
+    translate = TestBed.inject(TranslateService);
+  });
+
+  afterEach(() =>
+  {
+    translations = {"TEST": "This is a test"};
+  });
+
+  it("extends existing translations using setTranslation", () =>
+  {
+    translate.use("en");
+    translate.setTranslation("en", {a: "A1", b: "B1", c: { a: "CA1", b: "CB1"} });
+    translate.setTranslation("en", {a: "A2", c: {b: "CB2"},  d: "D2"});
+
+    expect(translate.instant("a")).toEqual("A2");
+    expect(translate.instant("b")).toEqual("B1");
+    expect(translate.instant("c.a")).toEqual("CA1");
+    expect(translate.instant("c.b")).toEqual("CB2");
+    expect(translate.instant("d")).toEqual("D2");
+  });
+})
+
+
+describe('TranslateService (extends, lazy loading)', () => {
+  const rootTranslations = {
+    en: {root: {name: "Root translation"}},
+    fr: {root: {name: "Traduction Racine"}}
+  }
+
+  const nestedTranslations = {
+    en: {nested: {name: "A translated name in english"}},
+    fr: {nested: {name: "Un nom traduit en francais"}}
+  }
+
+  class StaticTranslateLoader implements TranslateLoader {
+    constructor(private translations: Record<string, unknown>) {
+    }
+
+    getTranslation(lang: string) {
+      const translations = this.translations[lang];
+      if (translations) {
+        return of(translations)
+      } else {
+        return EMPTY;
+      }
+    }
+  }
+
+  @Component({
+    standalone: true,
+    selector: "lib-nested",
+    template: `
+      <div class="nested">{{ 'nested.name' | translate }}</div>
+      <div class="root">{{ 'root.name' | translate }}</div>
+    `,
+    imports: [
+      TranslatePipe
+    ],
+    providers: [
+      TranslateModule.forChild({
+        extend: true,
+        loader: {
+          provide: TranslateLoader,
+          useFactory: () => new StaticTranslateLoader(nestedTranslations),
+        },
+      }).providers!
+    ]
+  })
+  class TranslatedComponent {
+  }
+
+  @Component({
+    standalone: true,
+    imports: [RouterOutlet],
+    selector: "lib-test",
+    template: `
+      <router-outlet/>
+    `
+  })
+  class AppTestComponent {
+
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({
+          extend: true,
+          loader: {
+            provide: TranslateLoader,
+            useFactory: () => new StaticTranslateLoader(rootTranslations)
+          }
+        }),
+        provideLocationMocks(),
+        provideRouter([
+          {path: '', component: TranslatedComponent}
+        ]),
+        {provide: ENVIRONMENT_INITIALIZER, useValue: () => inject(TranslateService).use('fr'), multi: true}
+      ]
+    }).compileComponents();
+  })
+
+  it('should translate both keys', async () => {
+    const router = TestBed.inject(Router)
+    const fixture = TestBed.createComponent(AppTestComponent);
+    router.initialNavigation();
+    await router.navigate(['/'])
+    fixture.detectChanges();
+
+    const app = fixture.nativeElement
+
+    const rootfr = app.querySelector("div.root");
+    const nestedfr = app.querySelector("div.nested");
+
+    expect(rootfr.textContent).toEqual("Traduction Racine");
+    expect(nestedfr.textContent).toEqual("Un nom traduit en francais");
+
+    TestBed.inject(TranslateService).currentLang = 'en'
+    fixture.detectChanges();
+
+    const root = app.querySelector("div.root");
+    const nested = app.querySelector("div.nested");
+
+    expect(root.textContent).toEqual("Root translation");
+    expect(nested.textContent).toEqual("A translated name in english");
+  })
+})
 
 
 describe('TranslateService (isolate)', () => {
