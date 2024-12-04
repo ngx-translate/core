@@ -8,7 +8,7 @@ import {InterpolateFunction, TranslateParser} from "./translate.parser";
 import {TranslateStore} from "./translate.store";
 import {getValue, isDefined, isArray, isString, mergeDeep, setValue, isDict} from "./util";
 
-export const ISOALTE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOALTE_TRANSLATE_SERVICE');
+export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOLATE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
 export const DEFAULT_LANGUAGE = new InjectionToken<string>('DEFAULT_LANGUAGE');
 export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
@@ -187,7 +187,7 @@ export class TranslateService {
               public parser: TranslateParser,
               public missingTranslationHandler: MissingTranslationHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang = true,
-              @Inject(ISOALTE_TRANSLATE_SERVICE) isolate = false,
+              @Inject(ISOLATE_TRANSLATE_SERVICE) isolate = false,
               @Inject(USE_EXTEND) private extend = false,
               @Inject(DEFAULT_LANGUAGE) defaultLanguage: string
   )
