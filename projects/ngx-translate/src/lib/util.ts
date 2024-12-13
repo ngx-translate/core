@@ -56,7 +56,7 @@ export function isDefined(value: any): boolean {
 
 
 export function isDict(value: any): boolean {
-  return isObject(value) && !isArray(value);
+  return isObject(value) && !isArray(value) && value !== null;
 }
 
 
