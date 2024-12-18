@@ -430,7 +430,11 @@ export class TranslateService {
     {
       const result: TranslationObject = {};
       for (const key in translations) {
-          result[key] = this.runInterpolation(translations[key], interpolateParams);
+        let res = this.runInterpolation(translations[key], interpolateParams);
+        if(res !== undefined)
+        {
+          result[key] = res;
+        }
       }
       return result;
     }

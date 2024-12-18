@@ -664,6 +664,22 @@ describe("TranslateService", () =>
       expect(translate.instant("a.b")).toEqual(["X", "Y"]);
     });
 
+    it("ignores null values in nested results", () =>
+    {
+      const tr = {a: {aa: "test", bb: null}};
+      translate.setTranslation("en", tr);
+      translate.use("en");
+      expect(translate.instant("a")).toEqual({aa: "test"});
+    });
+
+    it("returns key when asking for null value directly", () =>
+    {
+      const tr = {a: {aa: "test", bb: null}};
+      translate.setTranslation("en", tr);
+      translate.use("en");
+      expect(translate.instant("a.bb")).toEqual("a.bb");
+    });
+
     it("should  interpolate in arrays", () =>
     {
       const tr = {a: {b: ["{{value}} 1", "{{value}} 2"]}};
