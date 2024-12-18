@@ -1,4 +1,4 @@
-import {equals, getValue, mergeDeep} from "./util";
+import {equals, getValue, isArray, isDict, mergeDeep} from "./util";
 
 
 describe("Utils", () =>
@@ -244,5 +244,34 @@ describe("Utils", () =>
 
   });
 
+  describe('isDict()', () =>
+  {
+    it('should accept objects as dictionaries', () =>
+    {
+      expect(isDict({a: "b"})).toEqual(true);
+      expect(isDict({})).toEqual(true);
+
+      expect(isDict(null)).toEqual(false);
+      expect(isDict([])).toEqual(false);
+      expect(isDict(123)).toEqual(false);
+      expect(isDict("asd")).toEqual(false);
+    }) ;
+  });
+
+  describe('isArray()', () =>
+  {
+    it('should accept objects as dictionaries', () =>
+    {
+      expect(isArray([1,2,3])).toEqual(true);
+      expect(isArray(["a","b","c"])).toEqual(true);
+      expect(isArray([])).toEqual(true);
+
+      expect(isArray(null)).toEqual(false);
+      expect(isArray({})).toEqual(false);
+      expect(isArray({a:123})).toEqual(false);
+      expect(isArray(123)).toEqual(false);
+      expect(isArray("asd")).toEqual(false);
+    }) ;
+  });
 
 });
