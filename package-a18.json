@@ -24,14 +24,14 @@
     "@angular/router": "^18",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.13.0"
+    "zone.js": "~0.14.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18",
     "@angular/cli": "^18",
     "@angular/compiler-cli": "^18",
     "@types/jasmine": "~5.1.0",
-    "angular-eslint": "^18.3.1",
+    "angular-eslint": "^18",
     "eslint": "^9.9.1",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
@@ -40,8 +40,8 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "karma-mocha-reporter": "^2.2.5",
-    "ng-packagr": "^16",
-    "typescript": "5.1.6",
+    "ng-packagr": "^18",
+    "typescript": "~5.5.0",
     "typescript-eslint": "8.2.0"
   },
   "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
