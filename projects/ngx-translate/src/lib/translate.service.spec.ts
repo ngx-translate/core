@@ -8,7 +8,7 @@ import {
   TranslationChangeEvent, TranslationObject, Translation, provideTranslateService, TranslatePipe, TranslateModule
 } from "../public-api";
 import {Component} from "@angular/core";
-import {Router, RouterOutlet} from "@angular/router";
+import {RouterOutlet} from "@angular/router";
 
 
 let translations: TranslationObject = {"TEST": "This is a test"};
