@@ -7,8 +7,8 @@ import {Observable} from 'rxjs';
 export class TranslateHttpLoader implements TranslateLoader {
   constructor(
     private http: HttpClient,
-    @Inject(String) public prefix:string = "/assets/i18n/",
-    @Inject(String) public suffix:string = ".json"
+    @Inject(String) public prefix = "/assets/i18n/",
+    @Inject(String) public suffix = ".json"
   )
   {}
 

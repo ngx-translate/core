@@ -1,6 +1,6 @@
 {
   "name": "@ngx-translate/http-loader",
-  "version": "16.0.0",
+  "version": "16.0.1",
   "description": "http loader for dynamically loading translation files for @ngx-translate/core",
   "keywords": [
     "@ngx-translate",
