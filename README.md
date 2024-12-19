@@ -3,7 +3,7 @@
 The internationalization (i18n) library for Angular.
 <br/>
 
-## Angular 16, 17, 18+
+## Angular 16, 17, 18, 19+
 
 The new [documentation](https://ngx-translate.org/) now covers installation on
 Angular 16+ and is divided into smaller, more readable sections, making it
