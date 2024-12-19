@@ -35,6 +35,8 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
 
 @Injectable()
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'lib-hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `{{'TEST' | translate}}`

@@ -5,6 +5,8 @@ import {provideRouter, Router, RouterModule} from "@angular/router";
 import {TranslateModule, TranslateService} from"../public-api";
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'lib-root-cmp',
   template: `
       <router-outlet></router-outlet>`
@@ -20,6 +22,8 @@ class RootComponent {
 }
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'lib-lazy',
   template: 'lazy-loaded-parent [<router-outlet></router-outlet>]'
 })
@@ -27,7 +31,8 @@ class ParentLazyLoadedComponent {
 }
 
 function getLazyLoadedModule<T extends object>(importedModule: ModuleWithProviders<T>) {
-  @Component({selector: 'lib-lazy', template: 'lazy-loaded-child'})
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  @Component({selector: 'lib-lazy', template: 'lazy-loaded-child', standalone: false})
   class ChildLazyLoadedComponent {
     constructor(public translate: TranslateService) {
       translate.setTranslation('en', {

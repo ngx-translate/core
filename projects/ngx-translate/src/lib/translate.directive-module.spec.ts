@@ -2,8 +2,11 @@ import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, V
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TranslateModule, TranslateService} from "../public-api";
 
+
 @Injectable()
 @Component({
+  // eslint-disable-next-line @angular-eslint/prefer-standalone
+  standalone: false,
   selector: 'lib-hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

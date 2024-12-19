@@ -1,15 +1,12 @@
 import {ChangeDetectionStrategy, Component, ElementRef, Injectable, ViewChild, ViewContainerRef} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {
-  provideTranslateService, TranslateDirective, TranslatePipe,
-  TranslateService
-} from "../public-api";
+import {provideTranslateService, TranslateDirective, TranslateService} from "../public-api";
 
 @Injectable()
 @Component({
   selector: 'lib-hmx-app',
   standalone: true,
-  imports: [TranslateDirective, TranslatePipe],
+  imports: [TranslateDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div #noKey translate>TEST</div>
