@@ -1,6 +1,6 @@
 {
   "name": "@ngx-translate/core",
-  "version": "16.0.3",
+  "version": "16.0.4",
   "description": "Translation library (i18n) for Angular",
   "keywords": [
     "@ngx-translate",
