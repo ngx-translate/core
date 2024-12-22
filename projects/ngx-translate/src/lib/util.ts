@@ -107,30 +107,31 @@ export function mergeDeep(target: any, source: any): any {
  * @param target
  * @param key
  */
-export function getValue(target: any, key: string): any
-{
-  const keys = key.split(".");
-
-  key = "";
-  do
-  {
-    key += keys.shift();
-    if (isDefined(target) && isDefined(target[key]) && (isDict(target[key]) ||isArray(target[key]) || !keys.length))
-    {
-      target = target[key];
-      key = "";
-    }
-    else if (!keys.length)
-    {
-      target = undefined;
-    }
-    else
-    {
-      key += ".";
-    }
-  } while (keys.length);
-
+export function getValue(target: any, key: string) {
+  let keys = key.split(".");
+  let matchedKey: string|undefined = key;
+  while(keys.length) {
+    [matchedKey, keys] = getLongestMatchingSubKey(target,keys);
+    if (matchedKey===undefined)
+      return undefined;
+    target = target[matchedKey];
+  }
   return target;
+}
+
+function getLongestMatchingSubKey(target: any, keys: string[]): [string|undefined, string[]] {
+  let key = '';
+  let matchedKey;
+  let size;
+  for (let i=0; i<keys.length; i++) {
+    key += keys[i];
+    if (isDefined(target[key])) {
+      matchedKey = key;
+      size = i+1;
+    }
+    key += '.';
+  }
+  return [matchedKey, isDefined(size) ? keys.slice(size) : keys];
 }
 
 /**
