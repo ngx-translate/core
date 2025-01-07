@@ -81,18 +81,20 @@ npm install @ngx-translate/core --save
 
 Choose the version corresponding to your Angular version:
 
- Angular       | @ngx-translate/core | @ngx-translate/http-loader
- ------------- |---------------------| --------------------------
- 16+           | 15.x+               | 8.x+
- 13+ (ivy only)| 14.x+               | 7.x+
- 10/11/12/13   | 13.x+               | 6.x+
- 9             | 12.x+               | 5.x+
- 8             | 12.x+               | 4.x+
- 7             | 11.x+               | 4.x+
- 6             | 10.x                | 3.x
- 5             | 8.x to 9.x          | 1.x to 2.x
- 4.3           | 7.x or less         | 1.x to 2.x
- 2 to 4.2.x    | 7.x or less         | 0.x
+
+| Angular       | @ngx-translate/core | @ngx-translate/http-loader | Tutorial | Docs |
+| ------------- | ------------------- | -------------------------- | -------- | ---- |
+| 16 - 19+ | 16.x | 16.x | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | https://ngx-translate.org |
+| 16 - 17+ | 16.x (15.x) | 16.x, (8.x) | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | https://ngx-translate.org/v15/ |
+| 13 - 15 (ivy only) | 14.x              | 7.x+ | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here |
+| 10 - 12   | 13.x               | 6.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here |
+| 9             | 12.x             | 5.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here |
+| 8             | 12.x             | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here |
+| 7             | 11.x              | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular7-app-with-ngx-translate) | here |
+| 6             | 10.x                | 3.x   | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular6-app-with-ngx-translate) | here |
+| 5             | 8.x to 9.x          | 1.x to 2.x | — |
+| 4.3           | 7.x or less         | 1.x to 2.x  | — |
+| 2 to 4.2.x    | 7.x or less         | 0.x  | — |
 
 
 ### Usage
