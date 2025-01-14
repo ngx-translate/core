@@ -1,10 +1,10 @@
-import {EventEmitter} from "@angular/core";
 import {
   InterpolatableTranslationObject,
   DefaultLangChangeEvent,
   LangChangeEvent,
   TranslationChangeEvent
 } from "./translate.service";
+import { Subject } from "rxjs";
 
 export class TranslateStore {
   /**
@@ -28,26 +28,26 @@ export class TranslateStore {
   public langs: string[] = [];
 
   /**
-   * An EventEmitter to listen to translation change events
+   * A Subject to listen to translation change events
    * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
      *     // do something
      * });
    */
-  public onTranslationChange: EventEmitter<TranslationChangeEvent> = new EventEmitter<TranslationChangeEvent>();
+  public onTranslationChange: Subject<TranslationChangeEvent> = new Subject<TranslationChangeEvent>();
 
   /**
-   * An EventEmitter to listen to lang change events
+   * A Subject to listen to lang change events
    * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
    */
-  public onLangChange: EventEmitter<LangChangeEvent> = new EventEmitter<LangChangeEvent>();
+  public onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
 
   /**
-   * An EventEmitter to listen to default lang change events
+   * A Subject to listen to default lang change events
    * onDefaultLangChange.subscribe((params: DefaultLangChangeEvent) => {
      *     // do something
      * });
    */
-  public onDefaultLangChange: EventEmitter<DefaultLangChangeEvent> = new EventEmitter<DefaultLangChangeEvent>();
+  public onDefaultLangChange: Subject<DefaultLangChangeEvent> = new Subject<DefaultLangChangeEvent>();
 }
