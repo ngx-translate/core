@@ -1,5 +1,5 @@
-import {EventEmitter, Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, forkJoin, isObservable, Observable, of, defer} from "rxjs";
+import {Inject, Injectable, InjectionToken} from "@angular/core";
+import {concat, forkJoin, isObservable, Observable, of, defer, Subject} from "rxjs";
 import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
 import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
@@ -96,32 +96,32 @@ export class TranslateService {
 
 
   /**
-   * An EventEmitter to listen to translation change events
+   * A Subject to listen to translation change events
    * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
      *     // do something
      * });
    */
-  get onTranslationChange(): EventEmitter<TranslationChangeEvent> {
+  get onTranslationChange(): Subject<TranslationChangeEvent> {
     return this.store.onTranslationChange;
   }
 
   /**
-   * An EventEmitter to listen to lang change events
+   * A Subject to listen to lang change events
    * onLangChange.subscribe((params: LangChangeEvent) => {
      *     // do something
      * });
    */
-  get onLangChange(): EventEmitter<LangChangeEvent> {
+  get onLangChange(): Subject<LangChangeEvent> {
     return this.store.onLangChange;
   }
 
   /**
-   * An EventEmitter to listen to default lang change events
+   * A Subject to listen to default lang change events
    * onDefaultLangChange.subscribe((params: DefaultLangChangeEvent) => {
      *     // do something
      * });
    */
-  get onDefaultLangChange() {
+  get onDefaultLangChange(): Subject<DefaultLangChangeEvent> {
     return this.store.onDefaultLangChange;
   }
 
@@ -287,7 +287,7 @@ export class TranslateService {
 
     this.currentLang = lang;
 
-    this.onLangChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onLangChange.next({lang: lang, translations: this.translations[lang]});
 
     // if there is no default lang, use the one that we just set
     if (this.defaultLang == null) {
@@ -369,7 +369,7 @@ export class TranslateService {
       this.translations[lang] = interpolatableTranslations;
     }
     this.updateLangs();
-    this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onTranslationChange.next({lang: lang, translations: this.translations[lang]});
   }
 
   /**
@@ -575,7 +575,7 @@ export class TranslateService {
       : this.compiler.compileTranslations(translation, lang)
     );
     this.updateLangs();
-    this.onTranslationChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onTranslationChange.next({lang: lang, translations: this.translations[lang]});
   }
 
   /**
@@ -583,7 +583,7 @@ export class TranslateService {
    */
   private changeDefaultLang(lang: string): void {
     this.defaultLang = lang;
-    this.onDefaultLangChange.emit({lang: lang, translations: this.translations[lang]});
+    this.onDefaultLangChange.next({lang: lang, translations: this.translations[lang]});
   }
 
   /**

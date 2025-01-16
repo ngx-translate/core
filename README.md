@@ -402,7 +402,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 
 - `currentLang`: The lang currently used
 - `currentLoader`: An instance of the loader currently used (static loader by default)
-- `onLangChange`: An EventEmitter to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
+- `onLangChange`: A Subject to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
   example:
     ```ts
@@ -410,7 +410,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 	  // do something
 	});
     ```
-- `onTranslationChange`: An EventEmitter to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
+- `onTranslationChange`: A Subject to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
   example:
     ```ts
@@ -418,7 +418,7 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 	  // do something
 	});
     ```
-- `onDefaultLangChange`: An EventEmitter to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
+- `onDefaultLangChange`: A Subject to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
   example:
     ```ts
