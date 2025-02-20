@@ -36,12 +36,12 @@ export class TranslateDefaultParser extends TranslateParser
     return undefined;
   }
 
-  private interpolateFunction(fn: InterpolateFunction, params?: InterpolationParameters): string
+  protected interpolateFunction(fn: InterpolateFunction, params?: InterpolationParameters): string
   {
     return fn(params);
   }
 
-  private interpolateString(expr: string, params?: InterpolationParameters): string
+  protected interpolateString(expr: string, params?: InterpolationParameters): string
   {
     if (!params)
     {
