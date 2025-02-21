@@ -290,21 +290,6 @@ export class TranslateService {
   }
 
 
-
-  /**
-   * Gets an object of translations for a given language with the current loader
-   * and passes it through the compiler
-   *
-   * @deprecated This function is meant for internal use. There should
-   * be no reason to use outside this service. You can plug into this
-   * functionality by using a customer TranslateLoader or TranslateCompiler.
-   * To load a new language use setDefaultLang() and/or use()
-   */
-  public getTranslation(lang: string): Observable<InterpolatableTranslationObject>
-  {
-      return this.loadAndCompileTranslations(lang);
-  }
-
   private loadAndCompileTranslations(lang: string): Observable<InterpolatableTranslationObject> {
 
     this.pending = true;
