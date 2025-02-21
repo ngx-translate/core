@@ -184,12 +184,12 @@ export class TranslateService {
    */
   public setDefaultLang(lang: string): Observable<InterpolatableTranslationObject>
   {
-    if (this.defaultLang == null)
+    if (!this.defaultLang)
     {
       // on init set the defaultLang immediately, but do not emit a change yet
       this.store.setDefaultLang(lang, false);
     }
-
+    
     const pending = this.loadOrExtendLanguage(lang);
     if (isObservable(pending))
     {
