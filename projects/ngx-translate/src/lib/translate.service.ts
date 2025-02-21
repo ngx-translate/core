@@ -399,25 +399,34 @@ export class TranslateService {
 
   private getParsedResultForKey(translations: InterpolatableTranslation, key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
   {
-      let res: Translation | Observable<Translation> | undefined;
+      const textToInterpolate = this.getTextToInterpolate(translations, key);
 
-      if (translations) {
-        res = this.runInterpolation(getValue(translations, key), interpolateParams);
+      let res: Translation | undefined;
+
+      if (textToInterpolate !== undefined)
+      {
+          res = this.runInterpolation(textToInterpolate, interpolateParams);
       }
-
-      if (res === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang) {
-        res = this.runInterpolation(getValue(this.translations[this.defaultLang], key), interpolateParams);
-      }
-
-      if (res === undefined) {
-        const params: MissingTranslationHandlerParams = {key, translateService: this};
-        if (typeof interpolateParams !== 'undefined') {
-          params.interpolateParams = interpolateParams;
-        }
-        res = this.missingTranslationHandler.handle(params);
+      else
+      {
+          const params: MissingTranslationHandlerParams = {key, translateService: this};
+          if (typeof interpolateParams !== 'undefined') {
+              params.interpolateParams = interpolateParams;
+          }
+          res = this.missingTranslationHandler.handle(params);
       }
 
       return res !== undefined ? res : key;
+  }
+
+  private getTextToInterpolate(translations: InterpolatableTranslation, key: string): InterpolatableTranslation | undefined
+  {
+      let text = getValue(translations, key);
+      if(text === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang)
+      {
+          text = getValue(this.translations[this.defaultLang], key);
+      }
+      return text;
   }
 
   private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation
