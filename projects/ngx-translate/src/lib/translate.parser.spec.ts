@@ -34,8 +34,16 @@ describe('Parser', () => {
       expect(parser.interpolate( uc , {"x":'bless'})).toBe('BLESS YOU!');
     });
 
+    it('should handle edge cases: value not found', () => {
+      expect(parser.interpolate("This is an array {{ key1.key2 }}", {key1: {key3: ['A', 'B', 'C']}})).toEqual("This is an array {{ key1.key2 }}");
+    });
+
     it('should handle edge cases: array', () => {
       expect(parser.interpolate("This is an array {{ key1.key2 }}", {key1: {key2: ['A', 'B', 'C']}})).toEqual("This is an array A, B, C");
+    });
+
+    it('should handle edge cases: null', () => {
+      expect(parser.interpolate("This is {{ key1.key2 }}", {key1: {key2: null}})).toEqual("This is null");
     });
 
     it('should handle edge cases: bool', () => {

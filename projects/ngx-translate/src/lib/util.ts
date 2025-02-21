@@ -141,7 +141,11 @@ export function getValue(target: any, key: string): any
   do
   {
     key += keys.shift();
-    if (isDefined(target) && isDefined(target[key]) && (isDict(target[key]) ||isArray(target[key]) || !keys.length))
+    if (
+      isDefined(target) &&
+      (isDefined(target[key]) || target[key] === null) &&
+      (isDict(target[key]) || isArray(target[key]) || !keys.length)
+    )
     {
       target = target[key];
       key = "";

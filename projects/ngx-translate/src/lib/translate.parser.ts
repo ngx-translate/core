@@ -48,9 +48,10 @@ export class TranslateDefaultParser extends TranslateParser
       return expr;
     }
 
-    return expr.replace(this.templateMatcher, (_substring: string, key: string) =>
+    return expr.replace(this.templateMatcher, (substring: string, key: string) =>
     {
-      return this.getInterpolationReplacement(params, key);
+      const replacement = this.getInterpolationReplacement(params, key);
+      return replacement !== undefined ? replacement : substring;
     });
   }
 
@@ -58,19 +59,18 @@ export class TranslateDefaultParser extends TranslateParser
    * Returns the replacement for an interpolation parameter
    * @params:
    */
-  protected getInterpolationReplacement(params: InterpolationParameters, key: string): string
+  protected getInterpolationReplacement(params: InterpolationParameters, key: string): string|undefined
   {
-    return this.formatValue(getValue(params, key), key);
+    return this.formatValue(getValue(params, key));
   }
 
   /**
    * Converts a value into a useful string representation.
    * @param value The value to format.
-   * @param fallback the value to return in case value is undefined
    * @returns A string representation of the value.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected formatValue(value: any, fallback:string): string
+  protected formatValue(value: any): string|undefined
   {
     if (isString(value)) {
       return value;
@@ -93,6 +93,6 @@ export class TranslateDefaultParser extends TranslateParser
       return JSON.stringify(value); // Pretty-print JSON if no meaningful toString()
     }
 
-    return fallback;
+    return undefined;
   }
 }
