@@ -2,10 +2,10 @@ import {
     InterpolatableTranslationObject,
     DefaultLangChangeEvent,
     LangChangeEvent,
-    TranslationChangeEvent, Language
+    TranslationChangeEvent, Language, InterpolatableTranslation
 } from "./translate.service";
 import {Observable, Subject} from "rxjs";
-import {mergeDeep} from "./util";
+import {getValue, mergeDeep} from "./util";
 
 
 type DeepReadonly<T> = {
@@ -19,13 +19,13 @@ export class TranslateStore
     private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
     private _onDefaultLangChange: Subject<DefaultLangChangeEvent> = new Subject<DefaultLangChangeEvent>();
 
-    private _defaultLang!: Language;
+    private defaultLang!: Language;
     private currentLang!: Language;
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
 
-    public getTranslations(language:Language): DeepReadonly<Record<Language, InterpolatableTranslationObject>>
+    public getTranslations(language:Language): DeepReadonly<InterpolatableTranslationObject>
     {
         return this.translations[language];
     }
@@ -49,7 +49,7 @@ export class TranslateStore
 
     public getDefaultLanguage(): Language
     {
-        return this._defaultLang;
+        return this.defaultLang;
     }
 
     /**
@@ -57,7 +57,7 @@ export class TranslateStore
      */
     public setDefaultLang(lang: string, emitChange = true): void
     {
-        this._defaultLang = lang;
+        this.defaultLang = lang;
         if (emitChange)
         {
             this._onDefaultLangChange.next({lang: lang, translations: this.translations[lang]});
@@ -126,5 +126,20 @@ export class TranslateStore
     public deleteTranslations(lang: string)
     {
         delete this.translations[lang];
+    }
+
+    public getTranslation(key: string, useDefaultLang: boolean): InterpolatableTranslation
+    {
+        let text = this.getValue(this.currentLang, key);
+        if(text === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && useDefaultLang)
+        {
+            text = this.getValue(this.defaultLang, key);
+        }
+        return text;
+    }
+
+    protected getValue(language: Language, key: string): InterpolatableTranslation
+    {
+        return getValue(this.getTranslations(language), key) as InterpolatableTranslation;
     }
 }

@@ -6,7 +6,7 @@ import {TranslateCompiler} from "./translate.compiler";
 import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
 import {TranslateStore} from "./translate.store";
-import {getValue, isDefined, isArray, isString, setValue, isDict, insertValue} from "./util";
+import {isDefined, isArray, isString, isDict, insertValue} from "./util";
 
 export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOLATE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -367,12 +367,7 @@ export class TranslateService {
 
   private getTextToInterpolate(key: string): InterpolatableTranslation | undefined
   {
-      let text = getValue(this.store.getTranslations(this.currentLang), key);
-      if(text === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang)
-      {
-          text = getValue(this.store.getTranslations(this.defaultLang), key);
-      }
-      return text;
+    return this.store.getTranslation(key, this.useDefaultLang);
   }
 
   private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation
@@ -444,7 +439,7 @@ export class TranslateService {
     // check if we are loading a new translation to use
     if (this.pending) {
       return this.loadingTranslations.pipe(
-        concatMap((res: InterpolatableTranslation) => {
+        concatMap(() => {
           return makeObservable(this.getParsedResult(key, interpolateParams));
         }),
       );
@@ -466,7 +461,7 @@ export class TranslateService {
     return concat(
       defer(() => this.get(key, interpolateParams)),
       this.onTranslationChange.pipe(
-        switchMap((event: TranslationChangeEvent) => {
+        switchMap(() => {
           const res = this.getParsedResult(key, interpolateParams);
           return makeObservable(res);
         })
@@ -487,7 +482,7 @@ export class TranslateService {
     return concat(
       defer(() => this.get(key, interpolateParams)),
       this.onLangChange.pipe(
-        switchMap((event: LangChangeEvent) => {
+        switchMap(() => {
           const res = this.getParsedResult(key, interpolateParams);
           return makeObservable(res);
         })
