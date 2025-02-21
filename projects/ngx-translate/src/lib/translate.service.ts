@@ -343,9 +343,9 @@ export class TranslateService {
   }
 
 
-  private getParsedResultForKey(translations: InterpolatableTranslation, key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
+  private getParsedResultForKey(key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
   {
-      const textToInterpolate = this.getTextToInterpolate(translations, key);
+      const textToInterpolate = this.getTextToInterpolate(key);
 
       let res: Translation | undefined;
 
@@ -365,9 +365,9 @@ export class TranslateService {
       return res !== undefined ? res : key;
   }
 
-  private getTextToInterpolate(translations: InterpolatableTranslation, key: string): InterpolatableTranslation | undefined
+  private getTextToInterpolate(key: string): InterpolatableTranslation | undefined
   {
-      let text = getValue(translations, key);
+      let text = getValue(this.store.getTranslations(this.currentLang), key);
       if(text === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && this.useDefaultLang)
       {
           text = getValue(this.store.getTranslations(this.defaultLang), key);
@@ -402,7 +402,7 @@ export class TranslateService {
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(translations: InterpolatableTranslation, key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject> {
+  public getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject> {
 
     // handle a bunch of keys
     if (key instanceof Array) {
@@ -410,7 +410,7 @@ export class TranslateService {
 
       let observables = false;
       for (const k of key) {
-        result[k] = this.getParsedResultForKey(translations, k, interpolateParams);
+        result[k] = this.getParsedResultForKey(k, interpolateParams);
         observables = observables || isObservable(result[k]);
       }
 
@@ -430,7 +430,7 @@ export class TranslateService {
       );
     }
 
-    return this.getParsedResultForKey(translations, key, interpolateParams);
+    return this.getParsedResultForKey(key, interpolateParams);
   }
 
   /**
@@ -445,12 +445,12 @@ export class TranslateService {
     if (this.pending) {
       return this.loadingTranslations.pipe(
         concatMap((res: InterpolatableTranslation) => {
-          return makeObservable(this.getParsedResult(res, key, interpolateParams));
+          return makeObservable(this.getParsedResult(key, interpolateParams));
         }),
       );
     }
 
-    return makeObservable(this.getParsedResult(this.store.getTranslations(this.currentLang), key, interpolateParams));
+    return makeObservable(this.getParsedResult(key, interpolateParams));
   }
 
   /**
@@ -467,7 +467,7 @@ export class TranslateService {
       defer(() => this.get(key, interpolateParams)),
       this.onTranslationChange.pipe(
         switchMap((event: TranslationChangeEvent) => {
-          const res = this.getParsedResult(event.translations, key, interpolateParams);
+          const res = this.getParsedResult(key, interpolateParams);
           return makeObservable(res);
         })
       )
@@ -488,7 +488,7 @@ export class TranslateService {
       defer(() => this.get(key, interpolateParams)),
       this.onLangChange.pipe(
         switchMap((event: LangChangeEvent) => {
-          const res = this.getParsedResult(event.translations, key, interpolateParams);
+          const res = this.getParsedResult(key, interpolateParams);
           return makeObservable(res);
         })
       ));
@@ -505,7 +505,7 @@ export class TranslateService {
       throw new Error('Parameter "key" is required and cannot be empty');
     }
 
-    const result = this.getParsedResult(this.store.getTranslations(this.currentLang), key, interpolateParams);
+    const result = this.getParsedResult(key, interpolateParams);
 
     if (isObservable(result)) {
       if (Array.isArray(key)) {

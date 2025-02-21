@@ -141,7 +141,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
       };
 
       if (isDefined(translations)) {
-        const res = this.translateService.getParsedResult(translations as InterpolatableTranslation, key, this.currentParams);
+        const res = this.translateService.getParsedResult(key, this.currentParams);
         if (isObservable(res)) {
           res.subscribe({next: onTranslation});
         } else {
