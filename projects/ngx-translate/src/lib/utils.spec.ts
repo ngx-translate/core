@@ -226,6 +226,14 @@ describe("Utils", () =>
         'key1': "value1",
         'key1.key2': "value2"
       }, 'key1.key2')).toEqual("value2");
+      expect(getValue({
+        'key1': {'key3': "value1"},
+        'key1.key2': "value2"
+      }, 'key1.key2')).toEqual("value2");
+      expect(getValue({
+        'key1': ["a","b","c"],
+        'key1.key2': "value2"
+      }, 'key1.key2')).toEqual("value2");
 
       expect(getValue({'key1.key2': {key3: "value3"}}, 'key1.key2')).toEqual({key3: "value3"});
     });
