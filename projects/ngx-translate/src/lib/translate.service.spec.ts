@@ -799,24 +799,18 @@ describe("TranslateService", () =>
   it("should be able to add new languages", () =>
   {
     translate.addLangs(["pl", "es"]);
-    expect(translate.getLangs()).toEqual(["pl", "es"]);
+    expect(translate.langs).toEqual(["pl", "es"]);
     translate.addLangs(["fr"]);
     translate.addLangs(["pl", "fr"]);
-    expect(translate.getLangs()).toEqual(["pl", "es", "fr"]);
+    expect(translate.langs).toEqual(["pl", "es", "fr"]);
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.use("en").subscribe(() =>
     {
-      expect(translate.getLangs()).toEqual(["pl", "es", "fr", "en"]);
+      expect(translate.langs).toEqual(["pl", "es", "fr", "en"]);
       translate.addLangs(["de"]);
-      expect(translate.getLangs()).toEqual(["pl", "es", "fr", "en", "de"]);
+      expect(translate.langs).toEqual(["pl", "es", "fr", "en", "de"]);
     });
-  });
-
-  it("should be able to set the langs property directly", () =>
-  {
-    translate.langs = ["pl", "es"];
-    expect(translate.getLangs()).toEqual(["pl", "es"]);
   });
 
   it("should be able to get the browserLang", () =>

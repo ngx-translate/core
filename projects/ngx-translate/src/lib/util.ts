@@ -76,12 +76,32 @@ export function isFunction(value: any):boolean {
   return typeof value === "function"
 }
 
+export function cloneDeep<T>(obj: Readonly<T>): T
+{
+  if (obj === null || typeof obj !== "object")
+  {
+    return obj;
+  }
 
-export function mergeDeep(target: any, source: any): any {
-  const output = Object.assign({}, target);
+  if (Array.isArray(obj)) {
+    return obj.map((item) => cloneDeep(item)) as unknown as T;
+  }
 
-  if (!isObject(target)) {
-    return mergeDeep({}, source);
+  const clonedObj: Record<string, any> = {};
+
+  Object.keys(obj).forEach((key) => {
+    clonedObj[key] = cloneDeep((obj as Record<string, any>)[key]);
+  });
+
+  return clonedObj as T;
+}
+
+export function mergeDeep(target: Readonly<any>, source: any): any {
+  const output = cloneDeep(target);
+
+  if (!isObject(target))
+  {
+    return cloneDeep(source)
   }
 
   if (isObject(target) && isObject(source)) {
@@ -140,11 +160,13 @@ export function getValue(target: any, key: string): any
 }
 
 /**
- * Gets a value from an object by composed key
+ * Sets a value on object using a dot separated key.
+ * This function modifies the object in place
  * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
  * @param target an object
  * @param key E.g. "a.b.c"
  * @param value to set
+ * @deprecated use insertValue() instead
  */
 export function setValue(target: any, key: string, value: any): void {
   const keys = key.split('.');
@@ -166,4 +188,23 @@ export function setValue(target: any, key: string, value: any): void {
   }
 }
 
+
+
+/**
+ * Sets a value on object using a dot separated key.
+ * Returns a clone of the object without modifying it
+ * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
+ * @param target an object
+ * @param key E.g. "a.b.c"
+ * @param value to set
+ */
+export function insertValue(target: Readonly<any>, key: string, value: any): any {
+  return mergeDeep(target, createNestedObject(key, value));
+}
+
+
+
+function createNestedObject(dotSeparatedKey: string, value: any): Record<string, any> {
+  return dotSeparatedKey.split('.').reduceRight((acc, key) => ({ [key]: acc }), value);
+}
 
