@@ -102,10 +102,16 @@ export function mergeDeep(target: any, source: any): any {
 
 
 /**
- * Gets a value from an object by composed key
- * getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'
- * @param target
- * @param key
+ * Retrieves a value from a nested object using a dot-separated key path.
+ *
+ * Example usage:
+ * ```ts
+ * getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA'); // returns 'valueI'
+ * ```
+ *
+ * @param target The source object from which to retrieve the value.
+ * @param key Dot-separated key path specifying the value to retrieve.
+ * @returns The value at the specified key path, or `undefined` if not found.
  */
 export function getValue(target: any, key: string): any
 {

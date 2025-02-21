@@ -35,7 +35,7 @@ describe('Parser', () => {
     });
 
     it('should handle edge cases: array', () => {
-      expect(parser.interpolate("This is an array {{ key1.key2 }}", {key1: {key2: ['A', 'B', 'C']}})).toEqual("This is an array A,B,C");
+      expect(parser.interpolate("This is an array {{ key1.key2 }}", {key1: {key2: ['A', 'B', 'C']}})).toEqual("This is an array A, B, C");
     });
 
     it('should handle edge cases: bool', () => {
@@ -43,10 +43,10 @@ describe('Parser', () => {
     });
 
     it('should handle edge cases: object', () => {
-      expect(parser.interpolate("This is a {{ key1.key2 }}", {key1: {key2: {key3: "value3"}}})).toEqual("This is a [object Object]");
+      expect(parser.interpolate("Object value: {{ key1.key2 }}", {key1: {key2: {key3: "value3"}}})).toEqual("Object value: {\"key3\":\"value3\"}");
     });
 
-    it('should handle edge cases: object', () => {
+    it('should handle edge cases: object with custom toString', () => {
       const object = {
         toString: () => "OBJECT A"
       }
