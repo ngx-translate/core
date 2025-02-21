@@ -182,30 +182,23 @@ export class TranslateService {
   /**
    * Sets the default language to use as a fallback
    */
-  public setDefaultLang(lang: string): void {
-    if (lang === this.defaultLang) {
-      return;
+  public setDefaultLang(lang: string): Observable<InterpolatableTranslationObject>
+  {
+    if (this.defaultLang == null)
+    {
+      // on init set the defaultLang immediately, but do not emit a change yet
+      this.store.setDefaultLang(lang, false);
     }
 
-    const pending = this.retrieveTranslations(lang);
-
-    if (typeof pending !== "undefined") {
-
-      if (this.defaultLang == null) {
-        // on init set the defaultLang immediately
-        // but do not emit the change yet
-        this.store.setDefaultLang(lang, false);
-      }
-
-      pending.pipe(take(1))
-        .subscribe(() => {
-          this.store.setDefaultLang(lang);
-        });
+    const pending = this.loadOrExtendLanguage(lang);
+    if (isObservable(pending))
+    {
+      pending.pipe(take(1)).subscribe(() => { this.store.setDefaultLang(lang); });
+      return pending;
     }
-    else {
-      // we already have this language
-      this.store.setDefaultLang(lang);
-    }
+
+    this.store.setDefaultLang(lang);
+    return of(this.store.getTranslations(lang));
   }
 
   /**
@@ -225,32 +218,37 @@ export class TranslateService {
     // where translation loads might complete in random order
     this.lastUseLanguage = lang;
 
-    // don't change the language if the language given is already selected
-    if (lang === this.currentLang) {
-      return of(this.store.getTranslations(lang));
-    }
-
-    // on init set the currentLang immediately
-    if (!this.currentLang) {
+    if (!this.currentLang)
+    {
+      // on init set the currentLang immediately, but do not emit a change yet
       this.store.setCurrentLang(lang, false);
     }
 
-    const pending = this.retrieveTranslations(lang);
-
-    if (isObservable(pending)) {
-
-      pending.pipe(take(1))
-        .subscribe(() => {
-          this.changeLang(lang);
-        });
-
+    const pending = this.loadOrExtendLanguage(lang);
+    if (isObservable(pending))
+    {
+      pending.pipe(take(1)).subscribe(() => { this.changeLang(lang); });
       return pending;
     }
-    else {
-      // we have this language, return an Observable
-      this.changeLang(lang);
-      return of(this.store.getTranslations(lang));
+
+    this.changeLang(lang);
+    return of(this.store.getTranslations(lang));
+  }
+
+
+
+  /**
+   * Retrieves the given translations
+   */
+  private loadOrExtendLanguage(lang: string): Observable<TranslationObject> | undefined {
+
+    // if this language is unavailable or extend is true, ask for it
+    if (!this.store.hasTranslationFor(lang) || this.extend) {
+      this._translationRequests[lang] = this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
+      return this._translationRequests[lang];
     }
+
+    return undefined;
   }
 
 
@@ -274,20 +272,6 @@ export class TranslateService {
     }
   }
 
-
-  /**
-   * Retrieves the given translations
-   */
-  private retrieveTranslations(lang: string): Observable<TranslationObject> | undefined {
-
-    // if this language is unavailable or extend is true, ask for it
-    if (!this.store.hasTranslationFor(lang) || this.extend) {
-      this._translationRequests[lang] = this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
-      return this._translationRequests[lang];
-    }
-
-    return undefined;
-  }
 
 
   private loadAndCompileTranslations(lang: string): Observable<InterpolatableTranslationObject> {
