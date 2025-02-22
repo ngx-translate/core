@@ -9,7 +9,7 @@ import {
   Translation,
   InterpolationParameters
 } from "./translate.service";
-import {equals, isDefined} from './util';
+import {equals, isDefinedAndNotNull} from './util';
 
 interface ExtendedNode extends Text {
   originalContent: string;
@@ -94,7 +94,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         if (forceUpdate) {
           node.lastKey = null;
         }
-        if(isDefined(node.lookupKey)) {
+        if(isDefinedAndNotNull(node.lookupKey)) {
           key = node.lookupKey;
         } else if (this.key) {
           key = this.key;
@@ -134,13 +134,13 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         if (!node.originalContent) {
           node.originalContent = this.getContent(node);
         }
-        node.currentValue = isDefined(res) ? res : (node.originalContent || key);
+        node.currentValue = isDefinedAndNotNull(res) ? res : (node.originalContent || key);
         // we replace in the original content to preserve spaces that we might have trimmed
         this.setContent(node, this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue));
         this._ref.markForCheck();
       };
 
-      if (isDefined(translations)) {
+      if (isDefinedAndNotNull(translations)) {
         const res = this.translateService.getParsedResult(key, this.currentParams);
         if (isObservable(res)) {
           res.subscribe({next: onTranslation});
@@ -154,11 +154,11 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
   }
 
   getContent(node: ExtendedNode): string {
-    return (isDefined(node.textContent) ? node.textContent : node.data) as string;
+    return (isDefinedAndNotNull(node.textContent) ? node.textContent : node.data) as string;
   }
 
   setContent(node: ExtendedNode, content: string): void {
-    if (isDefined(node.textContent)) {
+    if (isDefinedAndNotNull(node.textContent)) {
       node.textContent = content;
     } else {
       node.data = content;

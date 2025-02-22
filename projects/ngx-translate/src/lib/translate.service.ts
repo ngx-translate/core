@@ -1,12 +1,12 @@
 import {Inject, Injectable, InjectionToken} from "@angular/core";
 import {concat, forkJoin, isObservable, Observable, of, defer} from "rxjs";
 import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
-import {MissingTranslationHandler, MissingTranslationHandlerParams} from "./missing-translation-handler";
+import {MissingTranslationHandler} from "./missing-translation-handler";
 import {TranslateCompiler} from "./translate.compiler";
 import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
 import {TranslateStore} from "./translate.store";
-import {isDefined, isArray, isString, isDict, insertValue} from "./util";
+import {isDefinedAndNotNull, isArray, isString, isDict, insertValue} from "./util";
 
 export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOLATE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -189,7 +189,7 @@ export class TranslateService {
       // on init set the defaultLang immediately, but do not emit a change yet
       this.store.setDefaultLang(lang, false);
     }
-    
+
     const pending = this.loadOrExtendLanguage(lang);
     if (isObservable(pending))
     {
@@ -331,20 +331,16 @@ export class TranslateService {
   {
       const textToInterpolate = this.getTextToInterpolate(key);
 
-      let res: Translation | undefined;
+      if (isDefinedAndNotNull(textToInterpolate))
+      {
+          return this.runInterpolation(textToInterpolate, interpolateParams);
+      }
 
-      if (textToInterpolate !== undefined)
-      {
-          res = this.runInterpolation(textToInterpolate, interpolateParams);
-      }
-      else
-      {
-          const params: MissingTranslationHandlerParams = {key, translateService: this};
-          if (typeof interpolateParams !== 'undefined') {
-              params.interpolateParams = interpolateParams;
-          }
-          res = this.missingTranslationHandler.handle(params);
-      }
+      const res = this.missingTranslationHandler.handle({
+        key,
+        translateService: this,
+        ...(interpolateParams !== undefined && { interpolateParams })
+      });
 
       return res !== undefined ? res : key;
   }
@@ -358,19 +354,11 @@ export class TranslateService {
   {
     if(isArray(translations))
     {
-      return (translations as Translation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
+      return this.runInterpolationOnArray(translations, interpolateParams);
     }
     else if (isDict(translations))
     {
-      const result: TranslationObject = {};
-      for (const key in translations) {
-        const res = this.runInterpolation(translations[key], interpolateParams);
-        if(res !== undefined)
-        {
-          result[key] = res;
-        }
-      }
-      return result;
+      return this.runInterpolationOnDict(translations, interpolateParams);
     }
     else
     {
@@ -378,38 +366,61 @@ export class TranslateService {
     }
   }
 
+  private runInterpolationOnArray(translations: InterpolatableTranslation, interpolateParams: InterpolationParameters | undefined)
+  {
+    return (translations as Translation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
+  }
+
+  private runInterpolationOnDict(translations: InterpolatableTranslation, interpolateParams: InterpolationParameters | undefined)
+  {
+    const result: TranslationObject = {};
+    for (const key in translations)
+    {
+      const res = this.runInterpolation(translations[key], interpolateParams);
+      if (res !== undefined)
+      {
+        result[key] = res;
+      }
+    }
+    return result;
+  }
+
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject> {
+  public getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject>
+  {
+      return (key instanceof Array)  ? this.getParsedResultForArray(key, interpolateParams) :  this.getParsedResultForKey(key, interpolateParams);
+  }
 
-    // handle a bunch of keys
-    if (key instanceof Array) {
-      const result: Record<string, Translation|Observable<Translation>> = {};
+  private getParsedResultForArray(key: string[], interpolateParams: InterpolationParameters | undefined)
+  {
+    const result: Record<string, Translation | Observable<Translation>> = {};
 
-      let observables = false;
-      for (const k of key) {
-        result[k] = this.getParsedResultForKey(k, interpolateParams);
-        observables = observables || isObservable(result[k]);
-      }
-
-      if (!observables) {
-        return result as TranslationObject;
-      }
-
-      const sources: Observable<Translation>[] = key.map(k => makeObservable(result[k]));
-      return forkJoin(sources).pipe(
-        map((arr: (Translation)[]) => {
-          const obj: TranslationObject = {};
-          arr.forEach((value:Translation, index: number) => {
-            obj[key[index]] = value;
-          });
-          return obj;
-        })
-      );
+    let observables = false;
+    for (const k of key)
+    {
+      result[k] = this.getParsedResultForKey(k, interpolateParams);
+      observables = observables || isObservable(result[k]);
     }
 
-    return this.getParsedResultForKey(key, interpolateParams);
+    if (!observables)
+    {
+      return result as TranslationObject;
+    }
+
+    const sources: Observable<Translation>[] = key.map(k => makeObservable(result[k]));
+    return forkJoin(sources).pipe(
+      map((arr: (Translation)[]) =>
+      {
+        const obj: TranslationObject = {};
+        arr.forEach((value: Translation, index: number) =>
+        {
+          obj[key[index]] = value;
+        });
+        return obj;
+      })
+    );
   }
 
   /**
@@ -417,7 +428,7 @@ export class TranslateService {
    * @returns the translated key, or an object of translated keys
    */
   public get(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
-    if (!isDefined(key) || !key.length) {
+    if (!isDefinedAndNotNull(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
     // check if we are loading a new translation to use
@@ -438,7 +449,7 @@ export class TranslateService {
    * @returns A stream of the translated key, or an object of translated keys
    */
   public getStreamOnTranslationChange(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
-    if (!isDefined(key) || !key.length) {
+    if (!isDefinedAndNotNull(key) || !key.length) {
       throw new Error(`Parameter "key" is required and cannot be empty`);
     }
 
@@ -459,7 +470,7 @@ export class TranslateService {
    * @returns A stream of the translated key, or an object of translated keys
    */
   public stream(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation|TranslationObject> {
-    if (!isDefined(key) || !key.length) {
+    if (!isDefinedAndNotNull(key) || !key.length) {
       throw new Error(`Parameter "key" required`);
     }
 
@@ -480,7 +491,7 @@ export class TranslateService {
    */
   public instant(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject
   {
-    if (!isDefined(key) || key.length === 0) {
+    if (!isDefinedAndNotNull(key) || key.length === 0) {
       throw new Error('Parameter "key" is required and cannot be empty');
     }
 

@@ -50,7 +50,7 @@ export function equals(o1: any, o2: any): boolean {
   return false;
 }
 
-export function isDefined(value: any): boolean {
+export function isDefinedAndNotNull(value: any): boolean {
   return typeof value !== 'undefined' && value !== null;
 }
 
@@ -142,8 +142,8 @@ export function getValue(target: any, key: string): any
   {
     key += keys.shift();
     if (
-      isDefined(target) &&
-      (isDefined(target[key]) || target[key] === null) &&
+      isDefinedAndNotNull(target) &&
+      (isDefinedAndNotNull(target[key]) || target[key] === null) &&
       (isDict(target[key]) || isArray(target[key]) || !keys.length)
     )
     {

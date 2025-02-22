@@ -106,13 +106,6 @@ export class TranslateStore
         return this._onDefaultLangChange.asObservable();
     }
 
-    /**
-     * Update the list of available languages
-     */
-    public updateLanguages(): void {
-        this.addLanguages(Object.keys(this.translations));
-    }
-
     public addLanguages(languages: Language[]): void
     {
         this.languages = Array.from(new Set([...this.languages, ...languages]));
