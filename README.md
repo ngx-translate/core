@@ -238,6 +238,42 @@ export function createTranslateLoader(http: HttpClient) {
 export class AppModule { }
 ```
 
+##### Avoiding side-effects with HttpInterceptors
+
+If you are using custom `HttpInterceptors` (e.g. provided by an authentication library), you should bypass all `HttpInterceptors` when loading translation files.
+
+This can be achieved using the `HttpBackend` class, as described [here](https://github.com/angular/angular/issues/20203#issuecomment-368680437).
+
+```ts
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {HttpBackend, HttpClientModule, HttpClient} from '@angular/common/http';
+import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {AppComponent} from './app';
+
+// AoT requires an exported function for factories
+export function HttpLoaderFactory(httpBackend: HttpBackend) {
+    return new TranslateHttpLoader(new HttpClient(httpBackend));
+}
+
+@NgModule({
+    imports: [
+        BrowserModule,
+        HttpClientModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpBackend]
+            }
+        })
+    ],
+    bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
 #### 2. Define the `default language` for the application
 
 ```ts
