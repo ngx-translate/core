@@ -27,7 +27,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
   }
 
-  updateValue(key: string, interpolateParams?: object, translations?: InterpolatableTranslationObject): void {
+  updateValue(key: string, interpolateParams?: InterpolationParameters, translations?: InterpolatableTranslationObject): void {
     const onTranslation = (res: Translation) => {
       this.value = res !== undefined ? res : key;
       this.lastKey = key;
@@ -45,7 +45,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   }
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  transform(query: string, ...args: any[]): any {
+  transform(query: string | undefined | null, ...args: any[]): Translation {
     if (!query || !query.length) {
       return query;
     }
@@ -55,7 +55,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       return this.value;
     }
 
-    let interpolateParams: object | undefined = undefined;
+    let interpolateParams: InterpolationParameters | undefined = undefined;
     if (isDefinedAndNotNull(args[0]) && args.length) {
       if (isString(args[0]) && args[0].length) {
         // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
