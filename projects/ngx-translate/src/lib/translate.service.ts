@@ -13,8 +13,7 @@ export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
 export const DEFAULT_LANGUAGE = new InjectionToken<string>('DEFAULT_LANGUAGE');
 export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type InterpolationParameters = Record<string, any>;
+export type InterpolationParameters = Record<string, unknown>;
 
 export type Translation =
   string |

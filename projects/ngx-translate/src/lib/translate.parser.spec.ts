@@ -29,7 +29,7 @@ describe('Parser', () => {
     });
 
     it('should support interpolation functions', () => {
-      const uc:InterpolateFunction = (params) => (params?.['x'] ?? '').toUpperCase() + ' YOU!';
+      const uc:InterpolateFunction = (params) => ((params?.['x'] ?? '') as string).toUpperCase() + ' YOU!';
 
       expect(parser.interpolate( uc , {"x":'bless'})).toBe('BLESS YOU!');
     });
