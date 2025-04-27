@@ -9,6 +9,13 @@
     "i18n",
     "translation"
   ],
+  "homepage": "https://github.com/ngx-translate/core#readme",
+  "bugs": {
+    "url": "https://github.com/ngx-translate/core/issues"
+  },
+  "repository": {
+    "url": "https://github.com/ngx-translate/core"
+  },
   "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
   "license": "MIT",
   "peerDependencies": {
