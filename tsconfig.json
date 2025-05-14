@@ -13,11 +13,9 @@
     "isolatedModules": true,
     "paths": {
       "@ngx-translate/http-loader": [
-        "./dist/http-loader"
+        "./projects/http-loader/src/public-api.ts"
       ],
-      "@ngx-translate/core": [
-        "./dist/ngx-translate"
-      ]
+      "@ngx-translate/core": ["./projects/ngx-translate/src/public-api.ts"]
     },
     "esModuleInterop": true,
     "sourceMap": true,
@@ -27,10 +25,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
+    "lib": ["ES2022", "dom"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
