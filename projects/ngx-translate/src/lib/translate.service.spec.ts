@@ -1103,7 +1103,7 @@ describe('TranslateService (isolate)', () => {
 
   @Component({
     standalone: true,
-    selector: "lib-isolated-child",
+    selector: "app-isolated-child",
     template: `
       <div class="isolated-child">{{ 'test' | translate }}</div>
     `,
@@ -1130,7 +1130,7 @@ describe('TranslateService (isolate)', () => {
 
   @Component({
     standalone: true,
-    selector: "lib-shared-child",
+    selector: "app-shared-child",
     template: `
       <div class="shared-child">{{ 'test' | translate }}</div>
     `,
@@ -1148,11 +1148,11 @@ describe('TranslateService (isolate)', () => {
   @Component({
     standalone: true,
     imports: [RouterOutlet, IsolatedChildComponent, SharedChildComponent, TranslatePipe],
-    selector: "lib-test",
+    selector: "app-test",
     template: `
       <div class="root">{{ 'test' | translate }}</div>
-      <lib-isolated-child/>
-      <lib-shared-child/>
+      <app-isolated-child/>
+      <app-shared-child/>
     `
   })
   class AppTestComponent {
