@@ -41,34 +41,41 @@ Simple example using ngx-translate:
 https://stackblitz.com/github/ngx-translate/example
 
 ### Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Import the TranslateModule](#1-import-the-translatemodule)
-    * [SharedModule](#sharedmodule)
-    * [Lazy loaded modules](#lazy-loaded-modules)
-    * [Configuration](#configuration)
-    * [AoT](#aot)
-  * [Define the default language for the application](#2-define-the-default-language-for-the-application)
-  * [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
-  * [Define the translations](#4-define-the-translations)
-  * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
-  * [Use HTML tags](#6-use-html-tags)
-* [API](#api)
-  * [TranslateService](#translateservice)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Write & use your own loader](#write--use-your-own-loader)
-      * [Example](#example)
-    * [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
-    * [How to handle missing translations](#how-to-handle-missing-translations)
-      * [Example](#example-1)
-  * [Parser](#parser)
-    * [Methods](#methods)
-* [FAQ](#faq)
-  * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
-* [Plugins](#plugins)
-* [Editors](#editors)
-* [Additional Framework Support](#additional-framework-support)
+- [@ngx-translate/core  ](#ngx-translatecore--)
+  - [Angular 16, 17, 18, 19+](#angular-16-17-18-19)
+  - [Angular \<=15](#angular-15)
+    - [Table of Contents](#table-of-contents)
+    - [Installation](#installation)
+    - [Usage](#usage)
+      - [1. Import the `TranslateModule`:](#1-import-the-translatemodule)
+        - [SharedModule](#sharedmodule)
+        - [Lazy loaded modules](#lazy-loaded-modules)
+        - [Configuration](#configuration)
+        - [AoT](#aot)
+      - [2. Define the `default language` for the application](#2-define-the-default-language-for-the-application)
+      - [3. Init the `TranslateService` for your application:](#3-init-the-translateservice-for-your-application)
+      - [4. Define the translations:](#4-define-the-translations)
+      - [5. Use the service, the pipe or the directive:](#5-use-the-service-the-pipe-or-the-directive)
+      - [6. Use HTML tags:](#6-use-html-tags)
+    - [API](#api)
+    - [TranslateService](#translateservice)
+      - [Properties:](#properties)
+      - [Methods:](#methods)
+      - [Write \& use your own loader](#write--use-your-own-loader)
+        - [Example](#example)
+      - [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
+      - [How to handle missing translations](#how-to-handle-missing-translations)
+        - [Example:](#example-1)
+    - [Parser](#parser)
+      - [Methods:](#methods-1)
+  - [FAQ](#faq)
+      - [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
+      - [I want to hot reload the translations in my application but `reloadLang` does not work](#i-want-to-hot-reload-the-translations-in-my-application-but-reloadlang-does-not-work)
+  - [Plugins](#plugins)
+  - [Editors](#editors)
+    - [Extensions](#extensions)
+      - [VScode](#vscode)
+  - [Additional Framework Support](#additional-framework-support)
 
 
 ### Installation
@@ -170,7 +177,7 @@ export class LazyLoadedModule { }
 
 By default, there is no loader available. You can add translations manually using `setTranslation` but it is better to use a loader.
 You can write your own loader, or import an existing one.
-For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using HttpClient.
+For example you can use the [`TranslateHttpLoader`](https://github.com/ngx-translate/http-loader) that will load translations from files using HttpBackend.
 
 To use it, you need to install the http-loader package from @ngx-translate:
 
@@ -185,14 +192,14 @@ Here is how you would use the `TranslateHttpLoader` to load translations from "/
 ```ts
 import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
-import {HttpClientModule, HttpClient} from '@angular/common/http';
+import {HttpClientModule, HttpBackend} from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {AppComponent} from './app';
 
 // AoT requires an exported function for factories
-export function HttpLoaderFactory(http: HttpClient) {
-    return new TranslateHttpLoader(http);
+export function HttpLoaderFactory(httpBackend: HttpBackend) {
+    return new TranslateHttpLoader(httpBackend);
 }
 
 @NgModule({
@@ -203,7 +210,7 @@ export function HttpLoaderFactory(http: HttpClient) {
             loader: {
                 provide: TranslateLoader,
                 useFactory: HttpLoaderFactory,
-                deps: [HttpClient]
+                deps: [HttpBackend]
             }
         })
     ],
@@ -217,8 +224,8 @@ export class AppModule { }
 If you want to configure a custom `TranslateLoader` while using [AoT compilation](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html) or [Ionic](http://ionic.io/), you must use an exported function instead of an inline function.
 
 ```ts
-export function createTranslateLoader(http: HttpClient) {
-    return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+export function createTranslateLoader(httpBackend: HttpBackend) {
+    return new TranslateHttpLoader(httpBackend, './assets/i18n/', '.json');
 }
 
 @NgModule({
@@ -229,7 +236,7 @@ export function createTranslateLoader(http: HttpClient) {
             loader: {
                 provide: TranslateLoader,
                 useFactory: (createTranslateLoader),
-                deps: [HttpClient]
+                deps: [HttpBackend]
             }
         })
     ],

@@ -1,8 +1,8 @@
-import {HttpClient, provideHttpClient} from "@angular/common/http";
-import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
-import {TestBed} from "@angular/core/testing";
-import {TranslateLoader, provideTranslateService, TranslateService, Translation} from "@ngx-translate/core";
-import {TranslateHttpLoader} from "../public-api";
+import { HttpBackend, provideHttpClient } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { TestBed } from "@angular/core/testing";
+import { provideTranslateService, TranslateLoader, TranslateService, Translation } from "@ngx-translate/core";
+import { TranslateHttpLoader } from "../public-api";
 
 describe('TranslateLoader', () => {
   let translate: TranslateService;
@@ -17,8 +17,8 @@ describe('TranslateLoader', () => {
         provideTranslateService({
             loader: {
               provide: TranslateLoader,
-              useFactory: (httpClient: HttpClient) => new TranslateHttpLoader(httpClient),
-              deps: [HttpClient]
+              useFactory: (httpBackend: HttpBackend) => new TranslateHttpLoader(httpBackend),
+              deps: [HttpBackend]
             }
           }
         )
