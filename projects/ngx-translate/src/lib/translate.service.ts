@@ -1,12 +1,12 @@
-import {Inject, Injectable, InjectionToken} from "@angular/core";
-import {concat, forkJoin, isObservable, Observable, of, defer} from "rxjs";
-import {concatMap, map, shareReplay, switchMap, take} from "rxjs/operators";
-import {MissingTranslationHandler} from "./missing-translation-handler";
-import {TranslateCompiler} from "./translate.compiler";
-import {TranslateLoader} from "./translate.loader";
-import {InterpolateFunction, TranslateParser} from "./translate.parser";
-import {TranslateStore} from "./translate.store";
-import {isDefinedAndNotNull, isArray, isString, isDict, insertValue} from "./util";
+import { Inject, Injectable, InjectionToken } from "@angular/core";
+import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
+import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
+import { MissingTranslationHandler } from "./missing-translation-handler";
+import { TranslateCompiler } from "./translate.compiler";
+import { TranslateLoader } from "./translate.loader";
+import { InterpolateFunction, TranslateParser } from "./translate.parser";
+import { TranslateStore } from "./translate.store";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOLATE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -39,11 +39,8 @@ export type InterpolatableTranslation =
   InterpolatableTranslation[] |
   InterpolateFunction |
   InterpolatableTranslationObject |
-
-  // required to prevent error "Type instantiation is excessively deep and possibly infinite."
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any
-  ;
+  undefined |
+  null;
 
 
 // using Record<> does not work because TS does not support recursive definitions
@@ -352,18 +349,21 @@ export class TranslateService {
 
   private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation
   {
+    if(!isDefinedAndNotNull(translations)) {
+      return;
+    }
+
     if(isArray(translations))
     {
       return this.runInterpolationOnArray(translations, interpolateParams);
     }
-    else if (isDict(translations))
+
+    if (isDict(translations))
     {
       return this.runInterpolationOnDict(translations, interpolateParams);
     }
-    else
-    {
-      return this.parser.interpolate(translations, interpolateParams);
-    }
+
+    return this.parser.interpolate(translations, interpolateParams);
   }
 
   private runInterpolationOnArray(translations: InterpolatableTranslation, interpolateParams: InterpolationParameters | undefined)
@@ -371,7 +371,7 @@ export class TranslateService {
     return (translations as Translation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
   }
 
-  private runInterpolationOnDict(translations: InterpolatableTranslation, interpolateParams: InterpolationParameters | undefined)
+  private runInterpolationOnDict(translations: InterpolatableTranslationObject, interpolateParams: InterpolationParameters | undefined)
   {
     const result: TranslationObject = {};
     for (const key in translations)

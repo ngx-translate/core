@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { InterpolatableTranslationObject } from './translate.service';
+
 /**
  * Determines if two objects or two values are equivalent.
  *
@@ -50,29 +52,29 @@ export function equals(o1: any, o2: any): boolean {
   return false;
 }
 
-export function isDefinedAndNotNull(value: any): boolean {
+export function isDefinedAndNotNull<T>(value: T | null | undefined): value is T {
   return typeof value !== 'undefined' && value !== null;
 }
 
 
-export function isDict(value: any): boolean {
+export function isDict(value: any): value is InterpolatableTranslationObject {
   return isObject(value) && !isArray(value) && value !== null;
 }
 
 
-export function isObject(value: any): boolean {
+export function isObject(value: any): value is Record<string, any> {
   return typeof value === 'object';
 }
 
-export function isArray(value: any): boolean {
+export function isArray(value: any): value is any[] {
   return Array.isArray(value);
 }
 
-export function isString(value: any): boolean {
+export function isString(value: any): value is string {
   return typeof value === 'string';
 }
 
-export function isFunction(value: any):boolean {
+export function isFunction(value: any): boolean {
   return typeof value === "function"
 }
 
@@ -211,4 +213,3 @@ export function insertValue(target: Readonly<any>, key: string, value: any): any
 function createNestedObject(dotSeparatedKey: string, value: any): Record<string, any> {
   return dotSeparatedKey.split('.').reduceRight((acc, key) => ({ [key]: acc }), value);
 }
-

@@ -1,14 +1,18 @@
-import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Observable, of, timer, zip, defer, EMPTY} from "rxjs";
-import {take, toArray, first, map} from "rxjs/operators";
+import { Component } from "@angular/core";
+import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { RouterOutlet } from "@angular/router";
+import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
+import { first, map, take, toArray } from "rxjs/operators";
 import {
   LangChangeEvent,
+  provideTranslateService,
   TranslateLoader,
+  TranslateModule,
+  TranslatePipe,
   TranslateService,
-  TranslationChangeEvent, TranslationObject, Translation, provideTranslateService, TranslatePipe, TranslateModule
+  Translation,
+  TranslationChangeEvent, TranslationObject
 } from "../public-api";
-import {Component} from "@angular/core";
-import {RouterOutlet} from "@angular/router";
 
 
 let translations: TranslationObject = {"TEST": "This is a test"};
@@ -711,7 +715,7 @@ describe("TranslateService", () =>
       translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
       {
         expect(event.translations).toBeDefined();
-        expect((event.translations)["TEST"]).toEqual("This is a test");
+        expect((event.translations)["TEST"] as string).toEqual("This is a test");
         expect(event.lang).toBe("en");
       });
       translate.set("TEST", "This is a test", "en");
@@ -725,7 +729,7 @@ describe("TranslateService", () =>
       translate.onTranslationChange.subscribe((event: TranslationChangeEvent) =>
       {
         expect(event.translations).toBeDefined();
-        expect((event.translations)["TEST"]).toEqual("This is a test");
+        expect((event.translations)["TEST"] as string).toEqual("This is a test");
         expect(event.lang).toBe("en");
       });
       translate.set("TEST", "This is a test");
@@ -749,7 +753,7 @@ describe("TranslateService", () =>
     translate.onLangChange.subscribe((event: LangChangeEvent) =>
     {
       expect(event.lang).toBe("en");
-      expect(event.translations).toEqual(tr);
+      expect(event.translations as any).toEqual(tr);
     });
     translate.use("en");
   });
