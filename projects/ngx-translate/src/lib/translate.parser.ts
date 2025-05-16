@@ -69,8 +69,7 @@ export class TranslateDefaultParser extends TranslateParser
    * @param value The value to format.
    * @returns A string representation of the value.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected formatValue(value: any): string|undefined
+  protected formatValue(value: unknown): string|undefined
   {
     if (isString(value)) {
       return value;
