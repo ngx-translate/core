@@ -68,7 +68,7 @@ describe('MissingTranslationHandler', () => {
     translate.get('nonExistingKey').subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
       //test that the instance of the last called argument is string
-      expect(res).toEqual('handled');
+      expect(res as string).toEqual('handled');
     });
   });
 
@@ -81,7 +81,7 @@ describe('MissingTranslationHandler', () => {
     translate.get('nonExistingKey', interpolateParams).subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({interpolateParams: interpolateParams}));
       //test that the instance of the last called argument is string
-      expect(res).toEqual('handled');
+      expect(res as string).toEqual('handled');
     });
   });
 
@@ -95,7 +95,7 @@ describe('MissingTranslationHandler', () => {
              .subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({translateService: translate}));
       //test that the instance of the last called argument is string
-      expect(res).toEqual('handled');
+      expect(res as string).toEqual('handled');
     });
   });
 
@@ -114,7 +114,7 @@ describe('MissingTranslationHandler', () => {
 
     translate.get('nonExistingKey').subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
-      expect(res).toEqual('nonExistingKey');
+      expect(res as string).toEqual('nonExistingKey');
     });
   });
 
@@ -133,7 +133,7 @@ describe('MissingTranslationHandler', () => {
     translate.use('en');
     spyOn(missingTranslationHandler, 'handle').and.callThrough();
 
-    expect(translate.instant('nonExistingKey')).toEqual('handled');
+    expect(translate.instant('nonExistingKey') as string).toEqual('handled');
     expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
   });
 
@@ -144,7 +144,7 @@ describe('MissingTranslationHandler', () => {
 
     translate.get('nonExistingKey').subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'nonExistingKey'}));
-      expect(res).toEqual('handled: nonExistingKey');
+      expect(res as string).toEqual('handled: nonExistingKey');
     });
   });
 
@@ -161,7 +161,7 @@ describe('MissingTranslationHandler', () => {
 
     translate.get(Object.keys(tr)).subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledTimes(3);
-      expect(res).toEqual(tr);
+      expect(res as object).toEqual(tr);
     });
   });
 
@@ -170,7 +170,7 @@ describe('MissingTranslationHandler', () => {
     translate.use('en');
     spyOn(missingTranslationHandler, 'handle').and.callThrough();
 
-    expect(translate.instant('nonExistingKey')).toEqual('nonExistingKey');
+    expect(translate.instant('nonExistingKey') as string).toEqual('nonExistingKey');
   });
 
   it('should not wait for the MissingTranslationHandler when it returns an observable & we use instant with an array', () => {
@@ -184,7 +184,7 @@ describe('MissingTranslationHandler', () => {
     translate.use('en');
     spyOn(missingTranslationHandler, 'handle').and.callThrough();
 
-    expect(translate.instant(Object.keys(tr))).toEqual({
+    expect(translate.instant(Object.keys(tr)) as object).toEqual({
       nonExistingKey1: 'nonExistingKey1',
       nonExistingKey2: 'nonExistingKey2',
       nonExistingKey3: 'nonExistingKey3'
@@ -200,7 +200,7 @@ describe('MissingTranslationHandler', () => {
     translate.get('TEST').subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledWith(jasmine.objectContaining({key: 'TEST'}));
       //test that the instance of the last called argument is string
-      expect(res).toEqual('handled');
+      expect(res as string).toEqual('handled');
     });
   });
 
@@ -211,7 +211,7 @@ describe('MissingTranslationHandler', () => {
 
     spyOn(missingTranslationHandler, 'handle').and.callThrough();
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+      expect(res as string).toEqual('This is a test');
     });
   });
 });

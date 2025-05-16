@@ -48,18 +48,18 @@ describe('TranslateCompiler', () => {
 
     it('should use the compiler on loading translations', () => {
       translate.get('LOAD').subscribe((res: Translation) => {
-        expect(res).toBe('This is a test');
+        expect(res as string).toBe('This is a test');
       });
     });
 
     it('should use the compiler on manually adding a translation object', () => {
       translate.setTranslation('en', {'SET-TRANSLATION': 'A manually added translation'});
-      expect(translate.instant('SET-TRANSLATION')).toBe('A manually added translation');
+      expect(translate.instant('SET-TRANSLATION') as string).toBe('A manually added translation');
     });
 
     it('should use the compiler on manually adding a single translation', () => {
       translate.set('SET', 'Another manually added translation', 'en');
-      expect(translate.instant('SET')).toBe('Another manually added translation');
+      expect(translate.instant('SET') as string).toBe('Another manually added translation');
     });
   });
 
@@ -101,18 +101,18 @@ describe('TranslateCompiler', () => {
 
     it('should use the compiler on loading translations', () => {
       translate.get('LOAD').subscribe((res: Translation) => {
-        expect(res).toBe('This is a test|compiled');
+        expect(res as string).toBe('This is a test|compiled');
       });
     });
 
     it('should use the compiler on manually adding a translation object', () => {
       translate.setTranslation('en', {'SET-TRANSLATION': 'A manually added translation'});
-      expect(translate.instant('SET-TRANSLATION')).toBe('A manually added translation|compiled');
+      expect(translate.instant('SET-TRANSLATION') as string).toBe('A manually added translation|compiled');
     });
 
     it('should use the compiler on manually adding a single translation', () => {
       translate.set('SET', 'Another manually added translation', 'en');
-      expect(translate.instant('SET')).toBe('Another manually added translation|compiled');
+      expect(translate.instant('SET') as string).toBe('Another manually added translation|compiled');
     });
   });
 });

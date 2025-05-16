@@ -6,7 +6,7 @@ import {
   TranslateService,
   TranslationObject,
   Translation,
-  provideTranslateService
+  provideTranslateService, InterpolatableTranslationObject
 } from "../public-api";
 import {Injectable} from "@angular/core";
 
@@ -41,7 +41,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+      expect(res as string).toEqual('This is a test');
     });
   });
 
@@ -70,7 +70,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the CustomLoader
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is also a test');
+      expect(res as string).toEqual('This is also a test');
     });
   });
 
@@ -88,8 +88,8 @@ describe('TranslateLoader', () => {
     expect(translate.currentLoader).toBeDefined();
     expect(translate.currentLoader instanceof TranslateFakeLoader).toBeTruthy();
 
-    translate.use('en').subscribe((res: Translation) => {
-      expect(res).toEqual({});
+    translate.use('en').subscribe((res: InterpolatableTranslationObject) => {
+      expect(res as object).toEqual({});
     });
   });
 

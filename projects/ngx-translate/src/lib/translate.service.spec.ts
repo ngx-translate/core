@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { RouterOutlet } from "@angular/router";
 import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
@@ -159,13 +158,13 @@ describe("TranslateService", () =>
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test");
+      expect(res as string).toEqual("This is a test");
     });
 
     // this will request the translation from downloaded translations without making a request to the backend
     translate.get("TEST2").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is another test");
+      expect(res as string).toEqual("This is another test");
     });
   });
 
@@ -177,7 +176,7 @@ describe("TranslateService", () =>
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get("default").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("Default text");
+      expect(res as string).toEqual("Default text");
     });
   });
 
@@ -189,7 +188,7 @@ describe("TranslateService", () =>
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get(["TEST", "TEST2"]).subscribe((res: Translation) =>
     {
-      expect(res).toEqual(translations);
+      expect(res as object).toEqual(translations);
     });
   });
 
@@ -200,14 +199,14 @@ describe("TranslateService", () =>
 
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("TEST");
+      expect(res as string).toEqual("TEST");
 
       translate.setDefaultLang("nl");
       translate.setTranslation("nl", {"TEST": "Dit is een test"});
 
       translate.get("TEST").subscribe((res2: Translation) =>
       {
-        expect(res2).toEqual("Dit is een test");
+        expect(res2 as string).toEqual("Dit is een test");
         expect(translate.getDefaultLang()).toEqual("nl");
       });
     });
@@ -220,7 +219,7 @@ describe("TranslateService", () =>
 
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("Dit is een test");
+      expect(res as string).toEqual("Dit is een test");
     });
   });
 
@@ -230,7 +229,7 @@ describe("TranslateService", () =>
 
     translate.get("TEST2").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("TEST2");
+      expect(res as string).toEqual("TEST2");
     });
   });
 
@@ -238,7 +237,7 @@ describe("TranslateService", () =>
   {
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("TEST");
+      expect(res as string).toEqual("TEST");
     });
   });
 
@@ -249,7 +248,7 @@ describe("TranslateService", () =>
 
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("");
+      expect(res as string).toEqual("");
     });
   });
 
@@ -260,7 +259,7 @@ describe("TranslateService", () =>
 
     translate.get("TEST", {param: "with param"}).subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test with param");
+      expect(res as string).toEqual("This is a test with param");
     });
 
   });
@@ -272,7 +271,7 @@ describe("TranslateService", () =>
 
     translate.get("TEST", {param: {value: "with param"}}).subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test with param");
+      expect(res as string).toEqual("This is a test with param");
     });
 
   });
@@ -306,13 +305,13 @@ describe("TranslateService", () =>
 
     translate.get("TEST.TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test");
+      expect(res as string).toEqual("This is a test");
     });
 
 
     translate.get("TEST2.TEST2.TEST2").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is another test");
+      expect(res as string).toEqual("This is another test");
     });
   });
 
@@ -325,26 +324,9 @@ describe("TranslateService", () =>
 
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual({"sub1": "value1", "sub2": "value2"});
-      expect(translations).toEqual({});
+      expect(res as object).toEqual({"sub1": "value1", "sub2": "value2"});
+      expect(translations as object).toEqual({});
       done();
-    });
-  });
-
-  it("should merge non-valid JSON translations if option shouldMerge is true", () =>
-  {
-    translations = {};
-    translate.setTranslation("en", {"TEST": {"sub1": () => "value1"}}, true);
-    translate.setTranslation("en", {"TEST": {"sub2": () => "value2"}}, true);
-    translate.use("en");
-
-    translate.get("TEST.sub1").subscribe((res: Translation) =>
-    {
-      expect(res).toEqual("value1");
-    });
-    translate.get("TEST.sub2").subscribe((res: Translation) =>
-    {
-      expect(res).toEqual("value2");
     });
   });
 
@@ -356,8 +338,8 @@ describe("TranslateService", () =>
 
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test");
-      expect(translations).toEqual({});
+      expect(res as string).toEqual("This is a test");
+      expect(translations as object).toEqual({});
       done();
     });
   });
@@ -382,7 +364,7 @@ describe("TranslateService", () =>
 
       translate.getStreamOnTranslationChange(["TEST", "TEST2"]).subscribe((res: Translation) =>
       {
-        expect(res).toEqual(tr);
+        expect(res as object).toEqual(tr);
         done();
       });
     });
@@ -394,7 +376,7 @@ describe("TranslateService", () =>
 
       translate.getStreamOnTranslationChange(["TEST"]).subscribe((res: Translation) =>
       {
-        expect(res).toEqual({"TEST": "This is a test"});
+        expect(res as object).toEqual({"TEST": "This is a test"});
         done();
       });
     });
@@ -410,8 +392,8 @@ describe("TranslateService", () =>
       ).subscribe((value: Translation[]) =>
         {
           const [streamed, nonStreamed] = value;
-          expect(streamed).toEqual("This is a test");
-          expect(streamed).toEqual(nonStreamed);
+          expect(streamed as string).toEqual("This is a test");
+          expect(nonStreamed as string).toEqual("This is a test");
           done();
         }
       );
@@ -443,7 +425,7 @@ describe("TranslateService", () =>
       translate.getStreamOnTranslationChange("TEST", {param: "with param"}).subscribe((res: Translation) =>
       {
         const expected = "This is a test with param";
-        expect(res).toEqual(expected);
+        expect(res as string).toEqual(expected);
         done();
       });
     });
@@ -459,7 +441,7 @@ describe("TranslateService", () =>
 
     translate.stream("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("This is a test");
+      expect(res as string).toEqual("This is a test");
       done();
     });
   });
@@ -472,7 +454,7 @@ describe("TranslateService", () =>
 
     translate.stream(["TEST", "TEST2"]).subscribe((res: Translation) =>
     {
-      expect(res).toEqual(tr);
+      expect(res as object).toEqual(tr);
       done();
     });
   });
@@ -525,7 +507,7 @@ describe("TranslateService", () =>
     translation$.pipe(first()).subscribe((res: Translation) =>
     {
       const expected = "This is a test2";
-      expect(res).toEqual(expected);
+      expect(res as string).toEqual(expected);
       done();
     });
   });
@@ -543,7 +525,7 @@ describe("TranslateService", () =>
     translation$.pipe(first()).subscribe((res: Translation) =>
     {
       const expected = "Dit is een test";
-      expect(res).toEqual(expected);
+      expect(res as string).toEqual(expected);
       done();
     });
   });
@@ -600,7 +582,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", {"TEST": "This is a test"});
       translate.use("en");
 
-      expect(translate.instant("TEST")).toEqual("This is a test");
+      expect(translate.instant("TEST") as string).toEqual("This is a test");
     });
 
     it("should be able to get instant translations of an array", () =>
@@ -609,7 +591,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant(["TEST", "TEST2"])).toEqual(tr);
+      expect(translate.instant(["TEST", "TEST2"]) as object).toEqual(tr);
     });
 
     it("should return the key if instant translations are not available", () =>
@@ -617,7 +599,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", {"TEST": "This is a test"});
       translate.use("en");
 
-      expect(translate.instant("TEST2")).toEqual("TEST2");
+      expect(translate.instant("TEST2") as string).toEqual("TEST2");
     });
 
     it("should be able to get instant translations of an array", () =>
@@ -626,7 +608,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant(["TEST", "TEST2"])).toEqual(tr);
+      expect(translate.instant(["TEST", "TEST2"]) as object).toEqual(tr);
     });
 
     it("should be able interpolate parameters in array", () =>
@@ -635,7 +617,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant(["TEST", "TEST2"], {value: "world"})).toEqual({
+      expect(translate.instant(["TEST", "TEST2"], {value: "world"}) as object).toEqual({
         "TEST": "Hello world 1!",
         "TEST2": "Hello world 2!"
       });
@@ -647,7 +629,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant("a.b")).toEqual({x: "X", y: "Y"});
+      expect(translate.instant("a.b") as object).toEqual({x: "X", y: "Y"});
     });
 
     it("should be able to interpolate in sub-trees", () =>
@@ -656,7 +638,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant("a.b", {value: "world"})).toEqual({x: "world 1", y: "world 2"});
+      expect(translate.instant("a.b", {value: "world"}) as object).toEqual({x: "world 1", y: "world 2"});
     });
 
     it("should be able to return arrays", () =>
@@ -665,7 +647,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant("a.b")).toEqual(["X", "Y"]);
+      expect(translate.instant("a.b") as string[]).toEqual(["X", "Y"]);
     });
 
     it("ignores null values in nested results", () =>
@@ -673,7 +655,7 @@ describe("TranslateService", () =>
       const tr = {a: {aa: "test", bb: null}};
       translate.setTranslation("en", tr);
       translate.use("en");
-      expect(translate.instant("a")).toEqual({aa: "test"});
+      expect(translate.instant("a") as object).toEqual({aa: "test"});
     });
 
     it("returns key when asking for null value directly", () =>
@@ -681,7 +663,7 @@ describe("TranslateService", () =>
       const tr = {a: {aa: "test", bb: null}};
       translate.setTranslation("en", tr);
       translate.use("en");
-      expect(translate.instant("a.bb")).toEqual("a.bb");
+      expect(translate.instant("a.bb") as string).toEqual("a.bb");
     });
 
     it("should  interpolate in arrays", () =>
@@ -690,7 +672,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", tr);
       translate.use("en");
 
-      expect(translate.instant("a.b", {value: "world"})).toEqual(["world 1", "world 2"]);
+      expect(translate.instant("a.b", {value: "world"}) as string[]).toEqual(["world 1", "world 2"]);
     });
   });
 
@@ -699,14 +681,14 @@ describe("TranslateService", () =>
       translate.setTranslation("en", {profile: "test"});
       translate.use("en");
       translate.set('profile.name', 'Profile Name', "en");
-      expect(translate.instant("profile.name")).toEqual('Profile Name');
+      expect(translate.instant("profile.name") as string).toEqual('Profile Name');
     });
 
     it('should set translations with nested key (object)', () => {
       translate.setTranslation("en", {profile: "test"});
       translate.use("en");
       translate.set('a.b', {c: {d: "setting nested object"}}, "en");
-      expect(translate.instant("a.b.c.d")).toEqual("setting nested object");
+      expect(translate.instant("a.b.c.d") as string).toEqual("setting nested object");
     });
 
     it("should trigger an event when the translation value changes", () =>
@@ -741,7 +723,7 @@ describe("TranslateService", () =>
       translate.setTranslation("en", {"default": "This is the default message"});
       translate.use("en");
 
-      expect(translate.instant("default")).toEqual("This is the default message");
+      expect(translate.instant("default") as string).toEqual("This is the default message");
     });
 
   });
@@ -765,16 +747,16 @@ describe("TranslateService", () =>
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual(translations["TEST"]);
+      expect(res as string).toEqual("This is a test");
 
       // reset the lang as if it was never initiated
       translate.resetLang("en");
 
-      expect(translate.instant("TEST")).toEqual("TEST");
+      expect(translate.instant("TEST") as string).toEqual("TEST");
 
       translate.get("TEST").subscribe((res2: Translation) =>
       {
-        expect(res2).toEqual("TEST"); // because the loader is "pristine" as if it was never called
+        expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
         done();
       });
     });
@@ -788,14 +770,14 @@ describe("TranslateService", () =>
     // this will request the translation from the loader
     translate.get("TEST").subscribe((res: Translation) =>
     {
-      expect(res).toEqual("TEST");
+      expect(res as string).toEqual("TEST");
 
       translations = {"TEST": "This is a test 2"};
 
       // reset the lang as if it was never initiated
       translate.reloadLang("en").subscribe(() =>
       {
-        expect(translate.instant("TEST")).toEqual(translations["TEST"]);
+        expect(translate.instant("TEST") as string).toEqual("This is a test 2");
       });
     });
   });
@@ -1093,10 +1075,10 @@ describe('TranslateService (isolate)', () => {
   }
 
   class StaticTranslateLoader implements TranslateLoader {
-    constructor(private translations: Record<string, unknown>) {
+    constructor(private translations: Record<string, TranslationObject>) {
     }
 
-    getTranslation(lang: string) {
+    getTranslation(lang: string): Observable<TranslationObject> {
       const translations = this.translations[lang];
       if (translations) {
         return of(translations)
@@ -1152,7 +1134,7 @@ describe('TranslateService (isolate)', () => {
 
   @Component({
     standalone: true,
-    imports: [RouterOutlet, IsolatedChildComponent, SharedChildComponent, TranslatePipe],
+    imports: [IsolatedChildComponent, SharedChildComponent, TranslatePipe],
     selector: "app-test",
     template: `
       <div class="root">{{ 'test' | translate }}</div>

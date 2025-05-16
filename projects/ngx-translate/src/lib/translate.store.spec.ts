@@ -40,7 +40,7 @@ function getLazyLoadedModule<T extends object>(importedModule: ModuleWithProvide
         'CHILD': 'Child'
       });
       translate.use('en');
-      expect(translate.instant('TEST')).toEqual('Lazy');
+      expect(translate.instant('TEST') as string).toEqual('Lazy');
     }
   }
 
@@ -96,7 +96,7 @@ describe("TranslateStore", () => {
       const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
-      expect(translate.instant('TEST')).toEqual('Root');
+      expect(translate.instant('TEST') as string).toEqual('Root');
 
       router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
@@ -108,7 +108,7 @@ describe("TranslateStore", () => {
       // since the root module imports the TranslateModule with forRoot and the lazy loaded module with forChild
       // the translate service is shared between both modules
       // the constructor of the ChildLazyLoadedComponent overwrote the "TEST" key of the root TranslateService
-      expect(translate.instant('TEST')).toEqual('Lazy');
+      expect(translate.instant('TEST') as string).toEqual('Lazy');
     }))
   );
 
@@ -120,7 +120,7 @@ describe("TranslateStore", () => {
       const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
-      expect(translate.instant('TEST')).toEqual('Root');
+      expect(translate.instant('TEST') as string).toEqual('Root');
 
       router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
@@ -132,7 +132,7 @@ describe("TranslateStore", () => {
       // since both the root module and the lazy loaded module use forRoot to define the TranslateModule
       // the translate service is NOT shared, and 2 instances co-exist
       // the constructor of the ChildLazyLoadedComponent didn't overwrote the "TEST" key of the root TranslateService
-      expect(translate.instant('TEST')).toEqual('Root');
+      expect(translate.instant('TEST') as string).toEqual('Root');
     }))
   );
 
@@ -144,7 +144,7 @@ describe("TranslateStore", () => {
       const fixture = createRoot(router, RootComponent),
         translate = TestBed.inject(TranslateService);
 
-      expect(translate.instant('TEST')).toEqual('Root');
+      expect(translate.instant('TEST') as string).toEqual('Root');
 
       router.resetConfig([{path: 'lazy', loadChildren: () => LoadedModule}]);
 
@@ -156,7 +156,7 @@ describe("TranslateStore", () => {
       // since both the root module and the lazy loaded module use forRoot to define the TranslateModule
       // the translate service is NOT shared, and 2 instances co-exist
       // the constructor of the ChildLazyLoadedComponent didn't overwrote the "TEST" key of the root TranslateService
-      expect(translate.instant('TEST')).toEqual('Root');
+      expect(translate.instant('TEST') as string).toEqual('Root');
     }))
   );
 
@@ -219,9 +219,9 @@ describe("TranslateStore", () => {
       router.navigateByUrl('/lazy/loaded/child');
       advance(fixture);
 
-      expect(translate.instant('TEST')).toEqual('Lazy');
-      expect(translate.instant('ROOT')).toEqual('Root');
-      expect(translate.instant('CHILD')).toEqual('Child');
+      expect(translate.instant('TEST') as string).toEqual('Lazy');
+      expect(translate.instant('ROOT') as string).toEqual('Root');
+      expect(translate.instant('CHILD') as string).toEqual('Child');
     }))
   );
 });
