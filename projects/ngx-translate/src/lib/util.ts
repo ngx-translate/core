@@ -63,7 +63,7 @@ export function isDict(value: any): value is InterpolatableTranslationObject {
 
 
 export function isObject(value: any): value is Record<string, any> {
-  return typeof value === 'object';
+  return typeof value === 'object' && value !== null;
 }
 
 export function isArray(value: any): value is any[] {
