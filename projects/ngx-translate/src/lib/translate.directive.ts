@@ -9,11 +9,11 @@ import {
   Translation,
   InterpolationParameters
 } from "./translate.service";
-import {equals, isDefinedAndNotNull} from './util';
+import {equals, isDefinedAndNotNull, isString} from "./util";
 
 interface ExtendedNode extends Text {
   originalContent: string;
-  currentValue: Translation;
+  currentValue: string;
   lookupKey: string;
   lastKey: string|null;
   data: string;
@@ -134,7 +134,20 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         if (!node.originalContent) {
           node.originalContent = this.getContent(node);
         }
-        node.currentValue = isDefinedAndNotNull(res) ? res : (node.originalContent || key);
+
+        if(isString(res))
+        {
+          node.currentValue = res;
+        }
+        else if(!isDefinedAndNotNull(res))
+        {
+          node.currentValue = node.originalContent || key;
+        }
+        else
+        {
+          node.currentValue = JSON.stringify(res);
+        }
+
         // we replace in the original content to preserve spaces that we might have trimmed
         this.setContent(node, this.key ? node.currentValue : node.originalContent.replace(key, node.currentValue));
         this._ref.markForCheck();
