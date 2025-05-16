@@ -327,14 +327,10 @@ export class TranslateService {
   private getParsedResultForKey(key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
   {
       const textToInterpolate = this.getTextToInterpolate(key);
-    
+
       if (isDefinedAndNotNull(textToInterpolate))
       {
-        //Fast exit to avoid overhead if no params provided
-        if(isDefinedAndNotNull(interpolateParams))
           return this.runInterpolation(textToInterpolate, interpolateParams);
-        else
-          return textToInterpolate;
       }
 
       const res = this.missingTranslationHandler.handle({
