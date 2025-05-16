@@ -304,8 +304,8 @@ export class TranslateService {
    * Manually sets an object of translations for a given language
    * after passing it through the compiler
    */
-  public setTranslation(lang: Language, translations: InterpolatableTranslationObject, shouldMerge = false): void {
-    const interpolatableTranslations = this.compiler.compileTranslations(translations, lang);
+  public setTranslation(lang: Language, translations: TranslationObject, shouldMerge = false): void {
+    const interpolatableTranslations: InterpolatableTranslationObject = this.compiler.compileTranslations(translations, lang);
     this.store.setTranslations(lang, interpolatableTranslations, (shouldMerge || this.extend));
   }
 
@@ -512,7 +512,7 @@ export class TranslateService {
   /**
    * Sets the translated value of a key, after compiling it
    */
-  public set(key: string, translation: Translation, lang: Language = this.currentLang): void {
+  public set(key: string, translation: string|TranslationObject, lang: Language = this.currentLang): void {
 
     this.store.setTranslations(
       lang,
