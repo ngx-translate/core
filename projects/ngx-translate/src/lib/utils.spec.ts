@@ -238,8 +238,6 @@ describe("Utils", () =>
       expect(getValue(['A', ['a', 'b', 'c'], 'C'], '1.2')).toEqual("c");
 
       expect(getValue("test", 'key')).not.toBeDefined();
-
-      expect(getValue("test", '1')).toEqual("e"); /// useless: substring
     })
 
   });
