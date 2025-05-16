@@ -998,6 +998,7 @@ describe("TranslateService", () =>
     it("should handle language codes with underscores", () =>
     {
       spyOnProperty(window.navigator, "language", "get").and.returnValue("en_US");
+      spyOnProperty(window.navigator, "languages", "get").and.returnValue(["en_US"]);
 
       expect(translate.getBrowserLang()).toBe("en");
     });
