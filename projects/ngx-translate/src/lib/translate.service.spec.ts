@@ -753,7 +753,7 @@ describe("TranslateService", () =>
     translate.onLangChange.subscribe((event: LangChangeEvent) =>
     {
       expect(event.lang).toBe("en");
-      expect(event.translations as any).toEqual(tr);
+      expect(event.translations as unknown).toEqual(tr);
     });
     translate.use("en");
   });
