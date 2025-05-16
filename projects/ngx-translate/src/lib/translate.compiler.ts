@@ -1,11 +1,15 @@
 import {Injectable} from "@angular/core";
 import {InterpolateFunction} from "./translate.parser";
-import {InterpolatableTranslation, InterpolatableTranslationObject, Translation} from "./translate.service";
+import {
+  InterpolatableTranslation,
+  InterpolatableTranslationObject,
+  TranslationObject
+} from "./translate.service";
 
 export abstract class TranslateCompiler {
   abstract compile(value: string, lang: string): InterpolatableTranslation;
 
-  abstract compileTranslations(translations: Translation, lang: string): InterpolatableTranslationObject;
+  abstract compileTranslations(translations: TranslationObject, lang: string): InterpolatableTranslationObject;
 }
 
 /**
@@ -18,7 +22,7 @@ export class TranslateFakeCompiler extends TranslateCompiler {
     return value;
   }
 
-  compileTranslations(translations: InterpolatableTranslationObject, lang: string): InterpolatableTranslationObject {
+  compileTranslations(translations: TranslationObject, lang: string): InterpolatableTranslationObject {
     void lang;
     return translations;
   }
