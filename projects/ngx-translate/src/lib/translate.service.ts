@@ -19,8 +19,10 @@ export type Translation =
   string |
   Translation[] |
   TranslationObject |
-  undefined |
-  null
+
+  // required to prevent error "Type instantiation is excessively deep and possibly infinite."
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
   ;
 
 
