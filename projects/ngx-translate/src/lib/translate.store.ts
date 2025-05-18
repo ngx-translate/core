@@ -1,11 +1,14 @@
+import { signal } from '@angular/core';
+import { Observable, Subject } from "rxjs";
 import {
-    InterpolatableTranslationObject,
-    DefaultLangChangeEvent,
-    LangChangeEvent,
-    TranslationChangeEvent, Language, InterpolatableTranslation
+  DefaultLangChangeEvent,
+  InterpolatableTranslation,
+  InterpolatableTranslationObject,
+  LangChangeEvent,
+  Language,
+  TranslationChangeEvent
 } from "./translate.service";
-import {Observable, Subject} from "rxjs";
-import {getValue, mergeDeep} from "./util";
+import { getValue, mergeDeep } from "./util";
 
 
 type DeepReadonly<T> = {
@@ -21,6 +24,7 @@ export class TranslateStore
 
     private defaultLang!: Language;
     private currentLang!: Language;
+    $currentLang = signal<Language>(this.currentLang);
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
@@ -67,6 +71,8 @@ export class TranslateStore
     public setCurrentLang(lang: string, emitChange = true): void
     {
         this.currentLang = lang;
+        this.$currentLang.set(lang);
+
         if (emitChange)
         {
             this._onLangChange.next({lang: lang, translations: this.translations[lang]});

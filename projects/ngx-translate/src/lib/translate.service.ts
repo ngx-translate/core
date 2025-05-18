@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken } from "@angular/core";
+import { Inject, Injectable, InjectionToken, Signal } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
@@ -88,6 +88,8 @@ export class TranslateService {
   private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
   private lastUseLanguage: Language|null = null;
 
+  $currentLang!: Signal<Language>;
+
 
   /**
    * An Observable to listen to translation change events
@@ -171,6 +173,8 @@ export class TranslateService {
     if (defaultLanguage) {
       this.setDefaultLang(defaultLanguage);
     }
+
+    this.$currentLang = this.store.$currentLang.asReadonly();
   }
 
   /**
