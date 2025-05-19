@@ -39,7 +39,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+      expect(res as string).toEqual('This is a test');
     });
 
     // mock response after the xhr request, otherwise it will be undefined
@@ -50,7 +50,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from downloaded translations without making a request to the backend
     translate.get('TEST2').subscribe((res: Translation) => {
-      expect(res).toEqual('This is another test');
+      expect(res as string).toEqual('This is another test');
     });
   });
 
@@ -59,11 +59,11 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+      expect(res as string).toEqual('This is a test');
 
       // reset the lang as if it was never initiated
       translate.reloadLang('en').subscribe(() => {
-        expect(translate.instant('TEST')).toEqual('This is a test 2');
+        expect(translate.instant('TEST') as string).toEqual('This is a test 2');
       });
 
       http.expectOne('/assets/i18n/en.json').flush({"TEST": "This is a test 2"});
@@ -79,18 +79,18 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+      expect(res as string).toEqual('This is a test');
       expect(http.expectOne).toHaveBeenCalledTimes(1);
 
       // reset the lang as if it was never initiated
       translate.resetLang('en');
 
-      expect(translate.instant('TEST')).toEqual('TEST');
+      expect(translate.instant('TEST') as string).toEqual('TEST');
 
       // use set timeout because no request is really made and we need to trigger zone to resolve the observable
       setTimeout(() => {
         translate.get('TEST').subscribe((res2: Translation) => {
-          expect(res2).toEqual('TEST'); // because the loader is "pristine" as if it was never called
+          expect(res2 as string).toEqual('TEST'); // because the loader is "pristine" as if it was never called
           expect(http.expectOne).toHaveBeenCalledTimes(1);
           done();
         });
