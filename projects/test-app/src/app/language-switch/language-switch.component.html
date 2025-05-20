@@ -1,0 +1,3 @@
+@for(lang of translateService.getLangs(); track lang) {
+  <button (click)="translateService.use(lang)" [class.active]="translateService.currentLang === lang">{{ lang }}</button>
+}

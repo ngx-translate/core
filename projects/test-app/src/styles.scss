@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --mat-sys-primary: #c2282b;
+  --mat-sys-on-primary: #fff;
+
+  --mat-sys-secondary: #3f4258;
+  --mat-sys-on-secondary: #fff;
+
+  --mat-sys-surface-dim: #ffe8f1;
+
+  --mat-sys-outline: #e5e5e5;
+
+  --mat-sys-corner-small: 8px;
+  --mat-sys-corner-medium: 12px;
+
+  --mat-sys-level0: 0px 0px 0px 0px rgba(0, 0, 0, .2), 0px 0px 0px 0px rgba(0, 0, 0, .14), 0px 0px 0px 0px rgba(0, 0, 0, .12);
+  --mat-sys-level1: 0px 2px 1px -1px rgba(0, 0, 0, .2), 0px 1px 1px 0px rgba(0, 0, 0, .14), 0px 1px 3px 0px rgba(0, 0, 0, .12);
+  --mat-sys-level2: 0px 3px 3px -2px rgba(0, 0, 0, .2), 0px 3px 4px 0px rgba(0, 0, 0, .14), 0px 1px 8px 0px rgba(0, 0, 0, .12);
+  --mat-sys-level3: 0px 3px 5px -1px rgba(0, 0, 0, .2), 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12);
+
+  --space-smallest: 4px;
+  --space-smaller: 8px;
+  --space-small: 12px;
+  --space: 16px;
+}
+
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+p, .translated{
+  background-color: var(--mat-sys-surface-dim);
+  padding:0.5rem 1rem;
+}
+
+.title {
+
+  h1 {
+    background-color: var(--mat-sys-surface-dim);
+    border-radius: var(--mat-sys-corner-small);
+    padding: var(--space) var(--space-small);
+  }
+}
