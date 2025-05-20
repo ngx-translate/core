@@ -1,0 +1,2 @@
+npm run build-all
+npm run test-ci
