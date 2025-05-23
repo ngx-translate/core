@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken } from "@angular/core";
+import {Inject, Injectable, InjectionToken, Signal} from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
@@ -121,16 +121,27 @@ export class TranslateService {
   /**
    * The default lang to fallback when translations are missing on the current lang
    */
-  get defaultLang(): Language {
+  get defaultLang(): Language|undefined {
     return this.store.getDefaultLanguage();
   }
+
+  get $defaultLang(): Signal<Language|undefined> {
+    return this.store.$defaultLang;
+  }
+
 
   /**
    * The lang currently used
    */
-  get currentLang(): Language {
+  get currentLang(): Language|undefined {
     return this.store.getCurrentLanguage();
   }
+
+
+  get $currentLang(): Signal<Language|undefined> {
+    return this.store.$currentLang;
+  }
+
 
   /**
    * an array of langs
@@ -197,7 +208,7 @@ export class TranslateService {
   /**
    * Gets the default language used
    */
-  public getDefaultLang(): string {
+  public getDefaultLang(): Language|undefined {
     return this.defaultLang;
   }
 
@@ -509,7 +520,12 @@ export class TranslateService {
   /**
    * Sets the translated value of a key, after compiling it
    */
-  public set(key: string, translation: string|TranslationObject, lang: Language = this.currentLang): void {
+  public set(key: string, translation: string|TranslationObject, lang: Language|undefined = this.currentLang): void {
+
+    if(lang === undefined)
+    {
+      throw new Error('Set the current language or pass a language code as a second parameter');
+    }
 
     this.store.setTranslations(
       lang,
