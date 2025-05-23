@@ -6,6 +6,7 @@ import {
 } from "./translate.service";
 import {Observable, Subject} from "rxjs";
 import {getValue, mergeDeep} from "./util";
+import {Signal, signal, WritableSignal} from "@angular/core";
 
 
 type DeepReadonly<T> = {
@@ -19,8 +20,8 @@ export class TranslateStore
     private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
     private _onDefaultLangChange: Subject<DefaultLangChangeEvent> = new Subject<DefaultLangChangeEvent>();
 
-    private defaultLang!: Language;
-    private currentLang!: Language;
+    private _$defaultLang: WritableSignal<Language|undefined> = signal<Language|undefined>(undefined);
+    private _$currentLang: WritableSignal<Language|undefined> = signal<Language|undefined>(undefined);
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
@@ -42,14 +43,24 @@ export class TranslateStore
         return this.languages;
     }
 
-    public getCurrentLanguage(): Language
+    public getCurrentLanguage(): Language|undefined
     {
-        return this.currentLang;
+        return this.$currentLang();
     }
 
-    public getDefaultLanguage(): Language
+    get $currentLang() : Signal<Language|undefined>
     {
-        return this.defaultLang;
+        return this._$currentLang.asReadonly();
+    }
+
+    public getDefaultLanguage(): Language|undefined
+    {
+        return this._$defaultLang();
+    }
+
+    get $defaultLang() : Signal<Language|undefined>
+    {
+        return this._$defaultLang.asReadonly();
     }
 
     /**
@@ -57,7 +68,7 @@ export class TranslateStore
      */
     public setDefaultLang(lang: string, emitChange = true): void
     {
-        this.defaultLang = lang;
+        this._$defaultLang.set(lang);
         if (emitChange)
         {
             this._onDefaultLangChange.next({lang: lang, translations: this.translations[lang]});
@@ -66,7 +77,7 @@ export class TranslateStore
 
     public setCurrentLang(lang: string, emitChange = true): void
     {
-        this.currentLang = lang;
+        this._$currentLang.set(lang);
         if (emitChange)
         {
             this._onLangChange.next({lang: lang, translations: this.translations[lang]});
@@ -123,10 +134,13 @@ export class TranslateStore
 
     public getTranslation(key: string, useDefaultLang: boolean): InterpolatableTranslation
     {
-        let text = this.getValue(this.currentLang, key);
-        if(text === undefined && this.defaultLang != null && this.defaultLang !== this.currentLang && useDefaultLang)
+        const currentLang = this.getCurrentLanguage();
+        const defaultLang = this.getDefaultLanguage();
+
+        let text = (currentLang !== undefined) ? this.getValue(currentLang, key) : undefined;
+        if(text === undefined && defaultLang != null && defaultLang !== currentLang && useDefaultLang)
         {
-            text = this.getValue(this.defaultLang, key);
+            text = this.getValue(defaultLang, key);
         }
         return text;
     }
