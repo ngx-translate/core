@@ -146,7 +146,7 @@ When you lazy load a module, you should use the `forChild` static method to impo
 Since lazy loaded modules use a different injector from the rest of your application, you can configure them separately with a different loader/compiler/parser/missing translations handler.
 
 To make a child module extend translations from parent modules use `extend: true`. This will cause the service to also
-use translations from its parent module.
+use translations from its parent module. You will have to force manually the loading of your lazy loaded translation file by adding `this.translateService.getTranslation(this.translateService.currentLang);` in the constructor of your lazy loaded module.
 
 You can also isolate the service by using `isolate: true`. In which case the service is a completely isolated instance (for translations, current lang, events, ...).
 Otherwise, by default, it will share its data with other instances of the service (but you can still use a different loader/compiler/parser/handler even if you don't isolate the service).
