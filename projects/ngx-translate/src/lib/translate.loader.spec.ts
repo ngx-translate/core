@@ -41,7 +41,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res as string).toEqual('This is a test');
+      expect(res).toEqual('This is a test');
     });
   });
 
@@ -70,7 +70,7 @@ describe('TranslateLoader', () => {
 
     // this will request the translation from the CustomLoader
     translate.get('TEST').subscribe((res: Translation) => {
-      expect(res as string).toEqual('This is also a test');
+      expect(res).toEqual('This is also a test');
     });
   });
 

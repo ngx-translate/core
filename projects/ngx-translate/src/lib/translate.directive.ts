@@ -6,7 +6,7 @@ import {
   LangChangeEvent,
   TranslateService,
   TranslationChangeEvent,
-  Translation,
+  StrictTranslation,
   InterpolationParameters
 } from "./translate.service";
 import {equals, isDefinedAndNotNull, isString} from "./util";
@@ -127,7 +127,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
 
       this.lastParams = this.currentParams;
 
-      const onTranslation = (res: Translation) => {
+      const onTranslation = (res: StrictTranslation) => {
         if (res !== key || !node.lastKey) {
           node.lastKey = key;
         }

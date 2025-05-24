@@ -15,19 +15,20 @@ export const USE_EXTEND = new InjectionToken<string>('USE_EXTEND');
 
 export type InterpolationParameters = Record<string, unknown>;
 
-export type Translation =
+export type StrictTranslation =
   string |
-  Translation[] |
+  StrictTranslation[] |
   TranslationObject |
   undefined |
   null
   ;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Translation = StrictTranslation | any;
 
-// using Record<> does not work because TS does not support recursive definitions
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+
 export interface TranslationObject {
-  [key: string]: Translation
+  [key: string]: StrictTranslation
 }
 
 
@@ -40,8 +41,6 @@ export type InterpolatableTranslation =
   null;
 
 
-// using Record<> does not work because TS does not support recursive definitions
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface InterpolatableTranslationObject {
   [key: string]: InterpolatableTranslation
 }
@@ -321,7 +320,7 @@ export class TranslateService {
   }
 
 
-  private getParsedResultForKey(key: string, interpolateParams?: InterpolationParameters): Translation|Observable<Translation>
+  private getParsedResultForKey(key: string, interpolateParams?: InterpolationParameters): StrictTranslation|Observable<StrictTranslation>
   {
       const textToInterpolate = this.getTextToInterpolate(key);
 
@@ -344,7 +343,7 @@ export class TranslateService {
     return this.store.getTranslation(key, this.useDefaultLang);
   }
 
-  private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation
+  private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): StrictTranslation
   {
     if(!isDefinedAndNotNull(translations)) {
       return;
@@ -365,7 +364,7 @@ export class TranslateService {
 
   private runInterpolationOnArray(translations: InterpolatableTranslation, interpolateParams: InterpolationParameters | undefined)
   {
-    return (translations as Translation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
+    return (translations as StrictTranslation[]).map((translation) => this.runInterpolation(translation, interpolateParams));
   }
 
   private runInterpolationOnDict(translations: InterpolatableTranslationObject, interpolateParams: InterpolationParameters | undefined)
@@ -385,14 +384,14 @@ export class TranslateService {
   /**
    * Returns the parsed result of the translations
    */
-  public getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): Translation|TranslationObject|Observable<Translation|TranslationObject>
+  public getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): StrictTranslation|TranslationObject|Observable<StrictTranslation|TranslationObject>
   {
       return (key instanceof Array)  ? this.getParsedResultForArray(key, interpolateParams) :  this.getParsedResultForKey(key, interpolateParams);
   }
 
   private getParsedResultForArray(key: string[], interpolateParams: InterpolationParameters | undefined)
   {
-    const result: Record<string, Translation | Observable<Translation>> = {};
+    const result: Record<string, StrictTranslation | Observable<StrictTranslation>> = {};
 
     let observables = false;
     for (const k of key)
@@ -406,12 +405,12 @@ export class TranslateService {
       return result as TranslationObject;
     }
 
-    const sources: Observable<Translation>[] = key.map(k => makeObservable(result[k]));
+    const sources: Observable<StrictTranslation>[] = key.map(k => makeObservable(result[k]));
     return forkJoin(sources).pipe(
-      map((arr: (Translation)[]) =>
+      map((arr: (StrictTranslation)[]) =>
       {
         const obj: TranslationObject = {};
-        arr.forEach((value: Translation, index: number) =>
+        arr.forEach((value: StrictTranslation, index: number) =>
         {
           obj[key[index]] = value;
         });
