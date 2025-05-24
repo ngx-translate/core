@@ -1,8 +1,16 @@
-import {HttpClient, provideHttpClient} from "@angular/common/http";
+import {
+  HTTP_INTERCEPTORS,
+  HttpBackend,
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+  withInterceptorsFromDi
+} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {TestBed} from "@angular/core/testing";
 import {TranslateLoader, provideTranslateService, TranslateService, Translation} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "../public-api";
+import {MarkerInterceptor} from "../test-helper/marker-interceptor";
 
 describe('TranslateLoader (HttpClient)', () => {
   let translate: TranslateService;
@@ -11,22 +19,37 @@ describe('TranslateLoader (HttpClient)', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        TranslateService,
-        provideHttpClient(),
+        MarkerInterceptor,
+        {
+          provide: HTTP_INTERCEPTORS,
+          useExisting: MarkerInterceptor,
+          multi: true
+        },
+        provideHttpClient(
+          withInterceptorsFromDi()
+        ),
         provideHttpClientTesting(),
+        TranslateService,
         provideTranslateService({
-            loader: {
-              provide: TranslateLoader,
-              useFactory: (httpClient: HttpClient) => new TranslateHttpLoader(httpClient),
-              deps: [HttpClient]
-            }
+          loader: {
+            provide: TranslateLoader,
+            useFactory: (client: HttpClient) =>
+              new TranslateHttpLoader(client, '/assets/i18n/', '.json'),
+            deps: [HttpClient],
           }
-        )
+        }),
       ]
     });
+
     translate = TestBed.inject(TranslateService);
     http = TestBed.inject(HttpTestingController);
   });
+
+
+  afterEach(() => {
+    http.verify();
+  });
+
 
   it('should be able to provide TranslateHttpLoader', () => {
     expect(TranslateHttpLoader).toBeDefined();
@@ -52,6 +75,15 @@ describe('TranslateLoader (HttpClient)', () => {
     translate.get('TEST2').subscribe((res: Translation) => {
       expect(res as string).toEqual('This is another test');
     });
+  });
+
+  it('should trigger MarkerInterceptor when loading translations', () => {
+    translate.use('en').subscribe();
+
+    const req = http.expectOne('/assets/i18n/en.json');
+    req.flush({ HELLO: 'Hello' });
+
+    expect(req.request.headers.get('X-Test-Header')).toBe('marker');
   });
 
   it('should be able to reload a lang', () => {
@@ -100,4 +132,6 @@ describe('TranslateLoader (HttpClient)', () => {
     // mock response after the xhr request, otherwise it will be undefined
     http.expectOne('/assets/i18n/en.json').flush({"TEST": "This is a test"});
   });
+
+
 });

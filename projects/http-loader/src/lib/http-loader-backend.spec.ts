@@ -1,8 +1,15 @@
-import {HttpBackend, HttpClient, provideHttpClient} from "@angular/common/http";
+import {
+  HTTP_INTERCEPTORS,
+  HttpBackend,
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi
+} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {TestBed} from "@angular/core/testing";
 import {TranslateLoader, provideTranslateService, TranslateService, Translation} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "../public-api";
+import {MarkerInterceptor} from "../test-helper/marker-interceptor";
 
 describe('TranslateLoader (HttpBackend)', () => {
   let translate: TranslateService;
@@ -11,33 +18,37 @@ describe('TranslateLoader (HttpBackend)', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        TranslateService,
-        provideHttpClient(),
+        MarkerInterceptor,
+        {
+          provide: HTTP_INTERCEPTORS,
+          useExisting: MarkerInterceptor,
+          multi: true
+        },
+        provideHttpClient(
+          withInterceptorsFromDi()
+        ),
         provideHttpClientTesting(),
-        /*
+        TranslateService,
         provideTranslateService({
-            loader: {
-              provide: TranslateLoader,
-              useFactory: (httpClient: HttpClient) => new TranslateHttpLoader(httpClient),
-              deps: [HttpClient]
-            }
+          loader: {
+            provide: TranslateLoader,
+            useFactory: (httpBackend: HttpBackend) =>
+              TranslateHttpLoader.withHttpBackend(httpBackend, '/assets/i18n/', '.json'),
+            deps: [HttpBackend],
           }
-        )
-         */
-        provideTranslateService({
-            loader: {
-              provide: TranslateLoader,
-              useFactory: (backend: HttpBackend) => TranslateHttpLoader.withHttpBackend(backend),
-              deps: [HttpBackend]
-            }
-          }
-        )
-
+        }),
       ]
     });
+
     translate = TestBed.inject(TranslateService);
     http = TestBed.inject(HttpTestingController);
   });
+
+
+  afterEach(() => {
+    http.verify();
+  });
+
 
   it('should be able to provide TranslateHttpLoader', () => {
     expect(TranslateHttpLoader).toBeDefined();
@@ -63,6 +74,15 @@ describe('TranslateLoader (HttpBackend)', () => {
     translate.get('TEST2').subscribe((res: Translation) => {
       expect(res as string).toEqual('This is another test');
     });
+  });
+
+  it('should trigger MarkerInterceptor when loading translations', () => {
+    translate.use('en').subscribe();
+
+    const req = http.expectOne('/assets/i18n/en.json');
+    req.flush({ HELLO: 'Hello' });
+
+    expect(req.request.headers.get('X-Test-Header')).toBeNull()
   });
 
   it('should be able to reload a lang', () => {
@@ -95,7 +115,6 @@ describe('TranslateLoader (HttpBackend)', () => {
 
       // reset the lang as if it was never initiated
       translate.resetLang('en');
-
       expect(translate.instant('TEST') as string).toEqual('TEST');
 
       // use set timeout because no request is really made and we need to trigger zone to resolve the observable
