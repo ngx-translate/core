@@ -5,7 +5,7 @@ import {
   LangChangeEvent,
   TranslateService,
   TranslationChangeEvent,
-  Translation,
+  StrictTranslation,
   InterpolationParameters
 } from "./translate.service";
 import {equals, isDefinedAndNotNull, isDict, isString} from "./util";
@@ -17,7 +17,7 @@ import {equals, isDefinedAndNotNull, isDict, isString} from "./util";
   pure: false // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-  value:Translation = '';
+  value:StrictTranslation = '';
   lastKey: string | null = null;
   lastParams: InterpolationParameters[] = [];
   onTranslationChange: Subscription | undefined;
@@ -28,7 +28,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   }
 
   updateValue(key: string, interpolateParams?: InterpolationParameters, translations?: InterpolatableTranslationObject): void {
-    const onTranslation = (res: Translation) => {
+    const onTranslation = (res: StrictTranslation) => {
       this.value = res !== undefined ? res : key;
       this.lastKey = key;
       this._ref.markForCheck();
@@ -45,7 +45,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
   }
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  transform(query: string | undefined | null, ...args: any[]): Translation {
+  transform(query: string | undefined | null, ...args: any[]): any {
     if (!query || !query.length) {
       return query;
     }
