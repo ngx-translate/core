@@ -88,11 +88,7 @@ describe('TranslateLoader', () => {
     expect(translate.currentLoader).toBeDefined();
     expect(translate.currentLoader instanceof TranslateFakeLoader).toBeTruthy();
 
-    // the lang to use, if the lang isn't available, it will use the current loader to get them
-    translate.use('en');
-
-    // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.getTranslation('en').subscribe((res: Translation) => {
+    translate.use('en').subscribe((res: Translation) => {
       expect(res).toEqual({});
     });
   });

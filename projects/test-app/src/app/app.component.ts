@@ -1,14 +1,12 @@
-import {Component} from "@angular/core";
-import {RouterOutlet} from "@angular/router";
-import {TranslateService, TranslatePipe, TranslateDirective} from "@ngx-translate/core";
-import {StandaloneComponent} from "./standalone.component";
-import {_} from "@ngx-translate/core";
+import { Component } from "@angular/core";
+import { _, TranslateDirective, TranslatePipe, TranslateService } from "@ngx-translate/core";
+import { StandaloneComponent } from "./standalone.component";
 
 
 @Component({
     selector: "app-root",
     standalone: true,
-    imports: [RouterOutlet, TranslateDirective, TranslatePipe, StandaloneComponent],
+    imports: [TranslateDirective, TranslatePipe, StandaloneComponent],
     templateUrl: "./app.component.html",
     styleUrl: "./app.component.scss"
 })

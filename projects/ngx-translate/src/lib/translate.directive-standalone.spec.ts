@@ -4,7 +4,7 @@ import {provideTranslateService, TranslateDirective, TranslateService} from "../
 
 @Injectable()
 @Component({
-  selector: 'lib-hmx-app',
+  selector: 'app-hmx-app',
   standalone: true,
   imports: [TranslateDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,

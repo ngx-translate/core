@@ -7,7 +7,7 @@ import {TranslateModule, TranslateService} from "../public-api";
 @Component({
   // eslint-disable-next-line @angular-eslint/prefer-standalone
   standalone: false,
-  selector: 'lib-hmx-app',
+  selector: 'app-hmx-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div #noKey translate>TEST</div>

@@ -42,7 +42,7 @@ class FakeChangeDetectorRef extends ChangeDetectorRef {
 
 @Injectable()
 @Component({
-  selector: 'lib-hmx-app',
+  selector: 'app-hmx-app',
   standalone: true,
   imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,7 +59,7 @@ class AppTranslationIdDefaultComponent {
 
 @Injectable()
 @Component({
-  selector: 'lib-hmx-app',
+  selector: 'app-hmx-app',
   standalone: true,
   imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
