@@ -555,6 +555,7 @@ If you want to reload the translations and see the update on all your components
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
+- [Light Localize Router](https://github.com/elham-oss/light-localize-router) by @elham-oss: localized routes without the need of rewriting your router configuration inspired by localize-routes & angular-l10n routing.
 - [.po files Loader](https://github.com/biesbjerg/ngx-translate-po-http-loader) by @biesbjerg: Use .po translation files with ngx-translate
 - [browser.i18n Loader](https://github.com/pearnaly/ngx-translate-browser-i18n-loader) by @pearnaly: loader for native translation files of browser extensions.
 - [ngx-translate-extract](https://github.com/biesbjerg/ngx-translate-extract) by @biesbjerg: Extract translatable strings from your projects
