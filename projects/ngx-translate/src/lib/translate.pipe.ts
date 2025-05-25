@@ -8,7 +8,7 @@ import {
   Translation,
   InterpolationParameters
 } from "./translate.service";
-import {equals, isDefined, isDict, isString} from "./util";
+import {equals, isDefinedAndNotNull, isDict, isString} from "./util";
 
 @Injectable()
 @Pipe({
@@ -34,7 +34,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       this._ref.markForCheck();
     };
     if (translations) {
-      const res = this.translate.getParsedResult(translations, key, interpolateParams);
+      const res = this.translate.getParsedResult(key, interpolateParams);
       if (isObservable(res)) {
         res.subscribe(onTranslation);
       } else {
@@ -56,7 +56,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
 
     let interpolateParams: object | undefined = undefined;
-    if (isDefined(args[0]) && args.length) {
+    if (isDefinedAndNotNull(args[0]) && args.length) {
       if (isString(args[0]) && args[0].length) {
         // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
         // which is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
