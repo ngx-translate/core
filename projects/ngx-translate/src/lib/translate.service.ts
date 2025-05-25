@@ -7,6 +7,7 @@ import {TranslateLoader} from "./translate.loader";
 import {InterpolateFunction, TranslateParser} from "./translate.parser";
 import {TranslateStore} from "./translate.store";
 import {isDefinedAndNotNull, isArray, isString, isDict, insertValue} from "./util";
+import {TranslationTransformerHandler} from "./translation-transformer-handler";
 
 export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>('ISOLATE_TRANSLATE_SERVICE');
 export const USE_DEFAULT_LANG = new InjectionToken<string>('USE_DEFAULT_LANG');
@@ -153,6 +154,7 @@ export class TranslateService {
    * @param compiler An instance of the compiler currently used
    * @param parser An instance of the parser currently used
    * @param missingTranslationHandler A handler for missing translations.
+   * @param translationTransformerHandler A handler to transform retrieved raw translation before interpolation
    * @param useDefaultLang whether we should use default language translation when current language translation is missing.
    * @param isolate whether this service should use the store or not
    * @param extend To make a child module extend (and use) translations from parent modules.
@@ -163,6 +165,7 @@ export class TranslateService {
               public compiler: TranslateCompiler,
               public parser: TranslateParser,
               public missingTranslationHandler: MissingTranslationHandler,
+              public translationTransformerHandler: TranslationTransformerHandler,
               @Inject(USE_DEFAULT_LANG) private useDefaultLang = true,
               @Inject(ISOLATE_TRANSLATE_SERVICE) isolate = false,
               @Inject(USE_EXTEND) private extend = false,
@@ -347,7 +350,14 @@ export class TranslateService {
 
   private getTextToInterpolate(key: string): InterpolatableTranslation | undefined
   {
-    return this.store.getTranslation(key, this.useDefaultLang);
+    const rawTranslation = this.store.getTranslation(key, this.useDefaultLang);
+
+    return this.translationTransformerHandler.handle(
+      {
+        key,
+        rawTranslation,
+      }
+    );
   }
 
   private runInterpolation(translations: InterpolatableTranslation, interpolateParams?: InterpolationParameters): Translation

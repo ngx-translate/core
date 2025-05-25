@@ -13,6 +13,7 @@ import {
   ISOLATE_TRANSLATE_SERVICE,
   TranslateService
 } from "./lib/translate.service";
+import {FakeTranslationTransformerHandler, TranslationTransformerHandler} from "./lib/translation-transformer-handler";
 
 export * from "./lib/translate.loader";
 export * from "./lib/translate.service";
@@ -24,12 +25,14 @@ export * from "./lib/translate.pipe";
 export * from "./lib/translate.store";
 export * from "./lib/extraction-marker";
 export * from "./lib/util"
+export * from "./lib/translation-transformer-handler"
 
 export interface TranslateModuleConfig {
   loader?: Provider;
   compiler?: Provider;
   parser?: Provider;
   missingTranslationHandler?: Provider;
+  translationTransformerHandler?: Provider;
   // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
   isolate?: boolean;
   // extends translations for a given language instead of ignoring them if present
@@ -45,6 +48,7 @@ export const provideTranslateService = (config: TranslateModuleConfig = {}): Env
     config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
     config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
     config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+    config.translationTransformerHandler || {provide: TranslationTransformerHandler, useClass: FakeTranslationTransformerHandler},
     TranslateStore,
     {provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate},
     {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
@@ -77,6 +81,7 @@ export class TranslateModule {
         config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
         config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+        config.translationTransformerHandler || {provide: TranslationTransformerHandler, useClass: FakeTranslationTransformerHandler},
         TranslateStore,
         {provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
@@ -98,6 +103,7 @@ export class TranslateModule {
         config.compiler || {provide: TranslateCompiler, useClass: TranslateFakeCompiler},
         config.parser || {provide: TranslateParser, useClass: TranslateDefaultParser},
         config.missingTranslationHandler || {provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler},
+        config.translationTransformerHandler || {provide: TranslationTransformerHandler, useClass: FakeTranslationTransformerHandler},
         {provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate},
         {provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang},
         {provide: USE_EXTEND, useValue: config.extend},
