@@ -1,29 +1,16 @@
 import {TranslateLoader, TranslationObject} from "@ngx-translate/core";
-import {HttpBackend, HttpClient} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {Inject, Injectable} from "@angular/core";
 import {Observable} from 'rxjs';
 
 @Injectable()
 export class TranslateHttpLoader implements TranslateLoader {
-
-  static readonly defaultPrefix = "/assets/i18n/";
-  static readonly defaultSuffix = ".json";
-
   constructor(
     private http: HttpClient,
-    @Inject(String) public prefix = TranslateHttpLoader.defaultPrefix,
-    @Inject(String) public suffix = TranslateHttpLoader.defaultSuffix
+    @Inject(String) public prefix = "/assets/i18n/",
+    @Inject(String) public suffix = ".json"
   )
   {}
-
-  public static withHttpBackend(
-    backend: HttpBackend,
-    prefix: string = TranslateHttpLoader.defaultPrefix,
-    suffix: string = TranslateHttpLoader.defaultSuffix
-  ): TranslateHttpLoader
-  {
-    return new TranslateHttpLoader(new HttpClient(backend), prefix, suffix);
-  }
 
   /**
    * Gets the translations from the server

@@ -1,6 +1,6 @@
 import {
   HTTP_INTERCEPTORS,
-  HttpBackend,
+  HttpBackend, HttpClient,
   provideHttpClient,
   withInterceptorsFromDi
 } from "@angular/common/http";
@@ -32,7 +32,7 @@ describe('TranslateLoader (HttpBackend)', () => {
           loader: {
             provide: TranslateLoader,
             useFactory: (httpBackend: HttpBackend) =>
-              TranslateHttpLoader.withHttpBackend(httpBackend, '/assets/i18n/', '.json'),
+              new TranslateHttpLoader(new HttpClient(httpBackend), '/assets/i18n/', '.json'),
             deps: [HttpBackend],
           }
         }),
