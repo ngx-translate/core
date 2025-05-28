@@ -161,7 +161,7 @@ describe('MissingTranslationHandler', () => {
 
     translate.get(Object.keys(tr)).subscribe((res: Translation) => {
       expect(missingTranslationHandler.handle).toHaveBeenCalledTimes(3);
-      expect(res as object).toEqual(tr);
+      expect(res).toEqual(tr);
     });
   });
 
