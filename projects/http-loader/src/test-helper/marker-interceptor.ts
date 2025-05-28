@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 export class MarkerInterceptor implements HttpInterceptor {
     triggered = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         this.triggered = true;
 

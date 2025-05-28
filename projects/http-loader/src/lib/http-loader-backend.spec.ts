@@ -1,7 +1,6 @@
 import {
   HTTP_INTERCEPTORS,
   HttpBackend,
-  HttpClient,
   provideHttpClient,
   withInterceptorsFromDi
 } from "@angular/common/http";

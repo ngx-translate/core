@@ -1,9 +1,7 @@
 import {
   HTTP_INTERCEPTORS,
-  HttpBackend,
   HttpClient,
   provideHttpClient,
-  withInterceptors,
   withInterceptorsFromDi
 } from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
