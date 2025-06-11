@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { TranslateDirective, TranslatePipe } from "@ngx-translate/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { TranslateDirective, TranslatePipe, TranslateService } from "@ngx-translate/core";
 
 
 @Component({
@@ -12,5 +12,9 @@ import { TranslateDirective, TranslatePipe } from "@ngx-translate/core";
 })
 export class StandaloneComponent
 {
+  readonly #translateService = inject(TranslateService);
 
+  constructor() {
+    this.#translateService.setTranslation('en', {'from-set-translation': 'Text from setTranslation'}, true);
+  }
 }
