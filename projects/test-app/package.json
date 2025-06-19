@@ -1,0 +1,17 @@
+{
+  "name": "@ngx-translate/test-app",
+  "version": "16.0.1",
+  "description": "test application",
+  "keywords": [
+    "@ngx-translate",
+    "ngx-translate",
+    "angular", "i18n", "translation"
+  ],
+  "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": ">=16",
+    "@angular/core": ">=16"
+  },
+  "sideEffects": false
+}
