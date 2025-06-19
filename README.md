@@ -41,34 +41,42 @@ Simple example using ngx-translate:
 https://stackblitz.com/github/ngx-translate/example
 
 ### Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Import the TranslateModule](#1-import-the-translatemodule)
-    * [SharedModule](#sharedmodule)
-    * [Lazy loaded modules](#lazy-loaded-modules)
-    * [Configuration](#configuration)
-    * [AoT](#aot)
-  * [Define the default language for the application](#2-define-the-default-language-for-the-application)
-  * [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
-  * [Define the translations](#4-define-the-translations)
-  * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
-  * [Use HTML tags](#6-use-html-tags)
-* [API](#api)
-  * [TranslateService](#translateservice)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Write & use your own loader](#write--use-your-own-loader)
-      * [Example](#example)
-    * [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
-    * [How to handle missing translations](#how-to-handle-missing-translations)
-      * [Example](#example-1)
-  * [Parser](#parser)
-    * [Methods](#methods)
-* [FAQ](#faq)
-  * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
-* [Plugins](#plugins)
-* [Editors](#editors)
-* [Additional Framework Support](#additional-framework-support)
+- [@ngx-translate/core  ](#ngx-translatecore--)
+  - [Angular 16, 17, 18, 19+](#angular-16-17-18-19)
+  - [Angular \<=15](#angular-15)
+    - [Table of Contents](#table-of-contents)
+    - [Installation](#installation)
+    - [Usage](#usage)
+      - [1. Import the `TranslateModule`:](#1-import-the-translatemodule)
+        - [SharedModule](#sharedmodule)
+        - [Lazy loaded modules](#lazy-loaded-modules)
+        - [Configuration](#configuration)
+        - [AoT](#aot)
+      - [2. Define the `default language` for the application](#2-define-the-default-language-for-the-application)
+      - [3. Init the `TranslateService` for your application:](#3-init-the-translateservice-for-your-application)
+      - [4. Define the translations:](#4-define-the-translations)
+      - [5. Use the service, the pipe or the directive:](#5-use-the-service-the-pipe-or-the-directive)
+      - [6. Use HTML tags:](#6-use-html-tags)
+    - [API](#api)
+    - [TranslateService](#translateservice)
+      - [Properties:](#properties)
+      - [Methods:](#methods)
+      - [Write \& use your own loader](#write--use-your-own-loader)
+        - [Example](#example)
+      - [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
+      - [How to handle missing translations](#how-to-handle-missing-translations)
+        - [Example:](#example-1)
+    - [Parser](#parser)
+      - [Methods:](#methods-1)
+  - [FAQ](#faq)
+      - [1. I'm getting an error `npm ERR! peerinvalid Peer [...]`](#1-im-getting-an-error-npm-err-peerinvalid-peer-)
+      - [2. I want to hot reload the translations in my application but `reloadLang` does not work](#2-i-want-to-hot-reload-the-translations-in-my-application-but-reloadlang-does-not-work)
+      - [3. Translation doesn't work for new words](#3-translation-doesnt-work-for-new-words)
+  - [Plugins](#plugins)
+  - [Editors](#editors)
+    - [Extensions](#extensions)
+      - [VScode](#vscode)
+  - [Additional Framework Support](#additional-framework-support)
 
 
 ### Installation
@@ -82,19 +90,19 @@ npm install @ngx-translate/core --save
 Choose the version corresponding to your Angular version:
 
 
-| Angular       | @ngx-translate/core | @ngx-translate/http-loader | Tutorial | Docs                                   |
-| ------------- | ------------------- | -------------------------- | -------- |----------------------------------------|
-| 16 - 19+ | 16.x | 16.x | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | [Docs](https://ngx-translate.org)      |
-| 16 - 17+ | 16.x (15.x) | 16.x, (8.x) | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | [Docs](https://ngx-translate.org/v15/) |
-| 13 - 15 (ivy only) | 14.x              | 7.x+ | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 10 - 12   | 13.x               | 6.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 9             | 12.x             | 5.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 8             | 12.x             | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 7             | 11.x              | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular7-app-with-ngx-translate) | here                                   |
-| 6             | 10.x                | 3.x   | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular6-app-with-ngx-translate) | here                                   |
-| 5             | 8.x to 9.x          | 1.x to 2.x | — |
-| 4.3           | 7.x or less         | 1.x to 2.x  | — |
-| 2 to 4.2.x    | 7.x or less         | 0.x  | — |
+| Angular            | @ngx-translate/core | @ngx-translate/http-loader | Tutorial                                                                                                         | Docs                                   |
+| ------------------ | ------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 16 - 19+           | 16.x                | 16.x                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | [Docs](https://ngx-translate.org)      |
+| 16 - 17+           | 16.x (15.x)         | 16.x, (8.x)                | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | [Docs](https://ngx-translate.org/v15/) |
+| 13 - 15 (ivy only) | 14.x                | 7.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 10 - 12            | 13.x                | 6.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 9                  | 12.x                | 5.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 8                  | 12.x                | 4.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 7                  | 11.x                | 4.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular7-app-with-ngx-translate) | here                                   |
+| 6                  | 10.x                | 3.x                        | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular6-app-with-ngx-translate) | here                                   |
+| 5                  | 8.x to 9.x          | 1.x to 2.x                 | —                                                                                                                |
+| 4.3                | 7.x or less         | 1.x to 2.x                 | —                                                                                                                |
+| 2 to 4.2.x         | 7.x or less         | 0.x                        | —                                                                                                                |
 
 
 ### Usage
@@ -219,6 +227,7 @@ If you want to configure a custom `TranslateLoader` while using [AoT compilation
 ```ts
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+    // return new TranslateHttpLoader(http, './assets/i18n/', '.json?v=' + Date.now()); // Avoid caching files
 }
 
 @NgModule({
@@ -541,7 +550,7 @@ If you need it for some reason, you can use the `TranslateParser` service.
 
 ## FAQ
 
-#### I'm getting an error `npm ERR! peerinvalid Peer [...]`
+#### 1. I'm getting an error `npm ERR! peerinvalid Peer [...]`
 
 If you're using npm 2.x, upgrade to npm 3.x, because npm 2 doesn't handle peer dependencies well. With npm 2 you could only use fixed versions, but with npm 3 you can use `^` to use a newer version if available.
 
@@ -549,9 +558,13 @@ If you're already on npm 3, check if it's an error (`npm ERR!`) or a warning (`n
 
 If you're using an old version of Angular and ngx-translate requires a newer version then you should consider upgrading your application to use the newer angular 2 version. There is always a reason when I upgrade the minimum dependencies of the library. Often it is because Angular had a breaking changes. If it's not an option for you, then check [the changelog](https://github.com/ngx-translate/core/releases) to know which version is the last compatible version for you.
 
-#### I want to hot reload the translations in my application but `reloadLang` does not work
+#### 2. I want to hot reload the translations in my application but `reloadLang` does not work
 
 If you want to reload the translations and see the update on all your components without reloading the page, you have to load the translations manually and call `setTranslation` function which triggers `onTranslationChange`.
+
+#### 3. Translation doesn't work for new words
+As the library is fetching `.json` files your browser will be caching them.   
+To avoid this behavior you can fake a new file version, see the [AoT](#AoT) section above for an example.
 
 ## Plugins
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
