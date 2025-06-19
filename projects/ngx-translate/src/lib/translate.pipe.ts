@@ -8,7 +8,7 @@ import {
   Translation,
   InterpolationParameters
 } from "./translate.service";
-import {equals, isDefined, isDict, isString} from "./util";
+import {equals, getValue, isDefined, isDict, isString} from "./util";
 
 @Injectable()
 @Pipe({
@@ -33,6 +33,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
       this.lastKey = key;
       this._ref.markForCheck();
     };
+
     if (translations) {
       const res = this.translate.getParsedResult(translations, key, interpolateParams);
       if (isObservable(res)) {
@@ -89,7 +90,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     // subscribe to onTranslationChange event, in case the translations change
     if (!this.onTranslationChange) {
       this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
-        if (this.lastKey && event.lang === this.translate.currentLang) {
+        if (this.lastKey && event.lang === this.translate.currentLang || event.lang === this.translate.defaultLang) {
           this.lastKey = null;
           this.updateValue(query, interpolateParams, event.translations);
         }
@@ -100,7 +101,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     if (!this.onLangChange) {
       this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
         if (this.lastKey) {
-          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+          this.lastKey = null;
           this.updateValue(query, interpolateParams, event.translations);
         }
       });
@@ -110,7 +111,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     if (!this.onDefaultLangChange) {
       this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe(() => {
         if (this.lastKey) {
-          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+          this.lastKey = null;
           this.updateValue(query, interpolateParams);
         }
       });
