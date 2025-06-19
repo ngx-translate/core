@@ -9,7 +9,7 @@ import {map} from "rxjs/operators";
 export class DelayedFakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<TranslationObject> {
 
-        const translations: TranslationObject = {
+        const translations: Record<string, TranslationObject> = {
             "en": {"TEST": "This is a test"},
             "fr": {"TEST": "C'est un test"},
         };
@@ -23,7 +23,7 @@ export class DelayedFakeLoader implements TranslateLoader {
 export class FakeLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<TranslationObject> {
 
-        const translations: TranslationObject = {
+        const translations: Record<string, TranslationObject> = {
             "en": {"TEST": "This is a test"},
             "fr": {"TEST": "C'est un test"},
         };
