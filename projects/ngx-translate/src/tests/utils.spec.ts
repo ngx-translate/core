@@ -1,4 +1,4 @@
-import {equals, getValue, isArray, isDict, mergeDeep} from "./util";
+import {equals, getValue, isArray, isDict, mergeDeep} from "../lib/util";
 
 
 describe("Utils", () =>
