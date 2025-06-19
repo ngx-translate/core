@@ -204,6 +204,32 @@ describe("TranslatePipe (unit)", () =>
 
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
         });
+
+        it("should update the translation if the language is reloaded", () =>
+        {
+            translate.setTranslation("en", {"TEST": "This is a test"});
+            translate.use("en");
+
+            expect(translatePipe.transform("TEST")).toEqual("This is a test");
+
+            translate.setTranslation("en", {"TEST": "Another one!"});
+
+            expect(translatePipe.transform("TEST")).toEqual("Another one!");
+        });
+
+        it("should update the translation if the default lang changes when using it as fallback", () =>
+        {
+            translate.setTranslation("en", {"TEST": "This is a test"});
+            translate.setTranslation("fr", {"no-test": "C'est un test"});
+            translate.setDefaultLang("en");
+            translate.use("fr");
+
+            expect(translatePipe.transform("TEST")).toEqual("This is a test");
+
+            translate.setTranslation("en", {"TEST": "Another test"});
+
+            expect(translatePipe.transform("TEST")).toEqual("Another test");
+        });
     });
 
     describe("updates - async", () =>
