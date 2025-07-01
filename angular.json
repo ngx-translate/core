@@ -101,7 +101,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular/build::application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/test-app",
             "index": "projects/test-app/src/index.html",
