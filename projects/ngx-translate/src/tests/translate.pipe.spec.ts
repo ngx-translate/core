@@ -1,35 +1,32 @@
-import {ChangeDetectorRef} from "@angular/core";
-import {fakeAsync, TestBed, tick} from "@angular/core/testing";
-import {Mock} from "ts-mocks";
+import { ChangeDetectorRef } from "@angular/core";
+import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { Mock } from "ts-mocks";
 import {
     provideTranslateService,
     TranslateLoader,
     TranslatePipe,
-    TranslateService
+    TranslateService,
 } from "../public-api";
-import {DelayedFakeLoader} from "./test-helpers";
+import { DelayedFakeLoader } from "./test-helpers";
 
-
-
-describe("TranslatePipe (unit)", () =>
-{
+describe("TranslatePipe (unit)", () => {
     let translate: TranslateService;
     let ref: ChangeDetectorRef;
     let translatePipe: TranslatePipe;
 
-    beforeEach(() =>
-    {
+    beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideTranslateService({
-                loader: {provide: TranslateLoader, useClass: DelayedFakeLoader},
-            })]
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useClass: DelayedFakeLoader },
+                }),
+            ],
         });
 
         translate = TestBed.inject(TranslateService);
 
         ref = new Mock<ChangeDetectorRef>({
-            markForCheck: () =>
-            {}
+            markForCheck: () => {},
         }).Object;
 
         translate = TestBed.inject(TranslateService);
@@ -38,115 +35,146 @@ describe("TranslatePipe (unit)", () =>
         spyOn(translatePipe, "updateValue").and.callThrough();
     });
 
-    it("is defined", () =>
-    {
+    it("is defined", () => {
         expect(TranslatePipe).toBeDefined();
         expect(translatePipe).toBeDefined();
     });
 
-    describe("transform()", () =>
-    {
-
-        it("should translate a string", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
+    describe("transform()", () => {
+        it("should translate a string", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
         });
 
-        it("should call markForChanges when it translates a string", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
+        it("should call markForChanges when it translates a string", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
             translatePipe.transform("TEST");
             expect(ref.markForCheck).toHaveBeenCalled();
         });
 
-        it("should translate a string with object parameters", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param}}"});
+        it("should translate a string with object parameters", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param}}" });
             translate.use("en");
 
-            expect(translatePipe.transform("TEST", {param: "with param"})).toEqual("This is a test with param");
+            expect(translatePipe.transform("TEST", { param: "with param" })).toEqual(
+                "This is a test with param",
+            );
         });
 
-        it("should translate a string with object as string parameters", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param}}"});
+        it("should translate a string with object as string parameters", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param}}" });
             translate.use("en");
 
-            expect(translatePipe.transform("TEST", "{param: \"with param\"}")).toEqual("This is a test with param");
-            expect(translatePipe.transform("TEST", "{\"param\": \"with param\"}")).toEqual("This is a test with param");
-            expect(translatePipe.transform("TEST", "{param: 'with param'}")).toEqual("This is a test with param");
-            expect(translatePipe.transform("TEST", "{'param' : 'with param'}")).toEqual("This is a test with param");
+            expect(translatePipe.transform("TEST", '{param: "with param"}')).toEqual(
+                "This is a test with param",
+            );
+            expect(translatePipe.transform("TEST", '{"param": "with param"}')).toEqual(
+                "This is a test with param",
+            );
+            expect(translatePipe.transform("TEST", "{param: 'with param'}")).toEqual(
+                "This is a test with param",
+            );
+            expect(translatePipe.transform("TEST", "{'param' : 'with param'}")).toEqual(
+                "This is a test with param",
+            );
         });
 
-        it("should translate a string with object as multiple string parameters", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param1}} {{param2}}"});
+        it("should translate a string with object as multiple string parameters", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param1}} {{param2}}" });
             translate.use("en");
 
-            expect(translatePipe.transform("TEST", "{param1: \"with param-1\", param2: \"and param-2\"}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{\"param1\": \"with param-1\", \"param2\": \"and param-2\"}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{param1: 'with param-1', param2: 'and param-2'}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{'param1' : 'with param-1', 'param2': 'and param-2'}"))
-              .toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform("TEST", '{param1: "with param-1", param2: "and param-2"}'),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    '{"param1": "with param-1", "param2": "and param-2"}',
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform("TEST", "{param1: 'with param-1', param2: 'and param-2'}"),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    "{'param1' : 'with param-1', 'param2': 'and param-2'}",
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
         });
 
-        it("should translate a string with object as nested string parameters", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param.one}} {{param.two}}"});
+        it("should translate a string with object as nested string parameters", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param.one}} {{param.two}}" });
             translate.use("en");
 
-            expect(translatePipe.transform("TEST", "{param: {one: \"with param-1\", two: \"and param-2\"}}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{\"param\": {\"one\": \"with param-1\", \"two\": \"and param-2\"}}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{param: {one: 'with param-1', two: 'and param-2'}}"))
-              .toEqual("This is a test with param-1 and param-2");
-            expect(translatePipe.transform("TEST", "{'param' : {'one': 'with param-1', 'two': 'and param-2'}}"))
-              .toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    '{param: {one: "with param-1", two: "and param-2"}}',
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    '{"param": {"one": "with param-1", "two": "and param-2"}}',
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    "{param: {one: 'with param-1', two: 'and param-2'}}",
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
+            expect(
+                translatePipe.transform(
+                    "TEST",
+                    "{'param' : {'one': 'with param-1', 'two': 'and param-2'}}",
+                ),
+            ).toEqual("This is a test with param-1 and param-2");
         });
 
-        it("should update the value when the parameters change", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param}}"});
+        it("should update the value when the parameters change", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param}}" });
             translate.use("en");
 
-            expect(translatePipe.transform("TEST", {param: "with param"})).toEqual("This is a test with param");
+            expect(translatePipe.transform("TEST", { param: "with param" })).toEqual(
+                "This is a test with param",
+            );
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
             // same value, shouldn't call 'updateValue' again
-            expect(translatePipe.transform("TEST", {param: "with param"})).toEqual("This is a test with param");
+            expect(translatePipe.transform("TEST", { param: "with param" })).toEqual(
+                "This is a test with param",
+            );
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
             // different param, should call 'updateValue'
-            expect(translatePipe.transform("TEST", {param: "with param2"})).toEqual("This is a test with param2");
+            expect(translatePipe.transform("TEST", { param: "with param2" })).toEqual(
+                "This is a test with param2",
+            );
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(2);
 
             expect(ref.markForCheck).toHaveBeenCalledTimes(2);
         });
 
-        it("should throw if you don't give an object parameter", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test {{param}}"});
+        it("should throw if you don't give an object parameter", () => {
+            translate.setTranslation("en", { TEST: "This is a test {{param}}" });
             translate.use("en");
-            const param = "param: \"with param\"";
+            const param = 'param: "with param"';
 
-            expect(() =>
-            {
+            expect(() => {
                 translatePipe.transform("TEST", param);
-            }).toThrowError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`);
+            }).toThrowError(
+                `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`,
+            );
         });
 
-        it("should return given falsey or non length query", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
+        it("should return given falsey or non length query", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -176,13 +204,10 @@ describe("TranslatePipe (unit)", () =>
          */
     });
 
-
-    describe("updates - sync", () =>
-    {
-        it("on default lang change", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
-            translate.setTranslation("fr", {"TEST": "C'est un test"});
+    describe("updates - sync", () => {
+        it("on default lang change", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
+            translate.setTranslation("fr", { TEST: "C'est un test" });
             translate.setDefaultLang("en");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
@@ -192,10 +217,9 @@ describe("TranslatePipe (unit)", () =>
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
         });
 
-        it("on lang change", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
-            translate.setTranslation("fr", {"TEST": "C'est un test"});
+        it("on lang change", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
+            translate.setTranslation("fr", { TEST: "C'est un test" });
             translate.use("en");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
@@ -205,37 +229,33 @@ describe("TranslatePipe (unit)", () =>
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
         });
 
-        it("should update the translation if the language is reloaded", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
+        it("should update the translation if the language is reloaded", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            translate.setTranslation("en", {"TEST": "Another one!"});
+            translate.setTranslation("en", { TEST: "Another one!" });
 
             expect(translatePipe.transform("TEST")).toEqual("Another one!");
         });
 
-        it("should update the translation if the default lang changes when using it as fallback", () =>
-        {
-            translate.setTranslation("en", {"TEST": "This is a test"});
-            translate.setTranslation("fr", {"no-test": "C'est un test"});
+        it("should update the translation if the default lang changes when using it as fallback", () => {
+            translate.setTranslation("en", { TEST: "This is a test" });
+            translate.setTranslation("fr", { "no-test": "C'est un test" });
             translate.setDefaultLang("en");
             translate.use("fr");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            translate.setTranslation("en", {"TEST": "Another test"});
+            translate.setTranslation("en", { TEST: "Another test" });
 
             expect(translatePipe.transform("TEST")).toEqual("Another test");
         });
     });
 
-    describe("updates - async", () =>
-    {
-        it("on default lang change", fakeAsync(() =>
-        {
+    describe("updates - async", () => {
+        it("on default lang change", fakeAsync(() => {
             translate.setDefaultLang("en");
             tick(10);
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
@@ -247,8 +267,7 @@ describe("TranslatePipe (unit)", () =>
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
         }));
 
-        it("on lang change", fakeAsync(() =>
-        {
+        it("on lang change", fakeAsync(() => {
             translate.use("en");
             tick(10);
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
@@ -261,4 +280,3 @@ describe("TranslatePipe (unit)", () =>
         }));
     });
 });
-

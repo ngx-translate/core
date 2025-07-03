@@ -10,7 +10,7 @@ Angular 16+ and is divided into smaller, more readable sections, making it
 easier to digest than this big README. It also documents the additional
 interfaces and explains how to develop custom plugins.
 
-- [Full documentation](https://ngx-translate.org) 
+- [Full documentation](https://ngx-translate.org)
 - [Migration guide v15 -> v16](https://ngx-translate.org/getting-started/migration-guide/)
 - [Release Notes](https://github.com/ngx-translate/core/releases)
 
@@ -41,35 +41,35 @@ Simple example using ngx-translate:
 https://stackblitz.com/github/ngx-translate/example
 
 ### Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Import the TranslateModule](#1-import-the-translatemodule)
-    * [SharedModule](#sharedmodule)
-    * [Lazy loaded modules](#lazy-loaded-modules)
-    * [Configuration](#configuration)
-    * [AoT](#aot)
-  * [Define the default language for the application](#2-define-the-default-language-for-the-application)
-  * [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
-  * [Define the translations](#4-define-the-translations)
-  * [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
-  * [Use HTML tags](#6-use-html-tags)
-* [API](#api)
-  * [TranslateService](#translateservice)
-    * [Properties](#properties)
-    * [Methods](#methods)
-    * [Write & use your own loader](#write--use-your-own-loader)
-      * [Example](#example)
-    * [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
-    * [How to handle missing translations](#how-to-handle-missing-translations)
-      * [Example](#example-1)
-  * [Parser](#parser)
-    * [Methods](#methods)
-* [FAQ](#faq)
-  * [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
-* [Plugins](#plugins)
-* [Editors](#editors)
-* [Additional Framework Support](#additional-framework-support)
 
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Import the TranslateModule](#1-import-the-translatemodule)
+        - [SharedModule](#sharedmodule)
+        - [Lazy loaded modules](#lazy-loaded-modules)
+        - [Configuration](#configuration)
+        - [AoT](#aot)
+    - [Define the default language for the application](#2-define-the-default-language-for-the-application)
+    - [Init the TranslateService for your application](#3-init-the-translateservice-for-your-application)
+    - [Define the translations](#4-define-the-translations)
+    - [Use the service, the pipe or the directive](#5-use-the-service-the-pipe-or-the-directive)
+    - [Use HTML tags](#6-use-html-tags)
+- [API](#api)
+    - [TranslateService](#translateservice)
+        - [Properties](#properties)
+        - [Methods](#methods)
+        - [Write & use your own loader](#write--use-your-own-loader)
+            - [Example](#example)
+        - [How to use a compiler to preprocess translation values](#how-to-use-a-compiler-to-preprocess-translation-values)
+        - [How to handle missing translations](#how-to-handle-missing-translations)
+            - [Example](#example-1)
+    - [Parser](#parser)
+        - [Methods](#methods)
+- [FAQ](#faq)
+    - [I'm getting an error `npm ERR! peerinvalid Peer [...]`](#im-getting-an-error-npm-err-peerinvalid-peer-)
+- [Plugins](#plugins)
+- [Editors](#editors)
+- [Additional Framework Support](#additional-framework-support)
 
 ### Installation
 
@@ -81,21 +81,19 @@ npm install @ngx-translate/core --save
 
 Choose the version corresponding to your Angular version:
 
-
-| Angular       | @ngx-translate/core | @ngx-translate/http-loader | Tutorial | Docs                                   |
-| ------------- | ------------------- | -------------------------- | -------- |----------------------------------------|
-| 16 - 19+ | 16.x | 16.x | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | [Docs](https://ngx-translate.org)      |
-| 16 - 17+ | 16.x (15.x) | 16.x, (8.x) | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | [Docs](https://ngx-translate.org/v15/) |
-| 13 - 15 (ivy only) | 14.x              | 7.x+ | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 10 - 12   | 13.x               | 6.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 9             | 12.x             | 5.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 8             | 12.x             | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate) | here                                   |
-| 7             | 11.x              | 4.x+  | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular7-app-with-ngx-translate) | here                                   |
-| 6             | 10.x                | 3.x   | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular6-app-with-ngx-translate) | here                                   |
-| 5             | 8.x to 9.x          | 1.x to 2.x | — |
-| 4.3           | 7.x or less         | 1.x to 2.x  | — |
-| 2 to 4.2.x    | 7.x or less         | 0.x  | — |
-
+| Angular            | @ngx-translate/core | @ngx-translate/http-loader | Tutorial                                                                                                         | Docs                                   |
+| ------------------ | ------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 16 - 19+           | 16.x                | 16.x                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | [Docs](https://ngx-translate.org)      |
+| 16 - 17+           | 16.x (15.x)         | 16.x, (8.x)                | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | [Docs](https://ngx-translate.org/v15/) |
+| 13 - 15 (ivy only) | 14.x                | 7.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 10 - 12            | 13.x                | 6.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 9                  | 12.x                | 5.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 8                  | 12.x                | 4.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)  | here                                   |
+| 7                  | 11.x                | 4.x+                       | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular7-app-with-ngx-translate) | here                                   |
+| 6                  | 10.x                | 3.x                        | [Tutorial](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular6-app-with-ngx-translate) | here                                   |
+| 5                  | 8.x to 9.x          | 1.x to 2.x                 | —                                                                                                                |
+| 4.3                | 7.x or less         | 1.x to 2.x                 | —                                                                                                                |
+| 2 to 4.2.x         | 7.x or less         | 0.x                        | —                                                                                                                |
 
 ### Usage
 
@@ -108,18 +106,15 @@ Make sure you only call this method in the root module of your application, most
 This method allows you to configure the `TranslateModule` by specifying a loader, a parser and/or a missing translations handler.
 
 ```ts
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
-import {TranslateModule} from '@ngx-translate/core';
+import { BrowserModule } from "@angular/platform-browser";
+import { NgModule } from "@angular/core";
+import { TranslateModule } from "@ngx-translate/core";
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        TranslateModule.forRoot()
-    ],
-    bootstrap: [AppComponent]
+    imports: [BrowserModule, TranslateModule.forRoot()],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 ##### SharedModule
@@ -129,12 +124,9 @@ you can export the `TranslateModule` to make sure you don't have to import it in
 
 ```ts
 @NgModule({
-    exports: [
-        CommonModule,
-        TranslateModule
-    ]
+    exports: [CommonModule, TranslateModule],
 })
-export class SharedModule { }
+export class SharedModule {}
 ```
 
 > Note: Never call a `forRoot` static method in the `SharedModule`. You might end up with different instances of the service in your injector tree. But you can use `forChild` if necessary.
@@ -155,15 +147,18 @@ Otherwise, by default, it will share its data with other instances of the servic
 @NgModule({
     imports: [
         TranslateModule.forChild({
-            loader: {provide: TranslateLoader, useClass: CustomLoader},
-            compiler: {provide: TranslateCompiler, useClass: CustomCompiler},
-            parser: {provide: TranslateParser, useClass: CustomParser},
-            missingTranslationHandler: {provide: MissingTranslationHandler, useClass: CustomHandler},
-            isolate: true
-        })
-    ]
+            loader: { provide: TranslateLoader, useClass: CustomLoader },
+            compiler: { provide: TranslateCompiler, useClass: CustomCompiler },
+            parser: { provide: TranslateParser, useClass: CustomParser },
+            missingTranslationHandler: {
+                provide: MissingTranslationHandler,
+                useClass: CustomHandler,
+            },
+            isolate: true,
+        }),
+    ],
 })
-export class LazyLoadedModule { }
+export class LazyLoadedModule {}
 ```
 
 ##### Configuration
@@ -183,12 +178,12 @@ Once you've decided which loader to use, you have to setup the `TranslateModule`
 Here is how you would use the `TranslateHttpLoader` to load translations from "/assets/i18n/[lang].json" (`[lang]` is the lang that you're using, for english it could be `en`):
 
 ```ts
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
-import {HttpClientModule, HttpClient} from '@angular/common/http';
-import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
-import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {AppComponent} from './app';
+import { NgModule } from "@angular/core";
+import { BrowserModule } from "@angular/platform-browser";
+import { HttpClientModule, HttpClient } from "@angular/common/http";
+import { TranslateModule, TranslateLoader } from "@ngx-translate/core";
+import { TranslateHttpLoader } from "@ngx-translate/http-loader";
+import { AppComponent } from "./app";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -203,13 +198,13 @@ export function HttpLoaderFactory(http: HttpClient) {
             loader: {
                 provide: TranslateLoader,
                 useFactory: HttpLoaderFactory,
-                deps: [HttpClient]
-            }
-        })
+                deps: [HttpClient],
+            },
+        }),
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 ##### AoT
@@ -218,7 +213,7 @@ If you want to configure a custom `TranslateLoader` while using [AoT compilation
 
 ```ts
 export function createTranslateLoader(http: HttpClient) {
-    return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+    return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
 }
 
 @NgModule({
@@ -228,14 +223,14 @@ export function createTranslateLoader(http: HttpClient) {
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
-                useFactory: (createTranslateLoader),
-                deps: [HttpClient]
-            }
-        })
+                useFactory: createTranslateLoader,
+                deps: [HttpClient],
+            },
+        }),
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 #### 2. Define the `default language` for the application
@@ -245,38 +240,34 @@ export class AppModule { }
     imports: [
         BrowserModule,
         TranslateModule.forRoot({
-            defaultLanguage: 'en'
-        })
+            defaultLanguage: "en",
+        }),
     ],
-    providers: [
-
-    ],
-    bootstrap: [AppComponent]
+    providers: [],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 #### 3. Init the `TranslateService` for your application:
 
 ```ts
-import {Component} from '@angular/core';
-import {TranslateService} from '@ngx-translate/core';
+import { Component } from "@angular/core";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
-    selector: 'app',
-    template: `
-        <div>{{ 'HELLO' | translate:param }}</div>
-    `
+    selector: "app",
+    template: ` <div>{{ "HELLO" | translate: param }}</div> `,
 })
 export class AppComponent {
-    param = {value: 'world'};
+    param = { value: "world" };
 
     constructor(translate: TranslateService) {
         // this language will be used as a fallback when a translation isn't found in the current language
-        translate.setDefaultLang('en');
+        translate.setDefaultLang("en");
 
-         // the lang to use, if the lang isn't available, it will use the current loader to get them
-        translate.use('en');
+        // the lang to use, if the lang isn't available, it will use the current loader to get them
+        translate.use("en");
     }
 }
 ```
@@ -294,8 +285,8 @@ Once you've imported the `TranslateModule`, you can put your translations in a j
 You can also define your translations manually with `setTranslation`.
 
 ```ts
-translate.setTranslation('en', {
-    HELLO: 'hello {{value}}'
+translate.setTranslation("en", {
+    HELLO: "hello {{value}}",
 });
 ```
 
@@ -318,7 +309,7 @@ You can either use the `TranslateService`, the `TranslatePipe` or the `Translate
 With the **service**, it looks like this:
 
 ```ts
-translate.get('HELLO', {value: 'world'}).subscribe((res: string) => {
+translate.get("HELLO", { value: "world" }).subscribe((res: string) => {
     console.log(res);
     //=> 'hello world'
 });
@@ -331,22 +322,23 @@ This is how you do it with the **pipe**:
 ```
 
 And in your component define `param` like this:
+
 ```ts
-param = {value: 'world'};
+param = { value: "world" };
 ```
 
 You can construct the translation keys dynamically by using simple string concatenation inside the template:
 
 ```html
 <ul>
-  <li *ngFor="let language of languages">{{ 'LANGUAGES.' + language | translate }}</li>
+    <li *ngFor="let language of languages">{{ 'LANGUAGES.' + language | translate }}</li>
 </ul>
 ```
 
 Where `languages` is an array member of your component:
 
 ```ts
-languages = ['EN', 'FR', 'BG'];
+languages = ["EN", "FR", "BG"];
 ```
 
 You can also use the output of the built-in pipes `uppercase` and `lowercase` in order to guarantee that your dynamically generated translation keys are either all uppercase or all lowercase. For example:
@@ -356,24 +348,27 @@ You can also use the output of the built-in pipes `uppercase` and `lowercase` in
 ```
 
 ```ts
-role = 'admin';
+role = "admin";
 ```
 
 will match the following translation:
+
 ```json
 {
-  "ROLES": {
-    "ADMIN": "Administrator"
-  }
+    "ROLES": {
+        "ADMIN": "Administrator"
+    }
 }
 ```
 
 This is how you use the **directive**:
+
 ```html
 <div [translate]="'HELLO'" [translateParams]="{value: 'world'}"></div>
 ```
 
 Or even simpler using the content of your element as a key:
+
 ```html
 <div translate [translateParams]="{value: 'world'}">HELLO</div>
 ```
@@ -404,27 +399,32 @@ To render them, simply use the `innerHTML` attribute with the pipe on any elemen
 - `currentLoader`: An instance of the loader currently used (static loader by default)
 - `onLangChange`: An EventEmitter to listen to lang change events. A `LangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-  example:
+    example:
+
     ```ts
     onLangChange.subscribe((event: LangChangeEvent) => {
-	  // do something
-	});
+        // do something
+    });
     ```
+
 - `onTranslationChange`: An EventEmitter to listen to translation change events. A `TranslationChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-  example:
+    example:
+
     ```ts
     onTranslationChange.subscribe((event: TranslationChangeEvent) => {
-	  // do something
-	});
+        // do something
+    });
     ```
+
 - `onDefaultLangChange`: An EventEmitter to listen to default lang change events. A `DefaultLangChangeEvent` is an object with the properties `lang: string` & `translations: any` (an object containing your translations).
 
-  example:
+    example:
+
     ```ts
     onDefaultLangChange.subscribe((event: DefaultLangChangeEvent) => {
-	  // do something
-	});
+        // do something
+    });
     ```
 
 #### Methods:
@@ -455,7 +455,7 @@ If you want to write your own loader, you need to create a class that implements
 ```ts
 class CustomLoader implements TranslateLoader {
     getTranslation(lang: string): Observable<any> {
-        return Observable.of({KEY: 'value'});
+        return Observable.of({ KEY: "value" });
     }
 }
 ```
@@ -467,13 +467,14 @@ Once you've defined your loader, you can provide it in your configuration by add
     imports: [
         BrowserModule,
         TranslateModule.forRoot({
-            loader: {provide: TranslateLoader, useClass: CustomLoader}
-        })
+            loader: { provide: TranslateLoader, useClass: CustomLoader },
+        }),
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
+
 [Another custom loader example with translations stored in Firebase](FIREBASE_EXAMPLE.md)
 
 #### How to use a compiler to preprocess translation values
@@ -481,10 +482,9 @@ export class AppModule { }
 By default, translation values are added "as-is". You can configure a `compiler` that implements `TranslateCompiler` to pre-process translation values when they are added (either manually or by a loader). A compiler has the following methods:
 
 - `compile(value: string, lang: string): string | Function`: Compiles a string to a function or another string.
-- `compileTranslations(translations: any, lang: string): any`:  Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values.
+- `compileTranslations(translations: any, lang: string): any`: Compiles a (possibly nested) object of translation values to a structurally identical object of compiled translation values.
 
 Using a compiler opens the door for powerful pre-processing of translation values. As long as the compiler outputs a compatible interpolation string or an interpolation function, arbitrary input syntax can be supported.
-
 
 #### How to handle missing translations
 
@@ -497,13 +497,13 @@ You can use `useDefaultLang` to decide whether default language string should be
 Create a Missing Translation Handler
 
 ```ts
-import {Injectable} from "@angular/core";
-import {MissingTranslationHandler, MissingTranslationHandlerParams} from '@ngx-translate/core';
+import { Injectable } from "@angular/core";
+import { MissingTranslationHandler, MissingTranslationHandlerParams } from "@ngx-translate/core";
 
 @Injectable()
 export class MyMissingTranslationHandler implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams) {
-        return 'some value';
+        return "some value";
     }
 }
 ```
@@ -515,16 +515,17 @@ Setup the Missing Translation Handler in your module import by adding it to the 
     imports: [
         BrowserModule,
         TranslateModule.forRoot({
-            missingTranslationHandler: {provide: MissingTranslationHandler, useClass: MyMissingTranslationHandler},
-            useDefaultLang: false
-        })
+            missingTranslationHandler: {
+                provide: MissingTranslationHandler,
+                useClass: MyMissingTranslationHandler,
+            },
+            useDefaultLang: false,
+        }),
     ],
-    providers: [
-
-    ],
-    bootstrap: [AppComponent]
+    providers: [],
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
 ```
 
 ### Parser
@@ -532,11 +533,13 @@ export class AppModule { }
 If you need it for some reason, you can use the `TranslateParser` service.
 
 #### Methods:
+
 - `interpolate(expr: string | Function, params?: any): string`: Interpolates a string to replace parameters or calls the interpolation function with the parameters.
 
-  `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
-  `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
-- `getValue(target: any, key: string): any`:  Gets a value from an object by composed key
+    `This is a {{ key }}` ==> `This is a value` with `params = { key: "value" }`
+    `(params) => \`This is a ${params.key}\` ==> `This is a value` with `params = { key: "value" }`
+
+- `getValue(target: any, key: string): any`: Gets a value from an object by composed key
   `parser.getValue({ key1: { keyA: 'valueI' }}, 'key1.keyA') ==> 'valueI'`
 
 ## FAQ
@@ -554,6 +557,7 @@ If you're using an old version of Angular and ngx-translate requires a newer ver
 If you want to reload the translations and see the update on all your components without reloading the page, you have to load the translations manually and call `setTranslation` function which triggers `onTranslationChange`.
 
 ## Plugins
+
 - [Localize Router](https://github.com/Greentube/localize-router) by @meeroslav: An implementation of routes localization for Angular. If you need localized urls (for example /fr/page and /en/page).
 - [.po files Loader](https://github.com/biesbjerg/ngx-translate-po-http-loader) by @biesbjerg: Use .po translation files with ngx-translate
 - [browser.i18n Loader](https://github.com/pearnaly/ngx-translate-browser-i18n-loader) by @pearnaly: loader for native translation files of browser extensions.
@@ -569,6 +573,7 @@ If you want to reload the translations and see the update on all your components
 - [ngx-translate-cut](https://github.com/bartholomej/ngx-translate-cut) by @bartholomej: Simple and useful pipe for cutting translations ✂️
 
 ## Editors
+
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for JSON files
 - [Translation Manager](https://translation-manager-86c3d.firebaseapp.com/) — Progressive web-app, translation editor for JSON files
 - [Crowdl.io](https://crowdl.io) — Free translation management and crowd-translations tool with support for JSON files
@@ -578,11 +583,10 @@ If you want to reload the translations and see the update on all your components
 ### Extensions
 
 #### VScode
+
 - [Generate Translation](https://marketplace.visualstudio.com/items?itemName=thiagocordeirooo.generate-translation) by [@thiagocordeirooo](https://github.com/thiagocordeirooo): A visual studio code extension for you to generate the translations without leaving the current file.
 - [Lingua](https://marketplace.visualstudio.com/items?itemName=chr33z.lingua-vscode&utm_source=www.vsixhub.com) by [@chr33z](https://github.com/chr33z): A visual studio code extension to help managing translations for ngx-translate - featuring inline translation lookup and in-place translation creation and editing.
 
-
-
 ## Additional Framework Support
 
-* [Use with NativeScript](https://github.com/NathanWalker/nativescript-ng2-translate/issues/5#issuecomment-257606661)
+- [Use with NativeScript](https://github.com/NathanWalker/nativescript-ng2-translate/issues/5#issuecomment-257606661)

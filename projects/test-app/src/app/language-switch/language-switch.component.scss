@@ -1,36 +1,35 @@
-:host{
-  display: block;
-  margin: 0 auto;
-  text-align: center;
-
-  button {
-    background-color: var(--mat-sys-secondary);
-    border: none;
-    color: var(--mat-sys-on-secondary);
-    padding: 0.25rem 0.5rem;
+:host {
+    display: block;
+    margin: 0 auto;
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin-left: 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-    min-width: 120px;
-    min-height: 46px;
-    cursor: pointer;
-    box-shadow: var(--mat-sys-level2);
 
-    &:hover {
-      box-shadow: var(--mat-sys-level3);
-      &:active {
-        box-shadow: var(--mat-sys-level1);
-      }
+    button {
+        background-color: var(--mat-sys-secondary);
+        border: none;
+        color: var(--mat-sys-on-secondary);
+        padding: 0.25rem 0.5rem;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-left: 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        min-width: 120px;
+        min-height: 46px;
+        cursor: pointer;
+        box-shadow: var(--mat-sys-level2);
+
+        &:hover {
+            box-shadow: var(--mat-sys-level3);
+            &:active {
+                box-shadow: var(--mat-sys-level1);
+            }
+        }
+
+        &.active {
+            background-color: var(--mat-sys-primary);
+            color: var(--mat-sys-on-primary);
+        }
     }
-
-    &.active {
-      background-color: var(--mat-sys-primary);
-      color: var(--mat-sys-on-primary);
-
-    }
-  }
 }

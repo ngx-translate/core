@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { TranslateDirective, TranslatePipe } from "@ngx-translate/core";
 
-
 @Component({
     selector: "app-standalone-component",
     standalone: true,
@@ -10,7 +9,4 @@ import { TranslateDirective, TranslatePipe } from "@ngx-translate/core";
     templateUrl: "./standalone.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StandaloneComponent
-{
-
-}
+export class StandaloneComponent {}

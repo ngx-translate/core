@@ -1,0 +1,17 @@
+{
+    "printWidth": 100,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "semi": true,
+    "arrowParens": "always",
+    "overrides": [
+        {
+            "files": "*.html",
+            "options": {
+                "parser": "angular"
+            }
+        }
+    ],
+    "tabWidth": 4,
+    "useTabs": false
+}

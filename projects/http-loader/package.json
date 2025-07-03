@@ -1,17 +1,19 @@
 {
-  "name": "@ngx-translate/http-loader",
-  "version": "16.0.1",
-  "description": "http loader for dynamically loading translation files for @ngx-translate/core",
-  "keywords": [
-    "@ngx-translate",
-    "ngx-translate",
-    "angular", "i18n", "translation"
-  ],
-  "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
-  "license": "MIT",
-  "peerDependencies": {
-    "@angular/common": ">=16",
-    "@angular/core": ">=16"
-  },
-  "sideEffects": false
+    "name": "@ngx-translate/http-loader",
+    "version": "16.0.1",
+    "description": "http loader for dynamically loading translation files for @ngx-translate/core",
+    "keywords": [
+        "@ngx-translate",
+        "ngx-translate",
+        "angular",
+        "i18n",
+        "translation"
+    ],
+    "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
+    "license": "MIT",
+    "peerDependencies": {
+        "@angular/common": ">=16",
+        "@angular/core": ">=16"
+    },
+    "sideEffects": false
 }

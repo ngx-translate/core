@@ -1,26 +1,26 @@
 {
-  "name": "@ngx-translate/core",
-  "version": "16.1.0-rc.0",
-  "description": "Translation library (i18n) for Angular",
-  "keywords": [
-    "@ngx-translate",
-    "ngx-translate",
-    "angular",
-    "i18n",
-    "translation"
-  ],
-  "homepage": "https://github.com/ngx-translate/core#readme",
-  "bugs": {
-    "url": "https://github.com/ngx-translate/core/issues"
-  },
-  "repository": {
-    "url": "https://github.com/ngx-translate/core"
-  },
-  "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
-  "license": "MIT",
-  "peerDependencies": {
-    "@angular/common": ">=16",
-    "@angular/core": ">=16"
-  },
-  "sideEffects": false
+    "name": "@ngx-translate/core",
+    "version": "16.1.0-rc.0",
+    "description": "Translation library (i18n) for Angular",
+    "keywords": [
+        "@ngx-translate",
+        "ngx-translate",
+        "angular",
+        "i18n",
+        "translation"
+    ],
+    "homepage": "https://github.com/ngx-translate/core#readme",
+    "bugs": {
+        "url": "https://github.com/ngx-translate/core/issues"
+    },
+    "repository": {
+        "url": "https://github.com/ngx-translate/core"
+    },
+    "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
+    "license": "MIT",
+    "peerDependencies": {
+        "@angular/common": ">=16",
+        "@angular/core": ">=16"
+    },
+    "sideEffects": false
 }
