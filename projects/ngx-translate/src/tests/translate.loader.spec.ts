@@ -1,15 +1,15 @@
+import { Injectable } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
+    InterpolatableTranslationObject,
     TranslateFakeLoader,
     TranslateLoader,
     TranslateService,
-    TranslationObject,
     Translation,
+    TranslationObject,
     provideTranslateService,
-    InterpolatableTranslationObject,
 } from "../public-api";
-import { Injectable } from "@angular/core";
 
 const translations: TranslationObject = { TEST: "This is a test" };
 

@@ -1,16 +1,16 @@
+import { Injectable, Type } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     MissingTranslationHandler,
     MissingTranslationHandlerParams,
     provideTranslateService,
+    StrictTranslation,
     TranslateLoader,
     TranslateService,
-    StrictTranslation,
-    TranslationObject,
     Translation,
+    TranslationObject,
 } from "../public-api";
-import { Injectable, Type } from "@angular/core";
 
 let translations: TranslationObject = { TEST: "This is a test" };
 const fakeTranslation: TranslationObject = { NOT_USED: "not used" };

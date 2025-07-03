@@ -1,6 +1,6 @@
-import { TranslateLoader, TranslationObject } from "@ngx-translate/core";
 import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
+import { TranslateLoader, TranslationObject } from "@ngx-translate/core";
 import { Observable } from "rxjs";
 
 @Injectable()

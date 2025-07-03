@@ -7,8 +7,8 @@ import {
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import {
-    TranslateLoader,
     provideTranslateService,
+    TranslateLoader,
     TranslateService,
     Translation,
 } from "@ngx-translate/core";

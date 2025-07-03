@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
-import { TranslateLoader } from "../public-api";
 import { Observable, of, timer } from "rxjs";
-import { TranslationObject } from "../public-api";
 import { map } from "rxjs/operators";
+import { TranslateLoader, TranslationObject } from "../public-api";
 
 @Injectable()
 export class DelayedFakeLoader implements TranslateLoader {

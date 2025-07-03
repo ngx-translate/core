@@ -1,3 +1,4 @@
+import { Injectable } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
@@ -6,11 +7,10 @@ import {
     TranslateFakeCompiler,
     TranslateLoader,
     TranslateService,
-    TranslationObject,
     Translation,
+    TranslationObject,
     provideTranslateService,
 } from "../public-api";
-import { Injectable } from "@angular/core";
 
 const translations: TranslationObject = { LOAD: "This is a test" };
 
