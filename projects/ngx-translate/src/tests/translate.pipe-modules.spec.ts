@@ -4,7 +4,7 @@ import { Observable, of } from "rxjs";
 import {
     TranslateLoader,
     TranslateModule,
-    TranslateModuleConfig, TranslatePipe,
+    TranslateModuleConfig,
     TranslateService,
     TranslationObject,
 } from "../public-api";

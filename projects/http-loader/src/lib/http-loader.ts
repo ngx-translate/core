@@ -6,8 +6,11 @@ import { Observable } from "rxjs";
 @Injectable()
 export class TranslateHttpLoader implements TranslateLoader {
     constructor(
+        // eslint-disable-next-line @angular-eslint/prefer-inject
         private http: HttpClient,
+        // eslint-disable-next-line @angular-eslint/prefer-inject
         @Inject(String) public prefix = "/assets/i18n/",
+        // eslint-disable-next-line @angular-eslint/prefer-inject
         @Inject(String) public suffix = ".json",
     ) {}
 
