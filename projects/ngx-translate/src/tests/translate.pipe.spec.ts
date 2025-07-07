@@ -159,7 +159,7 @@ describe("TranslatePipe (unit)", () => {
             );
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
-            // different param, should call 'updateValue'
+            // different param: should call 'updateValue'
             expect(translatePipe.transform("TEST", { param: "with param2" })).toEqual(
                 "This is a test with param2",
             );
@@ -180,7 +180,7 @@ describe("TranslatePipe (unit)", () => {
             );
         });
 
-        it("should return given falsey or non length query", () => {
+        it("should return given falsy or non length query", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
