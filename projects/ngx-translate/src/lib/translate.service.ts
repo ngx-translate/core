@@ -9,10 +9,10 @@ import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 export const TRANSLATE_CONFIG = new InjectionToken<{
-  defaultLanguage?: Language;
-  extend: boolean;
-  isolate: boolean;
-  useDefaultLang: boolean;
+    defaultLanguage?: Language;
+    extend: boolean;
+    isolate: boolean;
+    useDefaultLang: boolean;
 }>("TRANSLATE_CONFIG");
 
 export type InterpolationParameters = Record<string, unknown>;
@@ -134,17 +134,17 @@ export class TranslateService {
     public currentLoader: TranslateLoader = inject(TranslateLoader);
     public compiler: TranslateCompiler = inject(TranslateCompiler);
     private parser: TranslateParser = inject(TranslateParser);
-    private missingTranslationHandler: MissingTranslationHandler = inject(MissingTranslationHandler);
+    private missingTranslationHandler: MissingTranslationHandler =
+        inject(MissingTranslationHandler);
 
-    private config = inject(TRANSLATE_CONFIG, {optional: true}) ?? {
-      defaultLanguage: undefined,
-      extend: false,
-      isolate: false,
-      useDefaultLang: true,
-    }
+    private config = inject(TRANSLATE_CONFIG, { optional: true }) ?? {
+        defaultLanguage: undefined,
+        extend: false,
+        isolate: false,
+        useDefaultLang: true,
+    };
 
-    constructor(
-    ) {
+    constructor() {
         if (this.config.isolate) {
             this.store = new TranslateStore();
         }
@@ -278,7 +278,11 @@ export class TranslateService {
     ): void {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
-        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge || this.config.extend);
+        this.store.setTranslations(
+            lang,
+            interpolatableTranslations,
+            shouldMerge || this.config.extend,
+        );
     }
 
     public getLangs(): readonly Language[] {

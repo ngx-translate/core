@@ -1,24 +1,21 @@
 import {
-  EnvironmentProviders,
-  makeEnvironmentProviders,
-  ModuleWithProviders,
-  NgModule,
-  Provider,
-  Type,
+    EnvironmentProviders,
+    makeEnvironmentProviders,
+    ModuleWithProviders,
+    NgModule,
+    Provider,
+    Type,
 } from "@angular/core";
 import {
-  FakeMissingTranslationHandler,
-  MissingTranslationHandler,
+    FakeMissingTranslationHandler,
+    MissingTranslationHandler,
 } from "./lib/missing-translation-handler";
 import { TranslateCompiler, TranslateFakeCompiler } from "./lib/translate.compiler";
 import { TranslateDirective } from "./lib/translate.directive";
 import { TranslateFakeLoader, TranslateLoader } from "./lib/translate.loader";
 import { TranslateDefaultParser, TranslateParser } from "./lib/translate.parser";
 import { TranslatePipe } from "./lib/translate.pipe";
-import {
-  TRANSLATE_CONFIG,
-  TranslateService,
-} from "./lib/translate.service";
+import { TRANSLATE_CONFIG, TranslateService } from "./lib/translate.service";
 import { TranslateStore } from "./lib/translate.store";
 
 export * from "./lib/extraction-marker";
@@ -32,8 +29,7 @@ export * from "./lib/translate.service";
 export * from "./lib/translate.store";
 export * from "./lib/util";
 
-export interface TranslateModuleConfig
-{
+export interface TranslateModuleConfig {
     loader?: Provider;
     compiler?: Provider;
     parser?: Provider;
@@ -44,54 +40,50 @@ export interface TranslateModuleConfig
     extend?: boolean;
     useDefaultLang?: boolean;
     defaultLanguage?: string;
-};
+}
 
-export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider
-{
+export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider {
     return { provide: TranslateLoader, useClass: loader };
 }
 
-export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): Provider
-{
+export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): Provider {
     return { provide: TranslateCompiler, useClass: compiler };
 }
 
-export function provideTranslateParser(parser: Type<TranslateParser>): Provider
-{
+export function provideTranslateParser(parser: Type<TranslateParser>): Provider {
     return { provide: TranslateParser, useClass: parser };
 }
 
 export function provideTranslateMissingTranslationHandler(
     handler: Type<MissingTranslationHandler>,
-): Provider
-{
+): Provider {
     return { provide: MissingTranslationHandler, useClass: handler };
 }
 
-export function provideTranslateService(config: TranslateModuleConfig = {}): EnvironmentProviders
-{
+export function provideTranslateService(config: TranslateModuleConfig = {}): EnvironmentProviders {
     return makeEnvironmentProviders(providers(config));
 }
 
-
-function providers(config: TranslateModuleConfig = {}, includeStore = true): Provider[]
-{
+function providers(config: TranslateModuleConfig = {}, includeStore = true): Provider[] {
     const providers: Provider[] = [
         config.loader || provideTranslateLoader(TranslateFakeLoader),
         config.compiler || provideTranslateCompiler(TranslateFakeCompiler),
         config.parser || provideTranslateParser(TranslateDefaultParser),
-        config.missingTranslationHandler || provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
-        { provide: TRANSLATE_CONFIG, useValue: {
-          defaultLanguage: config.defaultLanguage,
-          extend: config.extend ?? false,
-          isolate: config.isolate ?? false,
-          useDefaultLang: config.useDefaultLang ?? true,
-        } },
+        config.missingTranslationHandler ||
+            provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
+        {
+            provide: TRANSLATE_CONFIG,
+            useValue: {
+                defaultLanguage: config.defaultLanguage,
+                extend: config.extend ?? false,
+                isolate: config.isolate ?? false,
+                useDefaultLang: config.useDefaultLang ?? true,
+            },
+        },
         TranslateService,
     ];
 
-    if(includeStore)
-    {
+    if (includeStore) {
         providers.push(TranslateStore);
     }
 

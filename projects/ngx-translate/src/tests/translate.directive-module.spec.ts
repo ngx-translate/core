@@ -3,7 +3,7 @@ import {
     Component,
     ElementRef,
     Injectable,
-    ViewChild
+    ViewChild,
 } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TranslateModule, TranslateService } from "../public-api";

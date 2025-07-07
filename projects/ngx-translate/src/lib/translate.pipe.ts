@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, inject, Injectable, OnDestroy, Pipe, PipeTransform } from "@angular/core";
+import {
+    ChangeDetectorRef,
+    inject,
+    Injectable,
+    OnDestroy,
+    Pipe,
+    PipeTransform,
+} from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
 import {
     InterpolatableTranslationObject,
@@ -17,7 +24,6 @@ import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
     pure: false, // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-
     private translate: TranslateService = inject(TranslateService);
     private _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
 
@@ -27,7 +33,6 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     onTranslationChange: Subscription | undefined;
     onLangChange: Subscription | undefined;
     onDefaultLangChange: Subscription | undefined;
-
 
     updateValue(
         key: string,
