@@ -4,7 +4,7 @@ import { Observable, of } from "rxjs";
 import {
     TranslateLoader,
     TranslateModule,
-    TranslateModuleConfig,
+    TranslateModuleConfig, TranslatePipe,
     TranslateService,
     TranslationObject,
 } from "../public-api";
@@ -14,7 +14,7 @@ import { DelayedFakeLoader } from "./test-helpers";
 @Component({
     // eslint-disable-next-line @angular-eslint/prefer-standalone
     standalone: false,
-    selector: "lib-hmx-app",
+    selector: "app-hmx-app",
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `{{ "TEST" | translate }}`,
 })

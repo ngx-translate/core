@@ -3,7 +3,7 @@ import {
     ModuleWithProviders,
     Provider,
     EnvironmentProviders,
-    makeEnvironmentProviders,
+    makeEnvironmentProviders, Type,
 } from "@angular/core";
 import { TranslateLoader, TranslateFakeLoader } from "./lib/translate.loader";
 import {
@@ -34,7 +34,8 @@ export * from "./lib/translate.store";
 export * from "./lib/extraction-marker";
 export * from "./lib/util";
 
-export interface TranslateModuleConfig {
+export interface TranslateModuleConfig
+{
     loader?: Provider;
     compiler?: Provider;
     parser?: Provider;
@@ -45,27 +46,57 @@ export interface TranslateModuleConfig {
     extend?: boolean;
     useDefaultLang?: boolean;
     defaultLanguage?: string;
+};
+
+export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider
+{
+    return { provide: TranslateLoader, useClass: loader };
 }
 
-export const provideTranslateService = (
-    config: TranslateModuleConfig = {},
-): EnvironmentProviders => {
-    return makeEnvironmentProviders([
-        config.loader || { provide: TranslateLoader, useClass: TranslateFakeLoader },
-        config.compiler || { provide: TranslateCompiler, useClass: TranslateFakeCompiler },
-        config.parser || { provide: TranslateParser, useClass: TranslateDefaultParser },
-        config.missingTranslationHandler || {
-            provide: MissingTranslationHandler,
-            useClass: FakeMissingTranslationHandler,
-        },
-        TranslateStore,
+export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): Provider
+{
+    return { provide: TranslateCompiler, useClass: compiler };
+}
+
+export function provideTranslateParser(parser: Type<TranslateParser>): Provider
+{
+    return { provide: TranslateParser, useClass: parser };
+}
+
+export function provideTranslateMissingTranslationHandler(
+    handler: Type<MissingTranslationHandler>,
+): Provider
+{
+    return { provide: MissingTranslationHandler, useClass: handler };
+}
+
+export function provideTranslateService(config: TranslateModuleConfig = {}): EnvironmentProviders
+{
+    return makeEnvironmentProviders(providers(config));
+}
+
+
+function providers(config: TranslateModuleConfig = {}, includeStore = true): Provider[]
+{
+    const providers: Provider[] = [
+        config.loader || provideTranslateLoader(TranslateFakeLoader),
+        config.compiler || provideTranslateCompiler(TranslateFakeCompiler),
+        config.parser || provideTranslateParser(TranslateDefaultParser),
+        config.missingTranslationHandler || provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
+        TranslateService,
         { provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate },
         { provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang },
         { provide: USE_EXTEND, useValue: config.extend },
         { provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage },
-        TranslateService,
-    ]);
-};
+    ];
+
+    if(includeStore)
+    {
+        providers.push(TranslateStore);
+    }
+
+    return providers;
+}
 
 @NgModule({
     imports: [TranslatePipe, TranslateDirective],
@@ -78,21 +109,7 @@ export class TranslateModule {
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [
-                config.loader || { provide: TranslateLoader, useClass: TranslateFakeLoader },
-                config.compiler || { provide: TranslateCompiler, useClass: TranslateFakeCompiler },
-                config.parser || { provide: TranslateParser, useClass: TranslateDefaultParser },
-                config.missingTranslationHandler || {
-                    provide: MissingTranslationHandler,
-                    useClass: FakeMissingTranslationHandler,
-                },
-                TranslateStore,
-                { provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate },
-                { provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang },
-                { provide: USE_EXTEND, useValue: config.extend },
-                { provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage },
-                TranslateService,
-            ],
+            providers: providers(config),
         };
     }
 
@@ -102,20 +119,7 @@ export class TranslateModule {
     static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [
-                config.loader || { provide: TranslateLoader, useClass: TranslateFakeLoader },
-                config.compiler || { provide: TranslateCompiler, useClass: TranslateFakeCompiler },
-                config.parser || { provide: TranslateParser, useClass: TranslateDefaultParser },
-                config.missingTranslationHandler || {
-                    provide: MissingTranslationHandler,
-                    useClass: FakeMissingTranslationHandler,
-                },
-                { provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate },
-                { provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang },
-                { provide: USE_EXTEND, useValue: config.extend },
-                { provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage },
-                TranslateService,
-            ],
+            providers: providers(config, false),
         };
     }
 }

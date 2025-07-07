@@ -1,6 +1,6 @@
 import { Location } from "@angular/common";
-import { Component, ModuleWithProviders, NgModule, Type } from "@angular/core";
-import { ComponentFixture, fakeAsync, inject, TestBed, tick } from "@angular/core/testing";
+import { Component, inject as coreInject, ModuleWithProviders, NgModule, Type } from "@angular/core";
+import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
 import { provideRouter, Router, RouterModule } from "@angular/router";
 import { TranslateModule, TranslateService } from "../public-api";
 
@@ -11,7 +11,8 @@ import { TranslateModule, TranslateService } from "../public-api";
     template: ` <router-outlet></router-outlet>`,
 })
 class RootComponent {
-    constructor(public translate: TranslateService) {
+    constructor() {
+        const translate = coreInject(TranslateService);
         translate.setTranslation("en", {
             TEST: "Root",
             ROOT: "Root",
@@ -32,7 +33,8 @@ function getLazyLoadedModule<T extends object>(importedModule: ModuleWithProvide
     // eslint-disable-next-line @angular-eslint/prefer-standalone
     @Component({ selector: "app-lazy", template: "lazy-loaded-child", standalone: false })
     class ChildLazyLoadedComponent {
-        constructor(public translate: TranslateService) {
+        constructor() {
+            const translate = coreInject(TranslateService);
             translate.setTranslation("en", {
                 TEST: "Lazy",
                 CHILD: "Child",

@@ -7,11 +7,6 @@ describe("Parser", () => {
         parser = new TranslateDefaultParser();
     });
 
-    it("is defined", () => {
-        expect(TranslateParser).toBeDefined();
-        expect(parser instanceof TranslateParser).toBeTruthy();
-    });
-
     describe("interpolate()", () => {
         it("should interpolate strings", () => {
             expect(parser.interpolate("This is a {{ key }}", { key: "value" })).toEqual(

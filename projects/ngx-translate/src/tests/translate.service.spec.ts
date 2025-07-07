@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
@@ -954,7 +954,8 @@ describe("TranslateService (isolate)", () => {
         ],
     })
     class IsolatedChildComponent {
-        constructor(private translate: TranslateService) {
+        constructor() {
+            const translate = inject(TranslateService);
             translate.use("de");
         }
     }
@@ -979,7 +980,8 @@ describe("TranslateService (isolate)", () => {
         `,
     })
     class AppTestComponent {
-        constructor(private translate: TranslateService) {
+        constructor() {
+            const translate = inject(TranslateService);
             translate.use("en");
         }
     }
