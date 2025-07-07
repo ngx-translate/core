@@ -11,7 +11,8 @@
         "test-ci": "ng test --watch=false --browsers=ChromeHeadless",
         "coverage": "ng test ngx-translate --code-coverage --watch=false --browsers=ChromeHeadless",
         "lint": "ng lint",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "prepare": "husky install"
     },
     "private": true,
     "dependencies": {
@@ -43,11 +44,16 @@
         "karma-jasmine": "~5.1.0",
         "karma-jasmine-html-reporter": "~2.1.0",
         "karma-mocha-reporter": "^2.2.5",
+        "lint-staged": "16.1.2",
         "ng-packagr": "^20.0.1",
-        "prettier": "3.6.2",        
+        "prettier": "3.6.2",
         "ts-mocks": "^3.0.1",
         "typescript": "~5.8.2",
         "typescript-eslint": "^8.18.1"
     },
-    "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+    "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
+    "lint-staged": {
+        "*.js": "eslint --cache --fix",
+        "*.{js,css,md}": "prettier --write"
+    }
 }
