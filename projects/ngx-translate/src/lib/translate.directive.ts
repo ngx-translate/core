@@ -2,7 +2,7 @@ import {
     AfterViewChecked,
     ChangeDetectorRef,
     Directive,
-    ElementRef,
+    ElementRef, inject,
     Input,
     OnDestroy,
 } from "@angular/core";
@@ -32,12 +32,17 @@ interface ExtendedNode extends Text {
     standalone: true,
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
-    key!: string;
-    lastParams?: InterpolationParameters;
-    currentParams?: InterpolationParameters;
-    onLangChangeSub!: Subscription;
-    onDefaultLangChangeSub!: Subscription;
-    onTranslationChangeSub!: Subscription;
+
+    private translateService: TranslateService = inject(TranslateService);
+    private element: ElementRef = inject(ElementRef);
+    private _ref:ChangeDetectorRef = inject(ChangeDetectorRef);
+
+    private key!: string;
+    private lastParams?: InterpolationParameters;
+    private currentParams?: InterpolationParameters;
+    private readonly onLangChangeSub!: Subscription;
+    private readonly onDefaultLangChangeSub!: Subscription;
+    private readonly onTranslationChangeSub!: Subscription;
 
     @Input() set translate(key: string) {
         if (key) {
@@ -53,11 +58,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
         }
     }
 
-    constructor(
-        private translateService: TranslateService,
-        private element: ElementRef,
-        private _ref: ChangeDetectorRef,
-    ) {
+
+    constructor() {
         // subscribe to onTranslationChange event, in case the translations of the current lang change
         if (!this.onTranslationChangeSub) {
             this.onTranslationChangeSub = this.translateService.onTranslationChange.subscribe(

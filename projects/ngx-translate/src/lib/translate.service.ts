@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken } from "@angular/core";
+import { inject, Injectable, InjectionToken } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
@@ -9,9 +9,9 @@ import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>("ISOLATE_TRANSLATE_SERVICE");
-export const USE_DEFAULT_LANG = new InjectionToken<string>("USE_DEFAULT_LANG");
-export const DEFAULT_LANGUAGE = new InjectionToken<string>("DEFAULT_LANGUAGE");
-export const USE_EXTEND = new InjectionToken<string>("USE_EXTEND");
+export const USE_DEFAULT_LANG = new InjectionToken<boolean>("USE_DEFAULT_LANG");
+export const DEFAULT_LANGUAGE = new InjectionToken<Language>("DEFAULT_LANGUAGE");
+export const USE_EXTEND = new InjectionToken<boolean>("USE_EXTEND");
 
 export type InterpolationParameters = Record<string, unknown>;
 
@@ -128,33 +128,22 @@ export class TranslateService {
         return this.store.getLanguages();
     }
 
-    /**
-     *
-     * @param store an instance of the store (that is supposed to be unique)
-     * @param currentLoader An instance of the loader currently used
-     * @param compiler An instance of the compiler currently used
-     * @param parser An instance of the parser currently used
-     * @param missingTranslationHandler A handler for missing translations.
-     * @param useDefaultLang whether we should use default language translation when current language translation is missing.
-     * @param isolate whether this service should use the store or not
-     * @param extend To make a child module extend (and use) translations from parent modules.
-     * @param defaultLanguage Set the default language using configuration
-     */
+    private store: TranslateStore = inject(TranslateStore);
+    public currentLoader: TranslateLoader = inject(TranslateLoader);
+    public compiler: TranslateCompiler = inject(TranslateCompiler);
+    private parser: TranslateParser = inject(TranslateParser);
+    private missingTranslationHandler: MissingTranslationHandler = inject(MissingTranslationHandler);
+    private useDefaultLang:boolean = inject(USE_DEFAULT_LANG) ?? true;
+    private extend = inject(USE_EXTEND) ?? false;
+
     constructor(
-        public store: TranslateStore,
-        public currentLoader: TranslateLoader,
-        public compiler: TranslateCompiler,
-        public parser: TranslateParser,
-        public missingTranslationHandler: MissingTranslationHandler,
-        @Inject(USE_DEFAULT_LANG) private useDefaultLang = true,
-        @Inject(ISOLATE_TRANSLATE_SERVICE) isolate = false,
-        @Inject(USE_EXTEND) private extend = false,
-        @Inject(DEFAULT_LANGUAGE) defaultLanguage: string,
     ) {
+        const isolate = inject(ISOLATE_TRANSLATE_SERVICE) ?? false;
         if (isolate) {
             this.store = new TranslateStore();
         }
 
+        const defaultLanguage = inject(DEFAULT_LANGUAGE);
         if (defaultLanguage) {
             this.setDefaultLang(defaultLanguage);
         }

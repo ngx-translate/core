@@ -7,7 +7,7 @@ export abstract class TranslateLoader {
 }
 
 /**
- * This loader is just a placeholder that does nothing, in case you don't need a loader at all
+ * This loader is just a placeholder that does nothing; in case you don't need a loader at all
  */
 @Injectable()
 export class TranslateFakeLoader extends TranslateLoader {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Injectable, OnDestroy, Pipe, PipeTransform } from "@angular/core";
+import { ChangeDetectorRef, inject, Injectable, OnDestroy, Pipe, PipeTransform } from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
 import {
     InterpolatableTranslationObject,
@@ -17,17 +17,17 @@ import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
     pure: false, // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-    value: StrictTranslation = "";
+
+    private translate: TranslateService = inject(TranslateService);
+    private _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+    private value: StrictTranslation = "";
     lastKey: string | null = null;
     lastParams: InterpolationParameters[] = [];
     onTranslationChange: Subscription | undefined;
     onLangChange: Subscription | undefined;
     onDefaultLangChange: Subscription | undefined;
 
-    constructor(
-        private translate: TranslateService,
-        private _ref: ChangeDetectorRef,
-    ) {}
 
     updateValue(
         key: string,
@@ -65,7 +65,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
         if (isDefinedAndNotNull(args[0]) && args.length) {
             if (isString(args[0]) && args[0].length) {
                 // we accept objects written in the template such as {n:1}, {'n':1}, {n:'v'}
-                // which is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
+                // this is why we might need to change it to real JSON objects such as {"n":1} or {"n":"v"}
                 const validArgs: string = args[0]
                     .replace(/(')?([a-zA-Z0-9_]+)(')?(\s)?:/g, '"$2":')
                     .replace(/:(\s)?(')(.*?)(')/g, ':"$3"');
@@ -82,10 +82,10 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             }
         }
 
-        // store the query, in case it changes
+        // store the query in case it changes
         this.lastKey = query;
 
-        // store the params, in case they change
+        // store the params in case they change
         this.lastParams = args;
 
         // set the value

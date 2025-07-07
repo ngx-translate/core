@@ -4,7 +4,6 @@ import {
     ElementRef,
     Injectable,
     ViewChild,
-    ViewContainerRef,
 } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideTranslateService, TranslateDirective, TranslateService } from "../public-api";
@@ -34,7 +33,6 @@ import { provideTranslateService, TranslateDirective, TranslateService } from ".
     `,
 })
 class AppComponent {
-    viewContainerRef: ViewContainerRef;
     @ViewChild("noKey", { static: true }) noKey!: ElementRef;
     @ViewChild("contentAsKey", { static: true }) contentAsKey!: ElementRef;
     @ViewChild("withKey", { static: true }) withKey!: ElementRef;
@@ -47,10 +45,6 @@ class AppComponent {
     @ViewChild("withSpaceAndLineBreakNoKeyNoParams")
     withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
     value = { value: "ok" };
-
-    constructor(viewContainerRef: ViewContainerRef) {
-        this.viewContainerRef = viewContainerRef;
-    }
 }
 
 describe("TranslateDirective (standalone)", () => {

@@ -15,22 +15,29 @@ describe("TranslatePipe (unit)", () => {
     let translatePipe: TranslatePipe;
 
     beforeEach(() => {
+
+        ref = new Mock<ChangeDetectorRef>({
+            markForCheck: () => {/*empty*/},
+        }).Object;
+
         TestBed.configureTestingModule({
             providers: [
                 provideTranslateService({
                     loader: { provide: TranslateLoader, useClass: DelayedFakeLoader },
                 }),
+                {
+                    provide: ChangeDetectorRef,
+                    useValue: ref
+                },
+                {
+                    provide: TranslatePipe,
+                    useClass: TranslatePipe,
+                }
             ],
         });
 
         translate = TestBed.inject(TranslateService);
-
-        ref = new Mock<ChangeDetectorRef>({
-            markForCheck: () => {},
-        }).Object;
-
-        translate = TestBed.inject(TranslateService);
-        translatePipe = new TranslatePipe(translate, ref);
+        translatePipe = TestBed.inject(TranslatePipe); // can't create the pipe with new because of DI
 
         spyOn(translatePipe, "updateValue").and.callThrough();
     });
@@ -152,7 +159,7 @@ describe("TranslatePipe (unit)", () => {
             );
             expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
-            // different param, should call 'updateValue'
+            // different param: should call 'updateValue'
             expect(translatePipe.transform("TEST", { param: "with param2" })).toEqual(
                 "This is a test with param2",
             );
@@ -173,7 +180,7 @@ describe("TranslatePipe (unit)", () => {
             );
         });
 
-        it("should return given falsey or non length query", () => {
+        it("should return given falsy or non length query", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 

@@ -14,7 +14,7 @@ import { DelayedFakeLoader } from "./test-helpers";
 @Injectable()
 @Component({
     standalone: true,
-    selector: "lib-hmx-app",
+    selector: "app-hmx-app",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [TranslatePipe],
     template: `{{ "TEST" | translate }}`,

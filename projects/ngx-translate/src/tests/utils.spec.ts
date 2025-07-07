@@ -24,7 +24,7 @@ describe("Utils", () => {
             const result = mergeDeep(target, source);
 
             expect(result).not.toBe(target);
-            expect(target).toEqual({ a: { b: 2 } }); // Ensure target is unchanged
+            expect(target).toEqual({ a: { b: 2 } }); // Ensure the target is unchanged
         });
 
         it("should handle non-object properties in source", () => {
@@ -209,7 +209,7 @@ describe("Utils", () => {
         });
 
         it("should handle edge cases", () => {
-            // strange cases that are currently permitted but don't make much sense
+            // strange cases that are currently permitted but make little sense
             expect(getValue(["A", "B", "C"], "1")).toEqual("B");
             expect(getValue(["A", ["a", "b", "c"], "C"], "1.2")).toEqual("c");
 
