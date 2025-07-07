@@ -1,37 +1,35 @@
 import {
-    NgModule,
-    ModuleWithProviders,
-    Provider,
-    EnvironmentProviders,
-    makeEnvironmentProviders, Type,
+  EnvironmentProviders,
+  makeEnvironmentProviders,
+  ModuleWithProviders,
+  NgModule,
+  Provider,
+  Type,
 } from "@angular/core";
-import { TranslateLoader, TranslateFakeLoader } from "./lib/translate.loader";
 import {
-    MissingTranslationHandler,
-    FakeMissingTranslationHandler,
+  FakeMissingTranslationHandler,
+  MissingTranslationHandler,
 } from "./lib/missing-translation-handler";
-import { TranslateParser, TranslateDefaultParser } from "./lib/translate.parser";
 import { TranslateCompiler, TranslateFakeCompiler } from "./lib/translate.compiler";
 import { TranslateDirective } from "./lib/translate.directive";
+import { TranslateFakeLoader, TranslateLoader } from "./lib/translate.loader";
+import { TranslateDefaultParser, TranslateParser } from "./lib/translate.parser";
 import { TranslatePipe } from "./lib/translate.pipe";
-import { TranslateStore } from "./lib/translate.store";
 import {
-    USE_DEFAULT_LANG,
-    DEFAULT_LANGUAGE,
-    USE_EXTEND,
-    ISOLATE_TRANSLATE_SERVICE,
-    TranslateService,
+  TRANSLATE_CONFIG,
+  TranslateService,
 } from "./lib/translate.service";
+import { TranslateStore } from "./lib/translate.store";
 
-export * from "./lib/translate.loader";
-export * from "./lib/translate.service";
+export * from "./lib/extraction-marker";
 export * from "./lib/missing-translation-handler";
-export * from "./lib/translate.parser";
 export * from "./lib/translate.compiler";
 export * from "./lib/translate.directive";
+export * from "./lib/translate.loader";
+export * from "./lib/translate.parser";
 export * from "./lib/translate.pipe";
+export * from "./lib/translate.service";
 export * from "./lib/translate.store";
-export * from "./lib/extraction-marker";
 export * from "./lib/util";
 
 export interface TranslateModuleConfig
@@ -83,11 +81,13 @@ function providers(config: TranslateModuleConfig = {}, includeStore = true): Pro
         config.compiler || provideTranslateCompiler(TranslateFakeCompiler),
         config.parser || provideTranslateParser(TranslateDefaultParser),
         config.missingTranslationHandler || provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
+        { provide: TRANSLATE_CONFIG, useValue: {
+          defaultLanguage: config.defaultLanguage,
+          extend: config.extend ?? false,
+          isolate: config.isolate ?? false,
+          useDefaultLang: config.useDefaultLang ?? true,
+        } },
         TranslateService,
-        { provide: ISOLATE_TRANSLATE_SERVICE, useValue: config.isolate },
-        { provide: USE_DEFAULT_LANG, useValue: config.useDefaultLang },
-        { provide: USE_EXTEND, useValue: config.extend },
-        { provide: DEFAULT_LANGUAGE, useValue: config.defaultLanguage },
     ];
 
     if(includeStore)

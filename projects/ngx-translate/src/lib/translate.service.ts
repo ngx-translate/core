@@ -8,10 +8,12 @@ import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
-export const ISOLATE_TRANSLATE_SERVICE = new InjectionToken<string>("ISOLATE_TRANSLATE_SERVICE");
-export const USE_DEFAULT_LANG = new InjectionToken<boolean>("USE_DEFAULT_LANG");
-export const DEFAULT_LANGUAGE = new InjectionToken<Language>("DEFAULT_LANGUAGE");
-export const USE_EXTEND = new InjectionToken<boolean>("USE_EXTEND");
+export const TRANSLATE_CONFIG = new InjectionToken<{
+  defaultLanguage?: Language;
+  extend: boolean;
+  isolate: boolean;
+  useDefaultLang: boolean;
+}>("TRANSLATE_CONFIG");
 
 export type InterpolationParameters = Record<string, unknown>;
 
@@ -133,19 +135,22 @@ export class TranslateService {
     public compiler: TranslateCompiler = inject(TranslateCompiler);
     private parser: TranslateParser = inject(TranslateParser);
     private missingTranslationHandler: MissingTranslationHandler = inject(MissingTranslationHandler);
-    private useDefaultLang:boolean = inject(USE_DEFAULT_LANG) ?? true;
-    private extend = inject(USE_EXTEND) ?? false;
+
+    private config = inject(TRANSLATE_CONFIG, {optional: true}) ?? {
+      defaultLanguage: undefined,
+      extend: false,
+      isolate: false,
+      useDefaultLang: true,
+    }
 
     constructor(
     ) {
-        const isolate = inject(ISOLATE_TRANSLATE_SERVICE) ?? false;
-        if (isolate) {
+        if (this.config.isolate) {
             this.store = new TranslateStore();
         }
 
-        const defaultLanguage = inject(DEFAULT_LANGUAGE);
-        if (defaultLanguage) {
-            this.setDefaultLang(defaultLanguage);
+        if (this.config.defaultLanguage) {
+            this.setDefaultLang(this.config.defaultLanguage);
         }
     }
 
@@ -208,7 +213,7 @@ export class TranslateService {
      */
     private loadOrExtendLanguage(lang: string): Observable<TranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
-        if (!this.store.hasTranslationFor(lang) || this.extend) {
+        if (!this.store.hasTranslationFor(lang) || this.config.extend) {
             this._translationRequests[lang] =
                 this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
             return this._translationRequests[lang];
@@ -250,7 +255,7 @@ export class TranslateService {
 
         this.loadingTranslations.subscribe({
             next: (res: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, res, this.extend);
+                this.store.setTranslations(lang, res, this.config.extend);
                 this.pending = false;
             },
             error: (err) => {
@@ -273,7 +278,7 @@ export class TranslateService {
     ): void {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
-        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge || this.extend);
+        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge || this.config.extend);
     }
 
     public getLangs(): readonly Language[] {
@@ -307,7 +312,7 @@ export class TranslateService {
     }
 
     private getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
-        return this.store.getTranslation(key, this.useDefaultLang);
+        return this.store.getTranslation(key, this.config.useDefaultLang);
     }
 
     private runInterpolation(
