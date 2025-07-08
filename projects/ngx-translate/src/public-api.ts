@@ -15,7 +15,11 @@ import { TranslateDirective } from "./lib/translate.directive";
 import { TranslateFakeLoader, TranslateLoader } from "./lib/translate.loader";
 import { TranslateDefaultParser, TranslateParser } from "./lib/translate.parser";
 import { TranslatePipe } from "./lib/translate.pipe";
-import { TRANSLATE_CONFIG, TranslateService } from "./lib/translate.service";
+import {
+    TRANSLATE_CONFIG,
+    TranslateService,
+    TranslateServiceConfig,
+} from "./lib/translate.service";
 import { TranslateStore } from "./lib/translate.store";
 
 export * from "./lib/extraction-marker";
@@ -29,17 +33,11 @@ export * from "./lib/translate.service";
 export * from "./lib/translate.store";
 export * from "./lib/util";
 
-export interface TranslateModuleConfig {
+export interface TranslateModuleConfig extends Partial<TranslateServiceConfig> {
     loader?: Provider;
     compiler?: Provider;
     parser?: Provider;
     missingTranslationHandler?: Provider;
-    // isolate the service instance, only works for lazy loaded modules or components with the "providers" property
-    isolate?: boolean;
-    // extends translations for a given language instead of ignoring them if present
-    extend?: boolean;
-    useDefaultLang?: boolean;
-    defaultLanguage?: string;
 }
 
 export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider {
@@ -65,6 +63,13 @@ export function provideTranslateService(config: TranslateModuleConfig = {}): Env
 }
 
 function providers(config: TranslateModuleConfig = {}, includeStore = true): Provider[] {
+    const serviceConfig: TranslateServiceConfig = {
+        defaultLanguage: config.defaultLanguage,
+        extend: config.extend ?? false,
+        isolate: config.isolate ?? false,
+        useDefaultLang: config.useDefaultLang ?? true,
+    };
+
     const providers: Provider[] = [
         config.loader || provideTranslateLoader(TranslateFakeLoader),
         config.compiler || provideTranslateCompiler(TranslateFakeCompiler),
@@ -73,12 +78,7 @@ function providers(config: TranslateModuleConfig = {}, includeStore = true): Pro
             provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
         {
             provide: TRANSLATE_CONFIG,
-            useValue: {
-                defaultLanguage: config.defaultLanguage,
-                extend: config.extend ?? false,
-                isolate: config.isolate ?? false,
-                useDefaultLang: config.useDefaultLang ?? true,
-            },
+            useValue: serviceConfig,
         },
         TranslateService,
     ];

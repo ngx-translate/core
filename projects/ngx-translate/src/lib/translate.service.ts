@@ -8,12 +8,14 @@ import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
-export const TRANSLATE_CONFIG = new InjectionToken<{
+export interface TranslateServiceConfig {
     defaultLanguage?: Language;
     extend: boolean;
     isolate: boolean;
     useDefaultLang: boolean;
-}>("TRANSLATE_CONFIG");
+}
+
+export const TRANSLATE_CONFIG = new InjectionToken<TranslateServiceConfig>("TRANSLATE_CONFIG");
 
 export type InterpolationParameters = Record<string, unknown>;
 
@@ -137,7 +139,9 @@ export class TranslateService {
     private missingTranslationHandler: MissingTranslationHandler =
         inject(MissingTranslationHandler);
 
-    private config = inject(TRANSLATE_CONFIG, { optional: true }) ?? {
+    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(TRANSLATE_CONFIG, {
+        optional: true,
+    }) ?? {
         defaultLanguage: undefined,
         extend: false,
         isolate: false,
