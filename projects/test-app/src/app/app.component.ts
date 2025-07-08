@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { _, TranslateDirective, TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { map } from "rxjs";
 import { TranslationObject } from "../../../ngx-translate/src/public-api";
@@ -20,17 +20,19 @@ import { StandaloneComponent } from "./standalone/standalone.component";
     templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
+    private _translate = inject(TranslateService);
+
     title = _("test-app");
 
-    constructor(private translate: TranslateService) {
-        this.translate.addLangs(["de", "en"]);
-        this.translate.setDefaultLang("en");
-        this.translate.use("en");
+    constructor() {
+        this._translate.addLangs(["de", "en"]);
+        this._translate.setDefaultLang("en");
+        this._translate.use("en");
     }
 
     ngOnInit() {
         // Service Get method with a set of string[]
-        this.translate
+        this._translate
             .get(["demo.simple.text-as-attribute", "demo.simple.text-as-content"])
             .pipe(
                 map((arr: TranslationObject) => {
