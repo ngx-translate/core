@@ -2,10 +2,10 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@a
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import { provideTranslateService, TranslateService, Translation } from "@ngx-translate/core";
-import { provideTranslateHttpLoaderFromHttpBackend, TranslateHttpLoader } from "../public-api";
+import { provideTranslateHttpLoader, TranslateHttpLoader } from "../public-api";
 import { MarkerInterceptor } from "../test-helper/marker-interceptor";
 
-describe("TranslateLoader (HttpBackend)", () => {
+describe("TranslateHttpLoader (HttpBackend)", () => {
     let translate: TranslateService;
     let http: HttpTestingController;
 
@@ -20,9 +20,10 @@ describe("TranslateLoader (HttpBackend)", () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                TranslateService,
                 provideTranslateService(),
-                provideTranslateHttpLoaderFromHttpBackend(),
+                provideTranslateHttpLoader({
+                    useHttpBackend: true,
+                }),
             ],
         });
 
