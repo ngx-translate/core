@@ -15,9 +15,10 @@ describe("TranslatePipe (unit)", () => {
     let translatePipe: TranslatePipe;
 
     beforeEach(() => {
-
         ref = new Mock<ChangeDetectorRef>({
-            markForCheck: () => {/*empty*/},
+            markForCheck: () => {
+                /*empty*/
+            },
         }).Object;
 
         TestBed.configureTestingModule({
@@ -27,12 +28,12 @@ describe("TranslatePipe (unit)", () => {
                 }),
                 {
                     provide: ChangeDetectorRef,
-                    useValue: ref
+                    useValue: ref,
                 },
                 {
                     provide: TranslatePipe,
                     useClass: TranslatePipe,
-                }
+                },
             ],
         });
 

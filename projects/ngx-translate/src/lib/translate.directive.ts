@@ -2,7 +2,8 @@ import {
     AfterViewChecked,
     ChangeDetectorRef,
     Directive,
-    ElementRef, inject,
+    ElementRef,
+    inject,
     Input,
     OnDestroy,
 } from "@angular/core";
@@ -32,10 +33,9 @@ interface ExtendedNode extends Text {
     standalone: true,
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
-
     private translateService: TranslateService = inject(TranslateService);
     private element: ElementRef = inject(ElementRef);
-    private _ref:ChangeDetectorRef = inject(ChangeDetectorRef);
+    private _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
 
     private key!: string;
     private lastParams?: InterpolationParameters;
@@ -57,7 +57,6 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             this.checkNodes(true);
         }
     }
-
 
     constructor() {
         // subscribe to onTranslationChange event, in case the translations of the current lang change

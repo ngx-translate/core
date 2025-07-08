@@ -1,5 +1,11 @@
 import { Location } from "@angular/common";
-import { Component, inject as coreInject, ModuleWithProviders, NgModule, Type } from "@angular/core";
+import {
+    Component,
+    inject as coreInject,
+    ModuleWithProviders,
+    NgModule,
+    Type,
+} from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
 import { provideRouter, Router, RouterModule } from "@angular/router";
 import { TranslateModule, TranslateService } from "../public-api";
