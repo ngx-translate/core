@@ -10,6 +10,8 @@ import {
     Translation,
     TranslationObject,
     provideTranslateService,
+    provideTranslateLoader,
+    provideTranslateCompiler,
 } from "../public-api";
 
 const translations: TranslationObject = { LOAD: "This is a test" };
@@ -29,10 +31,9 @@ describe("TranslateCompiler", () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [
-                    provideTranslateService({
-                        loader: { provide: TranslateLoader, useClass: FakeLoader },
-                        compiler: { provide: TranslateCompiler, useClass: TranslateFakeCompiler },
-                    }),
+                    provideTranslateService(),
+                    provideTranslateLoader(FakeLoader),
+                    provideTranslateCompiler(TranslateFakeCompiler),
                 ],
             });
             translate = TestBed.inject(TranslateService);
@@ -88,10 +89,9 @@ describe("TranslateCompiler", () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [
-                    provideTranslateService({
-                        loader: { provide: TranslateLoader, useClass: FakeLoader },
-                        compiler: { provide: TranslateCompiler, useClass: CustomCompiler },
-                    }),
+                    provideTranslateService({}),
+                    provideTranslateLoader(FakeLoader),
+                    provideTranslateCompiler(CustomCompiler),
                 ],
             });
             translate = TestBed.inject(TranslateService);

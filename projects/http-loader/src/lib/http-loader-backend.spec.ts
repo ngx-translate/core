@@ -1,19 +1,8 @@
-import {
-    HTTP_INTERCEPTORS,
-    HttpBackend,
-    HttpClient,
-    provideHttpClient,
-    withInterceptorsFromDi,
-} from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
-import {
-    provideTranslateService,
-    TranslateLoader,
-    TranslateService,
-    Translation,
-} from "@ngx-translate/core";
-import { TranslateHttpLoader } from "../public-api";
+import { provideTranslateService, TranslateService, Translation } from "@ngx-translate/core";
+import { provideTranslateHttpLoaderFromHttpBackend, TranslateHttpLoader } from "../public-api";
 import { MarkerInterceptor } from "../test-helper/marker-interceptor";
 
 describe("TranslateLoader (HttpBackend)", () => {
@@ -32,18 +21,8 @@ describe("TranslateLoader (HttpBackend)", () => {
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 TranslateService,
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useFactory: (httpBackend: HttpBackend) =>
-                            new TranslateHttpLoader(
-                                new HttpClient(httpBackend),
-                                "/assets/i18n/",
-                                ".json",
-                            ),
-                        deps: [HttpBackend],
-                    },
-                }),
+                provideTranslateService(),
+                provideTranslateHttpLoaderFromHttpBackend(),
             ],
         });
 

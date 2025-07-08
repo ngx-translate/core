@@ -2,8 +2,8 @@ import { ChangeDetectorRef } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { Mock } from "ts-mocks";
 import {
+    provideTranslateLoader,
     provideTranslateService,
-    TranslateLoader,
     TranslatePipe,
     TranslateService,
 } from "../public-api";
@@ -23,9 +23,7 @@ describe("TranslatePipe (unit)", () => {
 
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: DelayedFakeLoader },
-                }),
+                provideTranslateService(),
                 {
                     provide: ChangeDetectorRef,
                     useValue: ref,
@@ -34,6 +32,7 @@ describe("TranslatePipe (unit)", () => {
                     provide: TranslatePipe,
                     useClass: TranslatePipe,
                 },
+                provideTranslateLoader(DelayedFakeLoader),
             ],
         });
 

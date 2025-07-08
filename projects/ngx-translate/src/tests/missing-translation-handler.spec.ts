@@ -4,6 +4,8 @@ import { Observable, of } from "rxjs";
 import {
     MissingTranslationHandler,
     MissingTranslationHandlerParams,
+    provideTranslateLoader,
+    provideTranslateMissingTranslationHandler,
     provideTranslateService,
     StrictTranslation,
     TranslateLoader,
@@ -49,13 +51,10 @@ describe("MissingTranslationHandler", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: FakeLoader },
-                    missingTranslationHandler: {
-                        provide: MissingTranslationHandler,
-                        useClass: handlerClass,
-                    },
                     useDefaultLang: defaultLang,
                 }),
+                provideTranslateLoader(FakeLoader),
+                provideTranslateMissingTranslationHandler(handlerClass),
             ],
         });
         translate = TestBed.inject(TranslateService);

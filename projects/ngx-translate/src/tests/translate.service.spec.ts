@@ -4,6 +4,7 @@ import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
     LangChangeEvent,
+    provideTranslateLoader,
     provideTranslateService,
     TranslateLoader,
     TranslateModule,
@@ -48,11 +49,7 @@ describe("TranslateService (Delayed loading)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: DelayedLoader },
-                }),
-            ],
+            providers: [provideTranslateService({}), provideTranslateLoader(DelayedLoader)],
         });
         translate = TestBed.inject(TranslateService);
     });
@@ -106,9 +103,8 @@ describe("TranslateService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: FakeLoader },
-                }),
+                provideTranslateService({}),
+                { provide: TranslateLoader, useClass: FakeLoader },
             ],
         });
         translate = TestBed.inject(TranslateService);
@@ -991,11 +987,11 @@ describe("TranslateService (isolate)", () => {
             providers: [
                 provideTranslateService({
                     extend: true,
-                    loader: {
-                        provide: TranslateLoader,
-                        useFactory: () => new StaticTranslateLoader(translationsRoot),
-                    },
                 }),
+                {
+                    provide: TranslateLoader,
+                    useFactory: () => new StaticTranslateLoader(translationsRoot),
+                },
             ],
         }).compileComponents();
     });

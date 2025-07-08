@@ -9,6 +9,7 @@ import {
     Translation,
     TranslationObject,
     provideTranslateService,
+    provideTranslateLoader,
 } from "../public-api";
 
 const translations: TranslationObject = { TEST: "This is a test" };
@@ -25,11 +26,7 @@ describe("TranslateLoader", () => {
 
     it("should be able to provide TranslateStaticLoader", () => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: FakeLoader },
-                }),
-            ],
+            providers: [provideTranslateService({}), provideTranslateLoader(FakeLoader)],
         });
         translate = TestBed.inject(TranslateService);
 
@@ -55,9 +52,8 @@ describe("TranslateLoader", () => {
 
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: CustomLoader },
-                }),
+                provideTranslateService({}),
+                { provide: TranslateLoader, useClass: CustomLoader },
             ],
         });
         translate = TestBed.inject(TranslateService);
@@ -77,11 +73,7 @@ describe("TranslateLoader", () => {
 
     it("TranslateFakeLoader should return empty object", () => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
-                }),
-            ],
+            providers: [provideTranslateService(), provideTranslateLoader(TranslateFakeLoader)],
         });
         translate = TestBed.inject(TranslateService);
 

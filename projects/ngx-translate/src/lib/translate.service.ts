@@ -1,10 +1,13 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
-import { MissingTranslationHandler } from "./missing-translation-handler";
-import { TranslateCompiler } from "./translate.compiler";
-import { TranslateLoader } from "./translate.loader";
-import { InterpolateFunction, TranslateParser } from "./translate.parser";
+import {
+    FakeMissingTranslationHandler,
+    MissingTranslationHandler,
+} from "./missing-translation-handler";
+import { TranslateCompiler, TranslateFakeCompiler } from "./translate.compiler";
+import { TranslateFakeLoader, TranslateLoader } from "./translate.loader";
+import { InterpolateFunction, TranslateDefaultParser, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
@@ -15,7 +18,9 @@ export interface TranslateServiceConfig {
     useDefaultLang: boolean;
 }
 
-export const TRANSLATE_CONFIG = new InjectionToken<TranslateServiceConfig>("TRANSLATE_CONFIG");
+export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfig>(
+    "TRANSLATE_CONFIG",
+);
 
 export type InterpolationParameters = Record<string, unknown>;
 
@@ -132,16 +137,18 @@ export class TranslateService {
         return this.store.getLanguages();
     }
 
-    private store: TranslateStore = inject(TranslateStore);
-    public currentLoader: TranslateLoader = inject(TranslateLoader);
-    public compiler: TranslateCompiler = inject(TranslateCompiler);
-    private parser: TranslateParser = inject(TranslateParser);
-    private missingTranslationHandler: MissingTranslationHandler =
-        inject(MissingTranslationHandler);
+    private store: TranslateStore;
+    public currentLoader: TranslateLoader;
+    public compiler: TranslateCompiler;
+    private parser: TranslateParser;
+    private missingTranslationHandler: MissingTranslationHandler;
 
-    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(TRANSLATE_CONFIG, {
-        optional: true,
-    }) ?? {
+    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(
+        TRANSLATE_SERVICE_CONFIG,
+        {
+            optional: true,
+        },
+    ) ?? {
         defaultLanguage: undefined,
         extend: false,
         isolate: false,
@@ -149,8 +156,19 @@ export class TranslateService {
     };
 
     constructor() {
+        this.currentLoader =
+            inject(TranslateLoader, { optional: true }) ?? new TranslateFakeLoader();
+        this.compiler =
+            inject(TranslateCompiler, { optional: true }) ?? new TranslateFakeCompiler();
+        this.parser = inject(TranslateParser, { optional: true }) ?? new TranslateDefaultParser();
+        this.missingTranslationHandler =
+            inject(MissingTranslationHandler, { optional: true }) ??
+            new FakeMissingTranslationHandler();
+
         if (this.config.isolate) {
             this.store = new TranslateStore();
+        } else {
+            this.store = inject(TranslateStore) ?? new TranslateStore();
         }
 
         if (this.config.defaultLanguage) {

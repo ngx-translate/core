@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, Injectable } from "@angular/core";
+import { ChangeDetectionStrategy, Component, Injectable, Provider } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     TranslateLoader,
     TranslateModule,
-    TranslateModuleConfig,
     TranslateService,
     TranslationObject,
 } from "../public-api";
@@ -32,11 +31,13 @@ describe("TranslatePipe (module)", () => {
     let translate: TranslateService;
     let fixture: ComponentFixture<AppComponent>;
 
-    const prepare = (config?: TranslateModuleConfig) => {
-        config = config || { loader: { provide: TranslateLoader, useClass: FakeLoader } };
-
+    const prepare = (loader?: Provider) => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot(config)],
+            imports: [
+                TranslateModule.forRoot({
+                    loader: loader ?? { provide: TranslateLoader, useClass: FakeLoader },
+                }),
+            ],
             declarations: [AppComponent],
         });
         translate = TestBed.inject(TranslateService);
@@ -57,7 +58,7 @@ describe("TranslatePipe (module)", () => {
 
     describe("should update translations on lang change - async", () => {
         it("should detect changes with OnPush", fakeAsync(() => {
-            prepare({ loader: { provide: TranslateLoader, useClass: DelayedFakeLoader } });
+            prepare({ provide: TranslateLoader, useClass: DelayedFakeLoader });
 
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");

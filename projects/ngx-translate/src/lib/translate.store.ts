@@ -8,11 +8,13 @@ import {
 } from "./translate.service";
 import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
+import { Injectable } from "@angular/core";
 
 type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
 };
 
+@Injectable()
 export class TranslateStore {
     private _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
