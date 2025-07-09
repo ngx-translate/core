@@ -10,7 +10,7 @@ import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
 import { Injectable } from "@angular/core";
 
-type DeepReadonly<T> = {
+export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
 };
 

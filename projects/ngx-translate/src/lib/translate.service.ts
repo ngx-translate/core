@@ -22,7 +22,9 @@ export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfi
     "TRANSLATE_CONFIG",
 );
 
-export type InterpolationParameters = Record<string, unknown>;
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type InterpolationParameters = Record<string, any>;
+
 
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
 
