@@ -16,7 +16,7 @@ export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<Partial<Translate
 
 @Injectable()
 export class TranslateHttpLoader implements TranslateLoader {
-    private http: HttpClient = inject(HttpClient);
+    private http: HttpClient;
     private config: TranslateHttpLoaderConfig;
 
     constructor() {
