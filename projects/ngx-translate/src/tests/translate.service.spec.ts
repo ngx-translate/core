@@ -3,6 +3,7 @@ import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
+    InterpolationParameters,
     LangChangeEvent,
     provideTranslateLoader,
     provideTranslateService,
@@ -28,6 +29,11 @@ class FakeLoader implements TranslateLoader {
     getTranslation(): Observable<TranslationObject> {
         return of(translations);
     }
+}
+
+export interface User {
+    firstName: string
+    lastName?: string
 }
 
 describe("TranslateService (Delayed loading)", () => {
@@ -484,6 +490,34 @@ describe("TranslateService", () => {
     });
 
     describe("instant()", () => {
+
+        it("should accept an object for interpolation", () => {
+            translate.setTranslation("en", { TEST: "user={{firstName}}" });
+            translate.use("en");
+
+            const user: User = {
+                "firstName": 'John'
+            };
+
+            expect(translate.instant("TEST", user)).toEqual("user=John");
+        });
+
+        it("should accept a record for interpolation", () => {
+            translate.setTranslation("en", { TEST: "user={{firstName}}" });
+            translate.use("en");
+
+            const values:InterpolationParameters = {firstName:'John'};
+
+            expect(translate.instant("TEST", values)).toEqual("user=John");
+        });
+
+        it("should accept a record for interpolation", () => {
+            translate.setTranslation("en", { TEST: "user={{firstName}}" });
+            translate.use("en");
+
+            expect(translate.instant("TEST", {firstName:'John'})).toEqual("user=John");
+        });
+
         it("should be able to get instant translations", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");

@@ -1,4 +1,4 @@
-import { InterpolateFunction, TranslateDefaultParser, TranslateParser } from "../public-api";
+import { getValue, InterpolateFunction, TranslateDefaultParser, TranslateParser } from "../public-api";
 
 describe("Parser", () => {
     let parser: TranslateParser;
@@ -31,10 +31,11 @@ describe("Parser", () => {
         });
 
         it("should support interpolation functions", () => {
-            const uc: InterpolateFunction = (params) =>
-                ((params?.["x"] ?? "") as string).toUpperCase() + " YOU!";
+            const uc: InterpolateFunction = (params) => {
+                return (getValue(params, "x") as string)?.toUpperCase() + " YOU!";
+            };
 
-            expect(parser.interpolate(uc, { x: "bless" })).toBe("BLESS YOU!");
+            expect(parser.interpolate(uc, { x: "bless" })).toEqual("BLESS YOU!");
         });
 
         it("should handle edge cases: value not found", () => {
