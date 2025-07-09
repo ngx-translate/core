@@ -1,21 +1,17 @@
 import { Component, inject, OnInit } from "@angular/core";
-import { _, TranslateDirective, TranslatePipe, TranslateService } from "@ngx-translate/core";
+import { _, TranslateService } from "@ngx-translate/core";
 import { map } from "rxjs";
 import { TranslationObject } from "../../../ngx-translate/src/public-api";
-import { LanguageSwitchComponent } from "./language-switch/language-switch.component";
-import { StandaloneComponent } from "./standalone/standalone.component";
+import { LanguageSwitchComponent } from "./components/language-switch/language-switch.component";
 
 @Component({
     selector: "app-root",
     standalone: true,
     imports: [
+        RouterModule,
+
         // Components
         LanguageSwitchComponent,
-        StandaloneComponent,
-
-        // Vendors
-        TranslateDirective,
-        TranslatePipe,
     ],
     templateUrl: "./app.component.html",
 })
