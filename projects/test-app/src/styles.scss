@@ -35,6 +35,11 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
 p,
 .translated {
     background-color: var(--mat-sys-surface-dim);
@@ -46,5 +51,26 @@ p,
         background-color: var(--mat-sys-surface-dim);
         border-radius: var(--mat-sys-corner-small);
         padding: var(--space) var(--space-small);
+    }
+}
+
+button {
+    border: none;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    min-height: 46px;
+    cursor: pointer;
+    box-shadow: var(--mat-sys-level2);
+
+    &.routeActive {
+        opacity: 0.3;
+        box-shadow: none;
     }
 }
