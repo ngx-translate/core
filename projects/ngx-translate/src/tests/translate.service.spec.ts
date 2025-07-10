@@ -32,8 +32,8 @@ class FakeLoader implements TranslateLoader {
 }
 
 export interface User {
-    firstName: string
-    lastName?: string
+    firstName: string;
+    lastName?: string;
 }
 
 describe("TranslateService (Delayed loading)", () => {
@@ -490,13 +490,12 @@ describe("TranslateService", () => {
     });
 
     describe("instant()", () => {
-
         it("should accept an object for interpolation", () => {
             translate.setTranslation("en", { TEST: "user={{firstName}}" });
             translate.use("en");
 
             const user: User = {
-                "firstName": 'John'
+                firstName: "John",
             };
 
             expect(translate.instant("TEST", user)).toEqual("user=John");
@@ -506,7 +505,7 @@ describe("TranslateService", () => {
             translate.setTranslation("en", { TEST: "user={{firstName}}" });
             translate.use("en");
 
-            const values:InterpolationParameters = {firstName:'John'};
+            const values: InterpolationParameters = { firstName: "John" };
 
             expect(translate.instant("TEST", values)).toEqual("user=John");
         });
@@ -515,7 +514,7 @@ describe("TranslateService", () => {
             translate.setTranslation("en", { TEST: "user={{firstName}}" });
             translate.use("en");
 
-            expect(translate.instant("TEST", {firstName:'John'})).toEqual("user=John");
+            expect(translate.instant("TEST", { firstName: "John" })).toEqual("user=John");
         });
 
         it("should be able to get instant translations", () => {

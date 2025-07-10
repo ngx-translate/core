@@ -1,4 +1,9 @@
-import { getValue, InterpolateFunction, TranslateDefaultParser, TranslateParser } from "../public-api";
+import {
+    getValue,
+    InterpolateFunction,
+    TranslateDefaultParser,
+    TranslateParser,
+} from "../public-api";
 
 describe("Parser", () => {
     let parser: TranslateParser;

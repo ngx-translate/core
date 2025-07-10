@@ -1,0 +1,12 @@
+{
+    "demo": {
+        "simple": {
+            "text-as-attribute": "Isolated: Text als Attribut",
+            "text-as-content": "Isolated: Text als Inhalt"
+        },
+        "title": "Isolated: Test Anwendung"
+    },
+    "standalone-component": {
+        "title": "Isolated: Eigenständige Komponente"
+    }
+}

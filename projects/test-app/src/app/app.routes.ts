@@ -2,17 +2,18 @@ import { Routes } from "@angular/router";
 
 export const routes: Routes = [
     {
-        path: "first",
-        loadComponent: () => import("./pages/first/first.component").then((m) => m.FirstComponent),
+        path: "global",
+        loadComponent: () =>
+            import("./pages/global/global.component").then((m) => m.GlobalComponent),
     },
     {
-        path: "second",
+        path: "isolated",
         loadComponent: () =>
-            import("./pages/second/second.component").then((m) => m.SecondComponent),
+            import("./pages/isolated/isolated.component").then((m) => m.IsolatedComponent),
     },
     {
         path: "**",
         pathMatch: "full",
-        redirectTo: "first",
+        redirectTo: "global",
     },
 ];

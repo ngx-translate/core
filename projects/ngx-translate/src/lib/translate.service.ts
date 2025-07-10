@@ -1,13 +1,10 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
-import {
-    FakeMissingTranslationHandler,
-    MissingTranslationHandler,
-} from "./missing-translation-handler";
-import { TranslateCompiler, TranslateFakeCompiler } from "./translate.compiler";
-import { TranslateFakeLoader, TranslateLoader } from "./translate.loader";
-import { InterpolateFunction, TranslateDefaultParser, TranslateParser } from "./translate.parser";
+import { MissingTranslationHandler } from "./missing-translation-handler";
+import { TranslateCompiler } from "./translate.compiler";
+import { TranslateLoader } from "./translate.loader";
+import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
@@ -24,7 +21,6 @@ export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfi
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type InterpolationParameters = Record<string, any>;
-
 
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
 
@@ -79,14 +75,30 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
 
-@Injectable({
-    providedIn: "root",
-})
+@Injectable()
 export class TranslateService {
     private loadingTranslations!: Observable<InterpolatableTranslationObject>;
     private pending = false;
     private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
     private lastUseLanguage: Language | null = null;
+
+    public currentLoader = inject(TranslateLoader);
+    public compiler = inject(TranslateCompiler);
+    private parser = inject(TranslateParser);
+    private missingTranslationHandler = inject(MissingTranslationHandler);
+    public store: TranslateStore = inject(TranslateStore); // TODO: make private
+
+    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(
+        TRANSLATE_SERVICE_CONFIG,
+        {
+            optional: true,
+        },
+    ) ?? {
+        defaultLanguage: undefined,
+        extend: false,
+        isolate: false,
+        useDefaultLang: true,
+    };
 
     /**
      * An Observable to listen to translation change events
@@ -139,40 +151,7 @@ export class TranslateService {
         return this.store.getLanguages();
     }
 
-    private store: TranslateStore;
-    public currentLoader: TranslateLoader;
-    public compiler: TranslateCompiler;
-    private parser: TranslateParser;
-    private missingTranslationHandler: MissingTranslationHandler;
-
-    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(
-        TRANSLATE_SERVICE_CONFIG,
-        {
-            optional: true,
-        },
-    ) ?? {
-        defaultLanguage: undefined,
-        extend: false,
-        isolate: false,
-        useDefaultLang: true,
-    };
-
     constructor() {
-        this.currentLoader =
-            inject(TranslateLoader, { optional: true }) ?? new TranslateFakeLoader();
-        this.compiler =
-            inject(TranslateCompiler, { optional: true }) ?? new TranslateFakeCompiler();
-        this.parser = inject(TranslateParser, { optional: true }) ?? new TranslateDefaultParser();
-        this.missingTranslationHandler =
-            inject(MissingTranslationHandler, { optional: true }) ??
-            new FakeMissingTranslationHandler();
-
-        if (this.config.isolate) {
-            this.store = new TranslateStore();
-        } else {
-            this.store = inject(TranslateStore) ?? new TranslateStore();
-        }
-
         if (this.config.defaultLanguage) {
             this.setDefaultLang(this.config.defaultLanguage);
         }

@@ -10,11 +10,14 @@ export const appConfig: ApplicationConfig = {
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideHttpClient(),
-        provideTranslateService(),
-        provideTranslateHttpLoader({
-            prefix: "./i18n/",
-            suffix: ".json",
-            enforceLoading: true,
+        provideTranslateService({
+            loader: provideTranslateHttpLoader({
+                prefix: "./i18n/",
+                suffix: ".json",
+                enforceLoading: true,
+            }),
         }),
     ],
 };
+
+console.log("appConfig", appConfig);

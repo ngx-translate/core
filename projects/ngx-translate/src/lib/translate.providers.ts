@@ -3,25 +3,21 @@ import {
     TranslateService,
     TranslateServiceConfig,
 } from "./translate.service";
-import { EnvironmentProviders, makeEnvironmentProviders, Provider, Type } from "@angular/core";
-import { TranslateLoader } from "./translate.loader";
-import { TranslateCompiler } from "./translate.compiler";
-import { TranslateParser } from "./translate.parser";
-import { MissingTranslationHandler } from "./missing-translation-handler";
+import { Provider, Type } from "@angular/core";
+import { TranslateFakeLoader, TranslateLoader } from "./translate.loader";
+import { TranslateCompiler, TranslateFakeCompiler } from "./translate.compiler";
+import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
+import {
+    FakeMissingTranslationHandler,
+    MissingTranslationHandler,
+} from "./missing-translation-handler";
 import { TranslateStore } from "./translate.store";
 import { TranslateModuleConfig } from "./translate.module";
 
 export interface ProvideTranslateServiceConfig extends Partial<TranslateServiceConfig> {
-    /** @deprecated Use `provideTranslateLoader()` instead. */
     loader?: Provider;
-
-    /** @deprecated Use `provideTranslateCompiler()` instead. */
     compiler?: Provider;
-
-    /** @deprecated Use `provideTranslateParser()` instead. */
     parser?: Provider;
-
-    /** @deprecated Use `provideTranslateMissingTranslationHandler()` instead. */
     missingTranslationHandler?: Provider;
 }
 
@@ -43,16 +39,11 @@ export function provideTranslateMissingTranslationHandler(
     return { provide: MissingTranslationHandler, useClass: handler };
 }
 
-export function provideTranslateService(
-    config: ProvideTranslateServiceConfig = {},
-): EnvironmentProviders {
-    return makeEnvironmentProviders(defaultProviders(config));
+export function provideTranslateService(config: ProvideTranslateServiceConfig = {}): Provider[] {
+    return defaultProviders({ ...config, isolate: true });
 }
 
-export function defaultProviders(
-    config: TranslateModuleConfig = {},
-    includeStore = true,
-): Provider[] {
+export function defaultProviders(config: TranslateModuleConfig = {}): Provider[] {
     const serviceConfig: TranslateServiceConfig = {
         defaultLanguage: config.defaultLanguage,
         extend: config.extend ?? false,
@@ -60,35 +51,21 @@ export function defaultProviders(
         useDefaultLang: config.useDefaultLang ?? true,
     };
 
-    const providers: Provider[] = [
+    return [
         {
             provide: TRANSLATE_SERVICE_CONFIG,
             useValue: serviceConfig,
         },
+        ...(serviceConfig.isolate ? [TranslateStore] : []),
+        config.compiler ?? provideTranslateCompiler(TranslateFakeCompiler),
+        config.parser ?? provideTranslateParser(TranslateDefaultParser),
+        config.loader ?? provideTranslateLoader(TranslateFakeLoader),
+        config.missingTranslationHandler ??
+            provideTranslateMissingTranslationHandler(FakeMissingTranslationHandler),
         {
             provide: TranslateService,
+            useClass: TranslateService,
+            deps: [TranslateLoader, TranslateCompiler, TranslateParser, MissingTranslationHandler],
         },
     ];
-
-    if (config.compiler) {
-        providers.push(config.compiler);
-    }
-
-    if (config.parser) {
-        providers.push(config.parser);
-    }
-
-    if (config.loader) {
-        providers.push(config.loader);
-    }
-
-    if (config.missingTranslationHandler) {
-        providers.push(config.missingTranslationHandler);
-    }
-
-    if (includeStore) {
-        providers.push(TranslateStore);
-    }
-
-    return providers;
 }

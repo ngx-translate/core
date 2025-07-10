@@ -1,12 +1,12 @@
 {
     "demo": {
         "simple": {
-            "text-as-attribute": "Text als Attribut",
-            "text-as-content": "Text als Inhalt"
+            "text-as-attribute": "Global: Text als Attribut",
+            "text-as-content": "Global: Text als Inhalt"
         },
-        "title": "Test Anwendung"
+        "title": "Global: Test Anwendung"
     },
     "standalone-component": {
-        "title": "Eigenständige Komponente"
+        "title": "Global: Eigenständige Komponente"
     }
 }
