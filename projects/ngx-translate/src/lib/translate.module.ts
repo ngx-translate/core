@@ -22,7 +22,7 @@ export class TranslateModule {
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [...defaultProviders({ ...config, isolate: true })],
+            providers: [...defaultProviders({ isolate: true , ...config})],
         };
     }
 
@@ -32,7 +32,7 @@ export class TranslateModule {
     static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [...defaultProviders(config)],
+            providers: [...defaultProviders({ isolate: false, ...config})],
         };
     }
 }

@@ -40,14 +40,14 @@ export function provideTranslateMissingTranslationHandler(
 }
 
 export function provideTranslateService(config: ProvideTranslateServiceConfig = {}): Provider[] {
-    return defaultProviders({ ...config, isolate: true });
+    return defaultProviders({ ...config });
 }
 
 export function defaultProviders(config: TranslateModuleConfig = {}): Provider[] {
     const serviceConfig: TranslateServiceConfig = {
         defaultLanguage: config.defaultLanguage,
         extend: config.extend ?? false,
-        isolate: config.isolate ?? false,
+        isolate: config.isolate ?? true,
         useDefaultLang: config.useDefaultLang ?? true,
     };
 
@@ -69,3 +69,4 @@ export function defaultProviders(config: TranslateModuleConfig = {}): Provider[]
         },
     ];
 }
+

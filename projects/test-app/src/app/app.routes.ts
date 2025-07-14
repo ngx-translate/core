@@ -12,6 +12,11 @@ export const routes: Routes = [
             import("./pages/isolated/isolated.component").then((m) => m.IsolatedComponent),
     },
     {
+        path: "extended",
+        loadComponent: () =>
+            import("./pages/extended/extended.component").then((m) => m.ExtendedComponent),
+    },
+    {
         path: "**",
         pathMatch: "full",
         redirectTo: "global",
