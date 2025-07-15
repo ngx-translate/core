@@ -1,8 +1,7 @@
 import { Component, inject, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
-import { _, TranslateService } from "@ngx-translate/core";
+import { _, TranslateService, TranslationObject } from "@ngx-translate/core";
 import { map } from "rxjs";
-import { TranslationObject } from "@ngx-translate/core";
 import { LanguageSwitchComponent } from "./components/language-switch/language-switch.component";
 
 @Component({
@@ -23,7 +22,7 @@ export class AppComponent implements OnInit {
 
     constructor() {
         this._translate.addLangs(["de", "en"]);
-        this._translate.setDefaultLang("en");
+        this._translate.setFallbackLang("en");
         this._translate.use("en");
     }
 

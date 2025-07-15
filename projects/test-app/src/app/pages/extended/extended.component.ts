@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { PageContentComponent } from "../../components/page-content/page-content.component";
 import { TranslateService, provideChildTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { LanguageSwitchComponent } from "../../components/language-switch/language-switch.component";
+import { PageContentComponent } from "../../components/page-content/page-content.component";
 
 @Component({
     selector: "app-first",
