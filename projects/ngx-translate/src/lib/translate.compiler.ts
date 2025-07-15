@@ -19,7 +19,7 @@ export abstract class TranslateCompiler {
  * This compiler is just a placeholder that does nothing; in case you don't need a compiler at all
  */
 @Injectable()
-export class TranslateFakeCompiler extends TranslateCompiler {
+export class TranslateNoOpCompiler extends TranslateCompiler {
     compile(value: string, lang: string): string | InterpolateFunction {
         void lang;
         return value;

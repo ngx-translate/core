@@ -9,10 +9,10 @@ import {
     provideTranslateParser,
     TranslateProviders,
 } from "./translate.providers";
-import { TranslateFakeCompiler } from "./translate.compiler";
+import { TranslateNoOpCompiler } from "./translate.compiler";
 import { TranslateDefaultParser } from "./translate.parser";
-import { TranslateFakeLoader } from "./translate.loader";
-import { FakeMissingTranslationHandler } from "./missing-translation-handler";
+import { TranslateNoOpLoader } from "./translate.loader";
+import { DefaultMissingTranslationHandler } from "./missing-translation-handler";
 import { Language } from "./translate.service";
 
 export interface TranslateModuleConfig extends TranslateProviders {
@@ -41,11 +41,11 @@ export class TranslateModule {
             providers: [
                 ...defaultProviders(
                     {
-                        compiler: provideTranslateCompiler(TranslateFakeCompiler),
+                        compiler: provideTranslateCompiler(TranslateNoOpCompiler),
                         parser: provideTranslateParser(TranslateDefaultParser),
-                        loader: provideTranslateLoader(TranslateFakeLoader),
+                        loader: provideTranslateLoader(TranslateNoOpLoader),
                         missingTranslationHandler: provideMissingTranslationHandler(
-                            FakeMissingTranslationHandler,
+                            DefaultMissingTranslationHandler,
                         ),
                         ...config,
                     },

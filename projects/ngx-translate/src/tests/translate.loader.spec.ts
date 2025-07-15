@@ -3,7 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     InterpolatableTranslationObject,
-    TranslateFakeLoader,
+    TranslateNoOpLoader,
     TranslateLoader,
     TranslateService,
     Translation,
@@ -71,15 +71,15 @@ describe("TranslateLoader", () => {
         });
     });
 
-    it("TranslateFakeLoader should return empty object", () => {
+    it("TranslateNoOpLoader should return empty object", () => {
         TestBed.configureTestingModule({
-            providers: [provideTranslateService(), provideTranslateLoader(TranslateFakeLoader)],
+            providers: [provideTranslateService(), provideTranslateLoader(TranslateNoOpLoader)],
         });
         translate = TestBed.inject(TranslateService);
 
         expect(translate).toBeDefined();
         expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof TranslateFakeLoader).toBeTruthy();
+        expect(translate.currentLoader instanceof TranslateNoOpLoader).toBeTruthy();
 
         translate.use("en").subscribe((res: InterpolatableTranslationObject) => {
             expect(res as object).toEqual({});

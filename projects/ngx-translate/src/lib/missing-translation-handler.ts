@@ -39,7 +39,7 @@ export abstract class MissingTranslationHandler {
  * This handler is just a placeholder that does nothing; in case you don't need a missing translation handler at all
  */
 @Injectable()
-export class FakeMissingTranslationHandler implements MissingTranslationHandler {
+export class DefaultMissingTranslationHandler implements MissingTranslationHandler {
     handle(params: MissingTranslationHandlerParams): string {
         return params.key;
     }

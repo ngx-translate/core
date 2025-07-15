@@ -4,7 +4,7 @@ import { Observable, of } from "rxjs";
 import {
     InterpolatableTranslationObject,
     TranslateCompiler,
-    TranslateFakeCompiler,
+    TranslateNoOpCompiler,
     TranslateLoader,
     TranslateService,
     Translation,
@@ -27,13 +27,13 @@ class FakeLoader implements TranslateLoader {
 describe("TranslateCompiler", () => {
     let translate: TranslateService;
 
-    describe("with default TranslateFakeCompiler", () => {
+    describe("with default TranslateNoOpCompiler", () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [
                     provideTranslateService(),
                     provideTranslateLoader(FakeLoader),
-                    provideTranslateCompiler(TranslateFakeCompiler),
+                    provideTranslateCompiler(TranslateNoOpCompiler),
                 ],
             });
             translate = TestBed.inject(TranslateService);
@@ -44,7 +44,7 @@ describe("TranslateCompiler", () => {
         it("should use the correct compiler", () => {
             expect(translate).toBeDefined();
             expect(translate.compiler).toBeDefined();
-            expect(translate.compiler instanceof TranslateFakeCompiler).toBeTruthy();
+            expect(translate.compiler instanceof TranslateNoOpCompiler).toBeTruthy();
         });
 
         it("should use the compiler on loading translations", () => {

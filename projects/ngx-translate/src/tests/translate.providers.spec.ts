@@ -19,8 +19,8 @@ import {
     InterpolationParameters,
     InterpolatableTranslationObject,
 } from "../lib/translate.service";
-import { TranslateLoader, TranslateFakeLoader } from "../lib/translate.loader";
-import { TranslateCompiler, TranslateFakeCompiler } from "../lib/translate.compiler";
+import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
+import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
 import {
     TranslateParser,
     TranslateDefaultParser,
@@ -28,7 +28,7 @@ import {
 } from "../lib/translate.parser";
 import {
     MissingTranslationHandler,
-    FakeMissingTranslationHandler,
+    DefaultMissingTranslationHandler,
     MissingTranslationHandlerParams,
 } from "../lib/missing-translation-handler";
 import { TranslateStore } from "../lib/translate.store";
@@ -161,10 +161,10 @@ describe("Translate Providers", () => {
         it("should provide translate service with default config", () => {
             const providers = provideTranslateService();
             expect(providers).toEqual([
-                { provide: TranslateLoader, useClass: TranslateFakeLoader },
-                { provide: TranslateCompiler, useClass: TranslateFakeCompiler },
+                { provide: TranslateLoader, useClass: TranslateNoOpLoader },
+                { provide: TranslateCompiler, useClass: TranslateNoOpCompiler },
                 { provide: TranslateParser, useClass: TranslateDefaultParser },
-                { provide: MissingTranslationHandler, useClass: FakeMissingTranslationHandler },
+                { provide: MissingTranslationHandler, useClass: DefaultMissingTranslationHandler },
                 TranslateStore,
                 {
                     provide: TRANSLATE_SERVICE_CONFIG,
@@ -311,11 +311,11 @@ describe("Translate Providers", () => {
             TestBed.configureTestingModule({
                 providers: [
                     provideTranslateService({
-                        loader: provideTranslateLoader(TranslateFakeLoader),
-                        compiler: provideTranslateCompiler(TranslateFakeCompiler),
+                        loader: provideTranslateLoader(TranslateNoOpLoader),
+                        compiler: provideTranslateCompiler(TranslateNoOpCompiler),
                         parser: provideTranslateParser(TranslateDefaultParser),
                         missingTranslationHandler: provideMissingTranslationHandler(
-                            FakeMissingTranslationHandler,
+                            DefaultMissingTranslationHandler,
                         ),
                     }),
                 ],
@@ -328,10 +328,10 @@ describe("Translate Providers", () => {
             const handler = TestBed.inject(MissingTranslationHandler);
 
             expect(service).toBeTruthy();
-            expect(loader).toBeInstanceOf(TranslateFakeLoader);
-            expect(compiler).toBeInstanceOf(TranslateFakeCompiler);
+            expect(loader).toBeInstanceOf(TranslateNoOpLoader);
+            expect(compiler).toBeInstanceOf(TranslateNoOpCompiler);
             expect(parser).toBeInstanceOf(TranslateDefaultParser);
-            expect(handler).toBeInstanceOf(FakeMissingTranslationHandler);
+            expect(handler).toBeInstanceOf(DefaultMissingTranslationHandler);
         });
     });
 });

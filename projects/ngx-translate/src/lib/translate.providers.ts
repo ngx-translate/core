@@ -5,11 +5,11 @@ import {
     TranslateServiceConfig,
 } from "./translate.service";
 import { ClassProvider, Provider, Type } from "@angular/core";
-import { TranslateFakeLoader, TranslateLoader } from "./translate.loader";
-import { TranslateCompiler, TranslateFakeCompiler } from "./translate.compiler";
+import { TranslateNoOpLoader, TranslateLoader } from "./translate.loader";
+import { TranslateCompiler, TranslateNoOpCompiler } from "./translate.compiler";
 import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
 import {
-    FakeMissingTranslationHandler,
+    DefaultMissingTranslationHandler,
     MissingTranslationHandler,
 } from "./missing-translation-handler";
 import { TranslateStore } from "./translate.store";
@@ -56,11 +56,11 @@ export function provideMissingTranslationHandler(
 export function provideTranslateService(config: RootTranslateServiceConfig = {}): Provider[] {
     return defaultProviders(
         {
-            compiler: provideTranslateCompiler(TranslateFakeCompiler),
+            compiler: provideTranslateCompiler(TranslateNoOpCompiler),
             parser: provideTranslateParser(TranslateDefaultParser),
-            loader: provideTranslateLoader(TranslateFakeLoader),
+            loader: provideTranslateLoader(TranslateNoOpLoader),
             missingTranslationHandler: provideMissingTranslationHandler(
-                FakeMissingTranslationHandler,
+                DefaultMissingTranslationHandler,
             ),
             ...config,
         },
