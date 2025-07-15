@@ -1,4 +1,17 @@
-import { equals, getValue, isArray, isDict, mergeDeep } from "../lib/util";
+import {
+    equals,
+    getValue,
+    isArray,
+    isDict,
+    isDefinedAndNotNull,
+    isDefined,
+    isObject,
+    isString,
+    isFunction,
+    setValue,
+    insertValue,
+    mergeDeep,
+} from "../lib/util";
 
 describe("Utils", () => {
     describe("deepMerge", () => {
@@ -240,6 +253,181 @@ describe("Utils", () => {
             expect(isArray({ a: 123 })).toEqual(false);
             expect(isArray(123)).toEqual(false);
             expect(isArray("asd")).toEqual(false);
+        });
+    });
+
+    describe("isDefinedAndNotNull()", () => {
+        it("should return true for defined and non-null values", () => {
+            expect(isDefinedAndNotNull(0)).toEqual(true);
+            expect(isDefinedAndNotNull("")).toEqual(true);
+            expect(isDefinedAndNotNull(false)).toEqual(true);
+            expect(isDefinedAndNotNull([])).toEqual(true);
+            expect(isDefinedAndNotNull({})).toEqual(true);
+            expect(isDefinedAndNotNull("test")).toEqual(true);
+            expect(isDefinedAndNotNull(123)).toEqual(true);
+        });
+
+        it("should return false for null or undefined values", () => {
+            expect(isDefinedAndNotNull(null)).toEqual(false);
+            expect(isDefinedAndNotNull(undefined)).toEqual(false);
+        });
+    });
+
+    describe("isDefined()", () => {
+        it("should return true for defined values including null", () => {
+            expect(isDefined(0)).toEqual(true);
+            expect(isDefined("")).toEqual(true);
+            expect(isDefined(false)).toEqual(true);
+            expect(isDefined([])).toEqual(true);
+            expect(isDefined({})).toEqual(true);
+            expect(isDefined("test")).toEqual(true);
+            expect(isDefined(123)).toEqual(true);
+            expect(isDefined(null)).toEqual(true);
+        });
+
+        it("should return false for undefined values", () => {
+            expect(isDefined(undefined)).toEqual(false);
+        });
+    });
+
+    describe("isObject()", () => {
+        it("should return true for objects", () => {
+            expect(isObject({})).toEqual(true);
+            expect(isObject({ a: 1 })).toEqual(true);
+            expect(isObject([])).toEqual(true);
+            expect(isObject([1, 2, 3])).toEqual(true);
+        });
+
+        it("should return false for non-objects", () => {
+            expect(isObject(null)).toEqual(false);
+            expect(isObject(undefined)).toEqual(false);
+            expect(isObject("string")).toEqual(false);
+            expect(isObject(123)).toEqual(false);
+            expect(isObject(true)).toEqual(false);
+            expect(isObject(false)).toEqual(false);
+        });
+    });
+
+    describe("isString()", () => {
+        it("should return true for strings", () => {
+            expect(isString("")).toEqual(true);
+            expect(isString("test")).toEqual(true);
+            expect(isString("123")).toEqual(true);
+        });
+
+        it("should return false for non-strings", () => {
+            expect(isString(123)).toEqual(false);
+            expect(isString(true)).toEqual(false);
+            expect(isString(false)).toEqual(false);
+            expect(isString(null)).toEqual(false);
+            expect(isString(undefined)).toEqual(false);
+            expect(isString({})).toEqual(false);
+            expect(isString([])).toEqual(false);
+        });
+    });
+
+    describe("isFunction()", () => {
+        it("should return true for functions", () => {
+            expect(isFunction(() => "test")).toEqual(true);
+            expect(
+                isFunction(function () {
+                    return "test";
+                }),
+            ).toEqual(true);
+            expect(isFunction(Array.isArray)).toEqual(true);
+            expect(isFunction(console.log)).toEqual(true);
+        });
+
+        it("should return false for non-functions", () => {
+            expect(isFunction("string")).toEqual(false);
+            expect(isFunction(123)).toEqual(false);
+            expect(isFunction(true)).toEqual(false);
+            expect(isFunction(null)).toEqual(false);
+            expect(isFunction(undefined)).toEqual(false);
+            expect(isFunction({})).toEqual(false);
+            expect(isFunction([])).toEqual(false);
+        });
+    });
+
+    describe("setValue()", () => {
+        it("should set values using dot notation on existing nested structure", () => {
+            const target = { a: { b: { c: "old" } } };
+            setValue(target, "a.b.c", "value");
+            expect(target).toEqual({ a: { b: { c: "value" } } });
+        });
+
+        it("should overwrite existing values", () => {
+            const target = { a: { b: { c: "old" } } };
+            setValue(target, "a.b.c", "new");
+            expect(target).toEqual({ a: { b: { c: "new" } } });
+        });
+
+        it("should handle single key", () => {
+            const target = {};
+            setValue(target, "key", "value");
+            expect(target).toEqual({ key: "value" });
+        });
+
+        it("should handle empty key path", () => {
+            const target = {};
+            setValue(target, "", "value");
+            expect(target).toEqual({ "": "value" });
+        });
+
+        it("should handle existing partial structure", () => {
+            const target: Record<string, unknown> = { a: { b: {} } };
+            setValue(target, "a.b.c", "value");
+            expect(target).toEqual({ a: { b: { c: "value" } } });
+        });
+    });
+
+    describe("insertValue()", () => {
+        it("should insert values using dot notation without modifying original", () => {
+            const target = { a: { b: "existing" } };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = insertValue(target, "a.c", "new") as any;
+
+            expect(result.a.b).toEqual("existing");
+            expect(result.a.c).toEqual("new");
+            expect(target).toEqual({ a: { b: "existing" } }); // Original unchanged
+        });
+
+        it("should handle deep nesting", () => {
+            const target = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = insertValue(target, "a.b.c.d", "value") as any;
+
+            expect(result.a.b.c.d).toEqual("value");
+            expect(target).toEqual({}); // Original unchanged
+        });
+
+        it("should merge with existing nested objects", () => {
+            const target = { a: { b: { x: 1 } } };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = insertValue(target, "a.b.y", 2) as any;
+
+            expect(result.a.b.x).toEqual(1);
+            expect(result.a.b.y).toEqual(2);
+            expect(target).toEqual({ a: { b: { x: 1 } } }); // Original unchanged
+        });
+
+        it("should handle single key", () => {
+            const target = { existing: "value" };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = insertValue(target, "new", "newValue") as any;
+
+            expect(result.existing).toEqual("value");
+            expect(result.new).toEqual("newValue");
+            expect(target).toEqual({ existing: "value" }); // Original unchanged
+        });
+
+        it("should overwrite existing values", () => {
+            const target = { a: { b: "old" } };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = insertValue(target, "a.b", "new") as any;
+
+            expect(result.a.b).toEqual("new");
+            expect(target).toEqual({ a: { b: "old" } }); // Original unchanged
         });
     });
 });

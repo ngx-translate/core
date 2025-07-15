@@ -87,5 +87,13 @@ describe("Parser", () => {
                 parser.interpolate("This is {{ key1.key2 }}", { key1: { key2: object } }),
             ).toEqual("This is OBJECT A");
         });
+
+        it("should return undefined for non-string and non-function expressions", () => {
+            expect(parser.interpolate(123 as any)).toBeUndefined();
+            expect(parser.interpolate(null as any)).toBeUndefined();
+            expect(parser.interpolate({} as any)).toBeUndefined();
+            expect(parser.interpolate([] as any)).toBeUndefined();
+            expect(parser.interpolate(true as any)).toBeUndefined();
+        });
     });
 });

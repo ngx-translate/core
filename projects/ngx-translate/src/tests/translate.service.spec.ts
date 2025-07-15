@@ -1049,3 +1049,199 @@ describe("TranslateService (isolate)", () => {
         expect(app.querySelector("div.shared-child").textContent).toEqual("de-root");
     });
 });
+
+describe("TranslateService (Error Conditions and Recovery)", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    loader: provideTranslateLoader(FakeLoader),
+                }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    describe("Invalid Parameter Handling", () => {
+        it("should handle null parameters gracefully", () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                translate.get(null as any);
+            }).toThrowError('Parameter "key" is required and cannot be empty');
+        });
+
+        it("should handle undefined parameters gracefully", () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                translate.get(undefined as any);
+            }).toThrowError('Parameter "key" is required and cannot be empty');
+        });
+
+        it("should handle non-string parameters gracefully", () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                translate.get(123 as any);
+            }).toThrowError('Parameter "key" is required and cannot be empty');
+        });
+
+        it("should handle array with invalid elements", () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                translate.get([null, undefined, ""] as any);
+            }).toThrow();
+        });
+
+        it("should handle deeply nested invalid parameters", () => {
+            const invalidParams = {
+                nested: {
+                    value: null,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    circular: {} as any,
+                },
+            };
+            invalidParams.nested.circular = invalidParams;
+
+            translate.setTranslation("en", { TEST: "Test {{nested.value}}" });
+            translate.use("en");
+
+            translate.get("TEST", invalidParams).subscribe((res: Translation) => {
+                // Should handle gracefully without crashing
+                expect(res).toBeDefined();
+            });
+        });
+    });
+
+    describe("Edge Cases", () => {
+        it("should handle empty translation object", () => {
+            translate.setTranslation("en", {});
+            translate.use("en");
+
+            translate.get("ANY_KEY").subscribe((res: Translation) => {
+                expect(res).toEqual("ANY_KEY");
+            });
+        });
+
+        it("should handle translation with circular references", () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const circularTranslation: any = { key: "value" };
+            circularTranslation.self = circularTranslation;
+
+            expect(() => {
+                translate.setTranslation("en", circularTranslation);
+            }).not.toThrow();
+        });
+
+        it("should handle very long translation keys", () => {
+            const longKey = "a".repeat(10000);
+            translate.setTranslation("en", { [longKey]: "Long key translation" });
+            translate.use("en");
+
+            translate.get(longKey).subscribe((res: Translation) => {
+                expect(res).toEqual("Long key translation");
+            });
+        });
+
+        it("should handle special characters in translation keys", () => {
+            const specialKey = "key.with.dots-and_underscores@symbols#hash";
+            translate.setTranslation("en", { [specialKey]: "Special key translation" });
+            translate.use("en");
+
+            translate.get(specialKey).subscribe((res: Translation) => {
+                expect(res).toEqual("Special key translation");
+            });
+        });
+    });
+
+    describe("Error handling & configuration", () => {
+
+        class ErrorLoader implements TranslateLoader {
+            getTranslation(): Observable<TranslationObject> {
+                return new Observable((observer) => {
+                    observer.error(new Error("Load failed"));
+                });
+            }
+        }
+
+        it("should handle loader error in use", (done) => {
+
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(ErrorLoader),
+                    }),
+                ],
+            });
+
+            const errorTranslate = TestBed.inject(TranslateService);
+
+            errorTranslate.use("en").subscribe({
+                next: () => {
+                    // Should not reach here
+                    done.fail("Expected error but got success");
+                },
+                error: (err) => {
+                    expect(err.message).toBe("Load failed");
+                    done();
+                },
+            });
+        });
+
+        it("should handle loader error in setFallbackLang", (done) => {
+
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(ErrorLoader),
+                    }),
+                ],
+            });
+
+            const errorTranslate = TestBed.inject(TranslateService);
+
+            errorTranslate.setFallbackLang("en").subscribe({
+                next: () => {
+                    // Should not reach here
+                    done.fail("Expected error but got success");
+                },
+                error: (err) => {
+                    expect(err.message).toBe("Load failed");
+                    done();
+                },
+            });
+        });
+
+        it("should handle configuration with lang in constructor", () => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(FakeLoader),
+                        lang: "en",
+                    }),
+                ],
+            });
+
+            const configTranslate = TestBed.inject(TranslateService);
+            expect(configTranslate.getCurrentLang()).toBe("en");
+        });
+
+        it("should handle configuration with fallbackLang in constructor", () => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(FakeLoader),
+                        fallbackLang: "en",
+                    }),
+                ],
+            });
+
+            const configTranslate = TestBed.inject(TranslateService);
+            expect(configTranslate.getFallbackLang()).toBe("en");
+        });
+    });
+});

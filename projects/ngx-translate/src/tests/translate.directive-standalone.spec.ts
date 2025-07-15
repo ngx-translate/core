@@ -300,4 +300,25 @@ describe("TranslateDirective (standalone)", () => {
         translate.setTranslation("en", { TEST: "updated text" });
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("updated text");
     });
+
+    it("should handle undefined translation result", () => {
+        // Set up a scenario where translation returns undefined
+        translate.setTranslation("en", { TEST: undefined as any });
+        translate.use("en");
+
+        // Should fall back to original content or key
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("TEST");
+    });
+
+    it("should handle non-string translation result", () => {
+        // Set up a scenario where translation returns an object
+        translate.setTranslation("en", { TEST: { nested: "value" } as any });
+        translate.use("en");
+
+        // Should stringify the result
+        expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual(
+            '{"nested":"value"}',
+        );
+    });
+
 });
