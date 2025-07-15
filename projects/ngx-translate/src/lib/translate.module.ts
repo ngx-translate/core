@@ -1,14 +1,30 @@
-import { ModuleWithProviders, NgModule, Provider } from "@angular/core";
+import { ModuleWithProviders, NgModule } from "@angular/core";
 import { TranslatePipe } from "./translate.pipe";
 import { TranslateDirective } from "./translate.directive";
-import { TranslateServiceConfig } from "../public-api";
-import { defaultProviders } from "./translate.providers";
+import {
+    defaultProviders,
+    provideTranslateCompiler, provideTranslateLoader, provideMissingTranslationHandler,
+    provideTranslateParser,
+    TranslateProviders,
+} from "./translate.providers";
+import { TranslateFakeCompiler } from "./translate.compiler";
+import { TranslateDefaultParser } from "./translate.parser";
+import { TranslateFakeLoader } from "./translate.loader";
+import { FakeMissingTranslationHandler } from "./missing-translation-handler";
+import { Language } from "./translate.service";
 
-export interface TranslateModuleConfig extends Partial<TranslateServiceConfig> {
-    loader?: Provider;
-    compiler?: Provider;
-    parser?: Provider;
-    missingTranslationHandler?: Provider;
+
+
+export interface TranslateModuleConfig extends TranslateProviders {
+    isolate?: boolean;
+    extend?: boolean;
+    fallbackLang?: Language;
+    lang?: Language;
+
+    /** @deprecated use fallbackLang */
+    defaultLanguage?: string;
+    /** @deprecated use fallbackLang */
+    useDefaultLang?: boolean;
 }
 
 @NgModule({
@@ -22,7 +38,13 @@ export class TranslateModule {
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [...defaultProviders({ isolate: true , ...config})],
+            providers: [...defaultProviders({
+                compiler: provideTranslateCompiler(TranslateFakeCompiler),
+                parser: provideTranslateParser(TranslateDefaultParser),
+                loader: provideTranslateLoader(TranslateFakeLoader),
+                missingTranslationHandler: provideMissingTranslationHandler(FakeMissingTranslationHandler),
+                ...config
+            }, true)],
         };
     }
 
@@ -32,7 +54,7 @@ export class TranslateModule {
     static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [...defaultProviders({ isolate: false, ...config})],
+            providers: [...defaultProviders(config, config.isolate ?? false)],
         };
     }
 }

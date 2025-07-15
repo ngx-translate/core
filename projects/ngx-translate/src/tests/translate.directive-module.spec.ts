@@ -255,15 +255,15 @@ describe("TranslateDirective (modules)", () => {
         expect(fixture.componentInstance.noContent.nativeElement.innerHTML).toEqual(fr);
     });
 
-    it("should update the DOM when the default lang changes", () => {
+    it("should update the DOM when the fallback lang changes", () => {
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("TEST");
 
         translate.setTranslation("en", { TEST: "This is a test" });
         translate.setTranslation("fr", { TEST: "C'est un test" });
-        translate.setDefaultLang("en");
+        translate.setFallbackLang("en");
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("This is a test");
 
-        translate.setDefaultLang("fr");
+        translate.setFallbackLang("fr");
         expect(fixture.componentInstance.noKey.nativeElement.innerHTML).toEqual("C'est un test");
     });
 
@@ -278,13 +278,13 @@ describe("TranslateDirective (modules)", () => {
         expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual("TEST");
     });
 
-    it("should unsubscribe from default lang change subscription on destroy", () => {
+    it("should unsubscribe from fallback lang change subscription on destroy", () => {
         expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual("TEST");
 
         fixture.destroy();
 
         translate.setTranslation("en", { TEST: "This is a test" });
-        translate.setDefaultLang("en");
+        translate.setFallbackLang("en");
 
         expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual("TEST");
     });

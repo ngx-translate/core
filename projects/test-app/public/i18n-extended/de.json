@@ -1,8 +1,8 @@
 {
     "demo": {
-        "title": "Isolated: Test Anwendung - Extended"
+        "title": "Extended: Test Anwendung (overwrites to global)"
     },
     "standalone-component": {
-        "title": "Isolated: Eigenständige Komponente"
+        "title": "Extended: Eigenständige Komponente (overwrites to global)"
     }
 }

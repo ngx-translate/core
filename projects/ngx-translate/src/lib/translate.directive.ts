@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { Subscription, isObservable } from "rxjs";
 import {
-    DefaultLangChangeEvent,
+    FallbackLangChangeEvent,
     InterpolatableTranslation,
     LangChangeEvent,
     TranslateService,
@@ -41,7 +41,7 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
     private lastParams?: InterpolationParameters;
     private currentParams?: InterpolationParameters;
     private readonly onLangChangeSub!: Subscription;
-    private readonly onDefaultLangChangeSub!: Subscription;
+    private readonly onFallbackLangChangeSub!: Subscription;
     private readonly onTranslationChangeSub!: Subscription;
 
     @Input() set translate(key: string) {
@@ -79,10 +79,10 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             );
         }
 
-        // subscribe to onDefaultLangChange event, in case the default language changes
-        if (!this.onDefaultLangChangeSub) {
-            this.onDefaultLangChangeSub = this.translateService.onDefaultLangChange.subscribe(
-                (event: DefaultLangChangeEvent) => {
+        // subscribe to onFallbackLangChange event, in case the fallback language changes
+        if (!this.onFallbackLangChangeSub) {
+            this.onFallbackLangChangeSub = this.translateService.onFallbackLangChange.subscribe(
+                (event: FallbackLangChangeEvent) => {
                     void event;
                     this.checkNodes(true);
                 },
@@ -201,8 +201,8 @@ export class TranslateDirective implements AfterViewChecked, OnDestroy {
             this.onLangChangeSub.unsubscribe();
         }
 
-        if (this.onDefaultLangChangeSub) {
-            this.onDefaultLangChangeSub.unsubscribe();
+        if (this.onFallbackLangChangeSub) {
+            this.onFallbackLangChangeSub.unsubscribe();
         }
 
         if (this.onTranslationChangeSub) {

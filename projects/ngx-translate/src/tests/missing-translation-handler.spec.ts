@@ -5,7 +5,7 @@ import {
     MissingTranslationHandler,
     MissingTranslationHandlerParams,
     provideTranslateLoader,
-    provideTranslateMissingTranslationHandler,
+    provideMissingTranslationHandler,
     provideTranslateService,
     StrictTranslation,
     TranslateLoader,
@@ -28,40 +28,40 @@ class FakeLoader implements TranslateLoader {
     }
 }
 
+@Injectable()
+class Missing implements MissingTranslationHandler {
+    handle(params: MissingTranslationHandlerParams) {
+        void params;
+        return "handled";
+    }
+}
+
+@Injectable()
+class MissingObs implements MissingTranslationHandler {
+    handle(params: MissingTranslationHandlerParams): Observable<StrictTranslation> {
+        return of(`handled: ${params.key}`);
+    }
+}
+
 describe("MissingTranslationHandler", () => {
     let translate: TranslateService;
     let missingTranslationHandler: MissingTranslationHandler;
 
-    @Injectable()
-    class Missing implements MissingTranslationHandler {
-        handle(params: MissingTranslationHandlerParams) {
-            void params;
-            return "handled";
-        }
-    }
 
-    @Injectable()
-    class MissingObs implements MissingTranslationHandler {
-        handle(params: MissingTranslationHandlerParams): Observable<StrictTranslation> {
-            return of(`handled: ${params.key}`);
-        }
-    }
-
-    const prepare = (handlerClass: Type<MissingTranslationHandler>, defaultLang = true) => {
+    const prepare = (handlerClass: Type<MissingTranslationHandler>) => {
         TestBed.configureTestingModule({
             providers: [
                 provideTranslateService({
-                    useDefaultLang: defaultLang,
+                    loader: provideTranslateLoader(FakeLoader),
+                    missingTranslationHandler: provideMissingTranslationHandler(handlerClass),
                 }),
-                provideTranslateLoader(FakeLoader),
-                provideTranslateMissingTranslationHandler(handlerClass),
             ],
         });
         translate = TestBed.inject(TranslateService);
         missingTranslationHandler = TestBed.inject(MissingTranslationHandler);
     };
 
-    afterEach(() => {
+    beforeEach(() => {
         translations = { TEST: "This is a test" };
     });
 
@@ -209,8 +209,8 @@ describe("MissingTranslationHandler", () => {
         });
     });
 
-    it("should not return default translation, but missing handler", () => {
-        prepare(Missing, false);
+    it("should return translation from the missing translation handler", () => {
+        prepare(Missing);
         translate.use("en");
         translate.use("fake");
 
@@ -225,8 +225,8 @@ describe("MissingTranslationHandler", () => {
     });
 
     it("should return default translation", () => {
-        prepare(Missing, true);
-        translate.use("en");
+        prepare(Missing);
+        translate.setFallbackLang("en");
         translate.use("fake");
 
         spyOn(missingTranslationHandler, "handle").and.callThrough();

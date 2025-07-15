@@ -1,6 +1,6 @@
 import {
     InterpolatableTranslationObject,
-    DefaultLangChangeEvent,
+    FallbackLangChangeEvent,
     LangChangeEvent,
     TranslationChangeEvent,
     Language,
@@ -19,10 +19,10 @@ export class TranslateStore {
     private _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
     private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
-    private _onDefaultLangChange: Subject<DefaultLangChangeEvent> =
-        new Subject<DefaultLangChangeEvent>();
+    private _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
+        new Subject<FallbackLangChangeEvent>();
 
-    private defaultLang!: Language;
+    private fallbackLang: Language|null = null;
     private currentLang!: Language;
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
@@ -52,21 +52,21 @@ export class TranslateStore {
         return this.languages;
     }
 
-    public getCurrentLanguage(): Language {
+    public getCurrentLang(): Language {
         return this.currentLang;
     }
 
-    public getDefaultLanguage(): Language {
-        return this.defaultLang;
+    public getFallbackLang(): Language|null {
+        return this.fallbackLang;
     }
 
     /**
-     * Changes the default lang
+     * Changes the fallback lang
      */
-    public setDefaultLang(lang: string, emitChange = true): void {
-        this.defaultLang = lang;
+    public setFallbackLang(lang: string, emitChange = true): void {
+        this.fallbackLang = lang;
         if (emitChange) {
-            this._onDefaultLangChange.next({ lang: lang, translations: this.translations[lang] });
+            this._onFallbackLangChange.next({ lang: lang, translations: this.translations[lang] });
         }
     }
 
@@ -98,13 +98,13 @@ export class TranslateStore {
     }
 
     /**
-     * An Observable to listen to default lang change events
-     * onDefaultLangChange.subscribe((params: DefaultLangChangeEvent) => {
+     * An Observable to listen to fallback lang change events
+     * onFallbackLangChange.subscribe((params: FallbackLangChangeEvent) => {
      *     // do something
      * });
      */
-    get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
-        return this._onDefaultLangChange.asObservable();
+    get onFallbackLangChange(): Observable<FallbackLangChangeEvent> {
+        return this._onFallbackLangChange.asObservable();
     }
 
     public addLanguages(languages: Language[]): void {
@@ -119,15 +119,15 @@ export class TranslateStore {
         delete this.translations[lang];
     }
 
-    public getTranslation(key: string, useDefaultLang: boolean): InterpolatableTranslation {
+    public getTranslation(key: string): InterpolatableTranslation {
         let text = this.getValue(this.currentLang, key);
+
         if (
             text === undefined &&
-            this.defaultLang != null &&
-            this.defaultLang !== this.currentLang &&
-            useDefaultLang
+            this.fallbackLang != null &&
+            this.fallbackLang !== this.currentLang
         ) {
-            text = this.getValue(this.defaultLang, key);
+            text = this.getValue(this.fallbackLang, key);
         }
         return text;
     }

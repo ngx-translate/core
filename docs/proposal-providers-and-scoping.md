@@ -2,85 +2,66 @@
 
 ## Configuration
 
-### Main service
+### Root service
 
 ```
 provideTranslateService({
     fallbackLanguage: "en",
     language: "de",
-    mode: "root"  // see below
+
+    loader: ...,
+    compiler: ...,
+    parser: ...,
+    missingTranslationHandler: ...
 })
 ```
 
-**No more** `{loader:..., compiler:..., parser:..., missingTranslationHandler:...}` since this makes it hard to distinguish if
-a parent loader should be used or not. Not providing a loader would
-create a default loader instead - which is usually not what is wanted.
-
-Instead, we use `provideTranslateCompiler()`, `provideTranslateLoader()`, `provideTranslateHttpLoader()` and `provideTranslateParser()`
+User can provide loaders etc., otherwise defaults are used.
 
 `fallbackLanguage` replaces `defaultLang` + `useDefaultLang`
 
-### Compiler
+- we make defaultLang und useDefaultLang deprecated
+
+This defines the root component which provides the components to itself and the children.
+
+### Child service
 
 ```
-provideTranslateCompiler(MyCompiler)
+provideChildTranslateService({
+    loader: ...,
+    compiler: ...,
+    parser: ...,
+    missingTranslationHandler: ...,
+})
 ```
 
-### Loader
+Uses root components, can override them for its children - e.g. HttpLoader with own path.
 
-```
-provideTranslateLoader(MyLoader)
-```
+Uses parents language and fallbackLanguage
 
-### HttpLoader
+## Isolated
 
-```
-provideTranslateHttpLoader({prefix:..., suffix:...})
-```
+**isolated**
 
-### Parser
+- provideTranslateService() <-- store: A
+    - provideTranslateService() <-- store: B uses own store
+        - provideChildTranslateService() <-- B uses parent store
 
-```
-provideTranslateParser(MyParser)
-```
+**extended**
 
-## Scoping
+- provideTranslateService() <-- store: A
+    - provideChildTranslateService() <-- add to A
+        - provideChildTranslateService() <-- add to A
+            - provideChildTranslateService() <-- add to A
 
-| Mode     | Language                | Translations                                                                       |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------- |
-| `root`   | independent from parent | independent from parent                                                            |
-| `extend` | shared                  | loader merges translations with parent store                                       |
-| `scoped` | shared                  | loader loads into local store, service searches missing translations in the parent |
+**module** (Module concept with forChild)
 
-### root (=isolate)
+- forRoot() <-- store: A
+- forChild() <-- A
 
-```ts;file=app.config.ts
-provideTranslateService({mode: "root"})
-```
+**scoped** (future enhancement)
 
-Isolates itself from possible parent components
-
-- Uses independent current and default language
-- Uses independent store
-
-### scoped
-
-```ts;file=scoped.component.ts
-provideTranslateService({mode: "scoped"})
-```
-
-- Translations are available in the hierarchy **below** the component. Does not pollute the parent TranslateStore.
-- Searches "upstream" for translations, if not present in the current hierarchy
-- MissingTranslationHandler, TranslateCompiler, TranslateParser, TranslateLoader are used from the injection level of the provider
-- Current language and default language are shared with the parent
-
-### extend
-
-```ts;file=extend.component.ts
-provideTranslateService({mode: "extend"})
-```
-
-- Translations are **injected in the parent store** and are available in its hierarchy
-    - translations in the parent store are overwritten
-- MissingTranslationHandler, TranslateCompiler, TranslateParser, TranslateLoader are used from the injection level of the provider
-- Current language and default language are shared
+- provideTranslateService() <-- store: A
+    - provideChildTranslateService() <-- B uses A
+        - provideChildTranslateService() <-- C uses B
+            - provideChildTranslateService() <-- D uses C

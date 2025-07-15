@@ -32,7 +32,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     lastParams: InterpolationParameters[] = [];
     onTranslationChange: Subscription | undefined;
     onLangChange: Subscription | undefined;
-    onDefaultLangChange: Subscription | undefined;
+    onFallbackLangChange: Subscription | undefined;
 
     updateValue(
         key: string,
@@ -104,8 +104,8 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             this.onTranslationChange = this.translate.onTranslationChange.subscribe(
                 (event: TranslationChangeEvent) => {
                     if (
-                        (this.lastKey && event.lang === this.translate.currentLang) ||
-                        event.lang === this.translate.defaultLang
+                        (this.lastKey && event.lang === this.translate.getCurrentLang()) ||
+                        event.lang === this.translate.getFallbackLang()
                     ) {
                         this.lastKey = null;
                         this.updateValue(query, interpolateParams, event.translations);
@@ -124,9 +124,9 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             });
         }
 
-        // subscribe to onDefaultLangChange event, in case the default language changes
-        if (!this.onDefaultLangChange) {
-            this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe(() => {
+        // subscribe to onDefaultLangChange event, in case the fallback language changes
+        if (!this.onFallbackLangChange) {
+            this.onFallbackLangChange = this.translate.onFallbackLangChange.subscribe(() => {
                 if (this.lastKey) {
                     this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
                     this.updateValue(query, interpolateParams);
@@ -149,9 +149,9 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             this.onLangChange.unsubscribe();
             this.onLangChange = undefined;
         }
-        if (typeof this.onDefaultLangChange !== "undefined") {
-            this.onDefaultLangChange.unsubscribe();
-            this.onDefaultLangChange = undefined;
+        if (typeof this.onFallbackLangChange !== "undefined") {
+            this.onFallbackLangChange.unsubscribe();
+            this.onFallbackLangChange = undefined;
         }
     }
 

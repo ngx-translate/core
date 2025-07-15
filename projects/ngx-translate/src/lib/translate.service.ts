@@ -8,11 +8,16 @@ import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
+/**
+ * Configuration object for the translation service.
+ *
+ * Provides options to customize translation behavior, including setting the primary language,
+ * specifying a fallback language, and other deprecated flags for legacy support.
+ */
 export interface TranslateServiceConfig {
-    defaultLanguage?: Language;
+    lang?: Language;
+    fallbackLang?: Language|null;
     extend: boolean;
-    isolate: boolean;
-    useDefaultLang: boolean;
 }
 
 export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfig>(
@@ -55,10 +60,14 @@ export interface LangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
-export interface DefaultLangChangeEvent {
+export interface FallbackLangChangeEvent
+{
     lang: string;
     translations: InterpolatableTranslationObject;
 }
+
+/** @deprecated use `FallbackLangChangeEvent` */
+export type DefaultLangChangeEvent = FallbackLangChangeEvent;
 
 declare interface Window {
     navigator: {
@@ -75,8 +84,76 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
 
+export abstract class ITranslateService {
+    public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
+    public abstract readonly onLangChange: Observable<LangChangeEvent>;
+    public abstract readonly onFallbackLangChange: Observable<FallbackLangChangeEvent>;
+
+    public abstract use(lang: Language): Observable<InterpolatableTranslationObject>;
+
+    public abstract setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject>;
+    public abstract getFallbackLang(): Language|null;
+
+    public abstract addLangs(languages: Language[]): void;
+    public abstract getLangs(): readonly Language[];
+    public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
+    public abstract resetLang(lang: Language): void;
+
+    public abstract instant(key: string | string[], interpolateParams?: InterpolationParameters): Translation | TranslationObject;
+    public abstract stream(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
+    public abstract getStreamOnTranslationChange(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
+
+    public abstract set(key: string, translation: string | TranslationObject, lang?: Language): void;
+    public abstract get(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
+
+    public abstract setTranslation(lang: Language, translations: TranslationObject, shouldMerge?: boolean): void;
+    public abstract getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): StrictTranslation | TranslationObject | Observable<StrictTranslation | TranslationObject>;
+
+    public abstract getBrowserLang(): Language|undefined;
+    public abstract getBrowserCultureLang(): Language|undefined;
+
+
+    /**
+     * Returns the current language
+     * @deprecated use `getCurrentLang()`
+     */
+    public abstract readonly currentLang: Language;
+
+    /**
+     * Returns a list of known languages - either loaded
+     * or set by using `addLangs()`
+     * @deprecated use `getLangs()`
+     */
+    public abstract readonly langs: readonly Language[];
+
+    /**
+     * Sets the fallback language
+     * @param lang The language to set
+     * @deprecated use `setFallbackLang(lang)`
+     */
+    public abstract setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject>;
+
+    /**
+     * Gets the fallback language
+     * @deprecated use `getFallbackLang()`
+     */
+    public abstract getDefaultLang(): Language|null;
+
+    /**
+     * Returns the fallback language
+     * @deprectated use `getFallbackLang()`
+     */
+    public abstract readonly defaultLang: Language|null;
+
+    /**
+     * @deprectated use `getFallbackLang()`
+     */
+    public abstract readonly onDefaultLangChange: Observable<DefaultLangChangeEvent>;
+}
+
+
 @Injectable()
-export class TranslateService {
+export class TranslateService implements ITranslateService {
     private loadingTranslations!: Observable<InterpolatableTranslationObject>;
     private pending = false;
     private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
@@ -88,17 +165,7 @@ export class TranslateService {
     private missingTranslationHandler = inject(MissingTranslationHandler);
     public store: TranslateStore = inject(TranslateStore); // TODO: make private
 
-    private config: TranslateServiceConfig = inject<TranslateServiceConfig>(
-        TRANSLATE_SERVICE_CONFIG,
-        {
-            optional: true,
-        },
-    ) ?? {
-        defaultLanguage: undefined,
-        extend: false,
-        isolate: false,
-        useDefaultLang: true,
-    };
+    private extend = false;
 
     /**
      * An Observable to listen to translation change events
@@ -106,7 +173,7 @@ export class TranslateService {
      *     // do something
      * });
      */
-    get onTranslationChange(): Observable<TranslationChangeEvent> {
+    public get onTranslationChange(): Observable<TranslationChangeEvent> {
         return this.store.onTranslationChange;
     }
 
@@ -121,80 +188,82 @@ export class TranslateService {
     }
 
     /**
-     * An Observable to listen to default lang change events
-     * onDefaultLangChange.subscribe((params: DefaultLangChangeEvent) => {
+     * An Observable to listen to fallback lang change events
+     * onFallbackLangChange.subscribe((params: FallbackLangChangeEvent) => {
      *     // do something
      * });
      */
+    get onFallbackLangChange(): Observable<FallbackLangChangeEvent> {
+        return this.store.onFallbackLangChange;
+    }
+
     get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
-        return this.store.onDefaultLangChange;
+        return this.store.onFallbackLangChange;
     }
 
-    /**
-     * The default lang to fallback when translations are missing on the current lang
-     */
-    get defaultLang(): Language {
-        return this.store.getDefaultLanguage();
-    }
-
-    /**
-     * The lang currently used
-     */
-    get currentLang(): Language {
-        return this.store.getCurrentLanguage();
-    }
-
-    /**
-     * an array of langs
-     */
-    get langs(): readonly Language[] {
-        return this.store.getLanguages();
-    }
 
     constructor() {
-        if (this.config.defaultLanguage) {
-            this.setDefaultLang(this.config.defaultLanguage);
+
+        const config:TranslateServiceConfig =
+            {
+                extend:false,
+                fallbackLang:null,
+
+                ... inject<TranslateServiceConfig>(
+                    TRANSLATE_SERVICE_CONFIG,
+                    {
+                        optional: true,
+                    })
+            };
+
+        if(config.lang) {
+            this.use(config.lang);
+        }
+
+        if (config.fallbackLang) {
+            this.setFallbackLang(config.fallbackLang);
+        }
+
+        if(config.extend)
+        {
+            this.extend = true;
         }
     }
 
     /**
-     * Sets the default language to use as a fallback
+     * Sets the fallback language to use if a translation is not found in the
+     * current language
      */
-    public setDefaultLang(lang: string): Observable<InterpolatableTranslationObject> {
-        if (!this.defaultLang) {
-            // on init set the defaultLang immediately, but do not emit a change yet
-            this.store.setDefaultLang(lang, false);
+    public setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject> {
+        if (!this.getFallbackLang()) {
+            // on init set the fallbackLang immediately, but do not emit a change yet
+            this.store.setFallbackLang(lang, false);
         }
 
         const pending = this.loadOrExtendLanguage(lang);
         if (isObservable(pending)) {
             pending.pipe(take(1)).subscribe(() => {
-                this.store.setDefaultLang(lang);
+                this.store.setFallbackLang(lang);
             });
             return pending;
         }
 
-        this.store.setDefaultLang(lang);
+        this.store.setFallbackLang(lang);
         return of(this.store.getTranslations(lang));
     }
 
-    /**
-     * Gets the default language used
-     */
-    public getDefaultLang(): string {
-        return this.defaultLang;
-    }
+
 
     /**
      * Changes the lang currently used
      */
-    public use(lang: string): Observable<InterpolatableTranslationObject> {
+    public use(lang: Language): Observable<InterpolatableTranslationObject> {
         // remember the language that was called
         // we need this with multiple fast calls to use()
         // where translation loads might complete in random order
         this.lastUseLanguage = lang;
 
-        if (!this.currentLang) {
+        if (!this.getCurrentLang()) {
             // on init set the currentLang immediately, but do not emit a change yet
             this.store.setCurrentLang(lang, false);
         }
@@ -214,9 +283,9 @@ export class TranslateService {
     /**
      * Retrieves the given translations
      */
-    private loadOrExtendLanguage(lang: string): Observable<TranslationObject> | undefined {
+    private loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
-        if (!this.store.hasTranslationFor(lang) || this.config.extend) {
+        if (!this.store.hasTranslationFor(lang) || this.extend) {
             this._translationRequests[lang] =
                 this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
             return this._translationRequests[lang];
@@ -228,7 +297,7 @@ export class TranslateService {
     /**
      * Changes the current lang
      */
-    private changeLang(lang: string): void {
+    private changeLang(lang: Language): void {
         if (lang !== this.lastUseLanguage) {
             // received new language data,
             // but this was not the one requested last
@@ -236,14 +305,13 @@ export class TranslateService {
         }
 
         this.store.setCurrentLang(lang);
-
-        if (this.defaultLang == null) {
-            // if there is no default lang, use the one that we just set
-            this.store.setDefaultLang(lang);
-        }
     }
 
-    private loadAndCompileTranslations(lang: string): Observable<InterpolatableTranslationObject> {
+    public getCurrentLang(): Language {
+        return this.store.getCurrentLang();
+    }
+
+    private loadAndCompileTranslations(lang: Language): Observable<InterpolatableTranslationObject> {
         this.pending = true;
 
         const loadingTranslations = this.currentLoader
@@ -258,7 +326,7 @@ export class TranslateService {
 
         this.loadingTranslations.subscribe({
             next: (res: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, res, this.config.extend);
+                this.store.setTranslations(lang, res, this.extend);
                 this.pending = false;
             },
             error: (err) => {
@@ -284,7 +352,7 @@ export class TranslateService {
         this.store.setTranslations(
             lang,
             interpolatableTranslations,
-            shouldMerge || this.config.extend,
+            shouldMerge || this.extend,
         );
     }
 
@@ -318,8 +386,15 @@ export class TranslateService {
         return res !== undefined ? res : key;
     }
 
+    /**
+     * Gets the fallback language. null if none is defined
+     */
+    public getFallbackLang(): Language|null {
+        return this.store.getFallbackLang();
+    }
+
     private getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
-        return this.store.getTranslation(key, this.config.useDefaultLang);
+        return this.store.getTranslation(key);
     }
 
     private runInterpolation(
@@ -525,9 +600,9 @@ export class TranslateService {
     }
 
     /**
-     * Allows to reload the lang file from the file
+     * Allows reloading the lang file from the file
      */
-    public reloadLang(lang: string): Observable<InterpolatableTranslationObject> {
+    public reloadLang(lang: Language): Observable<InterpolatableTranslationObject> {
         this.resetLang(lang);
         return this.loadAndCompileTranslations(lang);
     }
@@ -535,7 +610,7 @@ export class TranslateService {
     /**
      * Deletes inner translation
      */
-    public resetLang(lang: string): void {
+    public resetLang(lang: Language): void {
         delete this._translationRequests[lang];
         this.store.deleteTranslations(lang);
     }
@@ -543,7 +618,7 @@ export class TranslateService {
     /**
      * Returns the language code name from the browser, e.g. "de"
      */
-    public getBrowserLang(): string | undefined {
+    public static getBrowserLang(): Language | undefined {
         if (typeof window === "undefined" || !window.navigator) {
             return undefined;
         }
@@ -556,7 +631,7 @@ export class TranslateService {
     /**
      * Returns the culture language code name from the browser, e.g. "de-DE"
      */
-    public getBrowserCultureLang(): string | undefined {
+    public static getBrowserCultureLang(): Language | undefined {
         if (typeof window === "undefined" || typeof window.navigator === "undefined") {
             return undefined;
         }
@@ -567,4 +642,57 @@ export class TranslateService {
                   window.navigator.browserLanguage ||
                   window.navigator.userLanguage;
     }
+
+    public getBrowserLang(): Language|undefined {
+        return TranslateService.getBrowserLang();
+    }
+
+    public getBrowserCultureLang(): Language|undefined {
+        return TranslateService.getBrowserCultureLang();
+    }
+
+
+    /** Deprecations **/
+
+    /**
+     * @deprecated use `getFallbackLang()`
+     */
+    get defaultLang(): Language|null {
+        return this.getFallbackLang();
+    }
+
+
+    /**
+     * The lang currently used
+     * @deprecated use `getCurrentLang()`
+     */
+    get currentLang(): Language {
+        return this.store.getCurrentLang();
+    }
+
+    /**
+     * @deprecated use `getLangs()`
+     */
+    get langs(): readonly Language[] {
+        return this.store.getLanguages();
+    }
+
+    /**
+     * Sets the  language to use as a fallback
+     * @deprecated use setFallbackLanguage()
+     */
+    public setDefaultLang(lang:Language): Observable<InterpolatableTranslationObject> {
+        return this.setFallbackLang(lang);
+    }
+
+    /**
+     * Gets the fallback language used
+     * @deprecated use getFallbackLang()
+     */
+    public getDefaultLang(): Language|null {
+        return this.getFallbackLang();
+    }
+
+
+
 }
