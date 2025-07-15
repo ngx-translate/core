@@ -256,8 +256,13 @@ export class TranslateService implements ITranslateService {
 
         const pending = this.loadOrExtendLanguage(lang);
         if (isObservable(pending)) {
-            pending.pipe(take(1)).subscribe(() => {
-                this.store.setFallbackLang(lang);
+            pending.pipe(take(1)).subscribe({
+                next: () => {
+                    this.store.setFallbackLang(lang);
+                },
+                error: () => {
+                    /* ignore here - user can handle it */
+                },
             });
             return pending;
         }
@@ -282,8 +287,13 @@ export class TranslateService implements ITranslateService {
 
         const pending = this.loadOrExtendLanguage(lang);
         if (isObservable(pending)) {
-            pending.pipe(take(1)).subscribe(() => {
-                this.changeLang(lang);
+            pending.pipe(take(1)).subscribe({
+                next: () => {
+                    this.changeLang(lang);
+                },
+                error: () => {
+                    /* ignore here - use can handle it */
+                },
             });
             return pending;
         }

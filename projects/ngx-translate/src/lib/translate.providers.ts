@@ -4,7 +4,7 @@ import {
     TranslateService,
     TranslateServiceConfig,
 } from "./translate.service";
-import { Provider, Type } from "@angular/core";
+import { ClassProvider, Provider, Type } from "@angular/core";
 import { TranslateFakeLoader, TranslateLoader } from "./translate.loader";
 import { TranslateCompiler, TranslateFakeCompiler } from "./translate.compiler";
 import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
@@ -35,21 +35,21 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig 
     defaultLanguage?: Language;
 }
 
-export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider {
+export function provideTranslateLoader(loader: Type<TranslateLoader>): ClassProvider {
     return { provide: TranslateLoader, useClass: loader };
 }
 
-export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): Provider {
+export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): ClassProvider {
     return { provide: TranslateCompiler, useClass: compiler };
 }
 
-export function provideTranslateParser(parser: Type<TranslateParser>): Provider {
+export function provideTranslateParser(parser: Type<TranslateParser>): ClassProvider {
     return { provide: TranslateParser, useClass: parser };
 }
 
 export function provideMissingTranslationHandler(
     handler: Type<MissingTranslationHandler>,
-): Provider {
+): ClassProvider {
     return { provide: MissingTranslationHandler, useClass: handler };
 }
 
