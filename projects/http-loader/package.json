@@ -5,7 +5,9 @@
   "keywords": [
     "@ngx-translate",
     "ngx-translate",
-    "angular", "i18n", "translation"
+    "angular",
+    "i18n",
+    "translation"
   ],
   "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
   "license": "MIT",

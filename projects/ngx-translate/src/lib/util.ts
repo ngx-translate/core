@@ -17,9 +17,10 @@ export function equals(o1: any, o2: any): boolean {
   if (o1 === o2) return true;
   if (o1 === null || o2 === null) return false;
   if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
-  const t1 = typeof o1, t2 = typeof o2;
+  const t1 = typeof o1,
+    t2 = typeof o2;
   let length: number, key: any, keySet: any;
-  if (t1 == t2 && t1 == 'object') {
+  if (t1 == t2 && t1 == "object") {
     if (Array.isArray(o1)) {
       if (!Array.isArray(o2)) return false;
       if ((length = o1.length) == o2.length) {
@@ -40,7 +41,7 @@ export function equals(o1: any, o2: any): boolean {
         keySet[key] = true;
       }
       for (key in o2) {
-        if (!(key in keySet) && typeof o2[key] !== 'undefined') {
+        if (!(key in keySet) && typeof o2[key] !== "undefined") {
           return false;
         }
       }
@@ -51,17 +52,15 @@ export function equals(o1: any, o2: any): boolean {
 }
 
 export function isDefined(value: any): boolean {
-  return typeof value !== 'undefined' && value !== null;
+  return typeof value !== "undefined" && value !== null;
 }
-
 
 export function isDict(value: any): boolean {
   return isObject(value) && !isArray(value) && value !== null;
 }
 
-
 export function isObject(value: any): boolean {
-  return typeof value === 'object';
+  return typeof value === "object";
 }
 
 export function isArray(value: any): boolean {
@@ -69,13 +68,12 @@ export function isArray(value: any): boolean {
 }
 
 export function isString(value: any): boolean {
-  return typeof value === 'string';
+  return typeof value === "string";
 }
 
-export function isFunction(value: any):boolean {
-  return typeof value === "function"
+export function isFunction(value: any): boolean {
+  return typeof value === "function";
 }
-
 
 export function mergeDeep(target: any, source: any): any {
   const output = Object.assign({}, target);
@@ -90,16 +88,15 @@ export function mergeDeep(target: any, source: any): any {
         if (key in target) {
           output[key] = mergeDeep(target[key], source[key]);
         } else {
-          Object.assign(output, {[key]: source[key]});
+          Object.assign(output, { [key]: source[key] });
         }
       } else {
-        Object.assign(output, {[key]: source[key]});
+        Object.assign(output, { [key]: source[key] });
       }
     });
   }
   return output;
 }
-
 
 /**
  * Gets a value from an object by composed key
@@ -107,25 +104,22 @@ export function mergeDeep(target: any, source: any): any {
  * @param target
  * @param key
  */
-export function getValue(target: any, key: string): any
-{
+export function getValue(target: any, key: string): any {
   const keys = key.split(".");
 
   key = "";
-  do
-  {
+  do {
     key += keys.shift();
-    if (isDefined(target) && isDefined(target[key]) && (isDict(target[key]) ||isArray(target[key]) || !keys.length))
-    {
+    if (
+      isDefined(target) &&
+      isDefined(target[key]) &&
+      (isDict(target[key]) || isArray(target[key]) || !keys.length)
+    ) {
       target = target[key];
       key = "";
-    }
-    else if (!keys.length)
-    {
+    } else if (!keys.length) {
       target = undefined;
-    }
-    else
-    {
+    } else {
       key += ".";
     }
   } while (keys.length);
@@ -141,7 +135,7 @@ export function getValue(target: any, key: string): any
  * @param value to set
  */
 export function setValue(target: any, key: string, value: any): void {
-  const keys = key.split('.');
+  const keys = key.split(".");
   let current = target;
 
   for (let i = 0; i < keys.length; i++) {
@@ -159,5 +153,3 @@ export function setValue(target: any, key: string, value: any): void {
     }
   }
 }
-
-

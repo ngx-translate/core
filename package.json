@@ -10,7 +10,8 @@
     "test": "ng test --code-coverage",
     "test-ci": "ng test --watch=false --browsers=ChromeHeadless --reporters=mocha",
     "coverage": "ng test ngx-translate --code-coverage --watch=false --browsers=ChromeHeadless --reporters=mocha,coverage",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "prettier --write ."
   },
   "private": true,
   "dependencies": {
@@ -32,6 +33,7 @@
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "*",
     "eslint": "^9.9.1",
+    "eslint-config-prettier": "10.1.5",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -40,6 +42,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "karma-mocha-reporter": "^2.2.5",
     "ng-packagr": "^19.0.0",
+    "prettier": "3.6.2",
     "typescript": "^5",
     "typescript-eslint": "^8.18.1"
   },

@@ -29,10 +29,7 @@
           "options": {
             "tsConfig": "./tsconfig.spec.json",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         },
         "lint": {
@@ -73,10 +70,7 @@
           "options": {
             "tsConfig": "./tsconfig.spec.json",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         },
         "lint": {
@@ -108,9 +102,7 @@
             "outputPath": "dist/test-app",
             "index": "projects/test-app/src/index.html",
             "browser": "projects/test-app/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "projects/test-app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -119,9 +111,7 @@
                 "input": "projects/test-app/public"
               }
             ],
-            "styles": [
-              "projects/test-app/src/styles.scss"
-            ],
+            "styles": ["projects/test-app/src/styles.scss"],
             "scripts": []
           },
           "configurations": {

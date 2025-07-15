@@ -1,16 +1,16 @@
-import {TestBed} from "@angular/core/testing";
-import {Observable, of} from "rxjs";
+import { TestBed } from "@angular/core/testing";
+import { Observable, of } from "rxjs";
 import {
   TranslateFakeLoader,
   TranslateLoader,
   TranslateService,
   TranslationObject,
   Translation,
-  provideTranslateService
+  provideTranslateService,
 } from "../public-api";
-import {Injectable} from "@angular/core";
+import { Injectable } from "@angular/core";
 
-const translations: TranslationObject = {"TEST": "This is a test"};
+const translations: TranslationObject = { TEST: "This is a test" };
 
 @Injectable()
 class FakeLoader implements TranslateLoader {
@@ -19,15 +19,15 @@ class FakeLoader implements TranslateLoader {
   }
 }
 
-describe('TranslateLoader', () => {
+describe("TranslateLoader", () => {
   let translate: TranslateService;
 
-  it('should be able to provide TranslateStaticLoader', () => {
+  it("should be able to provide TranslateStaticLoader", () => {
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService({
-          loader: {provide: TranslateLoader, useClass: FakeLoader}
-        })
+          loader: { provide: TranslateLoader, useClass: FakeLoader },
+        }),
       ],
     });
     translate = TestBed.inject(TranslateService);
@@ -37,27 +37,27 @@ describe('TranslateLoader', () => {
     expect(translate.currentLoader instanceof FakeLoader).toBeTruthy();
 
     // the lang to use, if the lang isn't available, it will use the current loader to get them
-    translate.use('en');
+    translate.use("en");
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is a test');
+    translate.get("TEST").subscribe((res: Translation) => {
+      expect(res).toEqual("This is a test");
     });
   });
 
-  it('should be able to provide any TranslateLoader', () => {
+  it("should be able to provide any TranslateLoader", () => {
     class CustomLoader implements TranslateLoader {
       getTranslation(): Observable<TranslationObject> {
-        return of({"TEST": "This is also a test"});
+        return of({ TEST: "This is also a test" });
       }
     }
 
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService({
-          loader: {provide: TranslateLoader, useClass: CustomLoader}
-        })
-      ]
+          loader: { provide: TranslateLoader, useClass: CustomLoader },
+        }),
+      ],
     });
     translate = TestBed.inject(TranslateService);
 
@@ -66,20 +66,20 @@ describe('TranslateLoader', () => {
     expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
 
     // the lang to use, if the lang isn't available, it will use the current loader to get them
-    translate.use('en');
+    translate.use("en");
 
     // this will request the translation from the CustomLoader
-    translate.get('TEST').subscribe((res: Translation) => {
-      expect(res).toEqual('This is also a test');
+    translate.get("TEST").subscribe((res: Translation) => {
+      expect(res).toEqual("This is also a test");
     });
   });
 
-  it('TranslateFakeLoader should return empty object', () => {
+  it("TranslateFakeLoader should return empty object", () => {
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService({
-          loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
-        })
+          loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
+        }),
       ],
     });
     translate = TestBed.inject(TranslateService);
@@ -89,12 +89,11 @@ describe('TranslateLoader', () => {
     expect(translate.currentLoader instanceof TranslateFakeLoader).toBeTruthy();
 
     // the lang to use, if the lang isn't available, it will use the current loader to get them
-    translate.use('en');
+    translate.use("en");
 
     // this will request the translation from the backend because we use a static files loader for TranslateService
-    translate.getTranslation('en').subscribe((res: Translation) => {
+    translate.getTranslation("en").subscribe((res: Translation) => {
       expect(res).toEqual({});
     });
   });
-
 });

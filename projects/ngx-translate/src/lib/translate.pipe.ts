@@ -1,40 +1,56 @@
-import {ChangeDetectorRef, Injectable, OnDestroy, Pipe, PipeTransform} from '@angular/core';
-import {isObservable, Subscription} from 'rxjs';
+import {
+  ChangeDetectorRef,
+  Injectable,
+  OnDestroy,
+  Pipe,
+  PipeTransform,
+} from "@angular/core";
+import { isObservable, Subscription } from "rxjs";
 import {
   InterpolatableTranslationObject,
   LangChangeEvent,
   TranslateService,
   TranslationChangeEvent,
   Translation,
-  InterpolationParameters
+  InterpolationParameters,
 } from "./translate.service";
-import {equals, isDefined, isDict, isString} from "./util";
+import { equals, isDefined, isDict, isString } from "./util";
 
 @Injectable()
 @Pipe({
-  name: 'translate',
+  name: "translate",
   standalone: true,
-  pure: false // required to update the value when the promise is resolved
+  pure: false, // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-  value:Translation = '';
+  value: Translation = "";
   lastKey: string | null = null;
   lastParams: InterpolationParameters[] = [];
   onTranslationChange: Subscription | undefined;
   onLangChange: Subscription | undefined;
   onDefaultLangChange: Subscription | undefined;
 
-  constructor(private translate: TranslateService, private _ref: ChangeDetectorRef) {
-  }
+  constructor(
+    private translate: TranslateService,
+    private _ref: ChangeDetectorRef,
+  ) {}
 
-  updateValue(key: string, interpolateParams?: object, translations?: InterpolatableTranslationObject): void {
+  updateValue(
+    key: string,
+    interpolateParams?: object,
+    translations?: InterpolatableTranslationObject,
+  ): void {
     const onTranslation = (res: Translation) => {
       this.value = res !== undefined ? res : key;
       this.lastKey = key;
       this._ref.markForCheck();
     };
     if (translations) {
-      const res = this.translate.getParsedResult(translations, key, interpolateParams);
+      const res = this.translate.getParsedResult(
+        translations,
+        key,
+        interpolateParams,
+      );
       if (isObservable(res)) {
         res.subscribe(onTranslation);
       } else {
@@ -67,7 +83,9 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
           interpolateParams = JSON.parse(validArgs);
         } catch (e) {
           void e;
-          throw new SyntaxError(`Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`);
+          throw new SyntaxError(
+            `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`,
+          );
         }
       } else if (isDict(args[0])) {
         interpolateParams = args[0];
@@ -88,32 +106,38 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
 
     // subscribe to onTranslationChange event, in case the translations change
     if (!this.onTranslationChange) {
-      this.onTranslationChange = this.translate.onTranslationChange.subscribe((event: TranslationChangeEvent) => {
-        if (this.lastKey && event.lang === this.translate.currentLang) {
-          this.lastKey = null;
-          this.updateValue(query, interpolateParams, event.translations);
-        }
-      });
+      this.onTranslationChange = this.translate.onTranslationChange.subscribe(
+        (event: TranslationChangeEvent) => {
+          if (this.lastKey && event.lang === this.translate.currentLang) {
+            this.lastKey = null;
+            this.updateValue(query, interpolateParams, event.translations);
+          }
+        },
+      );
     }
 
     // subscribe to onLangChange event, in case the language changes
     if (!this.onLangChange) {
-      this.onLangChange = this.translate.onLangChange.subscribe((event: LangChangeEvent) => {
-        if (this.lastKey) {
-          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
-          this.updateValue(query, interpolateParams, event.translations);
-        }
-      });
+      this.onLangChange = this.translate.onLangChange.subscribe(
+        (event: LangChangeEvent) => {
+          if (this.lastKey) {
+            this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+            this.updateValue(query, interpolateParams, event.translations);
+          }
+        },
+      );
     }
 
     // subscribe to onDefaultLangChange event, in case the default language changes
     if (!this.onDefaultLangChange) {
-      this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe(() => {
-        if (this.lastKey) {
-          this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
-          this.updateValue(query, interpolateParams);
-        }
-      });
+      this.onDefaultLangChange = this.translate.onDefaultLangChange.subscribe(
+        () => {
+          if (this.lastKey) {
+            this.lastKey = null; // we want to make sure it doesn't return the same value until it's been updated
+            this.updateValue(query, interpolateParams);
+          }
+        },
+      );
     }
 
     return this.value;
@@ -123,15 +147,15 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
    * Clean any existing subscription to change events
    */
   private _dispose(): void {
-    if (typeof this.onTranslationChange !== 'undefined') {
+    if (typeof this.onTranslationChange !== "undefined") {
       this.onTranslationChange.unsubscribe();
       this.onTranslationChange = undefined;
     }
-    if (typeof this.onLangChange !== 'undefined') {
+    if (typeof this.onLangChange !== "undefined") {
       this.onLangChange.unsubscribe();
       this.onLangChange = undefined;
     }
-    if (typeof this.onDefaultLangChange !== 'undefined') {
+    if (typeof this.onDefaultLangChange !== "undefined") {
       this.onDefaultLangChange.unsubscribe();
       this.onDefaultLangChange = undefined;
     }

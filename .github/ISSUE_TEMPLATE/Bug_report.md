@@ -2,7 +2,6 @@
 name: "⚠️ Bug report"
 about: Report a bug for this library. Please check the FAQ and search github/stackoverflow
   for a similar issue before submitting
-
 ---
 
 <!--
@@ -12,23 +11,23 @@ ISSUES MISSING IMPORTANT INFORMATION MAY BE CLOSED WITHOUT INVESTIGATION.
 -->
 
 ## Current behavior
+
 <!-- Describe how the issue manifests. -->
 
-
 ## Expected behavior
+
 <!-- Describe what the desired behavior would be. -->
 
-
 ## How do you think that we should fix this?
+
 <!-- If you can, describe how you would fix this. -->
 
-
 ## Minimal reproduction of the problem with instructions
+
 <!--
 For bug reports please provide the *STEPS TO REPRODUCE* and if possible a *MINIMAL DEMO* of the problem via
 https://stackblitz.com or similar. You can use this template as a starting point: https://stackblitz.com/github/ngx-translate/example
 -->
-
 
 ## Environment
 

@@ -1,6 +1,6 @@
-import {Injectable} from "@angular/core";
-import {Observable} from "rxjs";
-import {TranslateService, Translation} from "./translate.service";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { TranslateService, Translation } from "./translate.service";
 
 export interface MissingTranslationHandlerParams {
   /**
@@ -30,14 +30,18 @@ export abstract class MissingTranslationHandler {
    * If it returns an observable, the value returned by this observable will be used (except if the method was "instant").
    * If it returns undefined, the key will be used as a value
    */
-  abstract handle(params: MissingTranslationHandlerParams): Translation|Observable<Translation>;
+  abstract handle(
+    params: MissingTranslationHandlerParams,
+  ): Translation | Observable<Translation>;
 }
 
 /**
  * This handler is just a placeholder that does nothing, in case you don't need a missing translation handler at all
  */
 @Injectable()
-export class FakeMissingTranslationHandler implements MissingTranslationHandler {
+export class FakeMissingTranslationHandler
+  implements MissingTranslationHandler
+{
   handle(params: MissingTranslationHandlerParams): string {
     return params.key;
   }

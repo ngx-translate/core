@@ -1,4 +1,4 @@
-# @ngx-translate/http-loader 
+# @ngx-translate/http-loader
 
 ## Overview
 
@@ -10,4 +10,3 @@ applications with JSON translation files.
 
 - [Official Documentation](https://ngx-translate.org/)
 - [Getting Started Tutorial: How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
-
