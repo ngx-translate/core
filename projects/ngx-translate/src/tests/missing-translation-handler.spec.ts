@@ -47,7 +47,6 @@ describe("MissingTranslationHandler", () => {
     let translate: TranslateService;
     let missingTranslationHandler: MissingTranslationHandler;
 
-
     const prepare = (handlerClass: Type<MissingTranslationHandler>) => {
         TestBed.configureTestingModule({
             providers: [

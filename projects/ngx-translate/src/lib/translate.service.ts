@@ -16,7 +16,7 @@ import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./u
  */
 export interface TranslateServiceConfig {
     lang?: Language;
-    fallbackLang?: Language|null;
+    fallbackLang?: Language | null;
     extend: boolean;
 }
 
@@ -60,8 +60,7 @@ export interface LangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
-export interface FallbackLangChangeEvent
-{
+export interface FallbackLangChangeEvent {
     lang: string;
     translations: InterpolatableTranslationObject;
 }
@@ -92,26 +91,48 @@ export abstract class ITranslateService {
     public abstract use(lang: Language): Observable<InterpolatableTranslationObject>;
 
     public abstract setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject>;
-    public abstract getFallbackLang(): Language|null;
+    public abstract getFallbackLang(): Language | null;
 
     public abstract addLangs(languages: Language[]): void;
     public abstract getLangs(): readonly Language[];
     public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
     public abstract resetLang(lang: Language): void;
 
-    public abstract instant(key: string | string[], interpolateParams?: InterpolationParameters): Translation | TranslationObject;
-    public abstract stream(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
-    public abstract getStreamOnTranslationChange(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
+    public abstract instant(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Translation | TranslationObject;
+    public abstract stream(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation | TranslationObject>;
+    public abstract getStreamOnTranslationChange(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation | TranslationObject>;
 
-    public abstract set(key: string, translation: string | TranslationObject, lang?: Language): void;
-    public abstract get(key: string | string[], interpolateParams?: InterpolationParameters): Observable<Translation | TranslationObject>;
+    public abstract set(
+        key: string,
+        translation: string | TranslationObject,
+        lang?: Language,
+    ): void;
+    public abstract get(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation | TranslationObject>;
 
-    public abstract setTranslation(lang: Language, translations: TranslationObject, shouldMerge?: boolean): void;
-    public abstract getParsedResult(key: string | string[], interpolateParams?: InterpolationParameters): StrictTranslation | TranslationObject | Observable<StrictTranslation | TranslationObject>;
+    public abstract setTranslation(
+        lang: Language,
+        translations: TranslationObject,
+        shouldMerge?: boolean,
+    ): void;
+    public abstract getParsedResult(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): StrictTranslation | TranslationObject | Observable<StrictTranslation | TranslationObject>;
 
-    public abstract getBrowserLang(): Language|undefined;
-    public abstract getBrowserCultureLang(): Language|undefined;
-
+    public abstract getBrowserLang(): Language | undefined;
+    public abstract getBrowserCultureLang(): Language | undefined;
 
     /**
      * Returns the current language
@@ -137,20 +158,19 @@ export abstract class ITranslateService {
      * Gets the fallback language
      * @deprecated use `getFallbackLang()`
      */
-    public abstract getDefaultLang(): Language|null;
+    public abstract getDefaultLang(): Language | null;
 
     /**
      * Returns the fallback language
      * @deprectated use `getFallbackLang()`
      */
-    public abstract readonly defaultLang: Language|null;
+    public abstract readonly defaultLang: Language | null;
 
     /**
      * @deprectated use `getFallbackLang()`
      */
     public abstract readonly onDefaultLangChange: Observable<DefaultLangChangeEvent>;
 }
-
 
 @Injectable()
 export class TranslateService implements ITranslateService {
@@ -201,22 +221,17 @@ export class TranslateService implements ITranslateService {
         return this.store.onFallbackLangChange;
     }
 
-
     constructor() {
+        const config: TranslateServiceConfig = {
+            extend: false,
+            fallbackLang: null,
 
-        const config:TranslateServiceConfig =
-            {
-                extend:false,
-                fallbackLang:null,
+            ...inject<TranslateServiceConfig>(TRANSLATE_SERVICE_CONFIG, {
+                optional: true,
+            }),
+        };
 
-                ... inject<TranslateServiceConfig>(
-                    TRANSLATE_SERVICE_CONFIG,
-                    {
-                        optional: true,
-                    })
-            };
-
-        if(config.lang) {
+        if (config.lang) {
             this.use(config.lang);
         }
 
@@ -224,8 +239,7 @@ export class TranslateService implements ITranslateService {
             this.setFallbackLang(config.fallbackLang);
         }
 
-        if(config.extend)
-        {
+        if (config.extend) {
             this.extend = true;
         }
     }
@@ -251,8 +265,6 @@ export class TranslateService implements ITranslateService {
         this.store.setFallbackLang(lang);
         return of(this.store.getTranslations(lang));
     }
-
-
 
     /**
      * Changes the lang currently used
@@ -311,7 +323,9 @@ export class TranslateService implements ITranslateService {
         return this.store.getCurrentLang();
     }
 
-    private loadAndCompileTranslations(lang: Language): Observable<InterpolatableTranslationObject> {
+    private loadAndCompileTranslations(
+        lang: Language,
+    ): Observable<InterpolatableTranslationObject> {
         this.pending = true;
 
         const loadingTranslations = this.currentLoader
@@ -349,11 +363,7 @@ export class TranslateService implements ITranslateService {
     ): void {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
-        this.store.setTranslations(
-            lang,
-            interpolatableTranslations,
-            shouldMerge || this.extend,
-        );
+        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge || this.extend);
     }
 
     public getLangs(): readonly Language[] {
@@ -389,7 +399,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Gets the fallback language. null if none is defined
      */
-    public getFallbackLang(): Language|null {
+    public getFallbackLang(): Language | null {
         return this.store.getFallbackLang();
     }
 
@@ -643,24 +653,22 @@ export class TranslateService implements ITranslateService {
                   window.navigator.userLanguage;
     }
 
-    public getBrowserLang(): Language|undefined {
+    public getBrowserLang(): Language | undefined {
         return TranslateService.getBrowserLang();
     }
 
-    public getBrowserCultureLang(): Language|undefined {
+    public getBrowserCultureLang(): Language | undefined {
         return TranslateService.getBrowserCultureLang();
     }
-
 
     /** Deprecations **/
 
     /**
      * @deprecated use `getFallbackLang()`
      */
-    get defaultLang(): Language|null {
+    get defaultLang(): Language | null {
         return this.getFallbackLang();
     }
-
 
     /**
      * The lang currently used
@@ -681,7 +689,7 @@ export class TranslateService implements ITranslateService {
      * Sets the  language to use as a fallback
      * @deprecated use setFallbackLanguage()
      */
-    public setDefaultLang(lang:Language): Observable<InterpolatableTranslationObject> {
+    public setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject> {
         return this.setFallbackLang(lang);
     }
 
@@ -689,10 +697,7 @@ export class TranslateService implements ITranslateService {
      * Gets the fallback language used
      * @deprecated use getFallbackLang()
      */
-    public getDefaultLang(): Language|null {
+    public getDefaultLang(): Language | null {
         return this.getFallbackLang();
     }
-
-
-
 }

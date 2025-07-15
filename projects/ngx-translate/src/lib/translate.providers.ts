@@ -14,22 +14,18 @@ import {
 } from "./missing-translation-handler";
 import { TranslateStore } from "./translate.store";
 
-
-export interface TranslateProviders
-{
+export interface TranslateProviders {
     loader?: Provider;
     compiler?: Provider;
     parser?: Provider;
     missingTranslationHandler?: Provider;
 }
 
-export interface ChildTranslateServiceConfig extends Partial<TranslateProviders>
-{
+export interface ChildTranslateServiceConfig extends Partial<TranslateProviders> {
     extend?: boolean;
 }
 
-export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig
-{
+export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
     lang?: Language;
 
@@ -38,8 +34,6 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig
     /* @deprecated use `fallbackLang` */
     defaultLanguage?: Language;
 }
-
-
 
 export function provideTranslateLoader(loader: Type<TranslateLoader>): Provider {
     return { provide: TranslateLoader, useClass: loader };
@@ -60,15 +54,17 @@ export function provideMissingTranslationHandler(
 }
 
 export function provideTranslateService(config: RootTranslateServiceConfig = {}): Provider[] {
-
-    return defaultProviders({
-        compiler: provideTranslateCompiler(TranslateFakeCompiler),
-        parser: provideTranslateParser(TranslateDefaultParser),
-        loader: provideTranslateLoader(TranslateFakeLoader),
-        missingTranslationHandler: provideMissingTranslationHandler(FakeMissingTranslationHandler),
-        ...config
-    },
-        true
+    return defaultProviders(
+        {
+            compiler: provideTranslateCompiler(TranslateFakeCompiler),
+            parser: provideTranslateParser(TranslateDefaultParser),
+            loader: provideTranslateLoader(TranslateFakeLoader),
+            missingTranslationHandler: provideMissingTranslationHandler(
+                FakeMissingTranslationHandler,
+            ),
+            ...config,
+        },
+        true,
     );
 }
 
@@ -76,41 +72,35 @@ export function provideChildTranslateService(config: ChildTranslateServiceConfig
     return defaultProviders({ ...config }, false);
 }
 
+export function defaultProviders(
+    config: RootTranslateServiceConfig = {},
+    provideStore: boolean,
+): Provider[] {
+    const providers: Provider[] = [];
 
-export function defaultProviders(config: RootTranslateServiceConfig = {}, provideStore:boolean): Provider[] {
-
-    const providers:Provider[] = [];
-
-    if(config.loader)
-    {
+    if (config.loader) {
         providers.push(config.loader);
     }
-    if(config.compiler)
-    {
+    if (config.compiler) {
         providers.push(config.compiler);
     }
-    if(config.parser)
-    {
+    if (config.parser) {
         providers.push(config.parser);
     }
-    if(config.missingTranslationHandler)
-    {
+    if (config.missingTranslationHandler) {
         providers.push(config.missingTranslationHandler);
     }
 
-    if(provideStore)
-    {
+    if (provideStore) {
         providers.push(TranslateStore);
     }
 
-    if(config.useDefaultLang || config.defaultLanguage)
-    {
+    if (config.useDefaultLang || config.defaultLanguage) {
         console.warn(
             "The `useDefaultLang` and `defaultLanguage` options are deprecated. Please use `fallbackLang` instead.",
         );
 
-        if(config.useDefaultLang === true && config.defaultLanguage)
-        {
+        if (config.useDefaultLang === true && config.defaultLanguage) {
             config.fallbackLang = config.defaultLanguage;
         }
     }
@@ -121,19 +111,23 @@ export function defaultProviders(config: RootTranslateServiceConfig = {}, provid
         extend: config.extend ?? false,
     };
 
-    providers.push(
-        {
-            provide: TRANSLATE_SERVICE_CONFIG,
-            useValue: serviceConfig,
-        }
-    );
+    providers.push({
+        provide: TRANSLATE_SERVICE_CONFIG,
+        useValue: serviceConfig,
+    });
 
     providers.push({
         provide: TranslateService,
         useClass: TranslateService,
-        deps: [TranslateStore, TranslateLoader, TranslateCompiler, TranslateParser, MissingTranslationHandler, TRANSLATE_SERVICE_CONFIG],
+        deps: [
+            TranslateStore,
+            TranslateLoader,
+            TranslateCompiler,
+            TranslateParser,
+            MissingTranslationHandler,
+            TRANSLATE_SERVICE_CONFIG,
+        ],
     });
 
     return providers;
 }
-

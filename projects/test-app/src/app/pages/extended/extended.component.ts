@@ -26,8 +26,7 @@ import { LanguageSwitchComponent } from "../../components/language-switch/langua
         <app-page-content />`,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExtendedComponent
-{
+export class ExtendedComponent {
     public _translate = inject(TranslateService);
 
     constructor() {

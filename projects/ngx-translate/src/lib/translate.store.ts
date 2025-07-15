@@ -22,7 +22,7 @@ export class TranslateStore {
     private _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
         new Subject<FallbackLangChangeEvent>();
 
-    private fallbackLang: Language|null = null;
+    private fallbackLang: Language | null = null;
     private currentLang!: Language;
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
@@ -56,7 +56,7 @@ export class TranslateStore {
         return this.currentLang;
     }
 
-    public getFallbackLang(): Language|null {
+    public getFallbackLang(): Language | null {
         return this.fallbackLang;
     }
 

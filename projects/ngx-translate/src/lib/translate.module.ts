@@ -3,7 +3,9 @@ import { TranslatePipe } from "./translate.pipe";
 import { TranslateDirective } from "./translate.directive";
 import {
     defaultProviders,
-    provideTranslateCompiler, provideTranslateLoader, provideMissingTranslationHandler,
+    provideTranslateCompiler,
+    provideTranslateLoader,
+    provideMissingTranslationHandler,
     provideTranslateParser,
     TranslateProviders,
 } from "./translate.providers";
@@ -12,8 +14,6 @@ import { TranslateDefaultParser } from "./translate.parser";
 import { TranslateFakeLoader } from "./translate.loader";
 import { FakeMissingTranslationHandler } from "./missing-translation-handler";
 import { Language } from "./translate.service";
-
-
 
 export interface TranslateModuleConfig extends TranslateProviders {
     isolate?: boolean;
@@ -38,13 +38,20 @@ export class TranslateModule {
     static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
         return {
             ngModule: TranslateModule,
-            providers: [...defaultProviders({
-                compiler: provideTranslateCompiler(TranslateFakeCompiler),
-                parser: provideTranslateParser(TranslateDefaultParser),
-                loader: provideTranslateLoader(TranslateFakeLoader),
-                missingTranslationHandler: provideMissingTranslationHandler(FakeMissingTranslationHandler),
-                ...config
-            }, true)],
+            providers: [
+                ...defaultProviders(
+                    {
+                        compiler: provideTranslateCompiler(TranslateFakeCompiler),
+                        parser: provideTranslateParser(TranslateDefaultParser),
+                        loader: provideTranslateLoader(TranslateFakeLoader),
+                        missingTranslationHandler: provideMissingTranslationHandler(
+                            FakeMissingTranslationHandler,
+                        ),
+                        ...config,
+                    },
+                    true,
+                ),
+            ],
         };
     }
 
