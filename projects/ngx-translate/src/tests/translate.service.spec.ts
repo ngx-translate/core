@@ -1155,7 +1155,6 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
     });
 
     describe("Error handling & configuration", () => {
-
         class ErrorLoader implements TranslateLoader {
             getTranslation(): Observable<TranslationObject> {
                 return new Observable((observer) => {
@@ -1165,7 +1164,6 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
         }
 
         it("should handle loader error in use", (done) => {
-
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
                 providers: [
@@ -1190,7 +1188,6 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
         });
 
         it("should handle loader error in setFallbackLang", (done) => {
-
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
                 providers: [

@@ -303,7 +303,7 @@ describe("TranslateDirective (standalone)", () => {
 
     it("should handle undefined translation result", () => {
         // Set up a scenario where translation returns undefined
-        translate.setTranslation("en", { TEST: undefined as any });
+        translate.setTranslation("en", { TEST: undefined });
         translate.use("en");
 
         // Should fall back to original content or key
@@ -312,7 +312,7 @@ describe("TranslateDirective (standalone)", () => {
 
     it("should handle non-string translation result", () => {
         // Set up a scenario where translation returns an object
-        translate.setTranslation("en", { TEST: { nested: "value" } as any });
+        translate.setTranslation("en", { TEST: { nested: "value" } });
         translate.use("en");
 
         // Should stringify the result
@@ -320,5 +320,4 @@ describe("TranslateDirective (standalone)", () => {
             '{"nested":"value"}',
         );
     });
-
 });

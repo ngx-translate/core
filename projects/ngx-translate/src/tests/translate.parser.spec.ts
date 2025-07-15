@@ -89,10 +89,19 @@ describe("Parser", () => {
         });
 
         it("should return undefined for non-string and non-function expressions", () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             expect(parser.interpolate(123 as any)).toBeUndefined();
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             expect(parser.interpolate(null as any)).toBeUndefined();
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             expect(parser.interpolate({} as any)).toBeUndefined();
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             expect(parser.interpolate([] as any)).toBeUndefined();
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             expect(parser.interpolate(true as any)).toBeUndefined();
         });
     });
