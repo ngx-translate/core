@@ -38,7 +38,9 @@ export class AppComponent implements OnInit {
             .subscribe((result: string) => {
                 console.info(".get([])", result);
 
-                const instantTranslation = this._translate.instant("demo.simple.text-as-attribute");
+                const instantTranslation = this._translate.instant<string>(
+                    "demo.simple.text-as-attribute",
+                );
                 console.info("instant", instantTranslation);
             });
     }

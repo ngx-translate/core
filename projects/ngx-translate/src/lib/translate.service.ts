@@ -30,7 +30,7 @@ export type InterpolationParameters = Record<string, any>;
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Translation = StrictTranslation | any;
+export type Translation<T = any> = StrictTranslation | T;
 
 export interface TranslationObject {
     [key: string]: StrictTranslation;
@@ -575,10 +575,11 @@ export class TranslateService implements ITranslateService {
      * All rules regarding the current language, the preferred language of even fallback languages
      * will be used except any promise handling.
      */
-    public instant(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public instant<T = any>(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Translation {
+    ): Translation<T> {
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             throw new Error('Parameter "key" is required and cannot be empty');
         }
