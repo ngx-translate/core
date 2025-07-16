@@ -101,15 +101,15 @@ export abstract class ITranslateService {
     public abstract instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Translation | TranslationObject;
+    ): Translation;
     public abstract stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject>;
+    ): Observable<Translation>;
     public abstract getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject>;
+    ): Observable<Translation>;
 
     public abstract set(
         key: string,
@@ -119,7 +119,7 @@ export abstract class ITranslateService {
     public abstract get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject>;
+    ): Observable<Translation>;
 
     public abstract setTranslation(
         lang: Language,
@@ -129,7 +129,7 @@ export abstract class ITranslateService {
     public abstract getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): StrictTranslation | TranslationObject | Observable<StrictTranslation | TranslationObject>;
+    ): StrictTranslation | Observable<StrictTranslation>;
 
     public abstract getBrowserLang(): Language | undefined;
     public abstract getBrowserCultureLang(): Language | undefined;
@@ -465,7 +465,7 @@ export class TranslateService implements ITranslateService {
     public getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): StrictTranslation | TranslationObject | Observable<StrictTranslation | TranslationObject> {
+    ): StrictTranslation | Observable<StrictTranslation> {
         return key instanceof Array
             ? this.getParsedResultForArray(key, interpolateParams)
             : this.getParsedResultForKey(key, interpolateParams);
@@ -506,7 +506,7 @@ export class TranslateService implements ITranslateService {
     public get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" is required and cannot be empty`);
         }
@@ -530,7 +530,7 @@ export class TranslateService implements ITranslateService {
     public getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" is required and cannot be empty`);
         }
@@ -554,7 +554,7 @@ export class TranslateService implements ITranslateService {
     public stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation | TranslationObject> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -578,7 +578,7 @@ export class TranslateService implements ITranslateService {
     public instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Translation | TranslationObject {
+    ): Translation {
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             throw new Error('Parameter "key" is required and cannot be empty');
         }
