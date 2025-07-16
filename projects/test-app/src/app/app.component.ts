@@ -35,6 +35,11 @@ export class AppComponent implements OnInit {
                     return Object.values(arr).join(", ");
                 }),
             )
-            .subscribe(console.info);
+            .subscribe((result: string) => {
+                console.info(".get([])", result);
+
+                const instantTranslation = this._translate.instant("demo.simple.text-as-attribute");
+                console.info("instant", instantTranslation);
+            });
     }
 }
