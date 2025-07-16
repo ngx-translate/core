@@ -69,7 +69,7 @@ export function provideTranslateService(config: RootTranslateServiceConfig = {})
 }
 
 export function provideChildTranslateService(config: ChildTranslateServiceConfig = {}): Provider[] {
-    return defaultProviders({ ...config }, false);
+    return defaultProviders({ extend:true, ...config }, false);
 }
 
 export function defaultProviders(

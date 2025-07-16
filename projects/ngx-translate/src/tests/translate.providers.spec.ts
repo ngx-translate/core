@@ -106,7 +106,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: false,
+                        extend: true,
                     },
                 },
                 {
@@ -126,7 +126,7 @@ describe("Translate Providers", () => {
 
         it("should provide child translate service with custom config", () => {
             const config: ChildTranslateServiceConfig = {
-                extend: true,
+                extend: false,
                 loader: provideTranslateLoader(TestTranslateLoader),
             };
             const providers = provideChildTranslateService(config);
@@ -137,7 +137,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: true,
+                        extend: false,
                     },
                 },
                 {
