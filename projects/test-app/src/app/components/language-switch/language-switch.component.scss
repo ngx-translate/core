@@ -17,6 +17,7 @@
         &.active {
             background-color: var(--mat-sys-primary);
             color: var(--mat-sys-on-primary);
+            box-shadow: unset;
         }
     }
 }
