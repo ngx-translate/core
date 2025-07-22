@@ -29,10 +29,25 @@
     --space-smaller: 8px;
     --space-small: 12px;
     --space: 16px;
+
+    @media (min-width: 576px) and (max-width: 768px) {
+        --container-max-width: 540px;
+    }
+    @media (min-width: 768px) and (max-width: 992px) {
+        --container-max-width: 720px;
+    }
+    @media (min-width: 992px) and (max-width: 1200px) {
+        --container-max-width: 960px;
+    }
+    @media (min-width: 1200px) {
+        --container-max-width: 1140px;
+    }
 }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
+    max-width: var(--container-max-width);
+    margin: 24px auto;
 }
 
 header {
