@@ -1,7 +1,7 @@
-@for (lang of translateService.getLangs(); track lang) {
+@for (lang of translate.getLangs(); track lang) {
     <button
-        (click)="translateService.use(lang)"
-        [class.active]="translateService.currentLang === lang"
+        (click)="translate.use(lang)"
+        [class.active]="translate.getCurrentLang() === lang"
     >
         {{ lang }}
     </button>

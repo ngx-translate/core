@@ -18,5 +18,5 @@ import { LanguageSwitchComponent } from "../../components/language-switch/langua
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GlobalComponent {
-    public _translate = inject(TranslateService);
+    public translate = inject(TranslateService);
 }

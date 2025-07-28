@@ -27,10 +27,10 @@ import { PageContentComponent } from "../../components/page-content/page-content
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExtendedComponent {
-    public _translate = inject(TranslateService);
+    public translate = inject(TranslateService);
 
     constructor() {
-        this._translate.use("de");
-        this._translate.addLangs(["de", "en"]);
+        this.translate.use("de");
+        this.translate.addLangs(["de", "en"]);
     }
 }

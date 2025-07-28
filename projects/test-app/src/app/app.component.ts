@@ -16,19 +16,19 @@ import { LanguageSwitchComponent } from "./components/language-switch/language-s
     templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
-    private _translate = inject(TranslateService);
+    private translate = inject(TranslateService);
 
     title = _("test-app");
 
     constructor() {
-        this._translate.addLangs(["de", "en"]);
-        this._translate.setFallbackLang("en");
-        this._translate.use("en");
+        this.translate.addLangs(["de", "en"]);
+        this.translate.setFallbackLang("en");
+        this.translate.use("en");
     }
 
     ngOnInit() {
         // Service Get method with a set of string[]
-        this._translate
+        this.translate
             .get(["demo.simple.text-as-attribute", "demo.simple.text-as-content"])
             .pipe(
                 map((arr: TranslationObject) => {
