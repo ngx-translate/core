@@ -183,9 +183,9 @@ export class TranslateService implements ITranslateService {
     public compiler = inject(TranslateCompiler);
     private parser = inject(TranslateParser);
     private missingTranslationHandler = inject(MissingTranslationHandler);
-    public store: TranslateStore = inject(TranslateStore); // TODO: make private
+    private store: TranslateStore = inject(TranslateStore);
 
-    private extend = false;
+    private readonly extend:boolean = false;
 
     /**
      * An Observable to listen to translation change events
@@ -217,6 +217,9 @@ export class TranslateService implements ITranslateService {
         return this.store.onFallbackLangChange;
     }
 
+    /**
+     * @deprecated Use onFallbackLangChange() instead
+     */
     get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
         return this.store.onFallbackLangChange;
     }
@@ -605,7 +608,7 @@ export class TranslateService implements ITranslateService {
     public set(
         key: string,
         translation: string | TranslationObject,
-        lang: Language = this.currentLang,
+        lang: Language = this.getCurrentLang(),
     ): void {
         this.store.setTranslations(
             lang,
