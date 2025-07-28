@@ -30,8 +30,7 @@ export type InterpolationParameters = Record<string, any>;
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyTranslation = any;
-export type Translation<T = AnyTranslation> = StrictTranslation | T;
+export type Translation<T = any> = StrictTranslation | T;
 
 export interface TranslationObject {
     [key: string]: StrictTranslation;
@@ -99,28 +98,28 @@ export abstract class ITranslateService {
     public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
     public abstract resetLang(lang: Language): void;
 
-    public abstract instant<T = AnyTranslation>(
+    public abstract instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Translation<T>;
-    public abstract stream<T = AnyTranslation>(
+    ): Translation;
+    public abstract stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>>;
-    public abstract getStreamOnTranslationChange<T = AnyTranslation>(
+    ): Observable<Translation>;
+    public abstract getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>>;
+    ): Observable<Translation>;
 
     public abstract set(
         key: string,
         translation: string | TranslationObject,
         lang?: Language,
     ): void;
-    public abstract get<T = AnyTranslation>(
+    public abstract get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>>;
+    ): Observable<Translation>;
 
     public abstract setTranslation(
         lang: Language,
@@ -186,7 +185,7 @@ export class TranslateService implements ITranslateService {
     private missingTranslationHandler = inject(MissingTranslationHandler);
     private store: TranslateStore = inject(TranslateStore);
 
-    private readonly extend: boolean = false;
+    private readonly extend:boolean = false;
 
     /**
      * An Observable to listen to translation change events
@@ -507,10 +506,10 @@ export class TranslateService implements ITranslateService {
      * Gets the translated value of a key (or an array of keys)
      * @returns the translated key, or an object of translated keys
      */
-    public get<T = AnyTranslation>(
+    public get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" is required and cannot be empty`);
         }
@@ -531,10 +530,10 @@ export class TranslateService implements ITranslateService {
      * whenever the translation changes.
      * @returns A stream of the translated key, or an object of translated keys
      */
-    public getStreamOnTranslationChange<T = AnyTranslation>(
+    public getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" is required and cannot be empty`);
         }
@@ -555,10 +554,10 @@ export class TranslateService implements ITranslateService {
      * whenever the language changes.
      * @returns A stream of the translated key, or an object of translated keys
      */
-    public stream<T = AnyTranslation>(
+    public stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-    ): Observable<Translation<T>> {
+    ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
@@ -579,7 +578,8 @@ export class TranslateService implements ITranslateService {
      * All rules regarding the current language, the preferred language of even fallback languages
      * will be used except any promise handling.
      */
-    public instant<T = AnyTranslation>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public instant<T = any>(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Translation<T> {
