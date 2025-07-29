@@ -20,12 +20,6 @@ export class AppComponent implements OnInit {
 
     title = _("test-app");
 
-    constructor() {
-        this.translate.addLangs(["de", "en"]);
-        this.translate.setFallbackLang("en");
-        this.translate.use("en");
-    }
-
     ngOnInit() {
         // Service Get method with a set of string[]
         this.translate
