@@ -1,11 +1,17 @@
 import { HttpBackend, HttpClient } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
-import { TranslateLoader, TranslationObject } from "@ngx-translate/core";
-import { Observable } from "rxjs";
+import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
+import { forkJoin, map, Observable } from "rxjs";
+
+export interface TranslateHttpLoaderResource {
+    prefix: string;
+    suffix?: string;
+}
 
 export interface TranslateHttpLoaderConfig {
     prefix: string;
     suffix: string;
+    ressources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
 }
@@ -23,6 +29,7 @@ export class TranslateHttpLoader implements TranslateLoader {
         this.config = {
             prefix: "/assets/i18n/",
             suffix: ".json",
+            ressources: [],
             enforceLoading: false,
             useHttpBackend: false,
             ...inject(TRANSLATE_HTTP_LOADER_CONFIG),
@@ -39,9 +46,24 @@ export class TranslateHttpLoader implements TranslateLoader {
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
-        return this.http.get(
+        if (this.config.ressources.length > 0) {
+            const requests = this.config.ressources.map((resource) => {
+                let path: string;
+
+                if (typeof resource === "string") path = `${resource}${lang}.json`;
+                else path = `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
+
+                return this.http.get(`${path}${cacheBuster}`);
+            }) as Observable<TranslationObject>[];
+
+            return forkJoin(requests).pipe(
+                map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
+            ) as Observable<TranslationObject>;
+        }
+
+        return this.http.get<TranslationObject>(
             `${this.config.prefix}${lang}${this.config.suffix}${cacheBuster}`,
-        ) as Observable<TranslationObject>;
+        );
     }
 }
 
