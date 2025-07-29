@@ -282,6 +282,7 @@ export class TranslateService implements ITranslateService {
         // we need this with multiple fast calls to use()
         // where translation loads might complete in random order
         this.lastUseLanguage = lang;
+        document?.documentElement?.setAttribute("lang", lang); // Set the <html> lang attribute
 
         if (!this.getCurrentLang()) {
             // on init set the currentLang immediately, but do not emit a change yet
