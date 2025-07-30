@@ -12,10 +12,8 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(),
         provideTranslateService({
             loader: provideTranslateHttpLoader({
-                prefix: "./i18n/",
-                suffix: ".json",
                 enforceLoading: true,
-                ressources: [{ prefix: "./i18n/another/", suffix: ".json" }, { prefix: "./i18n/" }],
+                resources: [{ prefix: "./i18n/another/", suffix: ".json" }, { prefix: "./i18n/" }],
             }),
         }),
     ],
