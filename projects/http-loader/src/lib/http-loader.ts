@@ -1,16 +1,18 @@
 import { HttpBackend, HttpClient } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
-import { forkJoin, map, Observable } from "rxjs";
+import { catchError, forkJoin, map, Observable, of } from "rxjs";
 
 export interface TranslateHttpLoaderResource {
     prefix: string;
     suffix?: string;
+    showLog?: boolean;
 }
 
 export interface TranslateHttpLoaderConfig {
     prefix: string;
     suffix: string;
+    showLog?: boolean;
     ressources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
@@ -53,17 +55,36 @@ export class TranslateHttpLoader implements TranslateLoader {
                 if (typeof resource === "string") path = `${resource}${lang}.json`;
                 else path = `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
 
-                return this.http.get(`${path}${cacheBuster}`);
-            }) as Observable<TranslationObject>[];
+                return this.http.get<TranslationObject>(`${path}${cacheBuster}`).pipe(
+                    catchError((err) => {
+                        if (
+                            this.config.showLog ||
+                            (resource as TranslateHttpLoaderResource).showLog
+                        ) {
+                            console.error(`Error loading translation for ${lang}:`, err);
+                        }
+                        return of({});
+                    }),
+                );
+            });
 
             return forkJoin(requests).pipe(
                 map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
             ) as Observable<TranslationObject>;
         }
 
-        return this.http.get<TranslationObject>(
-            `${this.config.prefix}${lang}${this.config.suffix}${cacheBuster}`,
-        );
+        return this.http
+            .get<TranslationObject>(
+                `${this.config.prefix}${lang}${this.config.suffix}${cacheBuster}`,
+            )
+            .pipe(
+                catchError((err) => {
+                    if (this.config.showLog) {
+                        console.error(`Error loading translation for ${lang}:`, err);
+                    }
+                    return of({});
+                }),
+            );
     }
 }
 

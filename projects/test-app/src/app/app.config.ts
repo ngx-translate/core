@@ -15,7 +15,10 @@ export const appConfig: ApplicationConfig = {
                 prefix: "./i18n/",
                 suffix: ".json",
                 enforceLoading: true,
-                ressources: [{ prefix: "./i18n/another/", suffix: ".json" }, { prefix: "./i18n/" }],
+                ressources: [
+                    { prefix: "./i18n/another/", suffix: ".json" },
+                    { prefix: "./i18n/awld" },
+                ],
             }),
         }),
     ],
