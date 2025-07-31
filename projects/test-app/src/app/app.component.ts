@@ -35,5 +35,15 @@ export class AppComponent implements OnInit {
                 const instantTranslation = this.translate.instant("demo.simple.text-as-attribute");
                 console.info("instant", instantTranslation);
             });
+
+        this.translate.onTranslationChange.subscribe((event) => {
+            console.info("onTranslationChange", event);
+        });
+    }
+
+    reloadLang() {
+        this.translate.reloadLang(this.translate.getCurrentLang()).subscribe((translations) => {
+            console.info("reloadLang", translations);
+        });
     }
 }
