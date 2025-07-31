@@ -108,7 +108,10 @@ export function provideTranslateMultiHttpLoader(
     return [
         {
             provide: TRANSLATE_HTTP_LOADER_CONFIG,
-            useValue: config,
+            useValue: {
+                resources: ["/assets/i18n/"],
+                ...config,
+            },
         },
         {
             provide: TranslateLoader,
