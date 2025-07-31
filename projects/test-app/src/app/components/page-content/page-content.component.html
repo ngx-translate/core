@@ -7,6 +7,8 @@
     <p [translate]="'demo.simple.text-as-attribute'"></p>
 
     <p translate>demo.simple.text-as-content</p>
+
+    <p>{{ "demo.simple.text-as-pipe-with-params" | translate: { value: "params" } }}</p>
 </div>
 
 <app-standalone-component />

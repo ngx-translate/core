@@ -1,12 +1,13 @@
 {
-    "demo": {
-        "simple": {
-            "text-as-attribute": "Isolated: Text as attribute",
-            "text-as-content": "Isolated: Text as content"
-        },
-        "title": "Isolated: Test Application"
+  "demo": {
+    "simple": {
+      "text-as-attribute": "Isolated: Text as attribute",
+      "text-as-content": "Isolated: Text as content",
+      "text-as-pipe-with-params": "Isolated: Text as pipe with {{value}}"
     },
-    "standalone-component": {
-        "title": "Isolated: Standalone Component"
-    }
+    "title": "Isolated: Test Application"
+  },
+  "standalone-component": {
+    "title": "Isolated: Standalone Component"
+  }
 }
