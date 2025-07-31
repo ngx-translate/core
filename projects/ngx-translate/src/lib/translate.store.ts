@@ -1,14 +1,14 @@
-import {
-    InterpolatableTranslationObject,
-    FallbackLangChangeEvent,
-    LangChangeEvent,
-    TranslationChangeEvent,
-    Language,
-    InterpolatableTranslation,
-} from "./translate.service";
-import { Observable, Subject } from "rxjs";
-import { getValue, mergeDeep } from "./util";
 import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
+import {
+    FallbackLangChangeEvent,
+    InterpolatableTranslation,
+    InterpolatableTranslationObject,
+    LangChangeEvent,
+    Language,
+    TranslationChangeEvent,
+} from "./translate.service";
+import { getValue, mergeDeep } from "./util";
 
 export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
@@ -28,6 +28,8 @@ export class TranslateStore {
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
 
+    initialized$ = new BehaviorSubject(false);
+
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];
     }
@@ -46,6 +48,10 @@ export class TranslateStore {
             lang: language,
             translations: this.getTranslations(language),
         });
+
+        if (!this.initialized$.getValue()) {
+            this.initialized$.next(true);
+        }
     }
 
     public getLanguages(): readonly Language[] {

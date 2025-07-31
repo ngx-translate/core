@@ -612,17 +612,17 @@ describe("TranslateService", () => {
     });
 
     describe("set()", () => {
-        it("should set translations with nested key (string)", () => {
+        it("should set translations with nested key (string)", async () => {
             translate.setTranslation("en", { profile: "test" });
             translate.use("en");
-            translate.set("profile.name", "Profile Name", "en");
+            await translate.set("profile.name", "Profile Name", "en");
             expect(translate.instant("profile.name")).toEqual("Profile Name");
         });
 
-        it("should set translations with nested key (object)", () => {
+        it("should set translations with nested key (object)", async () => {
             translate.setTranslation("en", { profile: "test" });
             translate.use("en");
-            translate.set("a.b", { c: { d: "setting nested object" } }, "en");
+            await translate.set("a.b", { c: { d: "setting nested object" } }, "en");
             expect(translate.instant("a.b.c.d")).toEqual("setting nested object");
         });
 
