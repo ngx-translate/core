@@ -1,5 +1,5 @@
 {
-  "multi": {
-    "loader": "Dieser Text wurde aus /i18n/another/de.json geladen"
-  }
+    "multi": {
+        "loader": "Dieser Text wurde aus /i18n/another/de.json geladen"
+    }
 }

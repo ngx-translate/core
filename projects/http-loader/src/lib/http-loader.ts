@@ -1,7 +1,15 @@
-import { HttpBackend, HttpClient } from "@angular/common/http";
+import { HttpBackend, HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
 import { catchError, forkJoin, map, Observable, of } from "rxjs";
+
+export interface TranslateHttpLoaderConfig {
+    prefix?: string;
+    suffix?: string;
+    showLog?: boolean;
+    enforceLoading: boolean;
+    useHttpBackend: boolean;
+}
 
 export interface TranslateHttpLoaderResource {
     prefix: string;
@@ -9,37 +17,28 @@ export interface TranslateHttpLoaderResource {
     showLog?: boolean;
 }
 
-export interface TranslateHttpLoaderConfig {
-    /**
-     * @deprecated Use `resources` instead. `prefix` and `suffix` will be removed in a future version.
-     */
-    prefix?: string;
-    /**
-     * @deprecated Use `resources` instead. `prefix` and `suffix` will be removed in a future version.
-     */
-    suffix?: string;
+export interface TranslateMultiHttpLoaderConfig {
     showLog?: boolean;
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
 }
 
-export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<Partial<TranslateHttpLoaderConfig>>(
-    "TRANSLATE_HTTP_LOADER_CONFIG",
-);
+export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<
+    Partial<TranslateMultiHttpLoaderConfig>
+>("TRANSLATE_HTTP_LOADER_CONFIG");
 
 @Injectable()
 export class TranslateHttpLoader implements TranslateLoader {
     private http: HttpClient;
-    private config: TranslateHttpLoaderConfig;
+    private config: TranslateMultiHttpLoaderConfig;
 
     constructor() {
         this.config = {
-            prefix: "/assets/i18n/",
-            suffix: ".json",
             resources: [],
             enforceLoading: false,
             useHttpBackend: false,
+            showLog: false,
             ...inject(TRANSLATE_HTTP_LOADER_CONFIG),
         };
 
@@ -54,9 +53,6 @@ export class TranslateHttpLoader implements TranslateLoader {
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
-        if ((!this.config.resources || this.config.resources.length <= 0) && this.config.prefix)
-            this.config.resources = [{ prefix: this.config.prefix, suffix: this.config.suffix }];
-
         const requests = this.config.resources.map((resource) => {
             let path: string;
 
@@ -64,8 +60,8 @@ export class TranslateHttpLoader implements TranslateLoader {
             else path = `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
 
             return this.http.get<TranslationObject>(`${path}${cacheBuster}`).pipe(
-                catchError((err) => {
-                    if (this.config.showLog || (resource as TranslateHttpLoaderResource).showLog) {
+                catchError((err: HttpErrorResponse) => {
+                    if (this.config.showLog) {
                         console.error(`Error loading translation for ${lang}:`, err);
                     }
                     return of({});
@@ -80,7 +76,32 @@ export class TranslateHttpLoader implements TranslateLoader {
 }
 
 export function provideTranslateHttpLoader(
-    config: Partial<TranslateHttpLoaderConfig> = {},
+    config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
+): Provider[] {
+    // If config already has resources, it's a multi-config, pass it through
+    if ("resources" in config && config.resources) {
+        return provideTranslateMultiHttpLoader(config as Partial<TranslateMultiHttpLoaderConfig>);
+    }
+
+    // Otherwise, convert single config to multi-config
+    const singleConfig = config as Partial<TranslateHttpLoaderConfig>;
+    const multiConfig: Partial<TranslateMultiHttpLoaderConfig> = {
+        showLog: singleConfig.showLog ?? false,
+        enforceLoading: singleConfig.enforceLoading ?? false,
+        useHttpBackend: singleConfig.useHttpBackend ?? false,
+        resources: [
+            {
+                prefix: singleConfig.prefix ?? "/assets/i18n/",
+                suffix: singleConfig.suffix ?? ".json",
+            },
+        ],
+    };
+
+    return provideTranslateMultiHttpLoader(multiConfig);
+}
+
+export function provideTranslateMultiHttpLoader(
+    config: Partial<TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
     const useBackend = config.useHttpBackend ?? false;
 

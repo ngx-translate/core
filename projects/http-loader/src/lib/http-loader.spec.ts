@@ -4,8 +4,10 @@ import { TestBed } from "@angular/core/testing";
 import { provideTranslateService, TranslateService, Translation } from "@ngx-translate/core";
 import {
     provideTranslateHttpLoader,
+    provideTranslateMultiHttpLoader,
     TranslateHttpLoader,
     TranslateHttpLoaderConfig,
+    TranslateMultiHttpLoaderConfig,
 } from "../public-api";
 import { MarkerInterceptor } from "../test-helper/marker-interceptor";
 
@@ -13,7 +15,27 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     let translate: TranslateService;
     let http: HttpTestingController;
 
-    const prepare = (config: Partial<TranslateHttpLoaderConfig> = {}) => {
+    const prepareMulti = (config: Partial<TranslateMultiHttpLoaderConfig> = {}) => {
+        TestBed.configureTestingModule({
+            providers: [
+                MarkerInterceptor,
+                {
+                    provide: HTTP_INTERCEPTORS,
+                    useExisting: MarkerInterceptor,
+                    multi: true,
+                },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+                provideTranslateService(),
+                provideTranslateMultiHttpLoader(config),
+            ],
+        });
+
+        translate = TestBed.inject(TranslateService);
+        http = TestBed.inject(HttpTestingController);
+    };
+
+    const prepareSingle = (config: Partial<TranslateHttpLoaderConfig> = {}) => {
         TestBed.configureTestingModule({
             providers: [
                 MarkerInterceptor,
@@ -38,7 +60,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should be able to provide TranslateHttpLoader", () => {
-        prepare();
+        prepareSingle();
         expect(TranslateHttpLoader).toBeDefined();
         expect(translate.currentLoader).toBeDefined();
         expect(translate.currentLoader instanceof TranslateHttpLoader).toBeTruthy();
@@ -46,21 +68,21 @@ describe("TranslateHttpLoader (HttpClient)", () => {
 
     describe("Config", () => {
         it("uses prefix", () => {
-            prepare({ prefix: "XXXX/" });
+            prepareSingle({ prefix: "XXXX/" });
             translate.use("en");
             http.expectOne("XXXX/en.json").flush({});
             expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses suffix", () => {
-            prepare({ suffix: ".XXXX" });
+            prepareSingle({ suffix: ".XXXX" });
             translate.use("en");
             http.expectOne("/assets/i18n/en.XXXX").flush({});
             expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses cache buster", () => {
-            prepare({ enforceLoading: true });
+            prepareSingle({ enforceLoading: true });
             translate.use("en");
             http.expectOne((req) =>
                 req.url.startsWith("/assets/i18n/en.json?enforceLoading="),
@@ -70,7 +92,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should be able to get translations", () => {
-        prepare();
+        prepareSingle();
 
         translate.use("en");
 
@@ -92,7 +114,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should trigger MarkerInterceptor when loading translations", () => {
-        prepare();
+        prepareSingle();
 
         translate.use("en").subscribe();
 
@@ -103,7 +125,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should be able to reload a lang", () => {
-        prepare();
+        prepareSingle();
 
         translate.use("en");
 
@@ -124,7 +146,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should be able to reset a lang", (done: DoneFn) => {
-        prepare();
+        prepareSingle();
 
         translate.use("en");
         spyOn(http, "expectOne").and.callThrough();
