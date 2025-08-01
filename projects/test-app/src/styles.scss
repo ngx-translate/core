@@ -66,6 +66,10 @@ p,
         background-color: var(--mat-sys-surface-dim);
         border-radius: var(--mat-sys-corner-small);
         padding: var(--space) var(--space-small);
+
+        em {
+            font-size: small;
+        }
     }
 }
 
