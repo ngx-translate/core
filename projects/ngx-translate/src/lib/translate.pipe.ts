@@ -9,11 +9,11 @@ import {
 import { isObservable, Subscription } from "rxjs";
 import {
     InterpolatableTranslationObject,
+    InterpolationParameters,
     LangChangeEvent,
+    StrictTranslation,
     TranslateService,
     TranslationChangeEvent,
-    StrictTranslation,
-    InterpolationParameters,
 } from "./translate.service";
 import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
 

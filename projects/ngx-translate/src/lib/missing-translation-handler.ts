@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { TranslateService, StrictTranslation } from "./translate.service";
+import { StrictTranslation, TranslateService } from "./translate.service";
 
 export interface MissingTranslationHandlerParams {
     /**

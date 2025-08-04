@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { InterpolationParameters } from "./translate.service";
-import { getValue, isString, isFunction, isArray, isObject } from "./util";
+import { getValue, isArray, isFunction, isObject, isString } from "./util";
 
 export type InterpolateFunction = (params?: InterpolationParameters) => string;
 

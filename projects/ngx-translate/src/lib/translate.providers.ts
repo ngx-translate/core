@@ -1,17 +1,17 @@
+import { ClassProvider, Provider, Type } from "@angular/core";
+import {
+    DefaultMissingTranslationHandler,
+    MissingTranslationHandler,
+} from "./missing-translation-handler";
+import { TranslateCompiler, TranslateNoOpCompiler } from "./translate.compiler";
+import { TranslateLoader, TranslateNoOpLoader } from "./translate.loader";
+import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
 import {
     Language,
     TRANSLATE_SERVICE_CONFIG,
     TranslateService,
     TranslateServiceConfig,
 } from "./translate.service";
-import { ClassProvider, Provider, Type } from "@angular/core";
-import { TranslateNoOpLoader, TranslateLoader } from "./translate.loader";
-import { TranslateCompiler, TranslateNoOpCompiler } from "./translate.compiler";
-import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
-import {
-    DefaultMissingTranslationHandler,
-    MissingTranslationHandler,
-} from "./missing-translation-handler";
 import { TranslateStore } from "./translate.store";
 
 export interface TranslateProviders {

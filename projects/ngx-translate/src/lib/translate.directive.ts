@@ -7,15 +7,15 @@ import {
     Input,
     OnDestroy,
 } from "@angular/core";
-import { Subscription, isObservable } from "rxjs";
+import { isObservable, Subscription } from "rxjs";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
+    InterpolationParameters,
     LangChangeEvent,
+    StrictTranslation,
     TranslateService,
     TranslationChangeEvent,
-    StrictTranslation,
-    InterpolationParameters,
 } from "./translate.service";
 import { equals, isDefinedAndNotNull, isString } from "./util";
 
