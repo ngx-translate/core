@@ -227,22 +227,17 @@ describe("TranslateService", () => {
         });
     });
 
-    it("should throw if you forget the key", () => {
+    it("Should ignore if you forget the key", () => {
         translate.use("en");
 
-        expect(() => {
-            const key: Record<string, string> = {};
-            translate.get(key["x"]);
-        }).toThrowError('Parameter "key" is required and cannot be empty');
+        const key: Record<string, string> = {};
+        translate.get(key["x"]).subscribe((res: Translation) => {
+            expect(res).toEqual("");
+        });
 
-        expect(() => {
-            translate.get("");
-        }).toThrowError('Parameter "key" is required and cannot be empty');
-
-        expect(() => {
-            const key: Record<string, string> = {};
-            translate.instant(key["x"]);
-        }).toThrowError('Parameter "key" is required and cannot be empty');
+        translate.get("").subscribe((res: Translation) => {
+            expect(res).toEqual("");
+        });
     });
 
     it("should be able to get translations with nested keys", () => {
@@ -1066,24 +1061,20 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
 
     describe("Invalid Parameter Handling", () => {
         it("should handle null parameters gracefully", () => {
-            expect(() => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                translate.get(null as any);
-            }).toThrowError('Parameter "key" is required and cannot be empty');
-        });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            translate.get(null as any).subscribe((res: Translation) => {
+                expect(res).toEqual("");
+            });
 
-        it("should handle undefined parameters gracefully", () => {
-            expect(() => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                translate.get(undefined as any);
-            }).toThrowError('Parameter "key" is required and cannot be empty');
-        });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            translate.get(undefined as any).subscribe((res: Translation) => {
+                expect(res).toEqual("");
+            });
 
-        it("should handle non-string parameters gracefully", () => {
-            expect(() => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                translate.get(123 as any);
-            }).toThrowError('Parameter "key" is required and cannot be empty');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            translate.get(123 as any).subscribe((res: Translation) => {
+                expect(res).toEqual("");
+            });
         });
 
         it("should handle array with invalid elements", () => {
