@@ -4,14 +4,14 @@ import { Observable, of } from "rxjs";
 import {
     InterpolatableTranslationObject,
     TranslateCompiler,
-    TranslateNoOpCompiler,
     TranslateLoader,
+    TranslateNoOpCompiler,
     TranslateService,
     Translation,
     TranslationObject,
-    provideTranslateService,
-    provideTranslateLoader,
     provideTranslateCompiler,
+    provideTranslateLoader,
+    provideTranslateService,
 } from "../public-api";
 
 const translations: TranslationObject = { LOAD: "This is a test" };
@@ -58,8 +58,8 @@ describe("TranslateCompiler", () => {
             expect(translate.instant("SET-TRANSLATION")).toBe("A manually added translation");
         });
 
-        it("should use the compiler on manually adding a single translation", () => {
-            translate.set("SET", "Another manually added translation", "en");
+        it("should use the compiler on manually adding a single translation", async () => {
+            await translate.set("SET", "Another manually added translation", "en");
             expect(translate.instant("SET")).toBe("Another manually added translation");
         });
     });
@@ -118,8 +118,8 @@ describe("TranslateCompiler", () => {
             );
         });
 
-        it("should use the compiler on manually adding a single translation", () => {
-            translate.set("SET", "Another manually added translation", "en");
+        it("should use the compiler on manually adding a single translation", async () => {
+            await translate.set("SET", "Another manually added translation", "en");
             expect(translate.instant("SET")).toBe("Another manually added translation|compiled");
         });
     });

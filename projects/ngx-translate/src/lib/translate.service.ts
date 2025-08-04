@@ -1,6 +1,6 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
-import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
-import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
+import { concat, defer, firstValueFrom, forkJoin, isObservable, Observable, of } from "rxjs";
+import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
@@ -604,11 +604,18 @@ export class TranslateService implements ITranslateService {
     /**
      * Sets the translated value of a key, after compiling it
      */
-    public set(
+    public async set(
         key: string,
         translation: string | TranslationObject,
         lang: Language = this.getCurrentLang(),
-    ): void {
+    ): Promise<void> {
+        await firstValueFrom(
+            this.store.initialized$.pipe(
+                filter((event) => (event ? true : false)),
+                take(1),
+            ),
+        );
+
         this.store.setTranslations(
             lang,
             insertValue(
