@@ -28,6 +28,7 @@ export interface ChildTranslateServiceConfig extends Partial<TranslateProviders>
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
     lang?: Language;
+    hideBeforeDisplay?: boolean;
 
     /* @deprecated use `fallbackLang` */
     useDefaultLang?: boolean;
@@ -109,6 +110,7 @@ export function defaultProviders(
         fallbackLang: config.fallbackLang ?? null,
         lang: config.lang,
         extend: config.extend ?? false,
+        hideBeforeDisplay: config.hideBeforeDisplay ?? false,
     };
 
     providers.push({

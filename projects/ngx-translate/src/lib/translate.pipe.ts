@@ -134,6 +134,10 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
             });
         }
 
+        if (this.translate.hideBeforeDisplay && this.value === query) {
+            return "";
+        }
+
         return this.value;
     }
 
