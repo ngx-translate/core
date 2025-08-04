@@ -11,7 +11,7 @@ easier to digest than this big README. It also documents the additional
 interfaces and explains how to develop custom plugins.
 
 - [Full documentation](https://ngx-translate.org)
-- [Migration guide v16 -> v17](https://ngx-translate.org/getting-started/migration-guide/)
+- [Migration guide ngx-translate v16 -> v17](https://ngx-translate.org/getting-started/migration-guide/)
 - [Release Notes](https://github.com/ngx-translate/core/releases)
 
 In addition to that, a getting started tutorial is available here: 
