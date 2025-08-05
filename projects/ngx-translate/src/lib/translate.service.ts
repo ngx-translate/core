@@ -120,6 +120,7 @@ export abstract class ITranslateService {
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Observable<Translation>;
+    public abstract getTranslations(language: Language): InterpolatableTranslationObject;
 
     public abstract setTranslation(
         lang: Language,
@@ -523,6 +524,13 @@ export class TranslateService implements ITranslateService {
         }
 
         return makeObservable(this.getParsedResult(key, interpolateParams));
+    }
+
+    /**
+     * @returns The translations for the given language
+     */
+    public getTranslations(language: Language) {
+        return this.store.getTranslations(language);
     }
 
     /**
