@@ -654,6 +654,29 @@ describe("TranslateService", () => {
 
             expect(translate.instant("default")).toEqual("This is the default message");
         });
+
+        it("should overwrite keys - nested with plain", () => {
+            translate.setTranslation("en", { home:  { title: "the title", subtitle: "the subtitle"} });
+            translate.use("en");
+            expect(translate.instant("home.title")).toEqual("the title");
+            expect(translate.instant("home.subtitle")).toEqual("the subtitle");
+
+            translate.setTranslation("en", { "home.title": "new title"});
+            expect(translate.instant("home.title")).toEqual("new title");
+            expect(translate.instant("home.subtitle")).toEqual("the subtitle");
+        });
+
+        it("should overwrite keys - plain with nested", () => {
+            translate.setTranslation("en", { "home.title": "the title", "home.subtitle": "the subtitle"});
+            translate.use("en");
+            expect(translate.instant("home.title")).toEqual("the title");
+            expect(translate.instant("home.subtitle")).toEqual("the subtitle");
+
+            translate.setTranslation("en", { home:  { title: "new title"} });
+            expect(translate.instant("home.title")).toEqual("new title");
+            expect(translate.instant("home.subtitle")).toEqual("the subtitle");
+        });
+
     });
 
     it("should trigger an event when the lang changes", () => {
