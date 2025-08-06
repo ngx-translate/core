@@ -1,36 +1,36 @@
 import { TestBed } from "@angular/core/testing";
-import {
-    provideTranslateService,
-    provideChildTranslateService,
-    provideTranslateLoader,
-    provideTranslateCompiler,
-    provideTranslateParser,
-    provideMissingTranslationHandler,
-    defaultProviders,
-    RootTranslateServiceConfig,
-    ChildTranslateServiceConfig,
-} from "../lib/translate.providers";
 import { Observable, of } from "rxjs";
+import {
+    ChildTranslateServiceConfig,
+    defaultProviders,
+    provideChildTranslateService,
+    provideMissingTranslationHandler,
+    provideTranslateCompiler,
+    provideTranslateLoader,
+    provideTranslateParser,
+    provideTranslateService,
+    RootTranslateServiceConfig,
+} from "../lib/translate.providers";
 
 import {
-    TranslateService,
-    TRANSLATE_SERVICE_CONFIG,
-    TranslationObject,
-    InterpolationParameters,
-    InterpolatableTranslationObject,
-} from "../lib/translate.service";
-import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
-import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
-import {
-    TranslateParser,
-    TranslateDefaultParser,
-    InterpolateFunction,
-} from "../lib/translate.parser";
-import {
-    MissingTranslationHandler,
     DefaultMissingTranslationHandler,
+    MissingTranslationHandler,
     MissingTranslationHandlerParams,
 } from "../lib/missing-translation-handler";
+import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
+import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
+import {
+    InterpolateFunction,
+    TranslateDefaultParser,
+    TranslateParser,
+} from "../lib/translate.parser";
+import {
+    InterpolatableTranslationObject,
+    InterpolationParameters,
+    TRANSLATE_SERVICE_CONFIG,
+    TranslateService,
+    TranslationObject,
+} from "../lib/translate.service";
 import { TranslateStore } from "../lib/translate.store";
 
 class TestTranslateLoader extends TranslateLoader {
@@ -107,6 +107,7 @@ describe("Translate Providers", () => {
                         fallbackLang: null,
                         lang: undefined,
                         extend: true,
+                        hideBeforeDisplay: false,
                     },
                 },
                 {
@@ -138,6 +139,7 @@ describe("Translate Providers", () => {
                         fallbackLang: null,
                         lang: undefined,
                         extend: false,
+                        hideBeforeDisplay: false,
                     },
                 },
                 {
@@ -172,6 +174,7 @@ describe("Translate Providers", () => {
                         fallbackLang: null,
                         lang: undefined,
                         extend: false,
+                        hideBeforeDisplay: false,
                     },
                 },
                 {
@@ -211,6 +214,7 @@ describe("Translate Providers", () => {
                         fallbackLang: null,
                         lang: undefined,
                         extend: true,
+                        hideBeforeDisplay: false,
                     },
                 },
                 {
