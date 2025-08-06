@@ -5,7 +5,7 @@ import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { InterpolateFunction, TranslateParser } from "./translate.parser";
-import { TranslateStore } from "./translate.store";
+import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 /**
@@ -120,6 +120,9 @@ export abstract class ITranslateService {
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Observable<Translation>;
+    public abstract getTranslations(
+        language: Language,
+    ): DeepReadonly<InterpolatableTranslationObject>;
 
     public abstract setTranslation(
         lang: Language,
@@ -523,6 +526,13 @@ export class TranslateService implements ITranslateService {
         }
 
         return makeObservable(this.getParsedResult(key, interpolateParams));
+    }
+
+    /**
+     * @returns The translations for the given language
+     */
+    public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
+        return this.store.getTranslations(language);
     }
 
     /**
