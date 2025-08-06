@@ -21,9 +21,11 @@ import { PageContentComponent } from "../../components/page-content/page-content
             }),
         }),
     ],
-    template: ` <h2>Component uses global TranslateService with extend</h2>
+    template: `
+        <h2>Component uses global TranslateService with extend</h2>
         <app-language-switch />
-        <app-page-content />`,
+        <app-page-content />
+    `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExtendedComponent {

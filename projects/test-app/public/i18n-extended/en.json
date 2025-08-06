@@ -1,8 +1,9 @@
 {
-    "demo": {
-        "title": "Extended: Test Application (overwrites to global)"
-    },
-    "standalone-component": {
-        "title": "Extended: Standalone Component (overwrites to global)"
-    }
+  "demo": {
+    "title": "Extended: Test Application (overwrites to global)"
+  },
+  "standalone-component": {
+    "title": "Extended: Standalone Component (overwrites to global)",
+    "extended": "Extended: Readable only by extended"
+  }
 }
