@@ -140,6 +140,69 @@ describe("TranslateService", () => {
         });
     });
 
+    it("should be able to check if translation keys exist", () => {
+        translations = {
+            user: {
+                profile: {
+                    name: "User Name",
+                    email: "user@example.com",
+                },
+                settings: {
+                    language: "English",
+                },
+            },
+            common: {
+                buttons: {
+                    save: "Save",
+                    cancel: "Cancel",
+                },
+            },
+        };
+        translate.use("en");
+
+        // Check existing nested keys
+        expect(translate.hasTranslation("user.profile.name")).toBe(true);
+        expect(translate.hasTranslation("user.profile.email")).toBe(true);
+        expect(translate.hasTranslation("user.settings.language")).toBe(true);
+        expect(translate.hasTranslation("common.buttons.save")).toBe(true);
+        expect(translate.hasTranslation("common.buttons.cancel")).toBe(true);
+
+        // Check non-existing nested keys
+        expect(translate.hasTranslation("user.profile.age")).toBe(false);
+        expect(translate.hasTranslation("user.non.existent")).toBe(false);
+        expect(translate.hasTranslation("common.buttons.non.existent")).toBe(false);
+
+        // Check with fallback language
+        translate.setDefaultLang("fr");
+        translate.setTranslation("fr", {
+            user: {
+                profile: {
+                    name: "Nom d'utilisateur",
+                },
+            },
+        });
+
+        // Change current language to trigger fallback
+        translate.use("fr");
+
+        expect(translate.hasTranslation("user.profile.name")).toBe(true);
+        expect(translate.hasTranslation("user.profile.email")).toBe(false);
+    });
+
+    it("should check translation existence for a specific language when provided", () => {
+        translate.setTranslation("en", { a: { b: "x" } });
+        translate.setTranslation("de", { a: { c: "y" } });
+        translate.setDefaultLang("de");
+        translate.use("en");
+
+        expect(translate.hasTranslation("a.b", "en")).toBe(true);
+        expect(translate.hasTranslation("a.c", "en")).toBe(false);
+        expect(translate.hasTranslation("a.c", "de")).toBe(true);
+
+        expect(translate.hasTranslation("a.b")).toBe(true);
+        expect(translate.hasTranslation("a.c")).toBe(false);
+    });
+
     it("translates text using 'default' translation Id", () => {
         translations = { default: "Default text" };
         translate.use("en");

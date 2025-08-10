@@ -6,7 +6,7 @@ import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString, getValue } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -98,6 +98,7 @@ export abstract class ITranslateService {
     public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
     public abstract resetLang(lang: Language): void;
 
+    public abstract hasTranslation(translationKey: string, language?: string): boolean;
     public abstract instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
@@ -571,6 +572,35 @@ export class TranslateService implements ITranslateService {
                 }),
             ),
         );
+    }
+
+    /**
+     * Checks if a translation key exists in the specified language, or in the current/fallback languages when not specified.
+     * @param key The translation key to check
+     * @param language Optional language to check instead of the current language
+     * @returns true if the key exists, false otherwise
+     */
+    public hasTranslation(key: string, language?: string): boolean {
+        if (!isDefinedAndNotNull(key) || key.length === 0) {
+            return false;
+        }
+
+        if (isDefinedAndNotNull(language)) {
+            const translationsForLanguage = this.store.getTranslations(language);
+            if (!isDefinedAndNotNull(translationsForLanguage)) {
+                return false;
+            }
+            const value = getValue(translationsForLanguage, key);
+            return value !== undefined;
+        }
+
+        const currentLang = this.getCurrentLang();
+        const translationsForCurrentLang = this.store.getTranslations(currentLang);
+        if (!isDefinedAndNotNull(translationsForCurrentLang)) {
+            return false;
+        }
+        const value = getValue(translationsForCurrentLang, key);
+        return value !== undefined;
     }
 
     /**
