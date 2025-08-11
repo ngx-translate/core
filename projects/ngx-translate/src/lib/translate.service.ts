@@ -65,6 +65,10 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
+export interface FallbackLangUseEvent {
+    lang: string;
+    missingTranslationKey: string;
+}
 /** @deprecated use `FallbackLangChangeEvent` */
 export type DefaultLangChangeEvent = FallbackLangChangeEvent;
 
@@ -215,6 +219,16 @@ export class TranslateService implements ITranslateService {
      */
     get onFallbackLangChange(): Observable<FallbackLangChangeEvent> {
         return this.store.onFallbackLangChange;
+    }
+
+    /**
+     * An Observable to listen to fallback lang use events
+     * onFallbackLangUse.subscribe((params: FallbackLangUseEvent) => {
+     *     // do something
+     * });
+     */
+    get onFallbackLangUse(): Observable<FallbackLangUseEvent> {
+        return this.store.onFallbackLangUse;
     }
 
     /**

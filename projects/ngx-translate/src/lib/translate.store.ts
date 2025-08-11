@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import {
     FallbackLangChangeEvent,
+    FallbackLangUseEvent,
     InterpolatableTranslation,
     InterpolatableTranslationObject,
     LangChangeEvent,
@@ -21,6 +22,7 @@ export class TranslateStore {
     private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
     private _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
         new Subject<FallbackLangChangeEvent>();
+    private _onFallbackLangUse: Subject<FallbackLangUseEvent> = new Subject<FallbackLangUseEvent>();
 
     private fallbackLang: Language | null = null;
     private currentLang!: Language;
@@ -107,6 +109,16 @@ export class TranslateStore {
         return this._onFallbackLangChange.asObservable();
     }
 
+    /**
+     * An Observable to listen to fallback lang use events
+     * onFallbackLangUse.subscribe((params: FallbackLangUseEvent) => {
+     *     // do something
+     * });
+     */
+    get onFallbackLangUse(): Observable<FallbackLangUseEvent> {
+        return this._onFallbackLangUse.asObservable();
+    }
+
     public addLanguages(languages: Language[]): void {
         this.languages = Array.from(new Set([...this.languages, ...languages]));
     }
@@ -127,6 +139,10 @@ export class TranslateStore {
             this.fallbackLang != null &&
             this.fallbackLang !== this.currentLang
         ) {
+            this._onFallbackLangUse.next({
+                lang: this.currentLang,
+                missingTranslationKey: key,
+            });
             text = this.getValue(this.fallbackLang, key);
         }
         return text;

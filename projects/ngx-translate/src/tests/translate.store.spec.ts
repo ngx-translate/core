@@ -9,6 +9,7 @@ import {
 import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
 import { provideRouter, Router, RouterModule } from "@angular/router";
 import { TranslateModule, TranslateService } from "../public-api";
+import { TranslateStore } from "@ngx-translate/core";
 
 @Component({
     // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -220,4 +221,33 @@ describe("TranslateStore", () => {
             expect(translate.instant("CHILD")).toEqual("Child");
         }),
     ));
+
+    it("should not emit fallback lang use events when no translation is missing", () => {
+        const translate = TestBed.inject(TranslateService);
+
+        const spy = jasmine.createSpy("fallbackLangUseSpy");
+        const sub = translate.onFallbackLangUse.subscribe(spy);
+
+        expect(spy).toHaveBeenCalledTimes(0);
+
+        translate.instant("TEST");
+
+        expect(spy).toHaveBeenCalledTimes(0);
+        sub.unsubscribe();
+    });
+
+    it("should emit fallback lang use events when translation is missing", () => {
+        const translate = TestBed.inject(TranslateService);
+
+        const spy = jasmine.createSpy("fallbackLangUseSpy");
+        const sub = translate.onFallbackLangUse.subscribe(spy);
+        translate.setFallbackLang("en");
+
+        expect(spy).toHaveBeenCalledTimes(0);
+        translate.use("de");
+        translate.instant("TEST");
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        sub.unsubscribe();
+    });
 });
