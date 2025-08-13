@@ -700,7 +700,7 @@ export class TranslateService implements ITranslateService {
 
     /**
      * Sets the  language to use as a fallback
-     * @deprecated use setFallbackLanguage()
+     * @deprecated use setFallbackLang()
      */
     public setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject> {
         return this.setFallbackLang(lang);
