@@ -18,6 +18,7 @@ export interface TranslateServiceConfig {
     lang?: Language;
     fallbackLang?: Language | null;
     extend: boolean;
+    hideBeforeDisplay?: boolean;
 }
 
 export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfig>(
@@ -186,6 +187,7 @@ export class TranslateService implements ITranslateService {
     private store: TranslateStore = inject(TranslateStore);
 
     private readonly extend: boolean = false;
+    public readonly hideBeforeDisplay: boolean = false;
 
     /**
      * An Observable to listen to translation change events
@@ -244,6 +246,10 @@ export class TranslateService implements ITranslateService {
 
         if (config.extend) {
             this.extend = true;
+        }
+
+        if (config.hideBeforeDisplay) {
+            this.hideBeforeDisplay = true;
         }
     }
 
