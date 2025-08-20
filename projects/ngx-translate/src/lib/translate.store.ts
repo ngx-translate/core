@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
+import { TranslateLoader } from "./translate.loader";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -27,6 +28,8 @@ export class TranslateStore {
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
+
+    loaders = new Map<number, TranslateLoader>();
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];
@@ -72,6 +75,7 @@ export class TranslateStore {
 
     public setCurrentLang(lang: string, emitChange = true): void {
         this.currentLang = lang;
+
         if (emitChange) {
             this._onLangChange.next({ lang: lang, translations: this.translations[lang] });
         }
