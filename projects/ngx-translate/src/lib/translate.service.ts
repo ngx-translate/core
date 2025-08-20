@@ -1,4 +1,4 @@
-import { inject, Injectable, InjectionToken } from "@angular/core";
+import { inject, Injectable, InjectionToken, OnDestroy } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
@@ -6,7 +6,7 @@ import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString, mergeDeep } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -173,7 +173,7 @@ export abstract class ITranslateService {
 }
 
 @Injectable()
-export class TranslateService implements ITranslateService {
+export class TranslateService implements ITranslateService, OnDestroy {
     private loadingTranslations!: Observable<InterpolatableTranslationObject>;
     private pending = false;
     private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
@@ -184,6 +184,8 @@ export class TranslateService implements ITranslateService {
     private parser = inject(TranslateParser);
     private missingTranslationHandler = inject(MissingTranslationHandler);
     private store: TranslateStore = inject(TranslateStore);
+
+    private _loaderIndex!: number;
 
     private readonly extend: boolean = false;
 
@@ -225,6 +227,8 @@ export class TranslateService implements ITranslateService {
     }
 
     constructor() {
+        this._addLoader();
+
         const config: TranslateServiceConfig = {
             extend: false,
             fallbackLang: null,
@@ -245,6 +249,17 @@ export class TranslateService implements ITranslateService {
         if (config.extend) {
             this.extend = true;
         }
+    }
+
+    private _addLoader() {
+        while (this.store.loaders.has(this._loaderIndex)) {
+            this._loaderIndex++;
+        }
+        this.store.loaders.set(this._loaderIndex, this.currentLoader);
+    }
+
+    ngOnDestroy() {
+        this.store.loaders.delete(this._loaderIndex);
     }
 
     /**
@@ -341,9 +356,22 @@ export class TranslateService implements ITranslateService {
     ): Observable<InterpolatableTranslationObject> {
         this.pending = true;
 
-        const loadingTranslations = this.currentLoader
-            .getTranslation(lang)
-            .pipe(shareReplay(1), take(1));
+        const loaders = Array.from(this.store.loaders.values());
+        const requests = loaders.map((loader) => loader.getTranslation(lang).pipe(take(1)));
+
+        // Merge all translation objects
+        const loadingTranslations = (
+            requests.length > 1
+                ? forkJoin(requests).pipe(
+                      map((results: TranslationObject[]) =>
+                          results.reduce(
+                              (acc, curr) => mergeDeep(acc, curr),
+                              {} as TranslationObject,
+                          ),
+                      ),
+                  )
+                : requests[0]
+        ).pipe(shareReplay(1), take(1));
 
         this.loadingTranslations = loadingTranslations.pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
