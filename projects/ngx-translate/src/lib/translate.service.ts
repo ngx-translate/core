@@ -227,7 +227,7 @@ export class TranslateService implements ITranslateService, OnDestroy {
     }
 
     constructor() {
-        this._addLoader();
+        this._loaderIndex = this.store.addLoader();
 
         const config: TranslateServiceConfig = {
             extend: false,
@@ -251,15 +251,8 @@ export class TranslateService implements ITranslateService, OnDestroy {
         }
     }
 
-    private _addLoader() {
-        while (this.store.loaders.has(this._loaderIndex)) {
-            this._loaderIndex++;
-        }
-        this.store.loaders.set(this._loaderIndex, this.currentLoader);
-    }
-
     ngOnDestroy() {
-        this.store.loaders.delete(this._loaderIndex);
+        this.store.removeLoader(this._loaderIndex);
     }
 
     /**

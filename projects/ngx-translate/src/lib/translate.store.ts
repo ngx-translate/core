@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { TranslateLoader } from "./translate.loader";
 import {
@@ -30,6 +30,31 @@ export class TranslateStore {
     private languages: Language[] = [];
 
     loaders = new Map<number, TranslateLoader>();
+
+    /**
+     * Adds a new loader to the store
+     * @returns the index of the newly added loader
+     */
+    addLoader() {
+        let loaderIndex = 0;
+        while (this.loaders.has(loaderIndex)) {
+            loaderIndex++;
+        }
+        this.loaders.set(loaderIndex, inject(TranslateLoader));
+        return loaderIndex;
+    }
+
+    removeLoader(loaderIndex: number) {
+        if (this.loaders.has(loaderIndex)) this.loaders.delete(loaderIndex);
+    }
+
+    getLoaders() {
+        return this.loaders;
+    }
+
+    getLoader(loaderIndex: number) {
+        return this.loaders.get(loaderIndex);
+    }
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];
