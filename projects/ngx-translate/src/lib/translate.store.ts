@@ -29,7 +29,7 @@ export class TranslateStore {
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
 
-    loaders = new Map<number, TranslateLoader>();
+    private loaders = new Map<number, TranslateLoader>();
 
     /**
      * Adds a new loader to the store
