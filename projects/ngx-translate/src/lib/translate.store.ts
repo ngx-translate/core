@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { TranslateLoader } from "./translate.loader";
 import {
@@ -35,12 +35,12 @@ export class TranslateStore {
      * Adds a new loader to the store
      * @returns the index of the newly added loader
      */
-    addLoader() {
+    addLoader(loader: TranslateLoader) {
         let loaderIndex = 0;
         while (this.loaders.has(loaderIndex)) {
             loaderIndex++;
         }
-        this.loaders.set(loaderIndex, inject(TranslateLoader));
+        this.loaders.set(loaderIndex, loader);
         return loaderIndex;
     }
 
@@ -50,10 +50,6 @@ export class TranslateStore {
 
     getLoaders() {
         return this.loaders;
-    }
-
-    getLoader(loaderIndex: number) {
-        return this.loaders.get(loaderIndex);
     }
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {

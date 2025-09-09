@@ -227,7 +227,7 @@ export class TranslateService implements ITranslateService, OnDestroy {
     }
 
     constructor() {
-        this._loaderIndex = this.store.addLoader();
+        this._loaderIndex = this.store.addLoader(inject(TranslateLoader));
 
         const config: TranslateServiceConfig = {
             extend: false,
@@ -349,8 +349,13 @@ export class TranslateService implements ITranslateService, OnDestroy {
     ): Observable<InterpolatableTranslationObject> {
         this.pending = true;
 
-        const loaders = Array.from(this.store.loaders.values());
-        const requests = loaders.map((loader) => loader.getTranslation(lang).pipe(take(1)));
+        const loaders = this.store.getLoaders();
+        if (loaders.size === 0) return of({} as InterpolatableTranslationObject);
+
+        const requests: Observable<TranslationObject>[] = [];
+        loaders.forEach((loader) => {
+            requests.push(loader.getTranslation(lang).pipe(take(1)));
+        });
 
         // Merge all translation objects
         const loadingTranslations = (
