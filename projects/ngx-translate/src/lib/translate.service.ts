@@ -185,8 +185,6 @@ export class TranslateService implements ITranslateService, OnDestroy {
     private missingTranslationHandler = inject(MissingTranslationHandler);
     private store: TranslateStore = inject(TranslateStore);
 
-    private _loaderIndex!: number;
-
     private readonly extend: boolean = false;
 
     /**
@@ -227,8 +225,6 @@ export class TranslateService implements ITranslateService, OnDestroy {
     }
 
     constructor() {
-        this._loaderIndex = this.store.addLoader(inject(TranslateLoader));
-
         const config: TranslateServiceConfig = {
             extend: false,
             fallbackLang: null,
@@ -249,10 +245,12 @@ export class TranslateService implements ITranslateService, OnDestroy {
         if (config.extend) {
             this.extend = true;
         }
+
+        this.store.addLoader(this.currentLoader);
     }
 
-    ngOnDestroy() {
-        this.store.removeLoader(this._loaderIndex);
+    ngOnDestroy(): void {
+        this.store.removeLoader(this.currentLoader);
     }
 
     /**
@@ -350,28 +348,24 @@ export class TranslateService implements ITranslateService, OnDestroy {
         this.pending = true;
 
         const loaders = this.store.getLoaders();
-        if (loaders.size === 0) return of({} as InterpolatableTranslationObject);
+        let loadAndMerge: Observable<TranslationObject>;
 
-        const requests: Observable<TranslationObject>[] = [];
-        loaders.forEach((loader) => {
-            requests.push(loader.getTranslation(lang).pipe(take(1)));
-        });
+        if (loaders.length === 0) {
+            return of({} as InterpolatableTranslationObject);
+        } else if (loaders.length === 1) {
+            loadAndMerge = loaders[0].getTranslation(lang);
+        } else {
+            const requests: Observable<TranslationObject>[] = loaders.map((loader) =>
+                loader.getTranslation(lang).pipe(take(1)),
+            );
+            loadAndMerge = forkJoin(requests).pipe(
+                map((results: TranslationObject[]) =>
+                    results.reduce((acc, curr) => mergeDeep(acc, curr), {} as TranslationObject),
+                ),
+            );
+        }
 
-        // Merge all translation objects
-        const loadingTranslations = (
-            requests.length > 1
-                ? forkJoin(requests).pipe(
-                      map((results: TranslationObject[]) =>
-                          results.reduce(
-                              (acc, curr) => mergeDeep(acc, curr),
-                              {} as TranslationObject,
-                          ),
-                      ),
-                  )
-                : requests[0]
-        ).pipe(shareReplay(1), take(1));
-
-        this.loadingTranslations = loadingTranslations.pipe(
+        this.loadingTranslations = loadAndMerge.pipe(shareReplay(1), take(1)).pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             shareReplay(1),
             take(1),
@@ -388,7 +382,7 @@ export class TranslateService implements ITranslateService, OnDestroy {
             },
         });
 
-        return loadingTranslations;
+        return this.loadingTranslations;
     }
 
     /**
