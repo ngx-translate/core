@@ -23,7 +23,9 @@ describe("TranslatePipe (unit)", () => {
 
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService(),
+                provideTranslateService({
+                    loader: provideTranslateLoader(DelayedFakeLoader),
+                }),
                 {
                     provide: ChangeDetectorRef,
                     useValue: ref,
@@ -32,7 +34,6 @@ describe("TranslatePipe (unit)", () => {
                     provide: TranslatePipe,
                     useClass: TranslatePipe,
                 },
-                provideTranslateLoader(DelayedFakeLoader),
             ],
         });
 

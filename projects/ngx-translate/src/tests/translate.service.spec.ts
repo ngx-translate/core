@@ -15,6 +15,7 @@ import {
     TranslationChangeEvent,
     TranslationObject,
 } from "../public-api";
+import { provideTestableTranslateService, TestableTranslateService } from "./test-helpers";
 
 let translations: TranslationObject = { TEST: "This is a test" };
 
@@ -37,7 +38,7 @@ export interface User {
 }
 
 describe("TranslateService (Delayed loading)", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
 
     class DelayedLoader implements TranslateLoader {
         getTranslation(lang: string): Observable<TranslationObject> {
@@ -55,9 +56,11 @@ describe("TranslateService (Delayed loading)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [provideTranslateService({}), provideTranslateLoader(DelayedLoader)],
+            providers: [
+                provideTestableTranslateService({ loader: provideTranslateLoader(DelayedLoader) }),
+            ],
         });
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
     });
 
     it("currentLang should be the language, on which use() was called last - in order", fakeAsync(() => {
@@ -102,18 +105,17 @@ describe("TranslateService (Delayed loading)", () => {
 });
 
 describe("TranslateService", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
 
     const fakeNavigator: FakeNavigator = window.navigator as unknown as FakeNavigator;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({}),
-                { provide: TranslateLoader, useClass: FakeLoader },
+                provideTestableTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
             ],
         });
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
     });
 
     afterEach(() => {
@@ -726,7 +728,7 @@ describe("TranslateService", () => {
 
     it("should not make duplicate getTranslation calls", fakeAsync(() => {
         let getTranslationCalls = 0;
-        spyOn(translate.currentLoader, "getTranslation").and.callFake(() => {
+        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
             getTranslationCalls += 1;
             return timer(1000).pipe(map(() => translations));
         });
@@ -740,7 +742,7 @@ describe("TranslateService", () => {
 
     it("should subscribe to the loader just once", () => {
         let subscriptions = 0;
-        spyOn(translate.currentLoader, "getTranslation").and.callFake(() => {
+        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
             return defer(() => {
                 subscriptions++;
                 return of(translations);
@@ -755,16 +757,16 @@ describe("TranslateService", () => {
     });
 
     it("should compile translations only once, even when subscribing to translations while translations are loading", fakeAsync(() => {
-        spyOn(translate.currentLoader, "getTranslation").and.callFake(() => {
+        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
             return timer(1000).pipe(map(() => translations));
         });
 
         let translateCompilerCallCount = 0;
-        spyOn(translate.compiler, "compile").and.callFake((value) => {
+        spyOn(translate.getCompiler(), "compile").and.callFake((value) => {
             ++translateCompilerCallCount;
             return value;
         });
-        spyOn(translate.compiler, "compileTranslations").and.callFake((value) => {
+        spyOn(translate.getCompiler(), "compileTranslations").and.callFake((value) => {
             ++translateCompilerCallCount;
             return value;
         });

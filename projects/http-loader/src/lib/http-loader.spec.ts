@@ -1,7 +1,7 @@
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
-import { provideTranslateService, TranslateService, Translation } from "@ngx-translate/core";
+import { TranslateService, Translation } from "@ngx-translate/core";
 import {
     provideTranslateHttpLoader,
     provideTranslateMultiHttpLoader,
@@ -10,9 +10,13 @@ import {
     TranslateMultiHttpLoaderConfig,
 } from "../public-api";
 import { MarkerInterceptor } from "../test-helper/marker-interceptor";
+import {
+    provideTestableTranslateService,
+    TestableTranslateService,
+} from "../test-helper/testable-translate-service";
 
 describe("TranslateHttpLoader (HttpClient)", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
     let http: HttpTestingController;
 
     const prepareMulti = (config: Partial<TranslateMultiHttpLoaderConfig> = {}) => {
@@ -26,12 +30,13 @@ describe("TranslateHttpLoader (HttpClient)", () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                provideTranslateService(),
-                provideTranslateMultiHttpLoader(config),
+                provideTestableTranslateService({
+                    loader: provideTranslateMultiHttpLoader(config),
+                }),
             ],
         });
 
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
         http = TestBed.inject(HttpTestingController);
     };
 
@@ -46,12 +51,13 @@ describe("TranslateHttpLoader (HttpClient)", () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                provideTranslateService(),
-                provideTranslateHttpLoader(config),
+                provideTestableTranslateService({
+                    loader: provideTranslateHttpLoader(config),
+                }),
             ],
         });
 
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
         http = TestBed.inject(HttpTestingController);
     };
 
@@ -62,8 +68,8 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     it("should be able to provide TranslateHttpLoader", () => {
         prepareSingle();
         expect(TranslateHttpLoader).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof TranslateHttpLoader).toBeTruthy();
+        expect(translate.getCurrentLoader()).toBeDefined();
+        expect(translate.getCurrentLoader() instanceof TranslateHttpLoader).toBeTruthy();
     });
 
     describe("Config", () => {

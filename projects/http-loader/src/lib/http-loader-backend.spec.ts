@@ -1,12 +1,16 @@
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
-import { provideTranslateService, TranslateService, Translation } from "@ngx-translate/core";
+import { TranslateService, Translation } from "@ngx-translate/core";
 import { provideTranslateHttpLoader, TranslateHttpLoader } from "../public-api";
 import { MarkerInterceptor } from "../test-helper/marker-interceptor";
+import {
+    provideTestableTranslateService,
+    TestableTranslateService,
+} from "../test-helper/testable-translate-service";
 
 describe("TranslateHttpLoader (HttpBackend)", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
     let http: HttpTestingController;
 
     beforeEach(() => {
@@ -20,14 +24,15 @@ describe("TranslateHttpLoader (HttpBackend)", () => {
                 },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                provideTranslateService(),
-                provideTranslateHttpLoader({
-                    useHttpBackend: true,
+                provideTestableTranslateService({
+                    loader: provideTranslateHttpLoader({
+                        useHttpBackend: true,
+                    }),
                 }),
             ],
         });
 
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
         http = TestBed.inject(HttpTestingController);
     });
 
@@ -37,8 +42,8 @@ describe("TranslateHttpLoader (HttpBackend)", () => {
 
     it("should be able to provide TranslateHttpLoader", () => {
         expect(TranslateHttpLoader).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof TranslateHttpLoader).toBeTruthy();
+        expect(translate.getCurrentLoader()).toBeDefined();
+        expect(translate.getCurrentLoader() instanceof TranslateHttpLoader).toBeTruthy();
     });
 
     it("should be able to get translations", () => {
