@@ -14,7 +14,7 @@ interfaces and explains how to develop custom plugins.
 - [Migration guide ngx-translate v16 -> v17](https://ngx-translate.org/getting-started/migration-guide/)
 - [Release Notes](https://github.com/ngx-translate/core/releases)
 
-In addition to that, a getting started tutorial is available here: 
+In addition to that, a getting started tutorial is available here:
 [How to Translate Your Angular App with NGX-Translate](https://www.codeandweb.com/babeledit/tutorials/how-to-translate-your-angular-app-with-ngx-translate)
 
 ## Support for older versions

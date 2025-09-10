@@ -9,10 +9,10 @@ import {
     TranslateService,
     Translation,
     TranslationObject,
-    provideTranslateService,
     provideTranslateLoader,
     provideTranslateCompiler,
 } from "../public-api";
+import { provideTestableTranslateService, TestableTranslateService } from "./test-helpers";
 
 const translations: TranslationObject = { LOAD: "This is a test" };
 
@@ -25,26 +25,27 @@ class FakeLoader implements TranslateLoader {
 }
 
 describe("TranslateCompiler", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
 
     describe("with default TranslateNoOpCompiler", () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [
-                    provideTranslateService(),
-                    provideTranslateLoader(FakeLoader),
-                    provideTranslateCompiler(TranslateNoOpCompiler),
+                    provideTestableTranslateService({
+                        loader: provideTranslateLoader(FakeLoader),
+                        compiler: provideTranslateCompiler(TranslateNoOpCompiler),
+                    }),
                 ],
             });
-            translate = TestBed.inject(TranslateService);
+            translate = TestBed.inject(TranslateService) as TestableTranslateService;
 
             translate.use("en");
         });
 
         it("should use the correct compiler", () => {
             expect(translate).toBeDefined();
-            expect(translate.compiler).toBeDefined();
-            expect(translate.compiler instanceof TranslateNoOpCompiler).toBeTruthy();
+            expect(translate.getCompiler()).toBeDefined();
+            expect(translate.getCompiler() instanceof TranslateNoOpCompiler).toBeTruthy();
         });
 
         it("should use the compiler on loading translations", () => {
@@ -89,20 +90,21 @@ describe("TranslateCompiler", () => {
         beforeEach(() => {
             TestBed.configureTestingModule({
                 providers: [
-                    provideTranslateService({}),
-                    provideTranslateLoader(FakeLoader),
-                    provideTranslateCompiler(CustomCompiler),
+                    provideTestableTranslateService({
+                        loader: provideTranslateLoader(FakeLoader),
+                        compiler: provideTranslateCompiler(CustomCompiler),
+                    }),
                 ],
             });
-            translate = TestBed.inject(TranslateService);
+            translate = TestBed.inject(TranslateService) as TestableTranslateService;
 
             translate.use("en");
         });
 
         it("should use the correct compiler", () => {
             expect(translate).toBeDefined();
-            expect(translate.compiler).toBeDefined();
-            expect(translate.compiler instanceof CustomCompiler).toBeTruthy();
+            expect(translate.getCompiler()).toBeDefined();
+            expect(translate.getCompiler() instanceof CustomCompiler).toBeTruthy();
         });
 
         it("should use the compiler on loading translations", () => {

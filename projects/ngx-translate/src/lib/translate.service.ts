@@ -179,8 +179,8 @@ export class TranslateService implements ITranslateService, OnDestroy {
     private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
     private lastUseLanguage: Language | null = null;
 
-    public currentLoader = inject(TranslateLoader);
-    public compiler = inject(TranslateCompiler);
+    protected currentLoader = inject(TranslateLoader);
+    protected compiler = inject(TranslateCompiler);
     private parser = inject(TranslateParser);
     private missingTranslationHandler = inject(MissingTranslationHandler);
     private store: TranslateStore = inject(TranslateStore);
