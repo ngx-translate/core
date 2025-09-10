@@ -9,10 +9,16 @@ import {
     TranslationChangeEvent,
 } from "./translate.service";
 import { getValue, mergeDeep } from "./util";
+import { TranslateLoader } from "./translate.loader";
 
 export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
 };
+
+interface LoaderReference {
+    loader: TranslateLoader;
+    count: number;
+}
 
 @Injectable()
 export class TranslateStore {
@@ -27,6 +33,35 @@ export class TranslateStore {
 
     private translations: Record<Language, InterpolatableTranslationObject> = {};
     private languages: Language[] = [];
+
+    private loaders: LoaderReference[] = [];
+
+    public addLoader(loader: TranslateLoader): void {
+        const existingLoader = this.getLoaderRef(loader);
+        if (existingLoader) {
+            existingLoader.count++;
+        } else {
+            this.loaders.push({ loader, count: 1 });
+        }
+    }
+
+    public removeLoader(loader: TranslateLoader): void {
+        const existingLoader = this.getLoaderRef(loader);
+        if (existingLoader) {
+            existingLoader.count--;
+            if (existingLoader.count === 0) {
+                this.loaders = this.loaders.filter((ref) => ref.loader !== loader);
+            }
+        }
+    }
+
+    private getLoaderRef(loader: TranslateLoader): LoaderReference | undefined {
+        return this.loaders.find((ref) => ref.loader === loader);
+    }
+
+    public getLoaders(): TranslateLoader[] {
+        return this.loaders.map((ref) => ref.loader);
+    }
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];
