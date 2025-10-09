@@ -16,17 +16,17 @@ export type DeepReadonly<T> = {
 
 @Injectable()
 export class TranslateStore {
-    private _onTranslationChange: Subject<TranslationChangeEvent> =
+    protected _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
-    private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
-    private _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
+    protected _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
+    protected _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
         new Subject<FallbackLangChangeEvent>();
 
-    private fallbackLang: Language | null = null;
-    private currentLang!: Language;
+    protected fallbackLang: Language | null = null;
+    protected currentLang!: Language;
 
-    private translations: Record<Language, InterpolatableTranslationObject> = {};
-    private languages: Language[] = [];
+    protected translations: Record<Language, InterpolatableTranslationObject> = {};
+    protected languages: Language[] = [];
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];

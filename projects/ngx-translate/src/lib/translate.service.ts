@@ -174,18 +174,18 @@ export abstract class ITranslateService {
 
 @Injectable()
 export class TranslateService implements ITranslateService {
-    private loadingTranslations!: Observable<InterpolatableTranslationObject>;
-    private pending = false;
-    private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
-    private lastUseLanguage: Language | null = null;
+    protected loadingTranslations!: Observable<InterpolatableTranslationObject>;
+    protected pending = false;
+    protected _translationRequests: Record<Language, Observable<TranslationObject>> = {};
+    protected lastUseLanguage: Language | null = null;
 
     protected currentLoader = inject(TranslateLoader);
     protected compiler = inject(TranslateCompiler);
-    private parser = inject(TranslateParser);
-    private missingTranslationHandler = inject(MissingTranslationHandler);
-    private store: TranslateStore = inject(TranslateStore);
+    protected parser = inject(TranslateParser);
+    protected missingTranslationHandler = inject(MissingTranslationHandler);
+    protected store: TranslateStore = inject(TranslateStore);
 
-    private readonly extend: boolean = false;
+    protected readonly extend: boolean = false;
 
     /**
      * An Observable to listen to translation change events
@@ -308,7 +308,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Retrieves the given translations
      */
-    private loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
+    protected loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
         if (!this.store.hasTranslationFor(lang) || this.extend) {
             this._translationRequests[lang] =
@@ -322,7 +322,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Changes the current lang
      */
-    private changeLang(lang: Language): void {
+    protected changeLang(lang: Language): void {
         if (lang !== this.lastUseLanguage) {
             // received new language data,
             // but this was not the one requested last
@@ -336,7 +336,7 @@ export class TranslateService implements ITranslateService {
         return this.store.getCurrentLang();
     }
 
-    private loadAndCompileTranslations(
+    protected loadAndCompileTranslations(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> {
         this.pending = true;
@@ -390,7 +390,7 @@ export class TranslateService implements ITranslateService {
         this.store.addLanguages(languages);
     }
 
-    private getParsedResultForKey(
+    protected getParsedResultForKey(
         key: string,
         interpolateParams?: InterpolationParameters,
     ): StrictTranslation | Observable<StrictTranslation> {
@@ -416,11 +416,11 @@ export class TranslateService implements ITranslateService {
         return this.store.getFallbackLang();
     }
 
-    private getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
+    protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
         return this.store.getTranslation(key);
     }
 
-    private runInterpolation(
+    protected runInterpolation(
         translations: InterpolatableTranslation,
         interpolateParams?: InterpolationParameters,
     ): StrictTranslation {
@@ -439,7 +439,7 @@ export class TranslateService implements ITranslateService {
         return this.parser.interpolate(translations, interpolateParams);
     }
 
-    private runInterpolationOnArray(
+    protected runInterpolationOnArray(
         translations: InterpolatableTranslation,
         interpolateParams: InterpolationParameters | undefined,
     ) {
@@ -448,7 +448,7 @@ export class TranslateService implements ITranslateService {
         );
     }
 
-    private runInterpolationOnDict(
+    protected runInterpolationOnDict(
         translations: InterpolatableTranslationObject,
         interpolateParams: InterpolationParameters | undefined,
     ) {
@@ -474,7 +474,7 @@ export class TranslateService implements ITranslateService {
             : this.getParsedResultForKey(key, interpolateParams);
     }
 
-    private getParsedResultForArray(
+    protected getParsedResultForArray(
         key: string[],
         interpolateParams: InterpolationParameters | undefined,
     ) {
