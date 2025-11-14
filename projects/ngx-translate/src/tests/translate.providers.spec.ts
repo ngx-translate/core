@@ -15,9 +15,8 @@ import { Observable, of } from "rxjs";
 import {
     TranslateService,
     TRANSLATE_SERVICE_CONFIG,
-    TranslationObject,
-    InterpolationParameters,
-    InterpolatableTranslationObject,
+
+
 } from "../lib/translate.service";
 import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
 import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
@@ -32,6 +31,11 @@ import {
     MissingTranslationHandlerParams,
 } from "../lib/missing-translation-handler";
 import { TranslateStore } from "../lib/translate.store";
+import {
+    InterpolatableTranslationObject,
+    InterpolationParameters,
+    TranslationObject,
+} from "../lib/translate.service.interface";
 
 class TestTranslateLoader extends TranslateLoader {
     getTranslation(lang: string): Observable<TranslationObject> {

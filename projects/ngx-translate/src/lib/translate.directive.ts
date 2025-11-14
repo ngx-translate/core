@@ -9,15 +9,18 @@ import {
 } from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
 import {
+    TranslateService,
+
+} from "./translate.service";
+import { equals, isDefinedAndNotNull, isString } from "./util";
+import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
     InterpolationParameters,
     LangChangeEvent,
     StrictTranslation,
-    TranslateService,
     TranslationChangeEvent,
-} from "./translate.service";
-import { equals, isDefinedAndNotNull, isString } from "./util";
+} from "./translate.service.interface";
 
 interface ExtendedNode extends Text {
     originalContent: string;

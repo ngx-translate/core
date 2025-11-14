@@ -8,14 +8,17 @@ import {
 } from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
 import {
+    TranslateService,
+
+} from "./translate.service";
+import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
+import {
     InterpolatableTranslationObject,
     InterpolationParameters,
     LangChangeEvent,
     StrictTranslation,
-    TranslateService,
     TranslationChangeEvent,
-} from "./translate.service";
-import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
+} from "./translate.service.interface";
 
 @Injectable()
 @Pipe({

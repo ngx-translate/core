@@ -4,7 +4,7 @@ import {
     InterpolatableTranslation,
     InterpolatableTranslationObject,
     TranslationObject,
-} from "./translate.service";
+} from "./translate.service.interface";
 
 export abstract class TranslateCompiler {
     abstract compile(value: string, lang: string): InterpolatableTranslation;

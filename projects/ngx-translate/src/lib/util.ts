@@ -1,4 +1,4 @@
-import { InterpolatableTranslationObject } from "./translate.service";
+import { InterpolatableTranslationObject } from "./translate.service.interface";
 
 /**
  * Determines if two objects or two values are equivalent.

@@ -7,12 +7,12 @@ import { TranslateCompiler, TranslateNoOpCompiler } from "./translate.compiler";
 import { TranslateLoader, TranslateNoOpLoader } from "./translate.loader";
 import { TranslateDefaultParser, TranslateParser } from "./translate.parser";
 import {
-    Language,
     TRANSLATE_SERVICE_CONFIG,
     TranslateService,
     TranslateServiceConfig,
 } from "./translate.service";
 import { TranslateStore } from "./translate.store";
+import { Language } from "./translate.service.interface";
 
 export interface TranslateProviders {
     loader?: Provider;

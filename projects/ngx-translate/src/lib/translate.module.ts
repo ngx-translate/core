@@ -13,7 +13,8 @@ import {
     provideTranslateParser,
     TranslateProviders,
 } from "./translate.providers";
-import { Language } from "./translate.service";
+
+import { Language } from "./translate.service.interface";
 
 export interface TranslateModuleConfig extends TranslateProviders {
     isolate?: boolean;

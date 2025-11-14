@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
+import { getValue, mergeDeep } from "./util";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -7,8 +8,7 @@ import {
     LangChangeEvent,
     Language,
     TranslationChangeEvent,
-} from "./translate.service";
-import { getValue, mergeDeep } from "./util";
+} from "./translate.service.interface";
 
 export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
