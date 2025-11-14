@@ -36,16 +36,16 @@ interface ExtendedNode extends Text {
     standalone: true,
 })
 export class TranslateDirective implements AfterViewChecked, OnDestroy {
-    private translateService: TranslateService = inject(TranslateService);
-    private element: ElementRef = inject(ElementRef);
-    private _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
+    protected translateService: TranslateService = inject(TranslateService);
+    protected element: ElementRef = inject(ElementRef);
+    protected _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-    private key!: string;
-    private lastParams?: InterpolationParameters;
-    private currentParams?: InterpolationParameters;
-    private readonly onLangChangeSub!: Subscription;
-    private readonly onFallbackLangChangeSub!: Subscription;
-    private readonly onTranslationChangeSub!: Subscription;
+    protected key!: string;
+    protected lastParams?: InterpolationParameters;
+    protected currentParams?: InterpolationParameters;
+    protected readonly onLangChangeSub!: Subscription;
+    protected readonly onFallbackLangChangeSub!: Subscription;
+    protected readonly onTranslationChangeSub!: Subscription;
 
     @Input() set translate(key: string) {
         if (key) {

@@ -27,10 +27,10 @@ import {
     pure: false, // required to update the value when the promise is resolved
 })
 export class TranslatePipe implements PipeTransform, OnDestroy {
-    private translate: TranslateService = inject(TranslateService);
-    private _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
+    protected translate: TranslateService = inject(TranslateService);
+    protected _ref: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-    private value: StrictTranslation = "";
+    protected value: StrictTranslation = "";
     lastKey: string | null = null;
     lastParams: InterpolationParameters[] = [];
     onTranslationChange: Subscription | undefined;
@@ -143,7 +143,7 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     /**
      * Clean any existing subscription to change events
      */
-    private _dispose(): void {
+    protected _dispose(): void {
         if (typeof this.onTranslationChange !== "undefined") {
             this.onTranslationChange.unsubscribe();
             this.onTranslationChange = undefined;
