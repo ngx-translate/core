@@ -1,13 +1,13 @@
 {
-  "demo": {
-    "simple": {
-      "text-as-attribute": "Global: Text als Attribut",
-      "text-as-content": "Global: Text als Inhalt",
-      "text-as-pipe-with-params": "Global: Text als Pipe mit {{value}}"
+    "demo": {
+        "simple": {
+            "text-as-attribute": "Global: Text als Attribut",
+            "text-as-content": "Global: Text als Inhalt",
+            "text-as-pipe-with-params": "Global: Text als Pipe mit {{value}}"
+        },
+        "title": "Global: Test Anwendung"
     },
-    "title": "Global: Test Anwendung"
-  },
-  "standalone-component": {
-    "title": "Global: Eigenständige Komponente"
-  }
+    "standalone-component": {
+        "title": "Global: Eigenständige Komponente"
+    }
 }

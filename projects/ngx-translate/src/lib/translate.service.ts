@@ -54,6 +54,8 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
 
+
+
 @Injectable()
 export class TranslateService implements ITranslateService {
     protected loadingTranslations!: Observable<InterpolatableTranslationObject>;
@@ -457,23 +459,26 @@ export class TranslateService implements ITranslateService {
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Translation {
+
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             return "";
         }
 
         const result = this.getParsedResult(key, interpolateParams);
 
-        if (isObservable(result)) {
-            if (Array.isArray(key)) {
-                return key.reduce((acc: Record<string, string>, currKey: string) => {
-                    acc[currKey] = currKey;
-                    return acc;
-                }, {});
-            }
-            return key;
-        }
+        return isObservable(result) ? this.keyToObject(key) : result;
+    }
 
-        return result;
+
+    private keyToObject(key: string | string[])
+    {
+        if (Array.isArray(key)) {
+            return key.reduce((acc: Record<string, string>, currKey: string) => {
+                acc[currKey] = currKey;
+                return acc;
+            }, {});
+        }
+        return key;
     }
 
     /**
@@ -596,4 +601,103 @@ export class TranslateService implements ITranslateService {
         return this.store.onFallbackLangChange;
     }
 
+}
+
+@Injectable()
+export class ChildTranslateService extends TranslateService {
+
+    protected parent:TranslateService = inject(TranslateService, {skipSelf:true});
+
+    public override use(lang: Language): Observable<InterpolatableTranslationObject>
+    {
+        return this.parent.use(lang);
+    }
+
+    public override setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject>
+    {
+        return this.parent.setFallbackLang(lang);
+    }
+
+    public override getFallbackLang(): Language | null
+    {
+        return this.parent.getFallbackLang();
+    }
+
+
+    public override get onLangChange(): Observable<TranslationChangeEvent> {
+        return this.parent.onLangChange;
+    }
+
+    public override get onFallbackLangChange(): Observable<TranslationChangeEvent> {
+        return this.parent.onFallbackLangChange;
+    }
+
+    public override addLangs(languages: Language[]): void
+    {
+        return this.parent.addLangs(languages);
+    }
+
+    public override getLangs(): readonly Language[]
+    {
+        return this.parent.getLangs();
+    }
+
+
+    /*
+        public override get onTranslationChange(): Observable<TranslationChangeEvent> {
+
+            // local and parent
+        }
+
+     */
+
+    /*
+
+        public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
+        public abstract resetLang(lang: Language): void;
+
+     */
+    public override instant(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Translation
+    {
+        return super.instant(key, interpolateParams) || this.parent.instant(key, interpolateParams);
+    }
+
+    /*
+    public abstract stream(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation>;
+
+    public abstract getStreamOnTranslationChange(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation>;
+
+    public abstract get(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): Observable<Translation>;
+
+    public abstract getParsedResult(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+    ): StrictTranslation | Observable<StrictTranslation>;
+
+
+
+    public abstract set(
+        key: string,
+        translation: string | TranslationObject,
+        lang?: Language,
+    ): void;
+
+    public abstract setTranslation(
+        lang: Language,
+        translations: TranslationObject,
+        shouldMerge?: boolean,
+    ): void;
+    */
 }

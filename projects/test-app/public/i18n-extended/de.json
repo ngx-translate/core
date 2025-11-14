@@ -1,9 +1,9 @@
 {
-  "demo": {
-    "title": "Extended: Test Anwendung (overwrites to global)"
-  },
-  "standalone-component": {
-    "title": "Extended: Eigenständige Komponente (overwrites to global)",
-    "extended": "Extended: Nur Lehsbar durch Extended"
-  }
+    "demo": {
+        "title": "Extended: Test Anwendung (overwrites to global)"
+    },
+    "standalone-component": {
+        "title": "Extended: Eigenständige Komponente (overwrites to global)",
+        "extended": "Extended: Nur Lehsbar durch Extended"
+    }
 }
