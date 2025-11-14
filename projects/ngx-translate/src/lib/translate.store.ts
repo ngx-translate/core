@@ -22,19 +22,19 @@ interface LoaderReference {
 
 @Injectable()
 export class TranslateStore {
-    private _onTranslationChange: Subject<TranslationChangeEvent> =
+    protected _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
-    private _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
-    private _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
+    protected _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
+    protected _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
         new Subject<FallbackLangChangeEvent>();
 
-    private fallbackLang: Language | null = null;
-    private currentLang!: Language;
+    protected fallbackLang: Language | null = null;
+    protected currentLang!: Language;
 
-    private translations: Record<Language, InterpolatableTranslationObject> = {};
-    private languages: Language[] = [];
+    protected translations: Record<Language, InterpolatableTranslationObject> = {};
+    protected languages: Language[] = [];
 
-    private loaders: LoaderReference[] = [];
+    protected loaders: LoaderReference[] = [];
 
     public addLoader(loader: TranslateLoader): void {
         const existingLoader = this.getLoaderRef(loader);
@@ -55,7 +55,7 @@ export class TranslateStore {
         }
     }
 
-    private getLoaderRef(loader: TranslateLoader): LoaderReference | undefined {
+    protected getLoaderRef(loader: TranslateLoader): LoaderReference | undefined {
         return this.loaders.find((ref) => ref.loader === loader);
     }
 
