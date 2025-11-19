@@ -1,5 +1,5 @@
 import { inject, Injectable, InjectionToken } from "@angular/core";
-import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
+import { concat, defer, finalize, forkJoin, isObservable, Observable, of, tap } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
@@ -58,9 +58,7 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 
 @Injectable()
 export class TranslateService implements ITranslateService {
-    protected loadingTranslations!: Observable<InterpolatableTranslationObject>;
-    protected pending = false;
-    protected _translationRequests: Record<Language, Observable<TranslationObject>> = {};
+    protected loadingTranslations: Record<Language, Observable<InterpolatableTranslationObject>> = {};
     protected lastUseLanguage: Language | null = null;
 
     protected currentLoader = inject(TranslateLoader);
@@ -151,6 +149,11 @@ export class TranslateService implements ITranslateService {
         return of(this.store.getTranslations(lang));
     }
 
+    protected isLoading(): boolean
+    {
+        return Object.keys(this.loadingTranslations).length > 0;
+    }
+
     /**
      * Changes the lang currently used
      */
@@ -185,12 +188,10 @@ export class TranslateService implements ITranslateService {
     /**
      * Retrieves the given translations
      */
-    protected loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
+    protected loadOrExtendLanguage(lang: Language): Observable<InterpolatableTranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
         if (!this.store.hasTranslationFor(lang) || this.extend) {
-            this._translationRequests[lang] =
-                this._translationRequests[lang] || this.loadAndCompileTranslations(lang);
-            return this._translationRequests[lang];
+            return this.loadAndCompileTranslations(lang);
         }
 
         return undefined;
@@ -216,30 +217,36 @@ export class TranslateService implements ITranslateService {
     protected loadAndCompileTranslations(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> {
-        this.pending = true;
 
-        const loadingTranslations = this.currentLoader
-            .getTranslation(lang)
-            .pipe(shareReplay(1), take(1));
+        if(this.loadingTranslations[lang]) {
+            return this.loadingTranslations[lang];
+        }
 
-        this.loadingTranslations = loadingTranslations.pipe(
-            map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
-            shareReplay(1),
-            take(1),
+        const translations$ = this.currentLoader.getTranslation(lang).pipe(
+            map((res: TranslationObject) =>
+                this.compiler.compileTranslations(res, lang),
+            ),
+            tap((compiled: InterpolatableTranslationObject) => {
+                this.store.setTranslations(lang, compiled, this.extend);
+            }),
+            finalize(() => {
+                delete this.loadingTranslations[lang];
+            }),
+            // cache the single result & share it across all subscribers
+            shareReplay({ bufferSize: 1, refCount: true }),
         );
 
-        this.loadingTranslations.subscribe({
-            next: (res: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, res, this.extend);
-                this.pending = false;
-            },
+        this.loadingTranslations[lang] = translations$;
+
+        // trigger loading if nobody subscribes from outside
+        translations$.subscribe({
             error: (err) => {
                 void err;
-                this.pending = false;
+                // console.error(err);
             },
         });
 
-        return loadingTranslations;
+        return translations$;
     }
 
     /**
@@ -390,9 +397,10 @@ export class TranslateService implements ITranslateService {
         if (!isDefinedAndNotNull(key) || !key.length) {
             return of("");
         }
+
         // check if we are loading a new translation to use
-        if (this.pending) {
-            return this.loadingTranslations.pipe(
+        if (this.lastUseLanguage && this.loadingTranslations[this.lastUseLanguage]) {
+            return this.loadingTranslations[this.store.getCurrentLang()].pipe(
                 concatMap(() => {
                     return makeObservable(this.getParsedResult(key, interpolateParams));
                 }),
@@ -514,7 +522,7 @@ export class TranslateService implements ITranslateService {
      * Deletes inner translation
      */
     public resetLang(lang: Language): void {
-        delete this._translationRequests[lang];
+        delete this.loadingTranslations[lang];
         this.store.deleteTranslations(lang);
     }
 
