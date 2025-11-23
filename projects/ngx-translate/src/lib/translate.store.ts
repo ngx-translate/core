@@ -123,7 +123,7 @@ export class TranslateStore {
         let text = this.getValue(this.currentLang, key);
 
         if (
-            text === undefined &&
+            (text === undefined || text === null) &&
             this.fallbackLang != null &&
             this.fallbackLang !== this.currentLang
         ) {

@@ -179,6 +179,19 @@ describe("TranslateService", () => {
         });
     });
 
+    it("should return fallback lang if key in current lang is null", () => {
+        translations = {};
+        translate.use("fr");
+        translate.setFallbackLang("nl");
+
+        translate.setTranslation("fr", { TEST: null });
+        translate.setTranslation("nl", { TEST: "Dit is een test" });
+
+        translate.get("TEST").subscribe((res: Translation) => {
+            expect(res).toEqual("Dit is een test");
+        });
+    });
+
     it("should use the default language by default", () => {
         translate.setDefaultLang("nl");
         translate.setTranslation("nl", { TEST: "Dit is een test" });
