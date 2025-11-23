@@ -70,7 +70,7 @@ describe("MissingTranslationHandler", () => {
         spyOn(missingTranslationHandler, "handle").and.callThrough();
 
         translate.get("nonExistingKey").subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ key: "nonExistingKey" }),
             );
             //test that the instance of the last called argument is string
@@ -85,7 +85,7 @@ describe("MissingTranslationHandler", () => {
         const interpolateParams = { some: "params" };
 
         translate.get("nonExistingKey", interpolateParams).subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ interpolateParams: interpolateParams }),
             );
             //test that the instance of the last called argument is string
@@ -100,7 +100,7 @@ describe("MissingTranslationHandler", () => {
         const interpolateParams = { some: "params" };
 
         translate.get("nonExistingKey", interpolateParams).subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ translateService: translate }),
             );
             //test that the instance of the last called argument is string
@@ -124,7 +124,7 @@ describe("MissingTranslationHandler", () => {
         spyOn(missingTranslationHandler, "handle").and.callThrough();
 
         translate.get("nonExistingKey").subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ key: "nonExistingKey" }),
             );
             expect(res).toEqual("nonExistingKey");
@@ -146,7 +146,7 @@ describe("MissingTranslationHandler", () => {
         spyOn(missingTranslationHandler, "handle").and.callThrough();
 
         translate.get("nonExistingKey").subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ key: "nonExistingKey" }),
             );
             expect(res).toEqual("");
@@ -169,7 +169,7 @@ describe("MissingTranslationHandler", () => {
         spyOn(missingTranslationHandler, "handle").and.callThrough();
 
         expect(translate.instant("nonExistingKey")).toEqual("handled");
-        expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+        expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
             jasmine.objectContaining({ key: "nonExistingKey" }),
         );
     });
@@ -180,7 +180,7 @@ describe("MissingTranslationHandler", () => {
         spyOn(missingTranslationHandler, "handle").and.callThrough();
 
         translate.get("nonExistingKey").subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ key: "nonExistingKey" }),
             );
             expect(res).toEqual("handled: nonExistingKey");
@@ -237,7 +237,7 @@ describe("MissingTranslationHandler", () => {
 
         spyOn(missingTranslationHandler, "handle").and.callThrough();
         translate.get("TEST").subscribe((res: Translation) => {
-            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+            expect(missingTranslationHandler.handle).toHaveBeenCalledOnceWith(
                 jasmine.objectContaining({ key: "TEST" }),
             );
             //test that the instance of the last called argument is string
