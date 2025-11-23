@@ -8,10 +8,7 @@ import {
     OnDestroy,
 } from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
-import {
-    TranslateService,
-
-} from "./translate.service";
+import { TranslateService } from "./translate.service";
 import { equals, isDefinedAndNotNull, isString } from "./util";
 import {
     FallbackLangChangeEvent,

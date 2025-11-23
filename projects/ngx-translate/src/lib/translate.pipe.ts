@@ -7,10 +7,7 @@ import {
     PipeTransform,
 } from "@angular/core";
 import { isObservable, Subscription } from "rxjs";
-import {
-    TranslateService,
-
-} from "./translate.service";
+import { TranslateService } from "./translate.service";
 import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
     InterpolatableTranslationObject,

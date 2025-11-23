@@ -12,12 +12,7 @@ import {
 } from "../lib/translate.providers";
 import { Observable, of } from "rxjs";
 
-import {
-    TranslateService,
-    TRANSLATE_SERVICE_CONFIG,
-
-
-} from "../lib/translate.service";
+import { TranslateService, TRANSLATE_SERVICE_CONFIG } from "../lib/translate.service";
 import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
 import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
 import {

@@ -22,7 +22,6 @@ import {
     TranslationObject,
 } from "./translate.service.interface";
 
-
 /**
  * Configuration object for the translation service.
  *
@@ -54,11 +53,10 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
 
-
-
 @Injectable()
 export class TranslateService implements ITranslateService {
-    protected loadingTranslations: Record<Language, Observable<InterpolatableTranslationObject>> = {};
+    protected loadingTranslations: Record<Language, Observable<InterpolatableTranslationObject>> =
+        {};
     protected lastUseLanguage: Language | null = null;
 
     protected currentLoader = inject(TranslateLoader);
@@ -149,8 +147,7 @@ export class TranslateService implements ITranslateService {
         return of(this.store.getTranslations(lang));
     }
 
-    protected isLoading(): boolean
-    {
+    protected isLoading(): boolean {
         return Object.keys(this.loadingTranslations).length > 0;
     }
 
@@ -188,7 +185,9 @@ export class TranslateService implements ITranslateService {
     /**
      * Retrieves the given translations
      */
-    protected loadOrExtendLanguage(lang: Language): Observable<InterpolatableTranslationObject> | undefined {
+    protected loadOrExtendLanguage(
+        lang: Language,
+    ): Observable<InterpolatableTranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
         if (!this.store.hasTranslationFor(lang) || this.extend) {
             return this.loadAndCompileTranslations(lang);
@@ -224,15 +223,12 @@ export class TranslateService implements ITranslateService {
     protected loadAndCompileTranslations(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> {
-
-        if(this.loadingTranslations[lang]) {
+        if (this.loadingTranslations[lang]) {
             return this.loadingTranslations[lang];
         }
 
         const translations$ = this.currentLoader.getTranslation(lang).pipe(
-            map((res: TranslationObject) =>
-                this.compiler.compileTranslations(res, lang),
-            ),
+            map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             tap((compiled: InterpolatableTranslationObject) => {
                 this.store.setTranslations(lang, compiled, this.extend);
             }),
@@ -474,7 +470,6 @@ export class TranslateService implements ITranslateService {
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Translation {
-
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             return "";
         }
@@ -484,9 +479,7 @@ export class TranslateService implements ITranslateService {
         return isObservable(result) ? this.keyToObject(key) : result;
     }
 
-
-    protected keyToObject(key: string | string[])
-    {
+    protected keyToObject(key: string | string[]) {
         if (Array.isArray(key)) {
             return key.reduce((acc: Record<string, string>, currKey: string) => {
                 acc[currKey] = currKey;
@@ -615,5 +608,4 @@ export class TranslateService implements ITranslateService {
     get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
         return this.store.onFallbackLangChange;
     }
-
 }
