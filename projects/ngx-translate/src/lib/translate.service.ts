@@ -478,7 +478,7 @@ export class TranslateService implements ITranslateService {
     }
 
 
-    private keyToObject(key: string | string[])
+    protected keyToObject(key: string | string[])
     {
         if (Array.isArray(key)) {
             return key.reduce((acc: Record<string, string>, currKey: string) => {
