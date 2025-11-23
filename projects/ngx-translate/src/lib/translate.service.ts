@@ -1,4 +1,4 @@
-import { inject, Injectable, InjectionToken } from "@angular/core";
+import { inject, Injectable, InjectionToken, OnDestroy } from "@angular/core";
 import { concat, defer, forkJoin, isObservable, Observable, of } from "rxjs";
 import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
@@ -6,7 +6,7 @@ import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { InterpolateFunction, TranslateParser } from "./translate.parser";
 import { DeepReadonly, TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString, mergeDeep } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -176,19 +176,19 @@ export abstract class ITranslateService {
 }
 
 @Injectable()
-export class TranslateService implements ITranslateService {
-    private loadingTranslations!: Observable<InterpolatableTranslationObject>;
-    private pending = false;
-    private _translationRequests: Record<Language, Observable<TranslationObject>> = {};
-    private lastUseLanguage: Language | null = null;
+export class TranslateService implements ITranslateService, OnDestroy {
+    protected loadingTranslations!: Observable<InterpolatableTranslationObject>;
+    protected pending = false;
+    protected _translationRequests: Record<Language, Observable<TranslationObject>> = {};
+    protected lastUseLanguage: Language | null = null;
 
-    public currentLoader = inject(TranslateLoader);
-    public compiler = inject(TranslateCompiler);
-    private parser = inject(TranslateParser);
-    private missingTranslationHandler = inject(MissingTranslationHandler);
-    private store: TranslateStore = inject(TranslateStore);
+    protected currentLoader = inject(TranslateLoader);
+    protected compiler = inject(TranslateCompiler);
+    protected parser = inject(TranslateParser);
+    protected missingTranslationHandler = inject(MissingTranslationHandler);
+    protected store: TranslateStore = inject(TranslateStore);
 
-    private readonly extend: boolean = false;
+    protected readonly extend: boolean = false;
 
     /**
      * An Observable to listen to translation change events
@@ -248,6 +248,12 @@ export class TranslateService implements ITranslateService {
         if (config.extend) {
             this.extend = true;
         }
+
+        this.store.addLoader(this.currentLoader);
+    }
+
+    ngOnDestroy(): void {
+        this.store.removeLoader(this.currentLoader);
     }
 
     /**
@@ -311,7 +317,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Retrieves the given translations
      */
-    private loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
+    protected loadOrExtendLanguage(lang: Language): Observable<TranslationObject> | undefined {
         // if this language is unavailable or extend is true, ask for it
         if (!this.store.hasTranslationFor(lang) || this.extend) {
             this._translationRequests[lang] =
@@ -325,7 +331,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Changes the current lang
      */
-    private changeLang(lang: Language): void {
+    protected changeLang(lang: Language): void {
         if (lang !== this.lastUseLanguage) {
             // received new language data,
             // but this was not the one requested last
@@ -339,16 +345,30 @@ export class TranslateService implements ITranslateService {
         return this.store.getCurrentLang();
     }
 
-    private loadAndCompileTranslations(
+    protected loadAndCompileTranslations(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> {
         this.pending = true;
 
-        const loadingTranslations = this.currentLoader
-            .getTranslation(lang)
-            .pipe(shareReplay(1), take(1));
+        const loaders = this.store.getLoaders();
+        let loadAndMerge: Observable<TranslationObject>;
 
-        this.loadingTranslations = loadingTranslations.pipe(
+        if (loaders.length === 0) {
+            return of({} as InterpolatableTranslationObject);
+        } else if (loaders.length === 1) {
+            loadAndMerge = loaders[0].getTranslation(lang);
+        } else {
+            const requests: Observable<TranslationObject>[] = loaders.map((loader) =>
+                loader.getTranslation(lang).pipe(take(1)),
+            );
+            loadAndMerge = forkJoin(requests).pipe(
+                map((results: TranslationObject[]) =>
+                    results.reduce((acc, curr) => mergeDeep(acc, curr), {} as TranslationObject),
+                ),
+            );
+        }
+
+        this.loadingTranslations = loadAndMerge.pipe(shareReplay(1), take(1)).pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             shareReplay(1),
             take(1),
@@ -365,7 +385,7 @@ export class TranslateService implements ITranslateService {
             },
         });
 
-        return loadingTranslations;
+        return this.loadingTranslations;
     }
 
     /**
@@ -393,7 +413,7 @@ export class TranslateService implements ITranslateService {
         this.store.addLanguages(languages);
     }
 
-    private getParsedResultForKey(
+    protected getParsedResultForKey(
         key: string,
         interpolateParams?: InterpolationParameters,
     ): StrictTranslation | Observable<StrictTranslation> {
@@ -419,11 +439,11 @@ export class TranslateService implements ITranslateService {
         return this.store.getFallbackLang();
     }
 
-    private getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
+    protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
         return this.store.getTranslation(key);
     }
 
-    private runInterpolation(
+    protected runInterpolation(
         translations: InterpolatableTranslation,
         interpolateParams?: InterpolationParameters,
     ): StrictTranslation {
@@ -442,7 +462,7 @@ export class TranslateService implements ITranslateService {
         return this.parser.interpolate(translations, interpolateParams);
     }
 
-    private runInterpolationOnArray(
+    protected runInterpolationOnArray(
         translations: InterpolatableTranslation,
         interpolateParams: InterpolationParameters | undefined,
     ) {
@@ -451,7 +471,7 @@ export class TranslateService implements ITranslateService {
         );
     }
 
-    private runInterpolationOnDict(
+    protected runInterpolationOnDict(
         translations: InterpolatableTranslationObject,
         interpolateParams: InterpolationParameters | undefined,
     ) {
@@ -477,7 +497,7 @@ export class TranslateService implements ITranslateService {
             : this.getParsedResultForKey(key, interpolateParams);
     }
 
-    private getParsedResultForArray(
+    protected getParsedResultForArray(
         key: string[],
         interpolateParams: InterpolationParameters | undefined,
     ) {
@@ -514,7 +534,7 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
-            throw new Error(`Parameter "key" is required and cannot be empty`);
+            return of("");
         }
         // check if we are loading a new translation to use
         if (this.pending) {
@@ -593,7 +613,7 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
     ): Translation {
         if (!isDefinedAndNotNull(key) || key.length === 0) {
-            throw new Error('Parameter "key" is required and cannot be empty');
+            return "";
         }
 
         const result = this.getParsedResult(key, interpolateParams);
@@ -710,7 +730,7 @@ export class TranslateService implements ITranslateService {
 
     /**
      * Sets the  language to use as a fallback
-     * @deprecated use setFallbackLanguage()
+     * @deprecated use setFallbackLang()
      */
     public setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject> {
         return this.setFallbackLang(lang);

@@ -8,9 +8,9 @@ import {
     TranslateService,
     Translation,
     TranslationObject,
-    provideTranslateService,
     provideTranslateLoader,
 } from "../public-api";
+import { provideTestableTranslateService, TestableTranslateService } from "./test-helpers";
 
 const translations: TranslationObject = { TEST: "This is a test" };
 
@@ -22,17 +22,19 @@ class FakeLoader implements TranslateLoader {
 }
 
 describe("TranslateLoader", () => {
-    let translate: TranslateService;
+    let translate: TestableTranslateService;
 
     it("should be able to provide TranslateStaticLoader", () => {
         TestBed.configureTestingModule({
-            providers: [provideTranslateService({}), provideTranslateLoader(FakeLoader)],
+            providers: [
+                provideTestableTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
         });
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
 
         expect(translate).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof FakeLoader).toBeTruthy();
+        expect(translate.getCurrentLoader()).toBeDefined();
+        expect(translate.getCurrentLoader() instanceof FakeLoader).toBeTruthy();
 
         // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use("en");
@@ -52,15 +54,14 @@ describe("TranslateLoader", () => {
 
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({}),
-                { provide: TranslateLoader, useClass: CustomLoader },
+                provideTestableTranslateService({ loader: provideTranslateLoader(CustomLoader) }),
             ],
         });
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
 
         expect(translate).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof CustomLoader).toBeTruthy();
+        expect(translate.getCurrentLoader()).toBeDefined();
+        expect(translate.getCurrentLoader() instanceof CustomLoader).toBeTruthy();
 
         // the lang to use, if the lang isn't available, it will use the current loader to get them
         translate.use("en");
@@ -73,13 +74,17 @@ describe("TranslateLoader", () => {
 
     it("TranslateNoOpLoader should return empty object", () => {
         TestBed.configureTestingModule({
-            providers: [provideTranslateService(), provideTranslateLoader(TranslateNoOpLoader)],
+            providers: [
+                provideTestableTranslateService({
+                    loader: provideTranslateLoader(TranslateNoOpLoader),
+                }),
+            ],
         });
-        translate = TestBed.inject(TranslateService);
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
 
         expect(translate).toBeDefined();
-        expect(translate.currentLoader).toBeDefined();
-        expect(translate.currentLoader instanceof TranslateNoOpLoader).toBeTruthy();
+        expect(translate.getCurrentLoader()).toBeDefined();
+        expect(translate.getCurrentLoader() instanceof TranslateNoOpLoader).toBeTruthy();
 
         translate.use("en").subscribe((res: InterpolatableTranslationObject) => {
             expect(res as object).toEqual({});
