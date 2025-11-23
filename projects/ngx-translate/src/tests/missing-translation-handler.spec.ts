@@ -108,7 +108,7 @@ describe("MissingTranslationHandler", () => {
         });
     });
 
-    it("should return the key when using MissingTranslationHandler & the handler returns nothing", () => {
+    it("should return the key when using MissingTranslationHandler & the handler returns undefined", () => {
         class MissingUndef implements MissingTranslationHandler {
             handle(
                 params: MissingTranslationHandlerParams,
@@ -128,6 +128,28 @@ describe("MissingTranslationHandler", () => {
                 jasmine.objectContaining({ key: "nonExistingKey" }),
             );
             expect(res).toEqual("nonExistingKey");
+        });
+    });
+
+    it("can use empty string as result", () => {
+        class MissingUndef implements MissingTranslationHandler {
+            handle(
+                params: MissingTranslationHandlerParams,
+            ): StrictTranslation | Observable<StrictTranslation> {
+                void params;
+                return "";
+            }
+        }
+
+        prepare(MissingUndef);
+        translate.use("en");
+        spyOn(missingTranslationHandler, "handle").and.callThrough();
+
+        translate.get("nonExistingKey").subscribe((res: Translation) => {
+            expect(missingTranslationHandler.handle).toHaveBeenCalledWith(
+                jasmine.objectContaining({ key: "nonExistingKey" }),
+            );
+            expect(res).toEqual("");
         });
     });
 
