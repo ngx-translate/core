@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
+import { defer, EMPTY, firstValueFrom, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
     InterpolationParameters,
@@ -1248,3 +1248,115 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
         });
     });
 });
+
+describe("TranslateService - Override language support", () => {
+    let translate: TestableTranslateService
+    const translationStatic: any = {
+        en: {
+            TEST: 'English',
+            parent: {
+                child: 'test-en'
+            }
+        },
+        nl: {
+            TEST: 'Nederlands',
+            parent: {
+                child: 'test-nl'
+            }
+        }
+    }
+    class FakeMultiLangLoader implements TranslateLoader {
+        getTranslation(lang: string): Observable<TranslationObject> {
+            return of(translationStatic[lang]);
+        }
+    }
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTestableTranslateService({ loader: provideTranslateLoader(FakeMultiLangLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService) as TestableTranslateService;
+    });
+
+    it("loadTranslation - should load the additional language if not done already", async () => {
+        translate.use('en')
+
+        const result = translate.loadTranslations('nl')
+        expect(result).toBeDefined()
+
+        const values = await firstValueFrom(result)
+        expect(values as TranslationObject).toEqual(translationStatic.nl as TranslationObject)
+    })
+
+
+    it("getTranslations - should return if loaded", async () => {
+        translate.use('en')
+
+
+        const unloadedTranslations = translate.getTranslations('nl')
+
+        await firstValueFrom(translate.loadTranslations('nl'))
+
+        const translations = translate.getTranslations('nl')
+
+        expect(unloadedTranslations).toBeUndefined()
+        expect(translations).toBeDefined()
+        expect(translations as any).toEqual(translationStatic.nl)
+    })
+
+    it("instant - should return the key when additional language isn't loaded", async () => {
+        translate.use('en')
+
+        const fallbackResult = translate.instant('TEST', undefined, 'nl')
+        const fallbackResultTwo = translate.instant('parent.child', undefined, 'nl')
+
+        expect(fallbackResult).toEqual('TEST')
+        expect(fallbackResultTwo).toEqual('parent.child')
+    })
+
+    it("instant - should return the correct translation value when additional language is loaded", async () => {
+        translate.use('en')
+        translate.setFallbackLang('en')
+
+        await firstValueFrom(translate.loadTranslations('nl'))
+
+        const correctResult = translate.instant('TEST', undefined, 'nl')
+        const correctResultTwo = translate.instant('parent.child', undefined, 'nl')
+
+        expect(correctResult).toEqual('Nederlands')
+        expect(correctResultTwo).toEqual('test-nl')
+    })
+
+    it("getParsedResult - should parse key correctly for overriden translation", async () => {
+        translate.use('en')
+        translate.setFallbackLang('en')
+
+        await firstValueFrom(translate.loadTranslations('nl'))
+
+        const normalTranslation = translate.getParsedResult('TEST')
+        const overridenTranslation = translate.getParsedResult('TEST', undefined, 'nl')
+
+
+        expect(normalTranslation as string).toEqual('English')
+        expect(overridenTranslation as string).toEqual('Nederlands')
+    })
+
+    it("get - should return overriden language translation correctly", async () => {
+        translate.use('en')
+        translate.setFallbackLang('en')
+
+        await firstValueFrom(translate.loadTranslations('nl'))
+
+        const normalTranslation = await firstValueFrom(translate.get('TEST'))
+        const overridenTranslation = await firstValueFrom(translate.get('TEST', undefined, 'nl'))
+
+
+        expect(normalTranslation as Translation)
+            .toEqual('English')
+
+        expect(overridenTranslation as Translation)
+            .toEqual('Nederlands')
+    })
+})
