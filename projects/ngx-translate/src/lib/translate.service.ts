@@ -165,21 +165,27 @@ export class TranslateService implements ITranslateService {
             this.store.setCurrentLang(lang, false);
         }
 
-        const pending = this.loadOrExtendLanguage(lang);
-        if (isObservable(pending)) {
-            pending.pipe(take(1)).subscribe({
-                next: () => {
-                    this.changeLang(lang);
-                },
-                error: () => {
-                    /* ignore here - use can handle it */
-                },
-            });
-            return pending;
-        }
+        const loadingLanguage = this.loadTranslations(lang);
+        loadingLanguage.pipe(take(1)).subscribe({
+            next: () => {
+                this.changeLang(lang);
+            },
+            error: () => {
+                /* ignore here - use can handle it */
+            },
+        });
 
-        this.changeLang(lang);
-        return of(this.store.getTranslations(lang));
+        return loadingLanguage;
+    }
+
+    /**
+     * Load and get a specific language without changing the current language
+     */
+    public loadTranslations(lang: Language): Observable<DeepReadonly<InterpolatableTranslationObject>> {
+        const pending = this.loadOrExtendLanguage(lang);
+
+        return isObservable(pending)
+            ? pending : of(this.store.getTranslations(lang));
     }
 
     /**

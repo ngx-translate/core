@@ -93,6 +93,9 @@ export abstract class ITranslateService {
     public abstract getTranslations(
         language: Language
     ): DeepReadonly<InterpolatableTranslationObject>
+    public abstract loadTranslations(
+        lang: Language
+    ): Observable<DeepReadonly<InterpolatableTranslationObject>>
 
     public abstract getParsedResult(
         key: string | string[],
