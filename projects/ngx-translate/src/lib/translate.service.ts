@@ -280,8 +280,9 @@ export class TranslateService implements ITranslateService {
     protected getParsedResultForKey(
         key: string,
         interpolateParams?: InterpolationParameters,
+        overrideLang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        const textToInterpolate = this.getTextToInterpolate(key);
+        const textToInterpolate = this.getTextToInterpolate(key, overrideLang);
 
         if (isDefinedAndNotNull(textToInterpolate)) {
             return this.runInterpolation(textToInterpolate, interpolateParams);
@@ -303,8 +304,11 @@ export class TranslateService implements ITranslateService {
         return this.store.getFallbackLang();
     }
 
-    protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
-        return this.store.getTranslation(key);
+    protected getTextToInterpolate(
+        key: string,
+        overrideLang?: Language,
+    ): InterpolatableTranslation | undefined {
+        return this.store.getTranslation(key, overrideLang);
     }
 
     protected runInterpolation(
@@ -355,21 +359,23 @@ export class TranslateService implements ITranslateService {
     public getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        overrideLang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
         return key instanceof Array
-            ? this.getParsedResultForArray(key, interpolateParams)
-            : this.getParsedResultForKey(key, interpolateParams);
+            ? this.getParsedResultForArray(key, interpolateParams, overrideLang)
+            : this.getParsedResultForKey(key, interpolateParams, overrideLang);
     }
 
     protected getParsedResultForArray(
         key: string[],
         interpolateParams: InterpolationParameters | undefined,
+        overrideLang?: Language
     ) {
         const result: Record<string, StrictTranslation | Observable<StrictTranslation>> = {};
 
         let observables = false;
         for (const k of key) {
-            result[k] = this.getParsedResultForKey(k, interpolateParams);
+            result[k] = this.getParsedResultForKey(k, interpolateParams, overrideLang);
             observables = observables || isObservable(result[k]);
         }
 
@@ -396,21 +402,22 @@ export class TranslateService implements ITranslateService {
     public get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        overrideLang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             return of("");
         }
 
         // check if we are loading a new translation to use
-        if (this.lastUseLanguage && this.loadingTranslations[this.lastUseLanguage]) {
-            return this.loadingTranslations[this.store.getCurrentLang()].pipe(
+        if (this.lastUseLanguage && this.loadingTranslations[overrideLang ?? this.lastUseLanguage]) {
+            return this.loadingTranslations[overrideLang ?? this.store.getCurrentLang()].pipe(
                 concatMap(() => {
-                    return makeObservable(this.getParsedResult(key, interpolateParams));
+                    return makeObservable(this.getParsedResult(key, interpolateParams, overrideLang));
                 }),
             );
         }
 
-        return makeObservable(this.getParsedResult(key, interpolateParams));
+        return makeObservable(this.getParsedResult(key, interpolateParams, overrideLang));
     }
 
     /**
@@ -445,6 +452,7 @@ export class TranslateService implements ITranslateService {
     public stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        overrideLang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
@@ -454,7 +462,7 @@ export class TranslateService implements ITranslateService {
             defer(() => this.get(key, interpolateParams)),
             this.onLangChange.pipe(
                 switchMap(() => {
-                    const res = this.getParsedResult(key, interpolateParams);
+                    const res = this.getParsedResult(key, interpolateParams, overrideLang);
                     return makeObservable(res);
                 }),
             ),
@@ -469,12 +477,13 @@ export class TranslateService implements ITranslateService {
     public instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        overrideLang?: Language,
     ): Translation {
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             return "";
         }
 
-        const result = this.getParsedResult(key, interpolateParams);
+        const result = this.getParsedResult(key, interpolateParams, overrideLang);
 
         return isObservable(result) ? this.keyToObject(key) : result;
     }

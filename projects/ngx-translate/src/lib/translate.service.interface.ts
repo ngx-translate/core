@@ -1,5 +1,6 @@
 import { InterpolateFunction } from "./translate.parser";
 import { Observable } from "rxjs";
+import { DeepReadonly } from "./translate.store";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpolationParameters = Record<string, any>;
@@ -89,6 +90,9 @@ export abstract class ITranslateService {
         translations: TranslationObject,
         shouldMerge?: boolean,
     ): void;
+    public abstract getTranslations(
+        language: Language
+    ): DeepReadonly<InterpolatableTranslationObject>
 
     public abstract getParsedResult(
         key: string | string[],
