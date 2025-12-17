@@ -119,8 +119,11 @@ export class TranslateStore {
         delete this.translations[lang];
     }
 
-    public getTranslation(key: string): InterpolatableTranslation {
-        let text = this.getValue(this.currentLang, key);
+    public getTranslation(
+        key: string,
+        overrideLanguage?: Language,
+    ): InterpolatableTranslation {
+        let text = this.getValue(overrideLanguage ?? this.currentLang, key);
 
         if (
             (text === undefined || text === null) &&
