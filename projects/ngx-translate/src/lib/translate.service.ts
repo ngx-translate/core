@@ -458,7 +458,6 @@ export class TranslateService implements ITranslateService {
     public stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
-        overrideLang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
@@ -468,7 +467,7 @@ export class TranslateService implements ITranslateService {
             defer(() => this.get(key, interpolateParams)),
             this.onLangChange.pipe(
                 switchMap(() => {
-                    const res = this.getParsedResult(key, interpolateParams, overrideLang);
+                    const res = this.getParsedResult(key, interpolateParams);
                     return makeObservable(res);
                 }),
             ),
