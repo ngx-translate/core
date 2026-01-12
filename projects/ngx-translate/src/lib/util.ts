@@ -154,7 +154,7 @@ export function getValue(target: unknown, key: string): unknown {
             }
 
             if (isArray(target)) {
-                const index = parseInt(key, 10);
+                const index = key === "length" ? key : parseInt(key, 10);
                 if (
                     isDefined(target[index]) &&
                     (isDict(target[index]) || isArray(target[index]) || isLastKey)
