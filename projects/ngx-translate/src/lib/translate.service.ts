@@ -1,6 +1,16 @@
-import { inject, Injectable, InjectionToken } from "@angular/core";
-import { concat, defer, finalize, forkJoin, isObservable, Observable, of, tap } from "rxjs";
-import { concatMap, map, shareReplay, switchMap, take } from "rxjs/operators";
+import {
+    computed,
+    DestroyRef,
+    inject,
+    Injectable,
+    InjectionToken,
+    isSignal,
+    Signal,
+    signal,
+} from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { concat, defer, finalize, forkJoin, isObservable, merge, Observable, of, tap } from "rxjs";
+import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
@@ -68,6 +78,12 @@ export class TranslateService implements ITranslateService {
     protected readonly extend: boolean = false;
 
     /**
+     * Internal counter that increments on language/translation/fallback changes.
+     * Used to trigger reactivity in the `translate()` signal method.
+     */
+    private readonly refreshCounter = signal(0);
+
+    /**
      * An Observable to listen to translation change events
      * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
      *     // do something
@@ -97,6 +113,25 @@ export class TranslateService implements ITranslateService {
         return this.store.onFallbackLangChange;
     }
 
+    /**
+     * A combined Observable that emits whenever translations might need to be refreshed.
+     * This includes: language changes, translation updates for the current or fallback language,
+     * and fallback language changes.
+     */
+    get onTranslationRefresh(): Observable<void> {
+        return merge(
+            this.onTranslationChange.pipe(
+                filter(
+                    (event) =>
+                        event.lang === this.getCurrentLang() ||
+                        event.lang === this.getFallbackLang(),
+                ),
+            ),
+            this.onLangChange,
+            this.onFallbackLangChange,
+        ).pipe(map(() => void 0));
+    }
+
     constructor() {
         const config: TranslateServiceConfig = {
             extend: false,
@@ -118,6 +153,11 @@ export class TranslateService implements ITranslateService {
         if (config.extend) {
             this.extend = true;
         }
+
+        // Subscribe to change events to update the state change counter for reactivity
+        this.onTranslationRefresh
+            .pipe(takeUntilDestroyed(inject(DestroyRef)))
+            .subscribe(() => this.refreshCounter.update((v) => v + 1));
     }
 
     /**
@@ -477,6 +517,50 @@ export class TranslateService implements ITranslateService {
         const result = this.getParsedResult(key, interpolateParams);
 
         return isObservable(result) ? this.keyToObject(key) : result;
+    }
+
+    /**
+     * Returns a Signal that provides the translated value and automatically updates
+     * when the language changes, translations are updated, or when the input signals change.
+     *
+     * @param key - The translation key, either as a string or a Signal<string>
+     * @param params - Optional interpolation parameters, either as an object or a Signal
+     * @returns A Signal that emits the translated value
+     *
+     * @example
+     * // Static key and params
+     * title = this.translate.translate('page.title');
+     *
+     * @example
+     * // Reactive key
+     * key = signal('greeting');
+     * message = this.translate.translate(this.key);
+     *
+     * @example
+     * // Reactive params
+     * userName = signal('John');
+     * params = computed(() => ({ name: this.userName() }));
+     * greeting = this.translate.translate('hello', this.params);
+     */
+    public translate(
+        key: string | Signal<string>,
+        params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
+    ): Signal<Translation | TranslationObject> {
+        return computed(() => {
+            // Track state changes for reactivity on lang/translation/fallback changes
+            this.refreshCounter();
+
+            // Get current values, unwrapping signals if needed
+            const currentKey = isSignal(key) ? key() : key;
+            let currentParams: InterpolationParameters | undefined;
+            if (params !== undefined) {
+                currentParams = isSignal(params)
+                    ? (params as Signal<InterpolationParameters | undefined>)()
+                    : params;
+            }
+
+            return this.instant(currentKey, currentParams);
+        });
     }
 
     protected keyToObject(key: string | string[]) {

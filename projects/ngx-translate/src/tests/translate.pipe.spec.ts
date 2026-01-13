@@ -1,6 +1,4 @@
-import { ChangeDetectorRef } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { Mock } from "ts-mocks";
 import {
     provideTranslateLoader,
     provideTranslateService,
@@ -11,25 +9,14 @@ import { DelayedFakeLoader } from "./test-helpers";
 
 describe("TranslatePipe (unit)", () => {
     let translate: TranslateService;
-    let ref: ChangeDetectorRef;
     let translatePipe: TranslatePipe;
 
     beforeEach(() => {
-        ref = new Mock<ChangeDetectorRef>({
-            markForCheck: () => {
-                /*empty*/
-            },
-        }).Object;
-
         TestBed.configureTestingModule({
             providers: [
                 provideTranslateService({
                     loader: provideTranslateLoader(DelayedFakeLoader),
                 }),
-                {
-                    provide: ChangeDetectorRef,
-                    useValue: ref,
-                },
                 {
                     provide: TranslatePipe,
                     useClass: TranslatePipe,
@@ -38,9 +25,7 @@ describe("TranslatePipe (unit)", () => {
         });
 
         translate = TestBed.inject(TranslateService);
-        translatePipe = TestBed.inject(TranslatePipe); // can't create the pipe with new because of DI
-
-        spyOn(translatePipe, "updateValue").and.callThrough();
+        translatePipe = TestBed.inject(TranslatePipe);
     });
 
     it("is defined", () => {
@@ -56,12 +41,12 @@ describe("TranslatePipe (unit)", () => {
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
         });
 
-        it("should call markForChanges when it translates a string", () => {
+        it("should return the translated value", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.use("en");
 
-            translatePipe.transform("TEST");
-            expect(ref.markForCheck).toHaveBeenCalled();
+            const result = translatePipe.transform("TEST");
+            expect(result).toEqual("This is a test");
         });
 
         it("should translate a string with object parameters", () => {
@@ -152,21 +137,16 @@ describe("TranslatePipe (unit)", () => {
             expect(translatePipe.transform("TEST", { param: "with param" })).toEqual(
                 "This is a test with param",
             );
-            expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
-            // same value, shouldn't call 'updateValue' again
+            // same value, should return cached result
             expect(translatePipe.transform("TEST", { param: "with param" })).toEqual(
                 "This is a test with param",
             );
-            expect(translatePipe.updateValue).toHaveBeenCalledTimes(1);
 
-            // different param: should call 'updateValue'
+            // different param: should return updated value
             expect(translatePipe.transform("TEST", { param: "with param2" })).toEqual(
                 "This is a test with param2",
             );
-            expect(translatePipe.updateValue).toHaveBeenCalledTimes(2);
-
-            expect(ref.markForCheck).toHaveBeenCalledTimes(2);
         });
 
         it("should throw if you don't give an object parameter", () => {

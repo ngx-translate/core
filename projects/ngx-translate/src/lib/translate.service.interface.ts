@@ -1,4 +1,5 @@
 import { InterpolateFunction } from "./translate.parser";
+import { Signal } from "@angular/core";
 import { Observable } from "rxjs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,6 +49,13 @@ export abstract class ITranslateService {
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
     public abstract readonly onFallbackLangChange: Observable<FallbackLangChangeEvent>;
 
+    /**
+     * A combined Observable that emits whenever translations might need to be refreshed.
+     * This includes: language changes, translation updates for the current language,
+     * and fallback language changes.
+     */
+    public abstract readonly onTranslationRefresh: Observable<void>;
+
     public abstract use(lang: Language): Observable<InterpolatableTranslationObject>;
 
     public abstract setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject>;
@@ -62,6 +70,19 @@ export abstract class ITranslateService {
         key: string | string[],
         interpolateParams?: InterpolationParameters,
     ): Translation;
+
+    /**
+     * Returns a Signal that provides the translated value and automatically updates
+     * when the language changes, translations are updated, or when the input signals change.
+     *
+     * @param key - The translation key, either as a string or a Signal<string>
+     * @param params - Optional interpolation parameters, either as an object or a Signal
+     * @returns A Signal that emits the translated value
+     */
+    public abstract translate(
+        key: string | Signal<string>,
+        params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
+    ): Signal<Translation | TranslationObject>;
 
     public abstract stream(
         key: string | string[],

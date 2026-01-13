@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal, Signal, computed } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
@@ -1246,5 +1246,394 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
             const configTranslate = TestBed.inject(TranslateService);
             expect(configTranslate.getFallbackLang()).toBe("en");
         });
+    });
+});
+
+describe("TranslateService.translate() Signal", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    describe("with static key", () => {
+        it("should return a signal with the translated value", () => {
+            translate.setTranslation("en", { HELLO: "Hello" });
+            translate.use("en");
+
+            const result = translate.translate("HELLO");
+
+            expect(result()).toEqual("Hello");
+        });
+
+        it("should return key when translation is not found", () => {
+            translate.setTranslation("en", {});
+            translate.use("en");
+
+            const result = translate.translate("MISSING_KEY");
+
+            expect(result()).toEqual("MISSING_KEY");
+        });
+
+        it("should return empty string for empty key", () => {
+            translate.use("en");
+
+            const result = translate.translate("");
+
+            expect(result()).toEqual("");
+        });
+
+        it("should handle nested keys", () => {
+            translate.setTranslation("en", { page: { title: "Page Title" } });
+            translate.use("en");
+
+            const result = translate.translate("page.title");
+
+            expect(result()).toEqual("Page Title");
+        });
+    });
+
+    describe("with static params", () => {
+        it("should interpolate parameters", () => {
+            translate.setTranslation("en", { GREETING: "Hello, {{name}}!" });
+            translate.use("en");
+
+            const result = translate.translate("GREETING", { name: "World" });
+
+            expect(result()).toEqual("Hello, World!");
+        });
+
+        it("should handle nested parameters", () => {
+            translate.setTranslation("en", { MSG: "User: {{user.name}}" });
+            translate.use("en");
+
+            const result = translate.translate("MSG", { user: { name: "John" } });
+
+            expect(result()).toEqual("User: John");
+        });
+
+        it("should handle multiple parameters", () => {
+            translate.setTranslation("en", { MSG: "{{first}} and {{second}}" });
+            translate.use("en");
+
+            const result = translate.translate("MSG", { first: "One", second: "Two" });
+
+            expect(result()).toEqual("One and Two");
+        });
+    });
+
+    describe("with reactive key (Signal)", () => {
+        it("should update when key signal changes", () => {
+            translate.setTranslation("en", {
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+            translate.use("en");
+
+            const keySignal = signal("KEY1");
+            const result = translate.translate(keySignal);
+
+            expect(result()).toEqual("Value 1");
+
+            keySignal.set("KEY2");
+            expect(result()).toEqual("Value 2");
+        });
+
+        it("should handle dynamic key with params", () => {
+            translate.setTranslation("en", {
+                HELLO: "Hello, {{name}}!",
+                BYE: "Goodbye, {{name}}!",
+            });
+            translate.use("en");
+
+            const keySignal = signal("HELLO");
+            const result = translate.translate(keySignal, { name: "User" });
+
+            expect(result()).toEqual("Hello, User!");
+
+            keySignal.set("BYE");
+            expect(result()).toEqual("Goodbye, User!");
+        });
+    });
+
+    describe("with reactive params (Signal)", () => {
+        it("should update when params signal changes", () => {
+            translate.setTranslation("en", { GREETING: "Hello, {{name}}!" });
+            translate.use("en");
+
+            const paramsSignal = signal<Record<string, string>>({ name: "Alice" });
+            const result = translate.translate("GREETING", paramsSignal);
+
+            expect(result()).toEqual("Hello, Alice!");
+
+            paramsSignal.set({ name: "Bob" });
+            expect(result()).toEqual("Hello, Bob!");
+        });
+
+        it("should handle undefined params signal value", () => {
+            translate.setTranslation("en", { MSG: "Message: {{value}}" });
+            translate.use("en");
+
+            const paramsSignal = signal<Record<string, string> | undefined>(undefined);
+            const result = translate.translate("MSG", paramsSignal);
+
+            expect(result()).toEqual("Message: {{value}}");
+
+            paramsSignal.set({ value: "test" });
+            expect(result()).toEqual("Message: test");
+        });
+    });
+
+    describe("with both reactive key and params", () => {
+        it("should update when either signal changes", () => {
+            translate.setTranslation("en", {
+                HELLO: "Hello, {{name}}!",
+                BYE: "Goodbye, {{name}}!",
+            });
+            translate.use("en");
+
+            const keySignal = signal("HELLO");
+            const paramsSignal = signal<Record<string, string>>({ name: "User" });
+            const result = translate.translate(keySignal, paramsSignal);
+
+            expect(result()).toEqual("Hello, User!");
+
+            // Change params
+            paramsSignal.set({ name: "Friend" });
+            expect(result()).toEqual("Hello, Friend!");
+
+            // Change key
+            keySignal.set("BYE");
+            expect(result()).toEqual("Goodbye, Friend!");
+        });
+    });
+
+    describe("reactivity to language changes", () => {
+        it("should update when language changes", () => {
+            translate.setTranslation("en", { TEST: "English" });
+            translate.setTranslation("de", { TEST: "German" });
+            translate.use("en");
+
+            const result = translate.translate("TEST");
+
+            expect(result()).toEqual("English");
+
+            translate.use("de");
+            expect(result()).toEqual("German");
+        });
+
+        it("should update with params when language changes", () => {
+            translate.setTranslation("en", { GREETING: "Hello, {{name}}!" });
+            translate.setTranslation("de", { GREETING: "Hallo, {{name}}!" });
+            translate.use("en");
+
+            const result = translate.translate("GREETING", { name: "World" });
+
+            expect(result()).toEqual("Hello, World!");
+
+            translate.use("de");
+            expect(result()).toEqual("Hallo, World!");
+        });
+    });
+
+    describe("reactivity to translation changes", () => {
+        it("should update when translations are modified", () => {
+            translate.setTranslation("en", { TEST: "Original" });
+            translate.use("en");
+
+            const result = translate.translate("TEST");
+
+            expect(result()).toEqual("Original");
+
+            translate.setTranslation("en", { TEST: "Updated" });
+            expect(result()).toEqual("Updated");
+        });
+
+        it("should update when using set()", () => {
+            translate.setTranslation("en", { TEST: "Original" });
+            translate.use("en");
+
+            const result = translate.translate("TEST");
+
+            expect(result()).toEqual("Original");
+
+            translate.set("TEST", "Modified", "en");
+            expect(result()).toEqual("Modified");
+        });
+    });
+
+    describe("reactivity to fallback language changes", () => {
+        it("should update when fallback language changes", () => {
+            translate.setTranslation("en", {});
+            translate.setTranslation("de", { TEST: "German fallback" });
+            translate.setTranslation("fr", { TEST: "French fallback" });
+            translate.use("en");
+            translate.setFallbackLang("de");
+
+            const result = translate.translate("TEST");
+
+            expect(result()).toEqual("German fallback");
+
+            translate.setFallbackLang("fr");
+            expect(result()).toEqual("French fallback");
+        });
+    });
+
+    describe("with array keys", () => {
+        it("should return an object with multiple translations", () => {
+            translate.setTranslation("en", {
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+            translate.use("en");
+
+            const result = translate.translate(["KEY1", "KEY2"] as unknown as string);
+
+            expect(result()).toEqual({ KEY1: "Value 1", KEY2: "Value 2" });
+        });
+    });
+
+    describe("edge cases", () => {
+        it("should handle rapid signal changes", () => {
+            translate.setTranslation("en", {
+                A: "Alpha",
+                B: "Beta",
+                C: "Charlie",
+            });
+            translate.use("en");
+
+            const keySignal = signal("A");
+            const result = translate.translate(keySignal);
+
+            keySignal.set("B");
+            keySignal.set("C");
+            keySignal.set("A");
+            keySignal.set("B");
+
+            expect(result()).toEqual("Beta");
+        });
+
+        it("should work with computed signals as key", () => {
+            translate.setTranslation("en", {
+                "greeting.formal": "Good day",
+                "greeting.casual": "Hey",
+            });
+            translate.use("en");
+
+            const isFormal = signal(true);
+            const keySignal = computed(() => (isFormal() ? "greeting.formal" : "greeting.casual"));
+            const result = translate.translate(keySignal);
+
+            expect(result()).toEqual("Good day");
+
+            isFormal.set(false);
+            expect(result()).toEqual("Hey");
+        });
+
+        it("should work with computed signals as params", () => {
+            translate.setTranslation("en", { MSG: "Count: {{count}}" });
+            translate.use("en");
+
+            const count = signal(0);
+            const paramsSignal = computed(() => ({ count: count() }));
+            const result = translate.translate("MSG", paramsSignal);
+
+            expect(result()).toEqual("Count: 0");
+
+            count.set(5);
+            expect(result()).toEqual("Count: 5");
+
+            count.set(100);
+            expect(result()).toEqual("Count: 100");
+        });
+    });
+});
+
+describe("TranslateService.onTranslationRefresh", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    it("should emit when language changes", (done) => {
+        translate.setTranslation("en", { TEST: "English" });
+        translate.setTranslation("fr", { TEST: "French" });
+        translate.use("en");
+
+        translate.onTranslationRefresh.subscribe(() => {
+            done();
+        });
+
+        translate.use("fr");
+    });
+
+    it("should emit when current language translations are updated", (done) => {
+        translate.setTranslation("en", { TEST: "Original" });
+        translate.use("en");
+
+        translate.onTranslationRefresh.subscribe(() => {
+            done();
+        });
+
+        translate.setTranslation("en", { TEST: "Updated" });
+    });
+
+    it("should emit when fallback language translations are updated", (done) => {
+        translate.setTranslation("en", {});
+        translate.setTranslation("de", { TEST: "German" });
+        translate.use("en");
+        translate.setFallbackLang("de");
+
+        // Skip initial emissions, wait for translation update
+        let emitCount = 0;
+        translate.onTranslationRefresh.subscribe(() => {
+            emitCount++;
+            if (emitCount === 1) {
+                done();
+            }
+        });
+
+        translate.setTranslation("de", { TEST: "Updated German" });
+    });
+
+    it("should emit when fallback language changes", (done) => {
+        translate.setTranslation("en", {});
+        translate.setTranslation("de", { TEST: "German" });
+        translate.setTranslation("fr", { TEST: "French" });
+        translate.use("en");
+        translate.setFallbackLang("de");
+
+        translate.onTranslationRefresh.subscribe(() => {
+            done();
+        });
+
+        translate.setFallbackLang("fr");
+    });
+
+    it("should NOT emit when unrelated language translations are updated", (done) => {
+        translate.setTranslation("en", { TEST: "English" });
+        translate.setTranslation("fr", { TEST: "French" });
+        translate.use("en");
+
+        let emitted = false;
+        translate.onTranslationRefresh.subscribe(() => {
+            emitted = true;
+        });
+
+        // Update French translations while English is current (and no fallback)
+        translate.setTranslation("fr", { TEST: "Updated French" });
+
+        // Give it a moment then check
+        setTimeout(() => {
+            expect(emitted).toBe(false);
+            done();
+        }, 50);
     });
 });
