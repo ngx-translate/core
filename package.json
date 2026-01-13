@@ -16,7 +16,7 @@
     },
     "private": true,
     "dependencies": {
-        "@angular-devkit/build-angular": "^20.3.10",
+        "@angular-devkit/build-angular": "^20.3.14",
         "@angular/common": "20.3.12",
         "@angular/compiler": "20.3.12",
         "@angular/core": "20.3.12",
@@ -34,7 +34,7 @@
         "@commitlint/cli": "20.1.0",
         "@commitlint/config-conventional": "20.0.0",
         "@types/jasmine": "5.1.13",
-        "angular-eslint": "^20.6.0",
+        "angular-eslint": "^20.7.0",
         "eslint": "9.39.1",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
