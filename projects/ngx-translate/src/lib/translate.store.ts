@@ -18,12 +18,6 @@ export type DeepReadonly<T> = {
 export class TranslateStore {
     protected _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
-    protected _onLangChange: Subject<LangChangeEvent> = new Subject<LangChangeEvent>();
-    protected _onFallbackLangChange: Subject<FallbackLangChangeEvent> =
-        new Subject<FallbackLangChangeEvent>();
-
-    protected fallbackLang: Language | null = null;
-    protected currentLang!: Language;
 
     protected translations: Record<Language, InterpolatableTranslationObject> = {};
     protected languages: Language[] = [];
@@ -52,59 +46,8 @@ export class TranslateStore {
         return this.languages;
     }
 
-    public getCurrentLang(): Language {
-        return this.currentLang;
-    }
-
-    public getFallbackLang(): Language | null {
-        return this.fallbackLang;
-    }
-
-    /**
-     * Changes the fallback lang
-     */
-    public setFallbackLang(lang: string, emitChange = true): void {
-        this.fallbackLang = lang;
-        if (emitChange) {
-            this._onFallbackLangChange.next({ lang: lang, translations: this.translations[lang] });
-        }
-    }
-
-    public setCurrentLang(lang: string, emitChange = true): void {
-        this.currentLang = lang;
-        if (emitChange) {
-            this._onLangChange.next({ lang: lang, translations: this.translations[lang] });
-        }
-    }
-
-    /**
-     * An Observable to listen to translation change events
-     * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
-     *     // do something
-     * });
-     */
     get onTranslationChange(): Observable<TranslationChangeEvent> {
         return this._onTranslationChange.asObservable();
-    }
-
-    /**
-     * An Observable to listen to lang change events
-     * onLangChange.subscribe((params: LangChangeEvent) => {
-     *     // do something
-     * });
-     */
-    get onLangChange(): Observable<LangChangeEvent> {
-        return this._onLangChange.asObservable();
-    }
-
-    /**
-     * An Observable to listen to fallback lang change events
-     * onFallbackLangChange.subscribe((params: FallbackLangChangeEvent) => {
-     *     // do something
-     * });
-     */
-    get onFallbackLangChange(): Observable<FallbackLangChangeEvent> {
-        return this._onFallbackLangChange.asObservable();
     }
 
     public addLanguages(languages: Language[]): void {
@@ -119,20 +62,7 @@ export class TranslateStore {
         delete this.translations[lang];
     }
 
-    public getTranslation(key: string): InterpolatableTranslation {
-        let text = this.getValue(this.currentLang, key);
-
-        if (
-            (text === undefined || text === null) &&
-            this.fallbackLang != null &&
-            this.fallbackLang !== this.currentLang
-        ) {
-            text = this.getValue(this.fallbackLang, key);
-        }
-        return text;
-    }
-
-    protected getValue(language: Language, key: string): InterpolatableTranslation {
+    public getTranslationValue(language: Language, key: string): InterpolatableTranslation {
         return getValue(this.getTranslations(language), key) as InterpolatableTranslation;
     }
 }

@@ -5,6 +5,7 @@ import { first, map, take, toArray } from "rxjs/operators";
 import {
     InterpolationParameters,
     LangChangeEvent,
+    provideChildTranslateService,
     provideTranslateLoader,
     provideTranslateService,
     TranslateLoader,
@@ -965,7 +966,7 @@ describe("TranslateService (isolate)", () => {
     };
 
     class StaticTranslateLoader implements TranslateLoader {
-        constructor(private translations: Record<string, TranslationObject>) {}
+        constructor(private translations: Record<string, TranslationObject>) { }
 
         getTranslation(lang: string): Observable<TranslationObject> {
             const translations = this.translations[lang];
@@ -983,13 +984,12 @@ describe("TranslateService (isolate)", () => {
         template: ` <div class="isolated-child">{{ "test" | translate }}</div> `,
         imports: [TranslatePipe],
         providers: [
-            TranslateModule.forChild({
-                isolate: true,
+            provideTranslateService({
                 loader: {
                     provide: TranslateLoader,
                     useFactory: () => new StaticTranslateLoader(translationsChild),
                 },
-            }).providers!,
+            }),
         ],
     })
     class IsolatedChildComponent {
@@ -1004,9 +1004,9 @@ describe("TranslateService (isolate)", () => {
         selector: "app-shared-child",
         template: ` <div class="shared-child">{{ "test" | translate }}</div> `,
         imports: [TranslatePipe],
-        providers: [TranslateModule.forChild({}).providers!],
+        providers: [provideChildTranslateService()],
     })
-    class SharedChildComponent {}
+    class SharedChildComponent { }
 
     @Component({
         standalone: true,
@@ -1028,9 +1028,7 @@ describe("TranslateService (isolate)", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
-                provideTranslateService({
-                    extend: true,
-                }),
+                provideTranslateService(),
                 {
                     provide: TranslateLoader,
                     useFactory: () => new StaticTranslateLoader(translationsRoot),

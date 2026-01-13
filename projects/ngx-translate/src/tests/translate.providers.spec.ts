@@ -12,7 +12,10 @@ import {
 } from "../lib/translate.providers";
 import { Observable, of } from "rxjs";
 
-import { TranslateService, TRANSLATE_SERVICE_CONFIG } from "../lib/translate.service";
+import {
+    TranslateService,
+    TRANSLATE_SERVICE_CONFIG,
+} from "../lib/translate.service";
 import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
 import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
 import {
@@ -100,56 +103,54 @@ describe("Translate Providers", () => {
         it("should provide child translate service with default config", () => {
             const providers = provideChildTranslateService();
             expect(providers).toEqual([
+                { provide: TranslateLoader, useClass: TranslateNoOpLoader },
+                { provide: TranslateCompiler, useClass: TranslateNoOpCompiler },
+                { provide: TranslateParser, useClass: TranslateDefaultParser },
+                {
+                    provide: MissingTranslationHandler,
+                    useClass: DefaultMissingTranslationHandler,
+                },
+                TranslateStore,
                 {
                     provide: TRANSLATE_SERVICE_CONFIG,
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: true,
+                        isRoot: false,
                     },
                 },
                 {
                     provide: TranslateService,
                     useClass: TranslateService,
-                    deps: [
-                        TranslateStore,
-                        TranslateLoader,
-                        TranslateCompiler,
-                        TranslateParser,
-                        MissingTranslationHandler,
-                        TRANSLATE_SERVICE_CONFIG,
-                    ],
                 },
             ]);
         });
 
         it("should provide child translate service with custom config", () => {
             const config: ChildTranslateServiceConfig = {
-                extend: false,
                 loader: provideTranslateLoader(TestTranslateLoader),
             };
             const providers = provideChildTranslateService(config);
             expect(providers).toEqual([
                 { provide: TranslateLoader, useClass: TestTranslateLoader },
+                { provide: TranslateCompiler, useClass: TranslateNoOpCompiler },
+                { provide: TranslateParser, useClass: TranslateDefaultParser },
+                {
+                    provide: MissingTranslationHandler,
+                    useClass: DefaultMissingTranslationHandler,
+                },
+                TranslateStore,
                 {
                     provide: TRANSLATE_SERVICE_CONFIG,
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: false,
+                        isRoot: false,
                     },
                 },
                 {
                     provide: TranslateService,
                     useClass: TranslateService,
-                    deps: [
-                        TranslateStore,
-                        TranslateLoader,
-                        TranslateCompiler,
-                        TranslateParser,
-                        MissingTranslationHandler,
-                        TRANSLATE_SERVICE_CONFIG,
-                    ],
                 },
             ]);
             expect(Array.isArray(providers)).toBe(true);
@@ -170,27 +171,18 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: false,
+                        isRoot: true,
                     },
                 },
                 {
                     provide: TranslateService,
                     useClass: TranslateService,
-                    deps: [
-                        TranslateStore,
-                        TranslateLoader,
-                        TranslateCompiler,
-                        TranslateParser,
-                        MissingTranslationHandler,
-                        TRANSLATE_SERVICE_CONFIG,
-                    ],
                 },
             ]);
         });
 
         it("should provide translate service with custom config", () => {
             const providers = provideTranslateService({
-                extend: true,
                 loader: provideTranslateLoader(TestTranslateLoader),
                 compiler: provideTranslateCompiler(TestTranslateCompiler),
                 parser: provideTranslateParser(TestTranslateParser),
@@ -209,20 +201,12 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
-                        extend: true,
+                        isRoot: true,
                     },
                 },
                 {
                     provide: TranslateService,
                     useClass: TranslateService,
-                    deps: [
-                        TranslateStore,
-                        TranslateLoader,
-                        TranslateCompiler,
-                        TranslateParser,
-                        MissingTranslationHandler,
-                        TRANSLATE_SERVICE_CONFIG,
-                    ],
                 },
             ]);
             expect(Array.isArray(providers)).toBe(true);

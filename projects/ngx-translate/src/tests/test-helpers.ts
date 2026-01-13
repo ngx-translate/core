@@ -34,6 +34,7 @@ export class FakeLoader implements TranslateLoader {
     }
 }
 
+@Injectable()
 export class TestableTranslateService extends TranslateService {
     public getCurrentLoader(): TranslateLoader {
         return this.currentLoader;

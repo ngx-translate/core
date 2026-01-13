@@ -32,37 +32,4 @@ export interface TranslateModuleConfig extends TranslateProviders {
     imports: [TranslatePipe, TranslateDirective],
     exports: [TranslatePipe, TranslateDirective],
 })
-export class TranslateModule {
-    /**
-     * Use this method in your root module to provide the TranslateService
-     */
-    static forRoot(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
-        return {
-            ngModule: TranslateModule,
-            providers: [
-                ...defaultProviders(
-                    {
-                        compiler: provideTranslateCompiler(TranslateNoOpCompiler),
-                        parser: provideTranslateParser(TranslateDefaultParser),
-                        loader: provideTranslateLoader(TranslateNoOpLoader),
-                        missingTranslationHandler: provideMissingTranslationHandler(
-                            DefaultMissingTranslationHandler,
-                        ),
-                        ...config,
-                    },
-                    true,
-                ),
-            ],
-        };
-    }
-
-    /**
-     * Use this method in your other (non-root) modules to import the directive/pipe
-     */
-    static forChild(config: TranslateModuleConfig = {}): ModuleWithProviders<TranslateModule> {
-        return {
-            ngModule: TranslateModule,
-            providers: [...defaultProviders(config, config.isolate ?? false)],
-        };
-    }
-}
+export class TranslateModule { }

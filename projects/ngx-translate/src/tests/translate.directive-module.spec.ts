@@ -6,7 +6,7 @@ import {
     ViewChild,
 } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { TranslateModule, TranslateService } from "../public-api";
+import { provideTranslateService, TranslateModule, TranslateService } from "../public-api";
 
 @Injectable()
 @Component({
@@ -53,8 +53,9 @@ describe("TranslateDirective (modules)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule.forRoot()],
+            imports: [TranslateModule],
             declarations: [AppComponent],
+            providers: [provideTranslateService()],
         });
         translate = TestBed.inject(TranslateService);
 

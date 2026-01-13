@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Injectable, Provider } from "@angul
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
+    provideTranslateService,
     TranslateLoader,
     TranslateModule,
     TranslateService,
@@ -17,7 +18,7 @@ import { DelayedFakeLoader } from "./test-helpers";
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `{{ "TEST" | translate }}`,
 })
-class AppComponent {}
+class AppComponent { }
 
 @Injectable()
 class FakeLoader implements TranslateLoader {
@@ -33,8 +34,9 @@ describe("TranslatePipe (module)", () => {
 
     const prepare = (loader?: Provider) => {
         TestBed.configureTestingModule({
-            imports: [
-                TranslateModule.forRoot({
+            imports: [TranslateModule],
+            providers: [
+                provideTranslateService({
                     loader: loader ?? { provide: TranslateLoader, useClass: FakeLoader },
                 }),
             ],

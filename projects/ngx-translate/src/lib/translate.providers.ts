@@ -1,4 +1,4 @@
-import { ClassProvider, Provider, Type } from "@angular/core";
+import { ClassProvider, inject, InjectionToken, Provider, Type } from "@angular/core";
 import {
     DefaultMissingTranslationHandler,
     MissingTranslationHandler,
@@ -21,13 +21,12 @@ export interface TranslateProviders {
     missingTranslationHandler?: Provider;
 }
 
-export interface ChildTranslateServiceConfig extends Partial<TranslateProviders> {
-    extend?: boolean;
-}
+export interface ChildTranslateServiceConfig extends Partial<TranslateProviders> { }
 
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
     lang?: Language;
+    isRoot?: boolean;
 
     /* @deprecated use `fallbackLang` */
     useDefaultLang?: boolean;
@@ -63,13 +62,26 @@ export function provideTranslateService(config: RootTranslateServiceConfig = {})
                 DefaultMissingTranslationHandler,
             ),
             ...config,
+            isRoot: true,
         },
         true,
     );
 }
 
 export function provideChildTranslateService(config: ChildTranslateServiceConfig = {}): Provider[] {
-    return defaultProviders({ extend: true, ...config }, false);
+    return defaultProviders(
+        {
+            compiler: provideTranslateCompiler(TranslateNoOpCompiler),
+            parser: provideTranslateParser(TranslateDefaultParser),
+            loader: provideTranslateLoader(TranslateNoOpLoader),
+            missingTranslationHandler: provideMissingTranslationHandler(
+                DefaultMissingTranslationHandler,
+            ),
+            ...config,
+            isRoot: false,
+        },
+        true,
+    );
 }
 
 export function defaultProviders(
@@ -108,7 +120,7 @@ export function defaultProviders(
     const serviceConfig: TranslateServiceConfig = {
         fallbackLang: config.fallbackLang ?? null,
         lang: config.lang,
-        extend: config.extend ?? false,
+        isRoot: config.isRoot ?? false,
     };
 
     providers.push({
@@ -119,14 +131,6 @@ export function defaultProviders(
     providers.push({
         provide: TranslateService,
         useClass: TranslateService,
-        deps: [
-            TranslateStore,
-            TranslateLoader,
-            TranslateCompiler,
-            TranslateParser,
-            MissingTranslationHandler,
-            TRANSLATE_SERVICE_CONFIG,
-        ],
     });
 
     return providers;

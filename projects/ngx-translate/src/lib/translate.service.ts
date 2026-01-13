@@ -9,9 +9,9 @@ import {
     signal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { concat, defer, finalize, forkJoin, isObservable, merge, Observable, of, tap } from "rxjs";
+import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
 import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
-import { MissingTranslationHandler } from "./missing-translation-handler";
+import { DefaultMissingTranslationHandler, MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
@@ -41,7 +41,7 @@ import {
 export interface TranslateServiceConfig {
     lang?: Language;
     fallbackLang?: Language | null;
-    extend: boolean;
+    isRoot: boolean;
 }
 
 export const TRANSLATE_SERVICE_CONFIG = new InjectionToken<TranslateServiceConfig>(
@@ -75,7 +75,17 @@ export class TranslateService implements ITranslateService {
     protected missingTranslationHandler = inject(MissingTranslationHandler);
     protected store: TranslateStore = inject(TranslateStore);
 
-    protected readonly extend: boolean = false;
+    protected readonly parent = inject(TranslateService, { optional: true, skipSelf: true });
+    protected readonly isRoot: boolean;
+
+    protected _onLangChange = new Subject<LangChangeEvent>();
+    protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
+    protected _currentLang!: Language;
+    protected _fallbackLang: Language | null = null;
+
+    protected getRoot(): TranslateService {
+        return this.parent ? this.parent.getRoot() : this;
+    }
 
     /**
      * Internal counter that increments on language/translation/fallback changes.
@@ -100,7 +110,10 @@ export class TranslateService implements ITranslateService {
      * });
      */
     get onLangChange(): Observable<LangChangeEvent> {
-        return this.store.onLangChange;
+        if (this.isRoot) {
+            return this._onLangChange.asObservable();
+        }
+        return this.parent ? this.parent.onLangChange : EMPTY;
     }
 
     /**
@@ -110,7 +123,10 @@ export class TranslateService implements ITranslateService {
      * });
      */
     get onFallbackLangChange(): Observable<FallbackLangChangeEvent> {
-        return this.store.onFallbackLangChange;
+        if (this.isRoot) {
+            return this._onFallbackLangChange.asObservable();
+        }
+        return this.parent ? this.parent.onFallbackLangChange : EMPTY;
     }
 
     /**
@@ -119,7 +135,7 @@ export class TranslateService implements ITranslateService {
      * and fallback language changes.
      */
     get onTranslationRefresh(): Observable<void> {
-        return merge(
+        const refresh$ = merge(
             this.onTranslationChange.pipe(
                 filter(
                     (event) =>
@@ -130,11 +146,16 @@ export class TranslateService implements ITranslateService {
             this.onLangChange,
             this.onFallbackLangChange,
         ).pipe(map(() => void 0));
+
+        if (this.isRoot) {
+            return refresh$;
+        }
+        return this.parent ? merge(refresh$, this.parent.onTranslationRefresh) : refresh$;
     }
 
     constructor() {
         const config: TranslateServiceConfig = {
-            extend: false,
+            isRoot: true,
             fallbackLang: null,
 
             ...inject<TranslateServiceConfig>(TRANSLATE_SERVICE_CONFIG, {
@@ -142,21 +163,43 @@ export class TranslateService implements ITranslateService {
             }),
         };
 
-        if (config.lang) {
-            this.use(config.lang);
+        this.isRoot = config.isRoot;
+
+        if (this.isRoot) {
+            if (config.lang) {
+                this.use(config.lang);
+            }
+            if (config.fallbackLang) {
+                this.setFallbackLang(config.fallbackLang);
+            }
+        } else {
+            // Child services should initially load the root's current and fallback languages
+            const currentLang = this.getCurrentLang();
+            if (currentLang) {
+                this.loadOrExtendLanguage(currentLang)?.subscribe();
+            }
+            const fallbackLang = this.getFallbackLang();
+            if (fallbackLang) {
+                this.loadOrExtendLanguage(fallbackLang)?.subscribe();
+            }
         }
 
-        if (config.fallbackLang) {
-            this.setFallbackLang(config.fallbackLang);
-        }
+        // Child services should load translations when the language changes on the root
+        this.onLangChange.pipe(takeUntilDestroyed()).subscribe((event) => {
+            if (!this.isRoot) {
+                this.loadOrExtendLanguage(event.lang)?.subscribe();
+            }
+        });
 
-        if (config.extend) {
-            this.extend = true;
-        }
+        this.onFallbackLangChange.pipe(takeUntilDestroyed()).subscribe((event) => {
+            if (!this.isRoot) {
+                this.loadOrExtendLanguage(event.lang)?.subscribe();
+            }
+        });
 
         // Subscribe to change events to update the state change counter for reactivity
         this.onTranslationRefresh
-            .pipe(takeUntilDestroyed(inject(DestroyRef)))
+            .pipe(takeUntilDestroyed())
             .subscribe(() => this.refreshCounter.update((v) => v + 1));
     }
 
@@ -165,16 +208,24 @@ export class TranslateService implements ITranslateService {
      * current language
      */
     public setFallbackLang(lang: Language): Observable<InterpolatableTranslationObject> {
-        if (!this.getFallbackLang()) {
+        if (!this.isRoot) {
+            return this.parent!.setFallbackLang(lang);
+        }
+
+        if (!this._fallbackLang) {
             // on init set the fallbackLang immediately, but do not emit a change yet
-            this.store.setFallbackLang(lang, false);
+            this._fallbackLang = lang;
         }
 
         const pending = this.loadOrExtendLanguage(lang);
         if (isObservable(pending)) {
             pending.pipe(take(1)).subscribe({
                 next: () => {
-                    this.store.setFallbackLang(lang);
+                    this._fallbackLang = lang;
+                    this._onFallbackLangChange.next({
+                        lang: lang,
+                        translations: this.store.getTranslations(lang),
+                    });
                 },
                 error: () => {
                     /* ignore here - user can handle it */
@@ -183,7 +234,11 @@ export class TranslateService implements ITranslateService {
             return pending;
         }
 
-        this.store.setFallbackLang(lang);
+        this._fallbackLang = lang;
+        this._onFallbackLangChange.next({
+            lang: lang,
+            translations: this.store.getTranslations(lang),
+        });
         return of(this.store.getTranslations(lang));
     }
 
@@ -195,14 +250,18 @@ export class TranslateService implements ITranslateService {
      * Changes the lang currently used
      */
     public use(lang: Language): Observable<InterpolatableTranslationObject> {
+        if (!this.isRoot) {
+            return this.parent!.use(lang);
+        }
+
         // remember the language that was called
         // we need this with multiple fast calls to use()
         // where translation loads might complete in random order
         this.lastUseLanguage = lang;
 
-        if (!this.getCurrentLang()) {
+        if (!this._currentLang) {
             // on init set the currentLang immediately, but do not emit a change yet
-            this.store.setCurrentLang(lang, false);
+            this._currentLang = lang;
         }
 
         const pending = this.loadOrExtendLanguage(lang);
@@ -228,12 +287,12 @@ export class TranslateService implements ITranslateService {
     protected loadOrExtendLanguage(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> | undefined {
-        // if this language is unavailable or extend is true, ask for it
-        if (!this.store.hasTranslationFor(lang) || this.extend) {
+        // if this language is unavailable, ask for it
+        if (!this.store.hasTranslationFor(lang)) {
             return this.loadAndCompileTranslations(lang);
         }
 
-        return undefined;
+        return of(this.store.getTranslations(lang));
     }
 
     /**
@@ -253,11 +312,12 @@ export class TranslateService implements ITranslateService {
             return;
         }
 
-        this.store.setCurrentLang(lang);
+        this._currentLang = lang;
+        this._onLangChange.next({ lang: lang, translations: this.store.getTranslations(lang) });
     }
 
     public getCurrentLang(): Language {
-        return this.store.getCurrentLang();
+        return this.isRoot ? this._currentLang : (this.parent?.getCurrentLang() ?? (undefined as any));
     }
 
     protected loadAndCompileTranslations(
@@ -270,7 +330,7 @@ export class TranslateService implements ITranslateService {
         const translations$ = this.currentLoader.getTranslation(lang).pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             tap((compiled: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, compiled, this.extend);
+                this.store.setTranslations(lang, compiled, false);
             }),
             finalize(() => {
                 delete this.loadingTranslations[lang];
@@ -303,7 +363,7 @@ export class TranslateService implements ITranslateService {
     ): void {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
-        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge || this.extend);
+        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge);
     }
 
     public getLangs(): readonly Language[] {
@@ -327,7 +387,8 @@ export class TranslateService implements ITranslateService {
             return this.runInterpolation(textToInterpolate, interpolateParams);
         }
 
-        const res = this.missingTranslationHandler.handle({
+        const handler = this.getMissingTranslationHandler();
+        const res = handler.handle({
             key,
             translateService: this,
             ...(interpolateParams !== undefined && { interpolateParams }),
@@ -336,15 +397,38 @@ export class TranslateService implements ITranslateService {
         return res !== undefined ? res : key;
     }
 
+    protected getMissingTranslationHandler(): MissingTranslationHandler {
+        if (!(this.missingTranslationHandler instanceof DefaultMissingTranslationHandler)) {
+            return this.missingTranslationHandler;
+        }
+        return this.parent?.getMissingTranslationHandler() || this.missingTranslationHandler;
+    }
+
     /**
      * Gets the fallback language. null if none is defined
      */
     public getFallbackLang(): Language | null {
-        return this.store.getFallbackLang();
+        return this.isRoot ? this._fallbackLang : (this.parent?.getFallbackLang() ?? null);
     }
 
     protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
-        return this.store.getTranslation(key);
+        const currentLang = this.getCurrentLang();
+        const fallbackLang = this.getFallbackLang();
+
+        // 1. Try own store (currentLang)
+        let res = this.store.getTranslationValue(currentLang, key);
+
+        // 2. Try own store (fallbackLang) - null values also trigger fallback
+        if (!isDefinedAndNotNull(res) && fallbackLang && fallbackLang !== currentLang) {
+            res = this.store.getTranslationValue(fallbackLang, key);
+        }
+
+        if (res !== undefined) {
+            return res;
+        }
+
+        // 3. Try parent
+        return this.parent?.getTextToInterpolate(key);
     }
 
     protected runInterpolation(
@@ -443,7 +527,7 @@ export class TranslateService implements ITranslateService {
 
         // check if we are loading a new translation to use
         if (this.lastUseLanguage && this.loadingTranslations[this.lastUseLanguage]) {
-            return this.loadingTranslations[this.store.getCurrentLang()].pipe(
+            return this.loadingTranslations[this.getCurrentLang()].pipe(
                 concatMap(() => {
                     return makeObservable(this.getParsedResult(key, interpolateParams));
                 }),
@@ -634,8 +718,8 @@ export class TranslateService implements ITranslateService {
         return window.navigator.languages
             ? window.navigator.languages[0]
             : window.navigator.language ||
-                  window.navigator.browserLanguage ||
-                  window.navigator.userLanguage;
+            window.navigator.browserLanguage ||
+            window.navigator.userLanguage;
     }
 
     public getBrowserLang(): Language | undefined {
@@ -660,7 +744,7 @@ export class TranslateService implements ITranslateService {
      * @deprecated use `getCurrentLang()`
      */
     get currentLang(): Language {
-        return this.store.getCurrentLang();
+        return this.getCurrentLang();
     }
 
     /**
@@ -690,6 +774,6 @@ export class TranslateService implements ITranslateService {
      * @deprecated Use onFallbackLangChange() instead
      */
     get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
-        return this.store.onFallbackLangChange;
+        return this.onFallbackLangChange;
     }
 }
