@@ -1,23 +1,31 @@
 :host {
-    display: block;
-    margin-left: auto;
-    text-align: right;
+    display: flex;
+    gap: 0.5rem;
+}
 
-    button {
-        background-color: var(--mat-sys-secondary);
-        color: var(--mat-sys-on-secondary);
+button {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
 
-        &:hover {
-            box-shadow: var(--mat-sys-level3);
-            &:active {
-                box-shadow: var(--mat-sys-level1);
-            }
-        }
+    &:hover {
+        background: #f8fafc;
+        color: var(--text-main);
+        border-color: var(--secondary);
+    }
 
-        &.active {
-            background-color: var(--mat-sys-primary);
-            color: var(--mat-sys-on-primary);
-            box-shadow: unset;
-        }
+    &.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
     }
 }

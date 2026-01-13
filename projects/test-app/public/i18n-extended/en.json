@@ -1,9 +1,4 @@
 {
-    "demo": {
-        "title": "Extended: Test Application (overwrites to global)"
-    },
-    "standalone-component": {
-        "title": "Extended: Standalone Component (overwrites to global)",
-        "extended": "Extended: Readable only by extended"
-    }
+    "extended.own": "I am defined only in EXTENDED (en)",
+    "shared.greeting": "Hello from EXTENDED - overrides root! (en)"
 }

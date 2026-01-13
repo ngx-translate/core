@@ -1,11 +1,14 @@
 {
+    "isolated.own": "I am defined only in ISOLATED (en)",
+    "shared.greeting": "Hello from ISOLATED - completely separate! (en)",
+    "root.own": "ISOLATED cannot see root's translations (en)",
     "demo": {
+        "title": "Isolated: Test Application",
         "simple": {
             "text-as-attribute": "Isolated: Text as attribute",
             "text-as-content": "Isolated: Text as content",
-            "text-as-pipe-with-params": "Isolated: Text as pipe with {{value}}"
-        },
-        "title": "Isolated: Test Application"
+            "text-as-pipe-with-params": "Isolated: Text with {{value}}"
+        }
     },
     "standalone-component": {
         "title": "Isolated: Standalone Component"
