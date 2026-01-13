@@ -1,4 +1,4 @@
-import { ClassProvider, Provider } from "@angular/core";
+import { ClassProvider, Injectable, Provider } from "@angular/core";
 import {
     provideTranslateService,
     RootTranslateServiceConfig,
@@ -7,6 +7,7 @@ import {
     TranslateService,
 } from "@ngx-translate/core";
 
+@Injectable()
 export class TestableTranslateService extends TranslateService {
     public getCurrentLoader(): TranslateLoader {
         return this.currentLoader;

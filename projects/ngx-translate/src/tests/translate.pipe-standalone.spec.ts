@@ -55,19 +55,19 @@ describe("TranslatePipe (standalone)", () => {
     });
 
     describe("should update translations on lang change - async", () => {
-        it("should detect changes with OnPush", () =>
-            fakeAsync(() => {
-                prepare({ provide: TranslateLoader, useClass: DelayedFakeLoader });
+        it("should detect changes with OnPush", fakeAsync(() => {
+            prepare({ provide: TranslateLoader, useClass: DelayedFakeLoader });
 
-                fixture.detectChanges();
-                expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
 
-                translate.use("en");
-                fixture.detectChanges();
-                expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
+            translate.use("en");
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
 
-                tick(10);
-                expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
-            }));
+            tick(10);
+            fixture.detectChanges();
+            expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
+        }));
     });
 });

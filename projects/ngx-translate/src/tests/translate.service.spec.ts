@@ -1566,6 +1566,7 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate.use("en");
 
         translate.onTranslationRefresh.subscribe(() => {
+            expect(translate.currentLang).toEqual("fr");
             done();
         });
 
@@ -1577,6 +1578,7 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate.use("en");
 
         translate.onTranslationRefresh.subscribe(() => {
+            expect(translate.instant("TEST")).toEqual("Updated");
             done();
         });
 
@@ -1594,6 +1596,7 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate.onTranslationRefresh.subscribe(() => {
             emitCount++;
             if (emitCount === 1) {
+                expect(translate.instant("TEST")).toEqual("Updated German");
                 done();
             }
         });
@@ -1609,6 +1612,7 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate.setFallbackLang("de");
 
         translate.onTranslationRefresh.subscribe(() => {
+            expect(translate.getFallbackLang()).toEqual("fr");
             done();
         });
 
