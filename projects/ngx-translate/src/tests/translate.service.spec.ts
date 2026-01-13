@@ -1,4 +1,4 @@
-import { Component, inject, signal, Signal, computed } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
@@ -9,7 +9,6 @@ import {
     provideTranslateLoader,
     provideTranslateService,
     TranslateLoader,
-    TranslateModule,
     TranslatePipe,
     TranslateService,
     Translation,

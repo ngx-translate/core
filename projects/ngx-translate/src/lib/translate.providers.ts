@@ -1,4 +1,4 @@
-import { ClassProvider, inject, InjectionToken, Provider, Type } from "@angular/core";
+import { ClassProvider, Provider, Type } from "@angular/core";
 import {
     DefaultMissingTranslationHandler,
     MissingTranslationHandler,
@@ -21,7 +21,7 @@ export interface TranslateProviders {
     missingTranslationHandler?: Provider;
 }
 
-export interface ChildTranslateServiceConfig extends Partial<TranslateProviders> { }
+export type ChildTranslateServiceConfig = Partial<TranslateProviders>;
 
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;

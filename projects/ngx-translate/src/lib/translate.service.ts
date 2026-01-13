@@ -1,6 +1,5 @@
 import {
     computed,
-    DestroyRef,
     inject,
     Injectable,
     InjectionToken,
@@ -317,7 +316,7 @@ export class TranslateService implements ITranslateService {
     }
 
     public getCurrentLang(): Language {
-        return this.isRoot ? this._currentLang : (this.parent?.getCurrentLang() ?? (undefined as any));
+        return this.isRoot ? this._currentLang : (this.parent?.getCurrentLang() ?? (undefined as unknown as Language));
     }
 
     protected loadAndCompileTranslations(

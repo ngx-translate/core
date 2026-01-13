@@ -1,9 +1,7 @@
 import { Injector } from "@angular/core";
-import { TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     provideChildTranslateService,
-    provideTranslateLoader,
     provideTranslateService,
     TranslateLoader,
     TranslateService,

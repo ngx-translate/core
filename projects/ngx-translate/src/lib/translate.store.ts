@@ -2,10 +2,8 @@ import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
 import {
-    FallbackLangChangeEvent,
     InterpolatableTranslation,
     InterpolatableTranslationObject,
-    LangChangeEvent,
     Language,
     TranslationChangeEvent,
 } from "./translate.service.interface";

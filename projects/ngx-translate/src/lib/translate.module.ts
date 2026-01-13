@@ -1,18 +1,7 @@
-import { ModuleWithProviders, NgModule } from "@angular/core";
-import { DefaultMissingTranslationHandler } from "./missing-translation-handler";
-import { TranslateNoOpCompiler } from "./translate.compiler";
+import { NgModule } from "@angular/core";
 import { TranslateDirective } from "./translate.directive";
-import { TranslateNoOpLoader } from "./translate.loader";
-import { TranslateDefaultParser } from "./translate.parser";
 import { TranslatePipe } from "./translate.pipe";
-import {
-    defaultProviders,
-    provideMissingTranslationHandler,
-    provideTranslateCompiler,
-    provideTranslateLoader,
-    provideTranslateParser,
-    TranslateProviders,
-} from "./translate.providers";
+import { TranslateProviders } from "./translate.providers";
 
 import { Language } from "./translate.service.interface";
 

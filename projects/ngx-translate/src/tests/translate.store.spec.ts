@@ -2,8 +2,8 @@ import { Location } from "@angular/common";
 import {
     Component,
     inject as coreInject,
-    ModuleWithProviders,
     NgModule,
+    Provider,
     Type,
 } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
@@ -40,7 +40,7 @@ class RootComponent {
 })
 class ParentLazyLoadedComponent { }
 
-function getLazyLoadedModule(providers: any[] = []) {
+function getLazyLoadedModule(providers: Provider[] = []) {
     // eslint-disable-next-line @angular-eslint/prefer-standalone
     @Component({ selector: "app-lazy", template: "lazy-loaded-child", standalone: false })
     class ChildLazyLoadedComponent {
