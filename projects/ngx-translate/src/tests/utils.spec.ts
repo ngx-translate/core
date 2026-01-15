@@ -228,6 +228,15 @@ describe("Utils", () => {
 
             expect(getValue("test", "key")).not.toBeDefined();
         });
+
+        it("should provide an array's length", () => {
+            expect(getValue({items: ["A", "B", "C"]}, "items.length")).toEqual(3);
+
+            expect(getValue({items: "foo"}, "items.length")).toBeUndefined();
+            expect(getValue({items: null}, "items.length")).toBeUndefined();
+            expect(getValue({items: true}, "items.length")).toBeUndefined();
+            expect(getValue({items: {length: "foo"}}, "items.length")).toEqual("foo");
+        });
     });
 
     describe("isDict()", () => {
