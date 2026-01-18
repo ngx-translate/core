@@ -232,6 +232,11 @@ describe("Utils", () => {
         it("should provide an array's length", () => {
             expect(getValue({items: ["A", "B", "C"]}, "items.length")).toEqual(3);
 
+            expect(getValue({items: ["A", ["B", "b"], "C"]}, "items.length")).toEqual(3);
+            expect(getValue({items: ["A", ["B", "b"], "C"]}, "items.1.length")).toEqual(2);
+            expect(getValue({items: ["A", ["B", "b"], "C"]}, "items.length.1")).toBeUndefined();
+            expect(getValue({items: ["A", ["B", "b"], "C"]}, "items.length.length")).toBeUndefined();
+
             expect(getValue({items: "foo"}, "items.length")).toBeUndefined();
             expect(getValue({items: null}, "items.length")).toBeUndefined();
             expect(getValue({items: true}, "items.length")).toBeUndefined();
