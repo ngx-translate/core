@@ -6,7 +6,6 @@ import { LanguageSwitchComponent } from "./components/language-switch/language-s
 
 @Component({
     selector: "app-root",
-    standalone: true,
     imports: [
         RouterModule,
 

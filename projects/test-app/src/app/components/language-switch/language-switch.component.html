@@ -1,5 +1,0 @@
-@for (lang of translate.getLangs(); track lang) {
-    <button (click)="translate.use(lang)" [class.active]="translate.getCurrentLang() === lang">
-        {{ lang }}
-    </button>
-}

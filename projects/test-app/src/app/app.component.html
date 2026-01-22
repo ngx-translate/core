@@ -5,16 +5,28 @@
             <p>Demo & Visualization of Hierarchy and Isolation</p>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end">
             <nav>
                 <button routerLink="/global" routerLinkActive="routeActive">Global</button>
                 <button routerLink="/extended" routerLinkActive="routeActive">Extended</button>
                 <button routerLink="/isolated" routerLinkActive="routeActive">Isolated</button>
             </nav>
 
-            <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; gap: 1rem; align-items: center">
                 <app-language-switch></app-language-switch>
-                <button (click)="reloadLang()" class="sub-card" style="padding: 0.5rem 1rem; margin: 0; min-width: auto; min-height: auto; font-size: 0.75rem; color: var(--text-muted); border-radius: 8px;">
+                <button
+                    (click)="reloadLang()"
+                    class="sub-card"
+                    style="
+                        padding: 0.5rem 1rem;
+                        margin: 0;
+                        min-width: auto;
+                        min-height: auto;
+                        font-size: 0.75rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                    "
+                >
                     Reload
                 </button>
             </div>
@@ -25,7 +37,16 @@
         <router-outlet></router-outlet>
     </main>
 
-    <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.875rem; text-align: center;">
+    <footer
+        style="
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-align: center;
+        "
+    >
         <p>Built with ❤️ for ngx-translate hierarchy demo</p>
     </footer>
 </div>
