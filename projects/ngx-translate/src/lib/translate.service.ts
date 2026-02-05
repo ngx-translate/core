@@ -1,11 +1,11 @@
 import {
-    computed,
-    inject,
-    Injectable,
-    InjectionToken,
-    isSignal,
-    Signal,
-    signal,
+  computed,
+  inject,
+  Injectable,
+  InjectionToken,
+  isSignal,
+  Signal,
+  signal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
@@ -14,22 +14,22 @@ import { DefaultMissingTranslationHandler, MissingTranslationHandler } from "./m
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
+import {
+  DefaultLangChangeEvent,
+  FallbackLangChangeEvent,
+  InterpolatableTranslation,
+  InterpolatableTranslationObject,
+  InterpolationParameters,
+  ITranslateService,
+  LangChangeEvent,
+  Language,
+  StrictTranslation,
+  Translation,
+  TranslationChangeEvent,
+  TranslationObject,
+} from "./translate.service.interface";
 import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
-import {
-    DefaultLangChangeEvent,
-    FallbackLangChangeEvent,
-    InterpolatableTranslation,
-    InterpolatableTranslationObject,
-    InterpolationParameters,
-    ITranslateService,
-    LangChangeEvent,
-    Language,
-    StrictTranslation,
-    Translation,
-    TranslationChangeEvent,
-    TranslationObject,
-} from "./translate.service.interface";
 
 /**
  * Configuration object for the translation service.
@@ -329,7 +329,7 @@ export class TranslateService implements ITranslateService {
         const translations$ = this.currentLoader.getTranslation(lang).pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             tap((compiled: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, compiled, false);
+                this.store.setTranslations(lang, compiled);
             }),
             finalize(() => {
                 delete this.loadingTranslations[lang];
@@ -358,11 +358,10 @@ export class TranslateService implements ITranslateService {
     public setTranslation(
         lang: Language,
         translations: TranslationObject,
-        shouldMerge = false,
     ): void {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
-        this.store.setTranslations(lang, interpolatableTranslations, shouldMerge);
+        this.store.setTranslations(lang, interpolatableTranslations);
     }
 
     public getLangs(): readonly Language[] {
@@ -673,7 +672,6 @@ export class TranslateService implements ITranslateService {
                     ? this.compiler.compile(translation, lang)
                     : this.compiler.compileTranslations(translation, lang),
             ),
-            false,
         );
     }
 

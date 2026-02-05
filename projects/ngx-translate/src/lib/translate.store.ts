@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
-import { getValue, mergeDeep } from "./util";
 import {
     InterpolatableTranslation,
     InterpolatableTranslationObject,
     Language,
     TranslationChangeEvent,
 } from "./translate.service.interface";
+import { getValue } from "./util";
 
 export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
@@ -27,12 +27,8 @@ export class TranslateStore {
     public setTranslations(
         language: Language,
         translations: InterpolatableTranslationObject,
-        extend: boolean,
     ): void {
-        this.translations[language] =
-            extend && this.hasTranslationFor(language)
-                ? mergeDeep(this.translations[language], translations)
-                : translations;
+        this.translations[language] = translations;
         this.addLanguages([language]);
         this._onTranslationChange.next({
             lang: language,
