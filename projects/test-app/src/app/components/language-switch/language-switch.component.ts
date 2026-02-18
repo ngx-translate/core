@@ -1,10 +1,11 @@
-import { Component, inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
 
 @Component({
     selector: "app-language-switch",
+    changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        @for (lang of translate.getLangs(); track lang) {
+        @for (lang of translate.$languages(); track lang) {
             <button
                 (click)="translate.use(lang)"
                 [class.active]="translate.getCurrentLang() === lang"

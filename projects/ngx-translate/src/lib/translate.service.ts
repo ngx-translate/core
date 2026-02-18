@@ -1,11 +1,11 @@
 import {
-    computed,
-    inject,
-    Injectable,
-    InjectionToken,
-    isSignal,
-    Signal,
-    signal,
+  computed,
+  inject,
+  Injectable,
+  InjectionToken,
+  isSignal,
+  Signal,
+  signal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
@@ -14,22 +14,22 @@ import { DefaultMissingTranslationHandler, MissingTranslationHandler } from "./m
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
+import {
+  DefaultLangChangeEvent,
+  FallbackLangChangeEvent,
+  InterpolatableTranslation,
+  InterpolatableTranslationObject,
+  InterpolationParameters,
+  ITranslateService,
+  LangChangeEvent,
+  Language,
+  StrictTranslation,
+  Translation,
+  TranslationChangeEvent,
+  TranslationObject,
+} from "./translate.service.interface";
 import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
-import {
-    DefaultLangChangeEvent,
-    FallbackLangChangeEvent,
-    InterpolatableTranslation,
-    InterpolatableTranslationObject,
-    InterpolationParameters,
-    ITranslateService,
-    LangChangeEvent,
-    Language,
-    StrictTranslation,
-    Translation,
-    TranslationChangeEvent,
-    TranslationObject,
-} from "./translate.service.interface";
 
 /**
  * Configuration object for the translation service.
@@ -81,6 +81,8 @@ export class TranslateService implements ITranslateService {
     protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
     protected _currentLang!: Language;
     protected _fallbackLang: Language | null = null;
+
+    $languages = this.store.$languages.asReadonly();
 
     protected getRoot(): TranslateService {
         return this.parent ? this.parent.getRoot() : this;

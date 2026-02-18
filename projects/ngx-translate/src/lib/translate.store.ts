@@ -1,12 +1,12 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { Observable, Subject } from "rxjs";
-import { getValue, mergeDeep } from "./util";
 import {
     InterpolatableTranslation,
     InterpolatableTranslationObject,
     Language,
     TranslationChangeEvent,
 } from "./translate.service.interface";
+import { getValue, mergeDeep } from "./util";
 
 export type DeepReadonly<T> = {
     readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
@@ -18,7 +18,8 @@ export class TranslateStore {
         new Subject<TranslationChangeEvent>();
 
     protected translations: Record<Language, InterpolatableTranslationObject> = {};
-    protected languages: Language[] = [];
+
+    $languages = signal<Language[]>([]);
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations[language];
@@ -41,7 +42,7 @@ export class TranslateStore {
     }
 
     public getLanguages(): readonly Language[] {
-        return this.languages;
+        return this.$languages();
     }
 
     get onTranslationChange(): Observable<TranslationChangeEvent> {
@@ -49,7 +50,7 @@ export class TranslateStore {
     }
 
     public addLanguages(languages: Language[]): void {
-        this.languages = Array.from(new Set([...this.languages, ...languages]));
+        this.$languages.set(Array.from(new Set([...this.$languages(), ...languages])));
     }
 
     public hasTranslationFor(lang: string) {
