@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap");
 
 :root {
     --primary: #6366f1;
@@ -29,7 +29,7 @@
 
 body {
     font-family:
-        "Inter",
+        "DM Sans",
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
@@ -183,7 +183,7 @@ code {
     background: #e2e8f0;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.85em;
     color: var(--primary);
 }
@@ -223,6 +223,86 @@ code {
 
 .animate-fade-in {
     animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Demo input & method comparison — shared across all pages */
+.demo-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.25rem;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
+    font-family: inherit;
+    margin-bottom: 1rem;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3C/svg%3E")
+        no-repeat 0.75rem center / 14px,
+        #f0f0ff;
+
+    &:focus {
+        outline: none;
+        border-color: var(--primary-hover);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    &::placeholder {
+        color: var(--text-muted);
+        opacity: 0.6;
+    }
+}
+
+.method-grid {
+    display: grid;
+    gap: 0.375rem;
+}
+
+.method-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+}
+
+.method-label {
+    font-family: "DM Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    white-space: nowrap;
+
+    &.pipe {
+        color: #0369a1;
+        background: #e0f2fe;
+    }
+
+    &.directive {
+        color: #7c3aed;
+        background: #ede9fe;
+    }
+
+    &.observable {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    &.signal {
+        color: #047857;
+        background: #d1fae5;
+    }
+}
+
+.method-value {
+    color: var(--text-main);
+    font-size: 0.9375rem;
 }
 
 /* Flash animation for isolated info-box when root language changes */
