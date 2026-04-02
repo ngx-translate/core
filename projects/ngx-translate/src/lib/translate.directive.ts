@@ -3,14 +3,24 @@ import {
     ChangeDetectorRef,
     DestroyRef,
     Directive,
+    effect,
     ElementRef,
     inject,
+    Injector,
     Input,
+    signal,
+    Signal,
+    WritableSignal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { TranslateService } from "./translate.service";
 import { equals, isDefinedAndNotNull, isString } from "./util";
-import { InterpolationParameters, StrictTranslation } from "./translate.service.interface";
+import {
+    InterpolationParameters,
+    StrictTranslation,
+    Translation,
+    TranslationObject,
+} from "./translate.service.interface";
 
 interface ExtendedNode extends Text {
     originalContent: string;
@@ -30,22 +40,51 @@ export class TranslateDirective implements AfterViewChecked {
     private element = inject(ElementRef);
     private destroyRef = inject(DestroyRef);
     private changeDetectorRef = inject(ChangeDetectorRef);
+    private injector = inject(Injector);
 
     private key!: string;
     private lastParams?: InterpolationParameters;
     private currentParams?: InterpolationParameters;
 
+    // Signal-based key-input path
+    private useSignalPath = false;
+    private keySignal: WritableSignal<string> | null = null;
+    private paramsSignal: WritableSignal<InterpolationParameters | undefined> | null = null;
+    private translationSignal: Signal<Translation | TranslationObject> | null = null;
+    private effectCreated = false;
+
     @Input() set translate(key: string) {
         if (key) {
             this.key = key;
-            this.checkNodes();
+
+            if (!this.useSignalPath) {
+                // First time key is set — switch to signal path
+                this.useSignalPath = true;
+                this.keySignal = signal(key);
+                this.paramsSignal = signal<InterpolationParameters | undefined>(this.currentParams);
+                this.translationSignal = this.translateService.translate(
+                    this.keySignal,
+                    this.paramsSignal,
+                );
+                this.setupEffect();
+            } else {
+                // Subsequent key changes — just update the signal
+                this.keySignal!.set(key);
+            }
         }
     }
 
     @Input() set translateParams(params: InterpolationParameters) {
         if (!equals(this.currentParams, params)) {
             this.currentParams = params;
-            this.checkNodes(true);
+
+            if (this.useSignalPath && this.paramsSignal) {
+                // Signal path: update the params signal
+                this.paramsSignal.set(params);
+            } else {
+                // Content-as-key path: use imperative logic
+                this.checkNodes(true);
+            }
         }
     }
 
@@ -53,11 +92,61 @@ export class TranslateDirective implements AfterViewChecked {
         // Subscribe to all translation-related change events
         this.translateService.onTranslationRefresh
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(() => this.checkNodes(true));
+            .subscribe(() => {
+                if (this.useSignalPath) {
+                    // Signal path: read the computed signal and write to DOM synchronously.
+                    // The effect() handles async signal-only changes, but onTranslationRefresh
+                    // fires synchronously after use()/setFallbackLang() for immediate DOM updates.
+                    this.writeTranslationToDOM();
+                } else {
+                    // Content-as-key path: imperative DOM walking
+                    this.checkNodes(true);
+                }
+            });
     }
 
     ngAfterViewChecked() {
-        this.checkNodes();
+        if (!this.useSignalPath) {
+            this.checkNodes();
+        }
+    }
+
+    private setupEffect(): void {
+        if (this.effectCreated) {
+            return;
+        }
+        this.effectCreated = true;
+
+        effect(
+            () => {
+                const value = this.translationSignal!();
+                this.writeToDOM(value);
+            },
+            { injector: this.injector },
+        );
+    }
+
+    private writeTranslationToDOM(): void {
+        if (this.translationSignal) {
+            const value = this.translationSignal();
+            this.writeToDOM(value);
+        }
+    }
+
+    private writeToDOM(value: Translation | TranslationObject): void {
+        const el = this.element.nativeElement;
+        let text: string;
+
+        if (isString(value)) {
+            text = value as string;
+        } else if (!isDefinedAndNotNull(value)) {
+            text = this.key;
+        } else {
+            text = JSON.stringify(value);
+        }
+
+        el.textContent = text;
+        this.changeDetectorRef.markForCheck();
     }
 
     private checkNodes(forceUpdate = false): void {
