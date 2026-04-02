@@ -143,4 +143,60 @@ describe("TranslateService Hierarchy", () => {
         expect(sib2Service.instant("ROOT")).toBe("root");
         expect(sib2Service.instant("SIB1")).toBe("SIB1"); // No access to sibling
     });
+
+    it("should share currentLang signal reference between parent and child", () => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    lang: "en",
+                    loader: { provide: TranslateLoader, useValue: new FakeLoader({ TEST: "test" }) },
+                }),
+            ],
+        });
+        const rootService = rootInjector.get(TranslateService);
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+
+        expect(childService.currentLang).toBe(rootService.currentLang);
+        expect(childService.fallbackLang).toBe(rootService.fallbackLang);
+    });
+
+    it("should propagate parent translation changes to child translate() signal", () => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ KEY: "root-value" }),
+                    },
+                }),
+            ],
+        });
+        const rootService = rootInjector.get(TranslateService);
+        rootService.use("en");
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+
+        expect(childService.instant("KEY")).toBe("root-value");
+
+        rootService.setTranslation("en", { KEY: "updated-value" });
+
+        expect(childService.instant("KEY")).toBe("updated-value");
+    });
 });

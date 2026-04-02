@@ -1638,3 +1638,63 @@ describe("TranslateService.onTranslationRefresh", () => {
         }, 50);
     });
 });
+
+describe("TranslateService.currentLang signal", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    it("should return a Signal that reflects the current language", () => {
+        translate.use("en");
+        const langSignal = translate.currentLang;
+        expect(langSignal()).toBe("en");
+    });
+
+    it("should update when use() is called", fakeAsync(() => {
+        translate.use("en");
+        const langSignal = translate.currentLang;
+        expect(langSignal()).toBe("en");
+
+        translate.use("fr");
+        tick();
+        expect(langSignal()).toBe("fr");
+    }));
+
+    it("should be the same reference on repeated access", () => {
+        expect(translate.currentLang).toBe(translate.currentLang);
+    });
+});
+
+describe("TranslateService.fallbackLang signal", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    it("should return null initially", () => {
+        expect(translate.fallbackLang()).toBeNull();
+    });
+
+    it("should update when setFallbackLang() is called", fakeAsync(() => {
+        translate.setFallbackLang("en");
+        tick();
+        expect(translate.fallbackLang()).toBe("en");
+    }));
+
+    it("should be the same reference on repeated access", () => {
+        expect(translate.fallbackLang).toBe(translate.fallbackLang);
+    });
+});
