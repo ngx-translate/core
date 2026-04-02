@@ -87,9 +87,6 @@ export class TranslateService implements ITranslateService {
         return this.parent ? this.parent.getRoot() : this;
     }
 
-    protected readonly ownTranslationVersion = signal(0);
-    protected readonly translationVersion: Signal<number>;
-
     /**
      * An Observable to listen to translation change events
      * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
@@ -97,7 +94,7 @@ export class TranslateService implements ITranslateService {
      * });
      */
     public get onTranslationChange(): Observable<TranslationChangeEvent> {
-        return this.store.onTranslationChange;
+        return this.store.translationChange$;
     }
 
     /**
@@ -162,10 +159,6 @@ export class TranslateService implements ITranslateService {
 
         this.isRoot = config.isRoot;
 
-        this.translationVersion = this.parent
-            ? computed(() => this.ownTranslationVersion() + this.parent!.translationVersion())
-            : this.ownTranslationVersion.asReadonly();
-
         if (this.isRoot) {
             if (config.lang) {
                 this.use(config.lang);
@@ -197,18 +190,6 @@ export class TranslateService implements ITranslateService {
                 this.loadOrExtendLanguage(event.lang)?.subscribe();
             }
         });
-
-        // Subscribe to translation change events to update the version counter for reactivity
-        this.store.onTranslationChange
-            .pipe(
-                filter(
-                    (event) =>
-                        event.lang === this.getCurrentLang() ||
-                        event.lang === this.getFallbackLang(),
-                ),
-                takeUntilDestroyed(),
-            )
-            .subscribe(() => this.ownTranslationVersion.update((v) => v + 1));
     }
 
     /**
@@ -642,7 +623,6 @@ export class TranslateService implements ITranslateService {
             // Track state changes for reactivity on lang/translation/fallback changes
             this.currentLang();
             this.fallbackLang();
-            this.translationVersion();
 
             // Get current values, unwrapping signals if needed
             const currentKey = isSignal(key) ? key() : key;

@@ -25,18 +25,9 @@ export class TranslateStore {
     readonly lastTranslationChange: Signal<TranslationChangeEvent | null> =
         this._lastTranslationChange.asReadonly();
 
-    /**
-     * @deprecated Will be removed in Task 2. Use lastTranslationChange signal instead.
-     */
-    private _onTranslationChange: Subject<TranslationChangeEvent> =
-        new Subject<TranslationChangeEvent>();
-
-    /**
-     * @deprecated Will be removed in Task 2. Use lastTranslationChange signal instead.
-     */
-    get onTranslationChange(): Observable<TranslationChangeEvent> {
-        return this._onTranslationChange.asObservable();
-    }
+    private readonly _translationChange$ = new Subject<TranslationChangeEvent>();
+    readonly translationChange$: Observable<TranslationChangeEvent> =
+        this._translationChange$.asObservable();
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations()[language];
@@ -60,7 +51,7 @@ export class TranslateStore {
             translations: this.getTranslations(language),
         };
         this._lastTranslationChange.set(event);
-        this._onTranslationChange.next(event);
+        this._translationChange$.next(event);
     }
 
     public getLanguages(): readonly Language[] {
