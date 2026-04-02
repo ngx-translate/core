@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Signal, signal } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
 import {
@@ -14,14 +14,32 @@ export type DeepReadonly<T> = {
 
 @Injectable()
 export class TranslateStore {
-    protected _onTranslationChange: Subject<TranslationChangeEvent> =
+    private readonly _translations = signal<Record<Language, InterpolatableTranslationObject>>({});
+    readonly translations: Signal<Record<Language, InterpolatableTranslationObject>> =
+        this._translations.asReadonly();
+
+    private readonly _languages = signal<Language[]>([]);
+    readonly languages: Signal<Language[]> = this._languages.asReadonly();
+
+    private readonly _lastTranslationChange = signal<TranslationChangeEvent | null>(null);
+    readonly lastTranslationChange: Signal<TranslationChangeEvent | null> =
+        this._lastTranslationChange.asReadonly();
+
+    /**
+     * @deprecated Will be removed in Task 2. Use lastTranslationChange signal instead.
+     */
+    private _onTranslationChange: Subject<TranslationChangeEvent> =
         new Subject<TranslationChangeEvent>();
 
-    protected translations: Record<Language, InterpolatableTranslationObject> = {};
-    protected languages: Language[] = [];
+    /**
+     * @deprecated Will be removed in Task 2. Use lastTranslationChange signal instead.
+     */
+    get onTranslationChange(): Observable<TranslationChangeEvent> {
+        return this._onTranslationChange.asObservable();
+    }
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
-        return this.translations[language];
+        return this.translations()[language];
     }
 
     public setTranslations(
@@ -29,35 +47,39 @@ export class TranslateStore {
         translations: InterpolatableTranslationObject,
         extend: boolean,
     ): void {
-        this.translations[language] =
-            extend && this.hasTranslationFor(language)
-                ? mergeDeep(this.translations[language], translations)
-                : translations;
+        this._translations.update((current) => ({
+            ...current,
+            [language]:
+                extend && this.hasTranslationFor(language)
+                    ? mergeDeep(current[language], translations)
+                    : translations,
+        }));
         this.addLanguages([language]);
-        this._onTranslationChange.next({
+        const event: TranslationChangeEvent = {
             lang: language,
             translations: this.getTranslations(language),
-        });
+        };
+        this._lastTranslationChange.set(event);
+        this._onTranslationChange.next(event);
     }
 
     public getLanguages(): readonly Language[] {
-        return this.languages;
+        return this.languages();
     }
 
-    get onTranslationChange(): Observable<TranslationChangeEvent> {
-        return this._onTranslationChange.asObservable();
-    }
-
-    public addLanguages(languages: Language[]): void {
-        this.languages = Array.from(new Set([...this.languages, ...languages]));
+    public addLanguages(langs: Language[]): void {
+        this._languages.update((current) => Array.from(new Set([...current, ...langs])));
     }
 
     public hasTranslationFor(lang: string) {
-        return typeof this.translations[lang] !== "undefined";
+        return typeof this.translations()[lang] !== "undefined";
     }
 
     public deleteTranslations(lang: string) {
-        delete this.translations[lang];
+        this._translations.update((current) => {
+            const { [lang]: _, ...rest } = current;
+            return rest;
+        });
     }
 
     public getTranslationValue(language: Language, key: string): InterpolatableTranslation {

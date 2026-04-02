@@ -2,6 +2,7 @@ import { Location } from "@angular/common";
 import {
     Component,
     inject as coreInject,
+    Injector,
     NgModule,
     Provider,
     Type,
@@ -14,6 +15,7 @@ import {
     TranslateModule,
     TranslateService,
 } from "../public-api";
+import { TranslateStore } from "../lib/translate.store";
 
 @Component({
     // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -233,4 +235,59 @@ describe("TranslateStore", () => {
             expect(rootTranslate.instant("ROOT")).toEqual("Root");
         }),
     ));
+});
+
+describe("TranslateStore (signals)", () => {
+    let store: TranslateStore;
+
+    beforeEach(() => {
+        const injector = Injector.create({ providers: [TranslateStore] });
+        store = injector.get(TranslateStore);
+    });
+
+    it("should expose translations as a signal", () => {
+        expect(store.translations()).toEqual({});
+    });
+
+    it("should update translations signal with new reference on setTranslations", () => {
+        const before = store.translations();
+        store.setTranslations("en", { HELLO: "Hello" }, false);
+        const after = store.translations();
+
+        expect(after).not.toBe(before);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(after["en"] as any).toEqual({ HELLO: "Hello" });
+    });
+
+    it("should merge translations when extend is true", () => {
+        store.setTranslations("en", { A: "a" }, false);
+        store.setTranslations("en", { B: "b" }, true);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(store.translations()["en"] as any).toEqual({ A: "a", B: "b" });
+    });
+
+    it("should produce new reference on deleteTranslations", () => {
+        store.setTranslations("en", { A: "a" }, false);
+        const before = store.translations();
+        store.deleteTranslations("en");
+        const after = store.translations();
+
+        expect(after).not.toBe(before);
+        expect(after["en"]).toBeUndefined();
+    });
+
+    it("should expose languages as a signal", () => {
+        expect(store.languages()).toEqual([]);
+        store.addLanguages(["en", "fr"]);
+        expect(store.languages()).toEqual(["en", "fr"]);
+    });
+
+    it("should track lastTranslationChange", () => {
+        expect(store.lastTranslationChange()).toBeNull();
+        store.setTranslations("en", { A: "a" }, false);
+        const event = store.lastTranslationChange();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(event as any).toEqual({ lang: "en", translations: { A: "a" } });
+    });
 });
