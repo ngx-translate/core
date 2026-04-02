@@ -20,9 +20,7 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
         <div class="card">
             <h2>Isolated Service</h2>
             <div class="info-box warning">
-                This component uses <code>provideTranslateService()</code>. It creates a completely 
-                <strong>independent</strong> service with NO connection to the root. 
-                Language changes here don't affect the root, and vice versa.
+                This service is completely isolated. Changing the root language above has no effect here.
             </div>
 
             <div style="margin-bottom: 2rem;">
