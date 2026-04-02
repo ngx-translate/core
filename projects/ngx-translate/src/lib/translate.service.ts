@@ -87,11 +87,8 @@ export class TranslateService implements ITranslateService {
         return this.parent ? this.parent.getRoot() : this;
     }
 
-    /**
-     * Internal counter that increments on language/translation/fallback changes.
-     * Used to trigger reactivity in the `translate()` signal method.
-     */
-    private readonly refreshCounter = signal(0);
+    protected readonly ownTranslationVersion = signal(0);
+    protected readonly translationVersion: Signal<number>;
 
     /**
      * An Observable to listen to translation change events
@@ -165,6 +162,10 @@ export class TranslateService implements ITranslateService {
 
         this.isRoot = config.isRoot;
 
+        this.translationVersion = this.parent
+            ? computed(() => this.ownTranslationVersion() + this.parent!.translationVersion())
+            : this.ownTranslationVersion.asReadonly();
+
         if (this.isRoot) {
             if (config.lang) {
                 this.use(config.lang);
@@ -197,10 +198,17 @@ export class TranslateService implements ITranslateService {
             }
         });
 
-        // Subscribe to change events to update the state change counter for reactivity
-        this.onTranslationRefresh
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => this.refreshCounter.update((v) => v + 1));
+        // Subscribe to translation change events to update the version counter for reactivity
+        this.store.onTranslationChange
+            .pipe(
+                filter(
+                    (event) =>
+                        event.lang === this.getCurrentLang() ||
+                        event.lang === this.getFallbackLang(),
+                ),
+                takeUntilDestroyed(),
+            )
+            .subscribe(() => this.ownTranslationVersion.update((v) => v + 1));
     }
 
     /**
@@ -632,7 +640,9 @@ export class TranslateService implements ITranslateService {
     ): Signal<Translation | TranslationObject> {
         return computed(() => {
             // Track state changes for reactivity on lang/translation/fallback changes
-            this.refreshCounter();
+            this.currentLang();
+            this.fallbackLang();
+            this.translationVersion();
 
             // Get current values, unwrapping signals if needed
             const currentKey = isSignal(key) ? key() : key;
