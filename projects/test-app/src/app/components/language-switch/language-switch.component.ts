@@ -1,12 +1,15 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
 
 @Component({
     selector: "app-language-switch",
     template: `
+        @if (label()) {
+            <span class="label">{{ label() }}</span>
+        }
         @for (lang of translate.getLangs(); track lang) {
             <button
-                (click)="translate.use(lang)"
+                (click)="switchLang(lang)"
                 [class.active]="translate.getCurrentLang() === lang"
             >
                 {{ lang }}
@@ -17,6 +20,15 @@ import { TranslateService } from "@ngx-translate/core";
         :host {
             display: flex;
             gap: 0.5rem;
+            align-items: center;
+        }
+
+        .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         button {
@@ -49,4 +61,15 @@ import { TranslateService } from "@ngx-translate/core";
 })
 export class LanguageSwitchComponent {
     translate = inject(TranslateService);
+
+    label = input<string>();
+    isRoot = input(false);
+
+    switchLang(lang: string) {
+        this.translate.use(lang);
+        if (this.isRoot()) {
+            document.body.classList.add("root-lang-changed");
+            setTimeout(() => document.body.classList.remove("root-lang-changed"), 600);
+        }
+    }
 }
