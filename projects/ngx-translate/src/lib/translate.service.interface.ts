@@ -121,10 +121,16 @@ export abstract class ITranslateService {
     public abstract getBrowserCultureLang(): Language | undefined;
 
     /**
-     * Returns the current language
-     * @deprecated use `getCurrentLang()`
+     * The current language as a reactive Signal.
+     * Use `getCurrentLang()` for a non-reactive snapshot.
      */
-    public abstract readonly currentLang: Language;
+    public abstract readonly currentLang: Signal<Language>;
+
+    /**
+     * The fallback language as a reactive Signal.
+     * Use `getFallbackLang()` for a non-reactive snapshot.
+     */
+    public abstract readonly fallbackLang: Signal<Language | null>;
 
     /**
      * Returns a list of known languages - either loaded
@@ -147,10 +153,9 @@ export abstract class ITranslateService {
     public abstract getDefaultLang(): Language | null;
 
     /**
-     * Returns the fallback language
-     * @deprectated use `getFallbackLang()`
+     * @deprecated use `fallbackLang` signal or `getFallbackLang()`
      */
-    public abstract readonly defaultLang: Language | null;
+    public abstract readonly defaultLang: Signal<Language | null>;
 
     /**
      * @deprectated use `getFallbackLang()`
