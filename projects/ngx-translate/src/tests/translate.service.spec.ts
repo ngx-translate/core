@@ -67,40 +67,40 @@ describe("TranslateService (Delayed loading)", () => {
         const completionOrder: string[] = [];
 
         translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
-        expect(translate.currentLang).toEqual("delay-0");
+        expect(translate.getCurrentLang()).toEqual("delay-0");
 
         translate.use("delay-10").subscribe(() => completionOrder.push("delay-10"));
-        expect(translate.currentLang).toEqual("delay-0"); // stays until loaded
+        expect(translate.getCurrentLang()).toEqual("delay-0"); // stays until loaded
 
         translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
-        expect(translate.currentLang).toEqual("delay-0"); // stays until loaded
+        expect(translate.getCurrentLang()).toEqual("delay-0"); // stays until loaded
 
         tick(50);
 
         expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
 
-        expect(translate.currentLang).toEqual("delay-20");
+        expect(translate.getCurrentLang()).toEqual("delay-20");
     }));
 
     it("currentLang should be the language, on which use() was called last - reverse order", fakeAsync(() => {
         const completionOrder: string[] = [];
 
-        expect(translate.currentLang).toBeUndefined();
+        expect(translate.getCurrentLang()).toBeUndefined();
 
         translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
-        expect(translate.currentLang).toEqual("delay-20");
+        expect(translate.getCurrentLang()).toEqual("delay-20");
 
         translate.use("delay-10").subscribe(() => completionOrder.push("delay-10"));
-        expect(translate.currentLang).toEqual("delay-20"); // stays until completed
+        expect(translate.getCurrentLang()).toEqual("delay-20"); // stays until completed
 
         translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
-        expect(translate.currentLang).toEqual("delay-0"); // this one completes immediately
+        expect(translate.getCurrentLang()).toEqual("delay-0"); // this one completes immediately
 
         tick(50);
 
         expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
 
-        expect(translate.currentLang).toEqual("delay-0");
+        expect(translate.getCurrentLang()).toEqual("delay-0");
     }));
 });
 
@@ -1565,7 +1565,7 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate.use("en");
 
         translate.onTranslationRefresh.subscribe(() => {
-            expect(translate.currentLang).toEqual("fr");
+            expect(translate.getCurrentLang()).toEqual("fr");
             done();
         });
 
