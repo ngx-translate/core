@@ -8,7 +8,8 @@
             "text-as-attribute": "Isolated: Text as attribute",
             "text-as-content": "Isolated: Text as content",
             "text-as-pipe-with-params": "Isolated: Text with {{value}}"
-        }
+        },
+        "greeting": "Hello, {{name}}! (isolated)"
     },
     "standalone-component": {
         "title": "Isolated: Standalone Component"

@@ -1,4 +1,7 @@
 {
     "extended.own": "I am defined only in EXTENDED (en)",
-    "shared.greeting": "Hello from EXTENDED - overrides root! (en)"
+    "shared.greeting": "Hello from EXTENDED - overrides root! (en)",
+    "demo": {
+        "greeting": "Hello, {{name}}! (extended)"
+    }
 }

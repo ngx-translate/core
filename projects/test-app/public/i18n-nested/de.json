@@ -1,3 +1,6 @@
 {
-    "nested.own": "Ich bin nur in NESTED definiert (de)"
+    "nested.own": "Ich bin nur in NESTED definiert (de)",
+    "demo": {
+        "greeting": "Hallo, {{name}}! (verschachtelt)"
+    }
 }
