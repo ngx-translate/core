@@ -49,7 +49,8 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
             <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border);">
                 <h4><span>🔬</span> Translation Methods Comparison</h4>
                 <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Type a name below — all four methods translate <code>demo.greeting</code> with it.
+                    Type a name below — all four methods translate <code>demo.greeting</code> with
+                    it.
                 </p>
                 <input
                     type="text"
@@ -61,11 +62,17 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
                 <div class="method-grid">
                     <div class="method-item">
                         <span class="method-label">Pipe</span>
-                        <span class="method-value">{{ "demo.greeting" | translate: { name: name() } }}</span>
+                        <span class="method-value">{{
+                            "demo.greeting" | translate: { name: name() }
+                        }}</span>
                     </div>
                     <div class="method-item">
                         <span class="method-label">Directive</span>
-                        <span class="method-value" [translate]="'demo.greeting'" [translateParams]="{ name: name() }"></span>
+                        <span
+                            class="method-value"
+                            [translate]="'demo.greeting'"
+                            [translateParams]="{ name: name() }"
+                        ></span>
                     </div>
                     <div class="method-item">
                         <span class="method-label">Observable (get)</span>

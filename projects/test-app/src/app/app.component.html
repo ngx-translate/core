@@ -13,7 +13,7 @@
             </nav>
 
             <div style="display: flex; gap: 1rem; align-items: center">
-                <app-language-switch></app-language-switch>
+                <app-language-switch label="Root" [isRoot]="true" />
                 <button
                     (click)="reloadLang()"
                     class="sub-card"

@@ -11,8 +11,8 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
         <div class="card">
             <h2>Root Service (Global)</h2>
             <div class="info-box info">
-                This component uses the root <code>TranslateService</code> directly.
-                All translations come from the root service configured in <code>app.config.ts</code>.
+                This component uses the root <code>TranslateService</code> directly. All
+                translations come from the root service configured in <code>app.config.ts</code>.
             </div>
 
             <div class="demo-grid">
@@ -34,8 +34,13 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
 
                 <div class="sub-card">
                     <h4><span>⚙️</span> Configuration</h4>
-                    <p><strong>Current Lang:</strong> <code>{{ translate.getCurrentLang() }}</code></p>
-                    <p><strong>Fallback Lang:</strong> <code>{{ translate.getFallbackLang() }}</code></p>
+                    <p>
+                        <strong>Current Lang:</strong> <code>{{ translate.getCurrentLang() }}</code>
+                    </p>
+                    <p>
+                        <strong>Fallback Lang:</strong>
+                        <code>{{ translate.getFallbackLang() }}</code>
+                    </p>
                     <p><strong>Is Root:</strong> <code>true</code></p>
                 </div>
             </div>
@@ -43,7 +48,8 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
             <div class="sub-card" style="margin-top: 1.5rem;">
                 <h4><span>🔬</span> Translation Methods Comparison</h4>
                 <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Type a name below — all four methods translate <code>demo.greeting</code> with it.
+                    Type a name below — all four methods translate <code>demo.greeting</code> with
+                    it.
                 </p>
                 <input
                     type="text"
@@ -55,11 +61,17 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
                 <div class="method-grid">
                     <div class="method-item">
                         <span class="method-label">Pipe</span>
-                        <span class="method-value">{{ "demo.greeting" | translate: { name: name() } }}</span>
+                        <span class="method-value">{{
+                            "demo.greeting" | translate: { name: name() }
+                        }}</span>
                     </div>
                     <div class="method-item">
                         <span class="method-label">Directive</span>
-                        <span class="method-value" [translate]="'demo.greeting'" [translateParams]="{ name: name() }"></span>
+                        <span
+                            class="method-value"
+                            [translate]="'demo.greeting'"
+                            [translateParams]="{ name: name() }"
+                        ></span>
                     </div>
                     <div class="method-item">
                         <span class="method-label">Observable (get)</span>

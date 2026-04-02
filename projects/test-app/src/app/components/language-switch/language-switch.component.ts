@@ -8,10 +8,7 @@ import { TranslateService } from "@ngx-translate/core";
             <span class="label">{{ label() }}</span>
         }
         @for (lang of translate.getLangs(); track lang) {
-            <button
-                (click)="switchLang(lang)"
-                [class.active]="translate.getCurrentLang() === lang"
-            >
+            <button (click)="switchLang(lang)" [class.active]="translate.getCurrentLang() === lang">
                 {{ lang }}
             </button>
         }
