@@ -6,6 +6,7 @@ import {
     isSignal,
     Signal,
     signal,
+    WritableSignal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
@@ -79,8 +80,8 @@ export class TranslateService implements ITranslateService {
 
     protected _onLangChange = new Subject<LangChangeEvent>();
     protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
-    protected _currentLang!: Language;
-    protected _fallbackLang: Language | null = null;
+    protected _currentLang: WritableSignal<Language> = signal(undefined as unknown as Language);
+    protected _fallbackLang: WritableSignal<Language | null> = signal(null);
 
     protected getRoot(): TranslateService {
         return this.parent ? this.parent.getRoot() : this;
@@ -211,16 +212,16 @@ export class TranslateService implements ITranslateService {
             return this.parent!.setFallbackLang(lang);
         }
 
-        if (!this._fallbackLang) {
+        if (!this._fallbackLang()) {
             // on init set the fallbackLang immediately, but do not emit a change yet
-            this._fallbackLang = lang;
+            this._fallbackLang.set(lang);
         }
 
         const pending = this.loadOrExtendLanguage(lang);
         if (isObservable(pending)) {
             pending.pipe(take(1)).subscribe({
                 next: () => {
-                    this._fallbackLang = lang;
+                    this._fallbackLang.set(lang);
                     this._onFallbackLangChange.next({
                         lang: lang,
                         translations: this.store.getTranslations(lang),
@@ -233,7 +234,7 @@ export class TranslateService implements ITranslateService {
             return pending;
         }
 
-        this._fallbackLang = lang;
+        this._fallbackLang.set(lang);
         this._onFallbackLangChange.next({
             lang: lang,
             translations: this.store.getTranslations(lang),
@@ -258,9 +259,9 @@ export class TranslateService implements ITranslateService {
         // where translation loads might complete in random order
         this.lastUseLanguage = lang;
 
-        if (!this._currentLang) {
+        if (!this._currentLang()) {
             // on init set the currentLang immediately, but do not emit a change yet
-            this._currentLang = lang;
+            this._currentLang.set(lang);
         }
 
         const pending = this.loadOrExtendLanguage(lang);
@@ -311,12 +312,12 @@ export class TranslateService implements ITranslateService {
             return;
         }
 
-        this._currentLang = lang;
+        this._currentLang.set(lang);
         this._onLangChange.next({ lang: lang, translations: this.store.getTranslations(lang) });
     }
 
     public getCurrentLang(): Language {
-        return this.isRoot ? this._currentLang : (this.parent?.getCurrentLang() ?? (undefined as unknown as Language));
+        return this.isRoot ? this._currentLang() : (this.parent?.getCurrentLang() ?? (undefined as unknown as Language));
     }
 
     protected loadAndCompileTranslations(
@@ -407,7 +408,7 @@ export class TranslateService implements ITranslateService {
      * Gets the fallback language. null if none is defined
      */
     public getFallbackLang(): Language | null {
-        return this.isRoot ? this._fallbackLang : (this.parent?.getFallbackLang() ?? null);
+        return this.isRoot ? this._fallbackLang() : (this.parent?.getFallbackLang() ?? null);
     }
 
     protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
@@ -732,18 +733,26 @@ export class TranslateService implements ITranslateService {
     /** Deprecations **/
 
     /**
-     * @deprecated use `getFallbackLang()`
+     * @deprecated use `fallbackLang` signal or `getFallbackLang()`
      */
-    get defaultLang(): Language | null {
-        return this.getFallbackLang();
+    get defaultLang(): Signal<Language | null> {
+        return this.fallbackLang;
     }
 
     /**
-     * The lang currently used
-     * @deprecated use `getCurrentLang()`
+     * The current language as a reactive Signal.
+     * Use `getCurrentLang()` for a non-reactive snapshot.
      */
-    get currentLang(): Language {
-        return this.getCurrentLang();
+    get currentLang(): Signal<Language> {
+        return this.isRoot ? this._currentLang.asReadonly() : this.parent!.currentLang;
+    }
+
+    /**
+     * The fallback language as a reactive Signal.
+     * Use `getFallbackLang()` for a non-reactive snapshot.
+     */
+    get fallbackLang(): Signal<Language | null> {
+        return this.isRoot ? this._fallbackLang.asReadonly() : this.parent!.fallbackLang;
     }
 
     /**
