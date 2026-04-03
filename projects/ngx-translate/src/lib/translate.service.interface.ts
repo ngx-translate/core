@@ -133,6 +133,17 @@ export abstract class ITranslateService {
     public abstract readonly fallbackLang: Signal<Language | null>;
 
     /**
+     * Returns the current language as a plain value (non-reactive).
+     * Use `currentLang` signal for reactive usage.
+     */
+    public abstract getCurrentLang(): Language;
+
+    /**
+     * Returns the loaded translations for the given language.
+     */
+    public abstract getTranslations(language: Language): InterpolatableTranslationObject;
+
+    /**
      * Returns a list of known languages - either loaded
      * or set by using `addLangs()`
      * @deprecated use `getLangs()`
