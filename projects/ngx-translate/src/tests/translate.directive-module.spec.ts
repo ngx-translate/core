@@ -6,12 +6,12 @@ import {
     ViewChild,
 } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideTranslateService, TranslateModule, TranslateService } from "../public-api";
+import { provideTranslateService, TranslateDirective, TranslateService } from "../public-api";
 
 @Injectable()
 @Component({
-    // eslint-disable-next-line @angular-eslint/prefer-standalone
-    standalone: false,
+    standalone: true,
+    imports: [TranslateDirective],
     selector: "app-hmx-app",
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
@@ -53,8 +53,7 @@ describe("TranslateDirective (modules)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule],
-            declarations: [AppComponent],
+            imports: [AppComponent],
             providers: [provideTranslateService()],
         });
         translate = TestBed.inject(TranslateService);

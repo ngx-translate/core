@@ -7,7 +7,6 @@ export * from "./lib/translate.parser";
 export * from "./lib/translate.pipe";
 export * from "./lib/translate.service";
 export * from "./lib/translate.store";
-export * from "./lib/translate.module";
 export * from "./lib/translate.providers";
 export * from "./lib/util";
 export { ITranslateService } from "./lib/translate.service.interface";

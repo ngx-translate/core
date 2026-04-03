@@ -4,7 +4,7 @@ import { Observable, of } from "rxjs";
 import {
     provideTranslateService,
     TranslateLoader,
-    TranslateModule,
+    TranslatePipe,
     TranslateService,
     TranslationObject,
 } from "../public-api";
@@ -12,8 +12,8 @@ import { DelayedFakeLoader } from "./test-helpers";
 
 @Injectable()
 @Component({
-    // eslint-disable-next-line @angular-eslint/prefer-standalone
-    standalone: false,
+    standalone: true,
+    imports: [TranslatePipe],
     selector: "app-hmx-app",
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `{{ "TEST" | translate }}`,
@@ -34,13 +34,12 @@ describe("TranslatePipe (module)", () => {
 
     const prepare = (loader?: Provider) => {
         TestBed.configureTestingModule({
-            imports: [TranslateModule],
+            imports: [AppComponent],
             providers: [
                 provideTranslateService({
                     loader: loader ?? { provide: TranslateLoader, useClass: FakeLoader },
                 }),
             ],
-            declarations: [AppComponent],
         });
         translate = TestBed.inject(TranslateService);
         fixture = TestBed.createComponent(AppComponent);

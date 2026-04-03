@@ -12,7 +12,8 @@ import { provideRouter, Router, RouterModule } from "@angular/router";
 import {
     provideChildTranslateService,
     provideTranslateService,
-    TranslateModule,
+    TranslateDirective,
+    TranslatePipe,
     TranslateService,
 } from "../public-api";
 import { TranslateStore } from "../lib/translate.store";
@@ -67,7 +68,8 @@ function getLazyLoadedModule(providers: Provider[] = []) {
                     children: [{ path: "child", component: ChildLazyLoadedComponent }],
                 },
             ]),
-            TranslateModule,
+            TranslatePipe,
+            TranslateDirective,
         ],
         providers: providers,
     })
@@ -92,7 +94,7 @@ function createRoot<T>(router: Router, type: Type<T>): ComponentFixture<T> {
 describe("TranslateStore", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [RouterModule, TranslateModule],
+            imports: [RouterModule, TranslatePipe, TranslateDirective],
             declarations: [RootComponent],
             providers: [provideRouter([]), provideTranslateService()],
         });
