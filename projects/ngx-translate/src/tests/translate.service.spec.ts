@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { defer, EMPTY, Observable, of, timer, zip } from "rxjs";
+import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
     InterpolationParameters,
@@ -1696,5 +1696,59 @@ describe("TranslateService.fallbackLang signal", () => {
 
     it("should be the same reference on repeated access", () => {
         expect(translate.fallbackLang).toBe(translate.fallbackLang);
+    });
+});
+
+describe("error logging", () => {
+    it("should warn when loader fails in use()", () => {
+        const spy = spyOn(console, "warn");
+        const error = new Error("Load failed");
+
+        const errorLoader = {
+            getTranslation: () => throwError(() => error),
+        };
+
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useValue: errorLoader },
+                }),
+            ],
+        });
+
+        const service = TestBed.inject(TranslateService);
+        service.use("en").subscribe({ error: () => {} });
+
+        expect(spy).toHaveBeenCalledWith(
+            "@ngx-translate: error loading translations",
+            error,
+        );
+    });
+
+    it("should warn when loader fails in loadAndCompileTranslations()", () => {
+        const spy = spyOn(console, "warn");
+        const error = new Error("Load failed");
+
+        const errorLoader = {
+            getTranslation: () => throwError(() => error),
+        };
+
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useValue: errorLoader },
+                }),
+            ],
+        });
+
+        const service = TestBed.inject(TranslateService);
+        service.use("en");
+
+        expect(spy).toHaveBeenCalledWith(
+            "@ngx-translate: error loading translations",
+            error,
+        );
     });
 });
