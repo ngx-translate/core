@@ -81,6 +81,7 @@ export class TranslateService implements ITranslateService {
     protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
     protected _currentLang: WritableSignal<Language> = signal(undefined as unknown as Language);
     protected _fallbackLang: WritableSignal<Language | null> = signal(null);
+    private _onTranslationRefresh: Observable<void> | null = null;
 
     protected getRoot(): TranslateService {
         return this.parent ? this.parent.getRoot() : this;
@@ -128,22 +129,28 @@ export class TranslateService implements ITranslateService {
      * and fallback language changes.
      */
     get onTranslationRefresh(): Observable<void> {
-        const refresh$ = merge(
-            this.onTranslationChange.pipe(
-                filter(
-                    (event) =>
-                        event.lang === this.getCurrentLang() ||
-                        event.lang === this.getFallbackLang(),
+        if (!this._onTranslationRefresh) {
+            const refresh$ = merge(
+                this.onTranslationChange.pipe(
+                    filter(
+                        (event) =>
+                            event.lang === this.getCurrentLang() ||
+                            event.lang === this.getFallbackLang(),
+                    ),
                 ),
-            ),
-            this.onLangChange,
-            this.onFallbackLangChange,
-        ).pipe(map(() => void 0));
+                this.onLangChange,
+                this.onFallbackLangChange,
+            ).pipe(map(() => void 0));
 
-        if (this.isRoot) {
-            return refresh$;
+            if (this.isRoot) {
+                this._onTranslationRefresh = refresh$;
+            } else {
+                this._onTranslationRefresh = this.parent
+                    ? merge(refresh$, this.parent.onTranslationRefresh)
+                    : refresh$;
+            }
         }
-        return this.parent ? merge(refresh$, this.parent.onTranslationRefresh) : refresh$;
+        return this._onTranslationRefresh;
     }
 
     constructor() {

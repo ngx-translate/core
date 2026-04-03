@@ -1637,6 +1637,14 @@ describe("TranslateService.onTranslationRefresh", () => {
             done();
         }, 50);
     });
+
+    describe("onTranslationRefresh caching", () => {
+        it("should return the same observable instance on multiple accesses", () => {
+            const ref1 = translate.onTranslationRefresh;
+            const ref2 = translate.onTranslationRefresh;
+            expect(ref1).toBe(ref2);
+        });
+    });
 });
 
 describe("TranslateService.currentLang signal", () => {
