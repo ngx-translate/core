@@ -8,7 +8,6 @@ import {
     isObject,
     isString,
     isFunction,
-    setValue,
     insertValue,
     mergeDeep,
 } from "../lib/util";
@@ -346,38 +345,6 @@ describe("Utils", () => {
             expect(isFunction(undefined)).toEqual(false);
             expect(isFunction({})).toEqual(false);
             expect(isFunction([])).toEqual(false);
-        });
-    });
-
-    describe("setValue()", () => {
-        it("should set values using dot notation on existing nested structure", () => {
-            const target = { a: { b: { c: "old" } } };
-            setValue(target, "a.b.c", "value");
-            expect(target).toEqual({ a: { b: { c: "value" } } });
-        });
-
-        it("should overwrite existing values", () => {
-            const target = { a: { b: { c: "old" } } };
-            setValue(target, "a.b.c", "new");
-            expect(target).toEqual({ a: { b: { c: "new" } } });
-        });
-
-        it("should handle single key", () => {
-            const target = {};
-            setValue(target, "key", "value");
-            expect(target).toEqual({ key: "value" });
-        });
-
-        it("should handle empty key path", () => {
-            const target = {};
-            setValue(target, "", "value");
-            expect(target).toEqual({ "": "value" });
-        });
-
-        it("should handle existing partial structure", () => {
-            const target: Record<string, unknown> = { a: { b: {} } };
-            setValue(target, "a.b.c", "value");
-            expect(target).toEqual({ a: { b: { c: "value" } } });
         });
     });
 

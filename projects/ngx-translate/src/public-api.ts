@@ -11,7 +11,6 @@ export * from "./lib/translate.module";
 export * from "./lib/translate.providers";
 export * from "./lib/util";
 export { ITranslateService } from "./lib/translate.service.interface";
-export type { DefaultLangChangeEvent } from "./lib/translate.service.interface";
 export type { FallbackLangChangeEvent } from "./lib/translate.service.interface";
 export type { LangChangeEvent } from "./lib/translate.service.interface";
 export type { TranslationChangeEvent } from "./lib/translate.service.interface";

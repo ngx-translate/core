@@ -41,9 +41,6 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
-/** @deprecated use `FallbackLangChangeEvent` */
-export type DefaultLangChangeEvent = FallbackLangChangeEvent;
-
 export abstract class ITranslateService {
     public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
@@ -143,33 +140,4 @@ export abstract class ITranslateService {
      */
     public abstract getTranslations(language: Language): InterpolatableTranslationObject;
 
-    /**
-     * Returns a list of known languages - either loaded
-     * or set by using `addLangs()`
-     * @deprecated use `getLangs()`
-     */
-    public abstract readonly langs: readonly Language[];
-
-    /**
-     * Sets the fallback language
-     * @param lang The language to set
-     * @deprecated use `setFallbackLang(lang)`
-     */
-    public abstract setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject>;
-
-    /**
-     * Gets the fallback language
-     * @deprecated use `getFallbackLang()`
-     */
-    public abstract getDefaultLang(): Language | null;
-
-    /**
-     * @deprecated use `fallbackLang` signal or `getFallbackLang()`
-     */
-    public abstract readonly defaultLang: Signal<Language | null>;
-
-    /**
-     * @deprectated use `getFallbackLang()`
-     */
-    public abstract readonly onDefaultLangChange: Observable<DefaultLangChangeEvent>;
 }

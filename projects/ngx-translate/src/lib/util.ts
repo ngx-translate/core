@@ -178,30 +178,6 @@ export function getValue(target: unknown, key: string): unknown {
 
 /**
  * Sets a value on object using a dot separated key.
- * This function modifies the object in place
- * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
- * @param target an object
- * @param key E.g. "a.b.c"
- * @param value to set
- * @deprecated use insertValue() instead
- */
-export function setValue(target: Record<string, unknown>, key: string, value: unknown): void {
-    const keys: string[] = key.split(".");
-    let current: Record<string, unknown> = target;
-
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-
-        if (i === keys.length - 1) {
-            current[key] = value;
-        } else {
-            current = current[key] && isDict(current[key]) ? current[key] : {};
-        }
-    }
-}
-
-/**
- * Sets a value on object using a dot separated key.
  * Returns a clone of the object without modifying it
  * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
  * @param target an object

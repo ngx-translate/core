@@ -7,7 +7,6 @@ import {
     provideTranslateParser,
     provideMissingTranslationHandler,
     defaultProviders,
-    RootTranslateServiceConfig,
     ChildTranslateServiceConfig,
 } from "../lib/translate.providers";
 import { Observable, of } from "rxjs";
@@ -220,64 +219,6 @@ describe("Translate Providers", () => {
             expect(Array.isArray(providers)).toBe(true);
         });
 
-        it("should handle deprecated useDefaultLang option", () => {
-            spyOn(console, "warn");
-            const config: RootTranslateServiceConfig = {
-                useDefaultLang: true,
-                defaultLanguage: "en",
-            };
-            const providers = defaultProviders(config, true);
-            expect(console.warn).toHaveBeenCalledWith(
-                "The `useDefaultLang` and `defaultLanguage` options are deprecated. Please use `fallbackLang` instead.",
-            );
-            expect(providers).toBeDefined();
-        });
-
-        it("should handle deprecated defaultLanguage option without useDefaultLang", () => {
-            spyOn(console, "warn");
-            const config: RootTranslateServiceConfig = {
-                defaultLanguage: "en",
-            };
-            const providers = defaultProviders(config, true);
-            expect(console.warn).toHaveBeenCalledWith(
-                "The `useDefaultLang` and `defaultLanguage` options are deprecated. Please use `fallbackLang` instead.",
-            );
-            expect(providers).toBeDefined();
-        });
-
-        it("should set fallbackLang when useDefaultLang is true and defaultLanguage is provided", () => {
-            spyOn(console, "warn");
-            const config: RootTranslateServiceConfig = {
-                useDefaultLang: true,
-                defaultLanguage: "en",
-            };
-            const providers = defaultProviders(config, true);
-            expect(console.warn).toHaveBeenCalled();
-
-            // Find the service config provider
-            const serviceConfigProvider = providers.find(
-                (p) => (p as { provide: unknown }).provide === TRANSLATE_SERVICE_CONFIG,
-            ) as { useValue?: { fallbackLang: string | null } };
-            expect(serviceConfigProvider).toBeDefined();
-            expect(serviceConfigProvider?.useValue?.fallbackLang).toBe("en");
-        });
-
-        it("should not set fallbackLang when useDefaultLang is false", () => {
-            spyOn(console, "warn");
-            const config: RootTranslateServiceConfig = {
-                useDefaultLang: false,
-                defaultLanguage: "en",
-            };
-            const providers = defaultProviders(config, true);
-            expect(console.warn).toHaveBeenCalled();
-
-            // Find the service config provider
-            const serviceConfigProvider = providers.find(
-                (p) => (p as { provide: unknown }).provide === TRANSLATE_SERVICE_CONFIG,
-            ) as { useValue?: { fallbackLang: string | null } };
-            expect(serviceConfigProvider).toBeDefined();
-            expect(serviceConfigProvider?.useValue?.fallbackLang).toBeNull();
-        });
     });
 
     describe("Integration tests", () => {

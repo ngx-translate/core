@@ -28,10 +28,6 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig 
     lang?: Language;
     isRoot?: boolean;
 
-    /* @deprecated use `fallbackLang` */
-    useDefaultLang?: boolean;
-    /* @deprecated use `fallbackLang` */
-    defaultLanguage?: Language;
 }
 
 export function provideTranslateLoader(loader: Type<TranslateLoader>): ClassProvider {
@@ -105,16 +101,6 @@ export function defaultProviders(
 
     if (provideStore) {
         providers.push(TranslateStore);
-    }
-
-    if (config.useDefaultLang || config.defaultLanguage) {
-        console.warn(
-            "The `useDefaultLang` and `defaultLanguage` options are deprecated. Please use `fallbackLang` instead.",
-        );
-
-        if (config.useDefaultLang === true && config.defaultLanguage) {
-            config.fallbackLang = config.defaultLanguage;
-        }
     }
 
     const serviceConfig: TranslateServiceConfig = {

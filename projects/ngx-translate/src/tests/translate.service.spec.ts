@@ -169,12 +169,12 @@ describe("TranslateService", () => {
         translate.get("TEST").subscribe((res: Translation) => {
             expect(res).toEqual("TEST");
 
-            translate.setDefaultLang("nl");
+            translate.setFallbackLang("nl");
             translate.setTranslation("nl", { TEST: "Dit is een test" });
 
             translate.get("TEST").subscribe((res2: Translation) => {
                 expect(res2).toEqual("Dit is een test");
-                expect(translate.getDefaultLang()).toEqual("nl");
+                expect(translate.getFallbackLang()).toEqual("nl");
             });
         });
     });
@@ -193,7 +193,7 @@ describe("TranslateService", () => {
     });
 
     it("should use the default language by default", () => {
-        translate.setDefaultLang("nl");
+        translate.setFallbackLang("nl");
         translate.setTranslation("nl", { TEST: "Dit is een test" });
 
         translate.get("TEST").subscribe((res: Translation) => {
@@ -216,7 +216,7 @@ describe("TranslateService", () => {
     });
 
     it("should return an empty value", () => {
-        translate.setDefaultLang("en");
+        translate.setFallbackLang("en");
         translate.setTranslation("en", { TEST: "" });
 
         translate.get("TEST").subscribe((res: Translation) => {
@@ -714,16 +714,16 @@ describe("TranslateService", () => {
 
     it("should be able to add new languages", () => {
         translate.addLangs(["pl", "es"]);
-        expect(translate.langs).toEqual(["pl", "es"]);
+        expect(translate.getLangs()).toEqual(["pl", "es"]);
         translate.addLangs(["fr"]);
         translate.addLangs(["pl", "fr"]);
-        expect(translate.langs).toEqual(["pl", "es", "fr"]);
+        expect(translate.getLangs()).toEqual(["pl", "es", "fr"]);
 
         // this will request the translation from the backend because we use a static files loader for TranslateService
         translate.use("en").subscribe(() => {
-            expect(translate.langs).toEqual(["pl", "es", "fr", "en"]);
+            expect(translate.getLangs()).toEqual(["pl", "es", "fr", "en"]);
             translate.addLangs(["de"]);
-            expect(translate.langs).toEqual(["pl", "es", "fr", "en", "de"]);
+            expect(translate.getLangs()).toEqual(["pl", "es", "fr", "en", "de"]);
         });
     });
 
@@ -784,7 +784,7 @@ describe("TranslateService", () => {
             return value;
         });
 
-        translate.setDefaultLang("en-US");
+        translate.setFallbackLang("en-US");
         translate.get("TEST1").subscribe();
         translate.get("TEST2").subscribe();
         translate.get("TEST3").subscribe();

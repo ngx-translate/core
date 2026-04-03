@@ -185,7 +185,7 @@ describe("TranslatePipe (unit)", () => {
 
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("default");
-            translate.setDefaultLang('en');
+            translate.setFallbackLang('en');
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is some default text");
         });
@@ -196,11 +196,11 @@ describe("TranslatePipe (unit)", () => {
         it("on default lang change", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.setTranslation("fr", { TEST: "C'est un test" });
-            translate.setDefaultLang("en");
+            translate.setFallbackLang("en");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            translate.setDefaultLang("fr");
+            translate.setFallbackLang("fr");
 
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
         });
@@ -231,7 +231,7 @@ describe("TranslatePipe (unit)", () => {
         it("should update the translation if the default lang changes when using it as fallback", () => {
             translate.setTranslation("en", { TEST: "This is a test" });
             translate.setTranslation("fr", { "no-test": "C'est un test" });
-            translate.setDefaultLang("en");
+            translate.setFallbackLang("en");
             translate.use("fr");
 
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
@@ -244,11 +244,11 @@ describe("TranslatePipe (unit)", () => {
 
     describe("updates - async", () => {
         it("on default lang change", fakeAsync(() => {
-            translate.setDefaultLang("en");
+            translate.setFallbackLang("en");
             tick(10);
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            translate.setDefaultLang("fr");
+            translate.setFallbackLang("fr");
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
             tick(10);

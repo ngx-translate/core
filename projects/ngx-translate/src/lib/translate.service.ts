@@ -18,7 +18,6 @@ import { TranslateParser } from "./translate.parser";
 import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
-    DefaultLangChangeEvent,
     FallbackLangChangeEvent,
     InterpolatableTranslation,
     InterpolatableTranslationObject,
@@ -720,15 +719,6 @@ export class TranslateService implements ITranslateService {
         return TranslateService.getBrowserCultureLang();
     }
 
-    /** Deprecations **/
-
-    /**
-     * @deprecated use `fallbackLang` signal or `getFallbackLang()`
-     */
-    get defaultLang(): Signal<Language | null> {
-        return this.fallbackLang;
-    }
-
     /**
      * The current language as a reactive Signal.
      * Use `getCurrentLang()` for a non-reactive snapshot.
@@ -745,33 +735,4 @@ export class TranslateService implements ITranslateService {
         return this.isRoot ? this._fallbackLang.asReadonly() : this.parent!.fallbackLang;
     }
 
-    /**
-     * @deprecated use `getLangs()`
-     */
-    get langs(): readonly Language[] {
-        return this.store.getLanguages();
-    }
-
-    /**
-     * Sets the  language to use as a fallback
-     * @deprecated use setFallbackLang()
-     */
-    public setDefaultLang(lang: Language): Observable<InterpolatableTranslationObject> {
-        return this.setFallbackLang(lang);
-    }
-
-    /**
-     * Gets the fallback language used
-     * @deprecated use getFallbackLang()
-     */
-    public getDefaultLang(): Language | null {
-        return this.getFallbackLang();
-    }
-
-    /**
-     * @deprecated Use onFallbackLangChange() instead
-     */
-    get onDefaultLangChange(): Observable<DefaultLangChangeEvent> {
-        return this.onFallbackLangChange;
-    }
 }
