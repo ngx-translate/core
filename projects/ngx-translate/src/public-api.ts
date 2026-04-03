@@ -1,4 +1,5 @@
 export * from "./lib/extraction-marker";
+export * from "./lib/translate-block.directive";
 export * from "./lib/missing-translation-handler";
 export * from "./lib/translate.compiler";
 export * from "./lib/translate.directive";
