@@ -104,6 +104,62 @@ describe("TranslateService (Delayed loading)", () => {
     }));
 });
 
+describe("TranslateService get() during in-flight loading", () => {
+    let translate: TranslateService;
+
+    class DelayedLoader implements TranslateLoader {
+        getTranslation(lang: string): Observable<TranslationObject> {
+            if (lang === "en") {
+                return timer(10).pipe(map(() => ({ HELLO: "Hello" })));
+            } else if (lang === "fr") {
+                return timer(20).pipe(map(() => ({ HELLO: "Bonjour" })));
+            }
+            return of({});
+        }
+    }
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(DelayedLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    it("should not throw when get() is called during rapid use() switches", fakeAsync(() => {
+        translate.use("en");
+        tick(10);
+
+        // Now en is loaded and current. Start loading fr.
+        translate.use("fr");
+        // At this point: lastUseLanguage="fr", getCurrentLang()="en"
+        // loadingTranslations["fr"] exists, loadingTranslations["en"] does not
+
+        // This should not throw — the bug was accessing loadingTranslations[getCurrentLang()]
+        // which would be loadingTranslations["en"] = undefined → .pipe is not a function
+        expect(() => {
+            translate.get("HELLO").subscribe();
+        }).not.toThrow();
+
+        tick(20);
+    }));
+
+    it("should resolve to the correct translation after rapid use() switches", fakeAsync(() => {
+        translate.use("en");
+        tick(10);
+
+        translate.use("fr");
+
+        let result: Translation = "";
+        translate.get("HELLO").subscribe((val) => (result = val));
+
+        tick(20);
+
+        expect(result).toEqual("Bonjour");
+    }));
+});
+
 describe("TranslateService", () => {
     let translate: TestableTranslateService;
 
