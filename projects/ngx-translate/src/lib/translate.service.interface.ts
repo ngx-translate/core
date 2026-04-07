@@ -121,7 +121,7 @@ export abstract class ITranslateService {
      * The current language as a reactive Signal.
      * Use `getCurrentLang()` for a non-reactive snapshot.
      */
-    public abstract readonly currentLang: Signal<Language>;
+    public abstract readonly currentLang: Signal<Language | null>;
 
     /**
      * The fallback language as a reactive Signal.
@@ -133,7 +133,7 @@ export abstract class ITranslateService {
      * Returns the current language as a plain value (non-reactive).
      * Use `currentLang` signal for reactive usage.
      */
-    public abstract getCurrentLang(): Language;
+    public abstract getCurrentLang(): Language | null;
 
     /**
      * Returns the loaded translations for the given language.

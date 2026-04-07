@@ -79,7 +79,7 @@ export class TranslateService implements ITranslateService {
 
     protected _onLangChange = new Subject<LangChangeEvent>();
     protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
-    protected _currentLang: WritableSignal<Language> = signal(undefined as unknown as Language);
+    protected _currentLang: WritableSignal<Language | null> = signal(null);
     protected _fallbackLang: WritableSignal<Language | null> = signal(null);
     private _onTranslationRefresh: Observable<void> | null = null;
 
@@ -311,8 +311,8 @@ export class TranslateService implements ITranslateService {
         this._onLangChange.next({ lang: lang, translations: this.store.getTranslations(lang) });
     }
 
-    public getCurrentLang(): Language {
-        return this.isRoot ? this._currentLang() : (this.parent?.getCurrentLang() ?? (undefined as unknown as Language));
+    public getCurrentLang(): Language | null {
+        return this.isRoot ? this._currentLang() : (this.parent?.getCurrentLang() ?? null);
     }
 
     protected loadAndCompileTranslations(
@@ -407,7 +407,10 @@ export class TranslateService implements ITranslateService {
         const fallbackLang = this.getFallbackLang();
 
         // 1. Try own store (currentLang)
-        let res = this.store.getTranslationValue(currentLang, key);
+        let res: InterpolatableTranslation | undefined;
+        if (currentLang) {
+            res = this.store.getTranslationValue(currentLang, key);
+        }
 
         // 2. Try own store (fallbackLang) - null values also trigger fallback
         if (!isDefinedAndNotNull(res) && fallbackLang && fallbackLang !== currentLang) {
@@ -650,7 +653,7 @@ export class TranslateService implements ITranslateService {
     public set(
         key: string,
         translation: string | TranslationObject,
-        lang: Language = this.getCurrentLang(),
+        lang: Language = this.getCurrentLang()!,
     ): void {
         this.store.setTranslations(
             lang,
@@ -721,7 +724,7 @@ export class TranslateService implements ITranslateService {
      * The current language as a reactive Signal.
      * Use `getCurrentLang()` for a non-reactive snapshot.
      */
-    get currentLang(): Signal<Language> {
+    get currentLang(): Signal<Language | null> {
         return this.isRoot ? this._currentLang.asReadonly() : this.parent!.currentLang;
     }
 

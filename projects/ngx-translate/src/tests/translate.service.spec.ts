@@ -85,7 +85,7 @@ describe("TranslateService (Delayed loading)", () => {
     it("currentLang should be the language, on which use() was called last - reverse order", fakeAsync(() => {
         const completionOrder: string[] = [];
 
-        expect(translate.getCurrentLang()).toBeUndefined();
+        expect(translate.getCurrentLang()).toBeNull();
 
         translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
         expect(translate.getCurrentLang()).toEqual("delay-20");
@@ -1145,11 +1145,14 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
             });
         });
 
-        it("should handle array with invalid elements", () => {
-            expect(() => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                translate.get([null, undefined, ""] as any);
-            }).toThrow();
+        it("should handle array with invalid elements gracefully", (done) => {
+            // With honest nullable currentLang, invalid keys no longer crash —
+            // they fall through to the missing translation handler which returns the key
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            translate.get([null, undefined, ""] as any).subscribe((res: Translation) => {
+                expect(res).toEqual({ null: null, undefined: undefined, "": "" });
+                done();
+            });
         });
 
         it("should handle deeply nested invalid parameters", () => {
@@ -1814,5 +1817,37 @@ describe("error logging", () => {
             "@ngx-translate: error loading translations",
             error,
         );
+    });
+});
+
+describe("TranslateService pre-initialization (no use() called)", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+    });
+
+    it("getCurrentLang() should return null before use() is called", () => {
+        expect(translate.getCurrentLang()).toBeNull();
+    });
+
+    it("currentLang signal should be null before use() is called", () => {
+        expect(translate.currentLang()).toBeNull();
+    });
+
+    it("instant() should return the key before use() is called", () => {
+        expect(translate.instant("TEST")).toEqual("TEST");
+    });
+
+    it("get() should return the key before use() is called", (done) => {
+        translate.get("TEST").subscribe((result) => {
+            expect(result).toEqual("TEST");
+            done();
+        });
     });
 });
