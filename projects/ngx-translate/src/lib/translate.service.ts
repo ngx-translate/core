@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
 import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
-import { DefaultMissingTranslationHandler, MissingTranslationHandler } from "./missing-translation-handler";
+import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
@@ -392,10 +392,7 @@ export class TranslateService implements ITranslateService {
     }
 
     protected getMissingTranslationHandler(): MissingTranslationHandler {
-        if (!(this.missingTranslationHandler instanceof DefaultMissingTranslationHandler)) {
-            return this.missingTranslationHandler;
-        }
-        return this.parent?.getMissingTranslationHandler() || this.missingTranslationHandler;
+        return this.missingTranslationHandler;
     }
 
     /**
