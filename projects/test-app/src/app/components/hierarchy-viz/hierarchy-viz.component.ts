@@ -1,45 +1,93 @@
 import { Component, inject } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
 import { TranslateService } from "@ngx-translate/core";
+
+interface ServiceNode {
+    isRoot: boolean;
+    currentLang: string;
+    fallbackLang: string | null;
+    label?: string;
+}
 
 @Component({
     selector: "app-hierarchy-viz",
+    imports: [NgTemplateOutlet],
     template: `
         <div class="hierarchy-container">
             <h3>Service Hierarchy</h3>
-            <div class="hierarchy-tree">
-                @for (service of hierarchy; track service; let last = $last) {
-                    <div class="service-node" [class.current]="last">
-                        <div class="node-icon">
-                            <span>
-                                @if (service.isRoot) {
-                                    🏠
-                                } @else {
-                                    📦
-                                }
-                            </span>
-                        </div>
-                        <div class="node-info">
-                            <span class="node-type">{{
-                                service.isRoot ? "Root Service" : "Child Service"
-                            }}</span>
-                            <span class="node-lang"
-                                >Lang: <code>{{ service.currentLang }}</code></span
-                            >
-                            @if (service.fallbackLang) {
-                                <span class="node-fallback"
-                                    >Fallback: <code>{{ service.fallbackLang }}</code></span
+            @if (globalRoot) {
+                <div class="parallel-trees">
+                    <div class="tree-column">
+                        <div class="tree-label">Global</div>
+                        <div class="service-node">
+                            <div class="node-icon"><span>🏠</span></div>
+                            <div class="node-info">
+                                <span class="node-type">Root Service</span>
+                                <span class="node-lang"
+                                    >Lang: <code>{{ globalRoot.currentLang }}</code></span
                                 >
+                                @if (globalRoot.fallbackLang) {
+                                    <span class="node-fallback"
+                                        >Fallback:
+                                        <code>{{ globalRoot.fallbackLang }}</code></span
+                                    >
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tree-column">
+                        <div class="tree-label">Isolated</div>
+                        <div class="hierarchy-tree">
+                            @for (service of hierarchy; track service; let last = $last) {
+                                <ng-container
+                                    *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last }"
+                                />
                             }
                         </div>
                     </div>
-                    @if (!last) {
-                        <div class="connector">
-                            <div class="line"></div>
-                        </div>
+                </div>
+            } @else {
+                <div class="hierarchy-tree">
+                    @for (service of hierarchy; track service; let last = $last) {
+                        <ng-container
+                            *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last }"
+                        />
                     }
-                }
-            </div>
+                </div>
+            }
         </div>
+
+        <ng-template #nodeTemplate let-service let-last="last">
+            <div class="service-node" [class.current]="last">
+                <div class="node-icon">
+                    <span>
+                        @if (service.isRoot) {
+                            🏠
+                        } @else {
+                            📦
+                        }
+                    </span>
+                </div>
+                <div class="node-info">
+                    <span class="node-type">{{
+                        service.isRoot ? "Root Service" : "Child Service"
+                    }}</span>
+                    <span class="node-lang"
+                        >Lang: <code>{{ service.currentLang }}</code></span
+                    >
+                    @if (service.fallbackLang) {
+                        <span class="node-fallback"
+                            >Fallback: <code>{{ service.fallbackLang }}</code></span
+                        >
+                    }
+                </div>
+            </div>
+            @if (!last) {
+                <div class="connector">
+                    <div class="line"></div>
+                </div>
+            }
+        </ng-template>
     `,
     styles: `
         .hierarchy-container {
@@ -57,6 +105,21 @@ import { TranslateService } from "@ngx-translate/core";
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+        .parallel-trees {
+            display: flex;
+            gap: 1.5rem;
+        }
+        .tree-column {
+            flex: 1;
+        }
+        .tree-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
         }
         .hierarchy-tree {
             display: flex;
@@ -114,8 +177,26 @@ import { TranslateService } from "@ngx-translate/core";
 export class HierarchyVizComponent {
     private currentService = inject(TranslateService);
 
-    get hierarchy() {
-        const list: any[] = [];
+    /** Non-null when the current service is an isolated root (separate tree from global root) */
+    get globalRoot(): ServiceNode | null {
+        const svc = this.currentService as any;
+        if (!svc.isRoot || !svc.parent) {
+            return null;
+        }
+        // Walk up to the true global root
+        let root = svc.parent;
+        while (root.parent) {
+            root = root.parent;
+        }
+        return {
+            isRoot: true,
+            currentLang: root.getCurrentLang(),
+            fallbackLang: root.getFallbackLang(),
+        };
+    }
+
+    get hierarchy(): ServiceNode[] {
+        const list: ServiceNode[] = [];
         let current: any = this.currentService;
 
         while (current) {
@@ -124,6 +205,10 @@ export class HierarchyVizComponent {
                 currentLang: current.getCurrentLang(),
                 fallbackLang: current.getFallbackLang(),
             });
+            // Stop at root — don't walk into a different service tree via DI parent
+            if (current.isRoot) {
+                break;
+            }
             current = current.parent;
         }
 

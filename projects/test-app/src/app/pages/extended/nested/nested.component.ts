@@ -1,17 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from "@angular/core";
-import { toObservable, toSignal } from "@angular/core/rxjs-interop";
-import { switchMap } from "rxjs";
-import {
-    TranslatePipe,
-    TranslateDirective,
-    TranslateService,
-    provideChildTranslateService,
-} from "@ngx-translate/core";
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { TranslatePipe, provideChildTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
+import { MethodsComparisonComponent } from "../../../components/methods-comparison/methods-comparison.component";
+import { HierarchyVizComponent } from "../../../components/hierarchy-viz/hierarchy-viz.component";
 
 @Component({
     selector: "app-nested",
-    imports: [TranslatePipe, TranslateDirective],
+    imports: [TranslatePipe, MethodsComparisonComponent, HierarchyVizComponent],
     providers: [
         provideChildTranslateService({
             loader: provideTranslateHttpLoader({
@@ -47,61 +42,13 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
             </div>
 
             <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border);">
-                <h4><span>🔬</span> Translation Methods Comparison</h4>
-                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Type a name below — all four methods translate <code>demo.greeting</code> with
-                    it.
-                </p>
-                <input
-                    type="text"
-                    [value]="name()"
-                    (input)="name.set($any($event.target).value)"
-                    placeholder="Enter a name..."
-                    class="demo-input"
-                />
-                <div class="method-grid">
-                    <div class="method-item">
-                        <span class="method-label pipe">Pipe</span>
-                        <span class="method-value">{{
-                            "demo.greeting" | translate: { name: name() }
-                        }}</span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label directive">Directive</span>
-                        <span
-                            class="method-value"
-                            [translate]="'demo.greeting'"
-                            [translateParams]="{ name: name() }"
-                        ></span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label observable">Observable (get)</span>
-                        <span class="method-value">{{ greetingObs() }}</span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label signal">Signal (translate)</span>
-                        <span class="method-value">{{ greetingSignal() }}</span>
-                    </div>
-                </div>
+                <app-methods-comparison />
             </div>
+
+            <app-hierarchy-viz />
         </div>
     `,
     styles: [],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NestedComponent {
-    translate = inject(TranslateService);
-
-    name = signal("World");
-
-    greetingObs = toSignal(
-        toObservable(this.name).pipe(
-            switchMap((name) => this.translate.get("demo.greeting", { name })),
-        ),
-    );
-
-    greetingSignal = this.translate.translate(
-        "demo.greeting",
-        computed(() => ({ name: this.name() })),
-    );
-}
+export class NestedComponent {}

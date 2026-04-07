@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from "@angular/core";
-import { toObservable, toSignal } from "@angular/core/rxjs-interop";
-import { switchMap } from "rxjs";
-import { TranslateService, TranslatePipe, TranslateDirective } from "@ngx-translate/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { TranslateService, TranslatePipe } from "@ngx-translate/core";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
+import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
 
 @Component({
     selector: "app-global",
-    imports: [TranslatePipe, TranslateDirective, HierarchyVizComponent],
+    imports: [TranslatePipe, HierarchyVizComponent, MethodsComparisonComponent],
     template: `
         <div class="card">
             <h2>Root Service (Global)</h2>
@@ -46,42 +45,7 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
             </div>
 
             <div class="sub-card" style="margin-top: 1.5rem;">
-                <h4><span>🔬</span> Translation Methods Comparison</h4>
-                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Type a name below — all four methods translate <code>demo.greeting</code> with
-                    it.
-                </p>
-                <input
-                    type="text"
-                    [value]="name()"
-                    (input)="name.set($any($event.target).value)"
-                    placeholder="Enter a name..."
-                    class="demo-input"
-                />
-                <div class="method-grid">
-                    <div class="method-item">
-                        <span class="method-label pipe">Pipe</span>
-                        <span class="method-value">{{
-                            "demo.greeting" | translate: { name: name() }
-                        }}</span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label directive">Directive</span>
-                        <span
-                            class="method-value"
-                            [translate]="'demo.greeting'"
-                            [translateParams]="{ name: name() }"
-                        ></span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label observable">Observable (get)</span>
-                        <span class="method-value">{{ greetingObs() }}</span>
-                    </div>
-                    <div class="method-item">
-                        <span class="method-label signal">Signal (translate)</span>
-                        <span class="method-value">{{ greetingSignal() }}</span>
-                    </div>
-                </div>
+                <app-methods-comparison />
             </div>
 
             <app-hierarchy-viz />
@@ -92,17 +56,4 @@ import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-
 })
 export class GlobalComponent {
     translate = inject(TranslateService);
-
-    name = signal("World");
-
-    greetingObs = toSignal(
-        toObservable(this.name).pipe(
-            switchMap((name) => this.translate.get("demo.greeting", { name })),
-        ),
-    );
-
-    greetingSignal = this.translate.translate(
-        "demo.greeting",
-        computed(() => ({ name: this.name() })),
-    );
 }
