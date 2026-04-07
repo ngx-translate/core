@@ -103,8 +103,6 @@ export function provideTranslateHttpLoader(
 export function provideTranslateMultiHttpLoader(
     config: Partial<TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
-    const useBackend = config.useHttpBackend ?? false;
-
     return [
         {
             provide: TRANSLATE_HTTP_LOADER_CONFIG,
@@ -116,7 +114,6 @@ export function provideTranslateMultiHttpLoader(
         {
             provide: TranslateLoader,
             useClass: TranslateHttpLoader,
-            deps: [useBackend ? HttpBackend : HttpClient, TRANSLATE_HTTP_LOADER_CONFIG],
         },
     ];
 }

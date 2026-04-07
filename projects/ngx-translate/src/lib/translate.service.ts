@@ -625,19 +625,14 @@ export class TranslateService implements ITranslateService {
         params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
     ): Signal<Translation | TranslationObject> {
         return computed(() => {
-            // Track state changes for reactivity on lang/translation/fallback changes
-            this.currentLang();
-            this.fallbackLang();
-
-            // Get current values, unwrapping signals if needed
+            // Unwrap signals if needed
             const currentKey = isSignal(key) ? key() : key;
-            let currentParams: InterpolationParameters | undefined;
-            if (params !== undefined) {
-                currentParams = isSignal(params)
-                    ? (params as Signal<InterpolationParameters | undefined>)()
-                    : params;
-            }
+            const currentParams = params !== undefined && isSignal(params)
+                ? (params as Signal<InterpolationParameters | undefined>)()
+                : params;
 
+            // instant() internally reads the store's translations() signal,
+            // which provides reactivity for lang/translation/fallback changes.
             return this.instant(currentKey, currentParams);
         });
     }
