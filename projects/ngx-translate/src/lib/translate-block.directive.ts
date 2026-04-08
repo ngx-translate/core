@@ -7,6 +7,7 @@ export class TranslateBlockContext {
 }
 
 @Directive({
+    // eslint-disable-next-line @angular-eslint/directive-selector
     selector: "[translateBlock]",
     standalone: true,
 })

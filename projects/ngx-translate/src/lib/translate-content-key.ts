@@ -37,7 +37,7 @@ export class ContentKeyHandler {
     }
 
     checkNodes(currentParams: InterpolationParameters | undefined, forceUpdate = false): void {
-        let nodes: NodeList = this.element.nativeElement.childNodes;
+        const nodes: NodeList = this.element.nativeElement.childNodes;
         if (!nodes.length) {
             return;
         }

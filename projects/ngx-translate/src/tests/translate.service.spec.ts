@@ -1785,6 +1785,7 @@ describe("error logging", () => {
         });
 
         const service = TestBed.inject(TranslateService);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         service.use("en").subscribe({ error: () => {} });
 
         expect(spy).toHaveBeenCalledWith(
