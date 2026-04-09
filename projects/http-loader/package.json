@@ -13,7 +13,8 @@
     "license": "MIT",
     "peerDependencies": {
         "@angular/common": ">=16",
-        "@angular/core": ">=16"
+        "@angular/core": ">=16",
+        "@ngx-translate/core": ">=18"
     },
     "sideEffects": false
 }

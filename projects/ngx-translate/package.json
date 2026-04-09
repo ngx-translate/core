@@ -20,7 +20,8 @@
     "license": "MIT",
     "peerDependencies": {
         "@angular/common": ">=16",
-        "@angular/core": ">=16"
+        "@angular/core": ">=16",
+        "rxjs": ">=7"
     },
     "sideEffects": false
 }
