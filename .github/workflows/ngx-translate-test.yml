@@ -12,6 +12,7 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        name: "Latest (Node ${{ matrix.node-version }})"
 
         strategy:
             matrix:
@@ -28,5 +29,41 @@ jobs:
                   cache: "pnpm"
             - run: pnpm install --frozen-lockfile
             - run: pnpm run lint
+            - run: pnpm run build-all
+            - run: pnpm run test-ci
+
+    compat:
+        runs-on: ubuntu-latest
+        name: "Angular ${{ matrix.angular-version }}"
+
+        strategy:
+            matrix:
+                include:
+                    - angular-version: 18
+                      node-version: 18.x
+                      config-dir: compat/a18
+                    - angular-version: 19
+                      node-version: 18.x
+                      config-dir: compat/a19
+                    - angular-version: 20
+                      node-version: 20.x
+                      config-dir: compat/a20
+                    - angular-version: 21
+                      node-version: 22.x
+                      config-dir: compat/latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Use compat config
+              run: |
+                  cp ${{ matrix.config-dir }}/package.json package.json
+                  cp ${{ matrix.config-dir }}/angular.json angular.json
+            - run: pnpm install --no-frozen-lockfile
             - run: pnpm run build-all
             - run: pnpm run test-ci
