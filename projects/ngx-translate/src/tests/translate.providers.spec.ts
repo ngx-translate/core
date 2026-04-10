@@ -1,3 +1,4 @@
+import { FactoryProvider, InjectionToken, inject } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import {
     provideTranslateService,
@@ -65,12 +66,94 @@ class TestMissingTranslationHandler extends MissingTranslationHandler {
     }
 }
 
+const TEST_PREFIX_TOKEN = new InjectionToken<string>("TEST_PREFIX_TOKEN");
+
+class FactoryTestLoader extends TranslateLoader {
+    constructor(public readonly prefix: string) {
+        super();
+    }
+    getTranslation(lang: string): Observable<TranslationObject> {
+        return of({ [lang]: `${this.prefix}-${lang}` });
+    }
+}
+
+class FactoryTestCompiler extends TranslateCompiler {
+    constructor(public readonly prefix: string) {
+        super();
+    }
+    compile(value: string): string {
+        return `${this.prefix}:${value}`;
+    }
+    compileTranslations(
+        translations: TranslationObject,
+        lang: string,
+    ): InterpolatableTranslationObject {
+        void lang;
+        return translations as InterpolatableTranslationObject;
+    }
+}
+
+class FactoryTestParser extends TranslateParser {
+    constructor(public readonly prefix: string) {
+        super();
+    }
+    interpolate(expr: InterpolateFunction | string, params?: InterpolationParameters): string {
+        void params;
+        return `${this.prefix}:${expr}`;
+    }
+}
+
+class FactoryTestMissingHandler extends MissingTranslationHandler {
+    constructor(public readonly prefix: string) {
+        super();
+    }
+    handle(params: MissingTranslationHandlerParams): string {
+        return `${this.prefix}:${params.key}`;
+    }
+}
+
 describe("Translate Providers", () => {
     describe("provideTranslateLoader", () => {
         it("should provide TranslateLoader with specified class", () => {
             const provider = provideTranslateLoader(TestTranslateLoader);
             expect(provider.provide).toBe(TranslateLoader);
             expect(provider.useClass).toBe(TestTranslateLoader);
+        });
+
+        it("should produce a FactoryProvider when given a zero-arg factory", () => {
+            const factory = () => new FactoryTestLoader("static");
+            const provider = provideTranslateLoader(factory) as FactoryProvider;
+            expect(provider.provide).toBe(TranslateLoader);
+            expect(provider.useFactory).toBe(factory);
+        });
+
+        it("factory form produces a working loader when injected via TestBed", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(() => new FactoryTestLoader("static")),
+                    }),
+                ],
+            });
+            const loader = TestBed.inject(TranslateLoader);
+            expect(loader).toBeInstanceOf(FactoryTestLoader);
+            expect((loader as FactoryTestLoader).prefix).toBe("static");
+        });
+
+        it("factory can use inject() to pull a DI dependency", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: TEST_PREFIX_TOKEN, useValue: "from-di" },
+                    provideTranslateService({
+                        loader: provideTranslateLoader(
+                            () => new FactoryTestLoader(inject(TEST_PREFIX_TOKEN)),
+                        ),
+                    }),
+                ],
+            });
+            const loader = TestBed.inject(TranslateLoader);
+            expect(loader).toBeInstanceOf(FactoryTestLoader);
+            expect((loader as FactoryTestLoader).prefix).toBe("from-di");
         });
     });
 
@@ -80,6 +163,42 @@ describe("Translate Providers", () => {
             expect(provider.provide).toBe(TranslateCompiler);
             expect(provider.useClass).toBe(TestTranslateCompiler);
         });
+
+        it("should produce a FactoryProvider when given a zero-arg factory", () => {
+            const factory = () => new FactoryTestCompiler("static");
+            const provider = provideTranslateCompiler(factory) as FactoryProvider;
+            expect(provider.provide).toBe(TranslateCompiler);
+            expect(provider.useFactory).toBe(factory);
+        });
+
+        it("factory form produces a working compiler when injected via TestBed", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        compiler: provideTranslateCompiler(() => new FactoryTestCompiler("static")),
+                    }),
+                ],
+            });
+            const compiler = TestBed.inject(TranslateCompiler);
+            expect(compiler).toBeInstanceOf(FactoryTestCompiler);
+            expect((compiler as FactoryTestCompiler).prefix).toBe("static");
+        });
+
+        it("factory can use inject() to pull a DI dependency", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: TEST_PREFIX_TOKEN, useValue: "from-di" },
+                    provideTranslateService({
+                        compiler: provideTranslateCompiler(
+                            () => new FactoryTestCompiler(inject(TEST_PREFIX_TOKEN)),
+                        ),
+                    }),
+                ],
+            });
+            const compiler = TestBed.inject(TranslateCompiler);
+            expect(compiler).toBeInstanceOf(FactoryTestCompiler);
+            expect((compiler as FactoryTestCompiler).prefix).toBe("from-di");
+        });
     });
 
     describe("provideTranslateParser", () => {
@@ -88,6 +207,42 @@ describe("Translate Providers", () => {
             expect(provider.provide).toBe(TranslateParser);
             expect(provider.useClass).toBe(TestTranslateParser);
         });
+
+        it("should produce a FactoryProvider when given a zero-arg factory", () => {
+            const factory = () => new FactoryTestParser("static");
+            const provider = provideTranslateParser(factory) as FactoryProvider;
+            expect(provider.provide).toBe(TranslateParser);
+            expect(provider.useFactory).toBe(factory);
+        });
+
+        it("factory form produces a working parser when injected via TestBed", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        parser: provideTranslateParser(() => new FactoryTestParser("static")),
+                    }),
+                ],
+            });
+            const parser = TestBed.inject(TranslateParser);
+            expect(parser).toBeInstanceOf(FactoryTestParser);
+            expect((parser as FactoryTestParser).prefix).toBe("static");
+        });
+
+        it("factory can use inject() to pull a DI dependency", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: TEST_PREFIX_TOKEN, useValue: "from-di" },
+                    provideTranslateService({
+                        parser: provideTranslateParser(
+                            () => new FactoryTestParser(inject(TEST_PREFIX_TOKEN)),
+                        ),
+                    }),
+                ],
+            });
+            const parser = TestBed.inject(TranslateParser);
+            expect(parser).toBeInstanceOf(FactoryTestParser);
+            expect((parser as FactoryTestParser).prefix).toBe("from-di");
+        });
     });
 
     describe("provideMissingTranslationHandler", () => {
@@ -95,6 +250,44 @@ describe("Translate Providers", () => {
             const provider = provideMissingTranslationHandler(TestMissingTranslationHandler);
             expect(provider.provide).toBe(MissingTranslationHandler);
             expect(provider.useClass).toBe(TestMissingTranslationHandler);
+        });
+
+        it("should produce a FactoryProvider when given a zero-arg factory", () => {
+            const factory = () => new FactoryTestMissingHandler("static");
+            const provider = provideMissingTranslationHandler(factory) as FactoryProvider;
+            expect(provider.provide).toBe(MissingTranslationHandler);
+            expect(provider.useFactory).toBe(factory);
+        });
+
+        it("factory form produces a working handler when injected via TestBed", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        missingTranslationHandler: provideMissingTranslationHandler(
+                            () => new FactoryTestMissingHandler("static"),
+                        ),
+                    }),
+                ],
+            });
+            const handler = TestBed.inject(MissingTranslationHandler);
+            expect(handler).toBeInstanceOf(FactoryTestMissingHandler);
+            expect((handler as FactoryTestMissingHandler).prefix).toBe("static");
+        });
+
+        it("factory can use inject() to pull a DI dependency", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: TEST_PREFIX_TOKEN, useValue: "from-di" },
+                    provideTranslateService({
+                        missingTranslationHandler: provideMissingTranslationHandler(
+                            () => new FactoryTestMissingHandler(inject(TEST_PREFIX_TOKEN)),
+                        ),
+                    }),
+                ],
+            });
+            const handler = TestBed.inject(MissingTranslationHandler);
+            expect(handler).toBeInstanceOf(FactoryTestMissingHandler);
+            expect((handler as FactoryTestMissingHandler).prefix).toBe("from-di");
         });
     });
 

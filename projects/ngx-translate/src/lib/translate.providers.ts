@@ -1,4 +1,4 @@
-import { ClassProvider, Provider, Type } from "@angular/core";
+import { ClassProvider, FactoryProvider, Provider, ProviderToken, Type } from "@angular/core";
 import {
     DefaultMissingTranslationHandler,
     MissingTranslationHandler,
@@ -30,22 +30,53 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig 
 
 }
 
-export function provideTranslateLoader(loader: Type<TranslateLoader>): ClassProvider {
-    return { provide: TranslateLoader, useClass: loader };
+function isClass<T>(fn: Type<T> | (() => T)): fn is Type<T> {
+    return /^class\s/.test(Function.prototype.toString.call(fn));
 }
 
-export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): ClassProvider {
-    return { provide: TranslateCompiler, useClass: compiler };
+function toProvider<T>(
+    token: ProviderToken<T>,
+    value: Type<T> | (() => T),
+): ClassProvider | FactoryProvider {
+    return isClass(value)
+        ? { provide: token, useClass: value }
+        : { provide: token, useFactory: value };
 }
 
-export function provideTranslateParser(parser: Type<TranslateParser>): ClassProvider {
-    return { provide: TranslateParser, useClass: parser };
+export function provideTranslateLoader(loader: Type<TranslateLoader>): ClassProvider;
+export function provideTranslateLoader(factory: () => TranslateLoader): FactoryProvider;
+export function provideTranslateLoader(
+    loaderOrFactory: Type<TranslateLoader> | (() => TranslateLoader),
+): ClassProvider | FactoryProvider {
+    return toProvider(TranslateLoader, loaderOrFactory);
+}
+
+export function provideTranslateCompiler(compiler: Type<TranslateCompiler>): ClassProvider;
+export function provideTranslateCompiler(factory: () => TranslateCompiler): FactoryProvider;
+export function provideTranslateCompiler(
+    compilerOrFactory: Type<TranslateCompiler> | (() => TranslateCompiler),
+): ClassProvider | FactoryProvider {
+    return toProvider(TranslateCompiler, compilerOrFactory);
+}
+
+export function provideTranslateParser(parser: Type<TranslateParser>): ClassProvider;
+export function provideTranslateParser(factory: () => TranslateParser): FactoryProvider;
+export function provideTranslateParser(
+    parserOrFactory: Type<TranslateParser> | (() => TranslateParser),
+): ClassProvider | FactoryProvider {
+    return toProvider(TranslateParser, parserOrFactory);
 }
 
 export function provideMissingTranslationHandler(
     handler: Type<MissingTranslationHandler>,
-): ClassProvider {
-    return { provide: MissingTranslationHandler, useClass: handler };
+): ClassProvider;
+export function provideMissingTranslationHandler(
+    factory: () => MissingTranslationHandler,
+): FactoryProvider;
+export function provideMissingTranslationHandler(
+    handlerOrFactory: Type<MissingTranslationHandler> | (() => MissingTranslationHandler),
+): ClassProvider | FactoryProvider {
+    return toProvider(MissingTranslationHandler, handlerOrFactory);
 }
 
 export function provideTranslateService(config: RootTranslateServiceConfig = {}): Provider[] {
