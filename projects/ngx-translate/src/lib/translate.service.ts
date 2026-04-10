@@ -374,8 +374,9 @@ export class TranslateService implements ITranslateService {
     protected getParsedResultForKey(
         key: string,
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        const textToInterpolate = this.getTextToInterpolate(key);
+        const textToInterpolate = this.getTextToInterpolate(key, lang);
 
         if (isDefinedAndNotNull(textToInterpolate)) {
             return this.runInterpolation(textToInterpolate, interpolateParams);
@@ -402,7 +403,15 @@ export class TranslateService implements ITranslateService {
         return this.isRoot ? this._fallbackLang() : (this.parent?.getFallbackLang() ?? null);
     }
 
-    protected getTextToInterpolate(key: string): InterpolatableTranslation | undefined {
+    protected getTextToInterpolate(key: string, lang?: Language): InterpolatableTranslation | undefined {
+        if (lang) {
+            const res = this.store.getTranslationValue(lang, key);
+            if (res !== undefined) {
+                return res;
+            }
+            return this.parent?.getTextToInterpolate(key, lang);
+        }
+
         const currentLang = this.getCurrentLang();
         const fallbackLang = this.getFallbackLang();
 
@@ -473,21 +482,23 @@ export class TranslateService implements ITranslateService {
     public getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
         return key instanceof Array
-            ? this.getParsedResultForArray(key, interpolateParams)
-            : this.getParsedResultForKey(key, interpolateParams);
+            ? this.getParsedResultForArray(key, interpolateParams, lang)
+            : this.getParsedResultForKey(key, interpolateParams, lang);
     }
 
     protected getParsedResultForArray(
         key: string[],
         interpolateParams: InterpolationParameters | undefined,
+        lang?: Language,
     ) {
         const result: Record<string, StrictTranslation | Observable<StrictTranslation>> = {};
 
         let observables = false;
         for (const k of key) {
-            result[k] = this.getParsedResultForKey(k, interpolateParams);
+            result[k] = this.getParsedResultForKey(k, interpolateParams, lang);
             observables = observables || isObservable(result[k]);
         }
 
@@ -514,6 +525,7 @@ export class TranslateService implements ITranslateService {
     public get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             return of("");
@@ -523,12 +535,12 @@ export class TranslateService implements ITranslateService {
         if (this.lastUseLanguage && this.loadingTranslations[this.lastUseLanguage]) {
             return this.loadingTranslations[this.lastUseLanguage].pipe(
                 concatMap(() => {
-                    return makeObservable(this.getParsedResult(key, interpolateParams));
+                    return makeObservable(this.getParsedResult(key, interpolateParams, lang));
                 }),
             );
         }
 
-        return makeObservable(this.getParsedResult(key, interpolateParams));
+        return makeObservable(this.getParsedResult(key, interpolateParams, lang));
     }
 
     /**
@@ -539,16 +551,17 @@ export class TranslateService implements ITranslateService {
     public getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" is required and cannot be empty`);
         }
 
         return concat(
-            defer(() => this.get(key, interpolateParams)),
+            defer(() => this.get(key, interpolateParams, lang)),
             this.onTranslationChange.pipe(
                 switchMap(() => {
-                    const res = this.getParsedResult(key, interpolateParams);
+                    const res = this.getParsedResult(key, interpolateParams, lang);
                     return makeObservable(res);
                 }),
             ),
@@ -563,16 +576,17 @@ export class TranslateService implements ITranslateService {
     public stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation> {
         if (!isDefinedAndNotNull(key) || !key.length) {
             throw new Error(`Parameter "key" required`);
         }
 
         return concat(
-            defer(() => this.get(key, interpolateParams)),
+            defer(() => this.get(key, interpolateParams, lang)),
             this.onLangChange.pipe(
                 switchMap(() => {
-                    const res = this.getParsedResult(key, interpolateParams);
+                    const res = this.getParsedResult(key, interpolateParams, lang);
                     return makeObservable(res);
                 }),
             ),
@@ -583,16 +597,20 @@ export class TranslateService implements ITranslateService {
      * Returns a translation instantly from the internal state of loaded translation.
      * All rules regarding the current language, the preferred language of even fallback languages
      * will be used except any promise handling.
+     *
+     * When `lang` is provided, the lookup goes directly to the specified language,
+     * bypassing the current language and fallback chain.
      */
     public instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Translation {
         if (!isDefinedAndNotNull(key) || key.length === 0) {
             return "";
         }
 
-        const result = this.getParsedResult(key, interpolateParams);
+        const result = this.getParsedResult(key, interpolateParams, lang);
 
         return isObservable(result) ? this.keyToObject(key) : result;
     }
@@ -623,6 +641,7 @@ export class TranslateService implements ITranslateService {
     public translate(
         key: string | Signal<string>,
         params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
+        lang?: Language | Signal<Language | undefined>,
     ): Signal<Translation | TranslationObject> {
         return computed(() => {
             // Unwrap signals if needed
@@ -630,10 +649,13 @@ export class TranslateService implements ITranslateService {
             const currentParams = params !== undefined && isSignal(params)
                 ? (params as Signal<InterpolationParameters | undefined>)()
                 : params;
+            const currentLang = lang !== undefined && isSignal(lang)
+                ? lang()
+                : lang;
 
             // instant() internally reads the store's translations() signal,
             // which provides reactivity for lang/translation/fallback changes.
-            return this.instant(currentKey, currentParams);
+            return this.instant(currentKey, currentParams, currentLang);
         });
     }
 

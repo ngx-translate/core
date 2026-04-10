@@ -66,6 +66,7 @@ export abstract class ITranslateService {
     public abstract instant(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Translation;
 
     /**
@@ -79,16 +80,19 @@ export abstract class ITranslateService {
     public abstract translate(
         key: string | Signal<string>,
         params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
+        lang?: Language | Signal<Language>,
     ): Signal<Translation | TranslationObject>;
 
     public abstract stream(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation>;
 
     public abstract getStreamOnTranslationChange(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation>;
 
     public abstract set(
@@ -100,6 +104,7 @@ export abstract class ITranslateService {
     public abstract get(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): Observable<Translation>;
 
     public abstract setTranslation(
@@ -111,6 +116,7 @@ export abstract class ITranslateService {
     public abstract getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
+        lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation>;
 
     public abstract getBrowserLang(): Language | undefined;

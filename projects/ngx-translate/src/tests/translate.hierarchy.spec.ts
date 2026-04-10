@@ -169,6 +169,37 @@ describe("TranslateService Hierarchy", () => {
         expect(childService.fallbackLang).toBe(rootService.fallbackLang);
     });
 
+    it("should traverse parent with explicit lang parameter", () => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ ROOT_KEY: "root-val" }),
+                    },
+                }),
+            ],
+        });
+        const rootService = rootInjector.get(TranslateService);
+        rootService.use("en");
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ CHILD_KEY: "child-val" }),
+                    },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+
+        // Child doesn't have ROOT_KEY, parent does — should traverse with explicit lang
+        expect(childService.instant("ROOT_KEY", undefined, "en")).toEqual("root-val");
+    });
+
     it("should propagate parent translation changes to child translate() signal", () => {
         const rootInjector = Injector.create({
             providers: [

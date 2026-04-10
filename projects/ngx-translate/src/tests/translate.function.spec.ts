@@ -10,17 +10,23 @@ import {
     TranslationObject,
 } from "../public-api";
 
-const translations: TranslationObject = {
-    HELLO: "Hello",
-    GREETING: "Hello {{name}}",
-    NESTED: {
-        KEY: "Nested value",
+const translations: Record<string, TranslationObject> = {
+    en: {
+        HELLO: "Hello",
+        GREETING: "Hello {{name}}",
+        NESTED: {
+            KEY: "Nested value",
+        },
+    },
+    de: {
+        HELLO: "Hallo",
+        GREETING: "Hallo {{name}}",
     },
 };
 
 class FakeLoader implements TranslateLoader {
-    getTranslation(): Observable<TranslationObject> {
-        return of(translations);
+    getTranslation(lang: string): Observable<TranslationObject> {
+        return of(translations[lang] ?? {});
     }
 }
 
@@ -96,6 +102,31 @@ describe("translate() standalone function", () => {
             params.set({ name: "Bob" });
             TestBed.flushEffects();
             expect(result()).toBe("Hello Bob");
+        });
+    });
+
+    it("should return translation from specified language", () => {
+        const service = TestBed.inject(TranslateService);
+        service.setFallbackLang("de");
+        TestBed.runInInjectionContext(() => {
+            const result = translate("HELLO", undefined, "de");
+            TestBed.flushEffects();
+            expect(result()).toBe("Hallo");
+        });
+    });
+
+    it("should react to lang signal changes", () => {
+        const service = TestBed.inject(TranslateService);
+        service.setFallbackLang("de");
+        TestBed.runInInjectionContext(() => {
+            const lang = signal("de");
+            const result = translate("HELLO", undefined, lang);
+            TestBed.flushEffects();
+            expect(result()).toBe("Hallo");
+
+            lang.set("en");
+            TestBed.flushEffects();
+            expect(result()).toBe("Hello");
         });
     });
 });

@@ -1852,3 +1852,90 @@ describe("TranslateService pre-initialization (no use() called)", () => {
         });
     });
 });
+
+describe("TranslateService (explicit lang parameter)", () => {
+    let translate: TranslateService;
+
+    class MultiLangLoader implements TranslateLoader {
+        getTranslation(lang: string): Observable<TranslationObject> {
+            if (lang === "en") {
+                return of({ GREETING: "Hello", ONLY_EN: "English only" });
+            } else if (lang === "de") {
+                return of({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
+            }
+            return of({});
+        }
+    }
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(MultiLangLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+        translate.use("en");
+        translate.setFallbackLang("de");
+    });
+
+    it("instant() should return translation from the specified language", () => {
+        expect(translate.instant("GREETING", undefined, "de")).toEqual("Hallo");
+        expect(translate.instant("GREETING")).toEqual("Hello");
+    });
+
+    it("instant() should return the key when lang is specified but key not found", () => {
+        expect(translate.instant("MISSING_KEY", undefined, "de")).toEqual("MISSING_KEY");
+    });
+
+    it("instant() should return translation from specified lang even when it is not current or fallback", () => {
+        translate.use("de");
+        expect(translate.instant("ONLY_EN", undefined, "en")).toEqual("English only");
+    });
+
+    it("get() should return translation from the specified language", (done) => {
+        translate.get("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
+            expect(result).toEqual("Hallo");
+            done();
+        });
+    });
+
+    it("get() with array keys should return translations from the specified language", (done) => {
+        translate.get(["GREETING", "ONLY_DE"], undefined, "de").pipe(first()).subscribe((result) => {
+            expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
+            done();
+        });
+    });
+
+    it("stream() should return translation from the specified language", (done) => {
+        translate.stream("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
+            expect(result).toEqual("Hallo");
+            done();
+        });
+    });
+
+    it("getStreamOnTranslationChange() should return translation from the specified language", (done) => {
+        translate.getStreamOnTranslationChange("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
+            expect(result).toEqual("Hallo");
+            done();
+        });
+    });
+
+    it("translate() should return translation from the specified language (string)", () => {
+        const result = translate.translate("GREETING", undefined, "de");
+        expect(result()).toEqual("Hallo");
+    });
+
+    it("translate() should react to lang signal changes", () => {
+        const lang = signal<string>("de");
+        const result = translate.translate("GREETING", undefined, lang);
+        expect(result()).toEqual("Hallo");
+
+        lang.set("en");
+        expect(result()).toEqual("Hello");
+    });
+
+    it("instant() with array keys should return translations from the specified language", () => {
+        const result = translate.instant(["GREETING", "ONLY_DE"], undefined, "de");
+        expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
+    });
+});
