@@ -347,8 +347,13 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
-     * Manually sets an object of translations for a given language
-     * after passing it through the compiler
+     * Manually sets an object of translations for a given language,
+     * passing it through the configured {@link TranslateCompiler} first.
+     *
+     * If you already have translations in their final compiled form
+     * (e.g. interpolation functions produced at build time), use
+     * {@link setCompiledTranslation} instead — it stores the data
+     * directly and skips the compiler.
      */
     public setTranslation(
         lang: Language,
@@ -358,6 +363,23 @@ export class TranslateService implements ITranslateService {
         const interpolatableTranslations: InterpolatableTranslationObject =
             this.compiler.compileTranslations(translations, lang);
         this.store.setTranslations(lang, interpolatableTranslations, shouldMerge);
+    }
+
+    /**
+     * Stores an already-compiled translation object for the given language,
+     * bypassing the configured {@link TranslateCompiler}.
+     *
+     * Use this when you have translations in their final, interpolator-ready
+     * form — e.g. interpolation functions produced at build time. For raw
+     * translations that still need to go through the compiler, use
+     * {@link setTranslation} instead.
+     */
+    public setCompiledTranslation(
+        lang: Language,
+        translations: InterpolatableTranslationObject,
+        shouldMerge = false,
+    ): void {
+        this.store.setTranslations(lang, translations, shouldMerge);
     }
 
     public getLangs(): readonly Language[] {

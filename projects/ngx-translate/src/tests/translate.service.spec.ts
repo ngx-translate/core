@@ -3,11 +3,14 @@ import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
+    InterpolatableTranslationObject,
     InterpolationParameters,
     LangChangeEvent,
     provideChildTranslateService,
+    provideTranslateCompiler,
     provideTranslateLoader,
     provideTranslateService,
+    TranslateCompiler,
     TranslateLoader,
     TranslatePipe,
     TranslateService,
@@ -719,6 +722,150 @@ describe("TranslateService", () => {
             translate.use("en");
 
             expect(translate.instant("default")).toEqual("This is the default message");
+        });
+    });
+
+    describe("setCompiledTranslation()", () => {
+        it("stores a function-valued translation and resolves it via instant()", () => {
+            translate.setCompiledTranslation("en", {
+                GREETING: () => "hello",
+            });
+            translate.use("en");
+
+            expect(translate.instant("GREETING")).toBe("hello");
+        });
+
+        it("passes interpolation params to function leaves", () => {
+            translate.setCompiledTranslation("en", {
+                GREETING: (params) => `hello ${params?.["name"] ?? ""}`.trim(),
+            });
+            translate.use("en");
+
+            expect(translate.instant("GREETING", { name: "Andreas" })).toBe("hello Andreas");
+        });
+
+        it("supports mixed string and function leaves in the same object", () => {
+            translate.setCompiledTranslation("en", {
+                STATIC: "plain text",
+                DYNAMIC: (params) => `value: ${params?.["v"]}`,
+            });
+            translate.use("en");
+
+            expect(translate.instant("STATIC")).toBe("plain text");
+            expect(translate.instant("DYNAMIC", { v: 42 })).toBe("value: 42");
+        });
+
+        it("supports nested objects with function leaves reached by dotted keys", () => {
+            translate.setCompiledTranslation("en", {
+                user: {
+                    profile: {
+                        greeting: (params) => `hi ${params?.["name"]}`,
+                    },
+                },
+            });
+            translate.use("en");
+
+            expect(translate.instant("user.profile.greeting", { name: "Rook" })).toBe("hi Rook");
+        });
+
+        it("merges into existing translations when shouldMerge is true", () => {
+            translate.setTranslation("en", { KEEP: "kept string" });
+            translate.setCompiledTranslation("en", { ADDED: () => "added via compiled" }, true);
+            translate.use("en");
+
+            expect(translate.instant("KEEP")).toBe("kept string");
+            expect(translate.instant("ADDED")).toBe("added via compiled");
+        });
+
+        it("replaces existing translations when shouldMerge is false (default)", () => {
+            translate.setTranslation("en", { GONE: "will be replaced" });
+            translate.setCompiledTranslation("en", {
+                REPLACED: () => "new content",
+            });
+            translate.use("en");
+
+            expect(translate.instant("REPLACED")).toBe("new content");
+            // The original key is gone after replacement
+            expect(translate.instant("GONE")).toBe("GONE");
+        });
+
+        it("emits onTranslationChange when storing compiled translations", () => {
+            translate.use("en");
+            const events: TranslationChangeEvent[] = [];
+            const sub = translate.onTranslationChange.subscribe((event) => {
+                events.push(event);
+            });
+
+            translate.setCompiledTranslation("en", {
+                GREETING: () => "hi",
+            });
+
+            sub.unsubscribe();
+            expect(events.length).toBe(1);
+            expect(events[0].lang).toBe("en");
+            expect(typeof (events[0].translations as Record<string, unknown>)["GREETING"]).toBe(
+                "function",
+            );
+        });
+    });
+
+    describe("setCompiledTranslation() compiler bypass", () => {
+        let spyTranslate: TestableTranslateService;
+        let compileTranslationsSpy: jasmine.Spy;
+
+        class SpyCompiler extends TranslateCompiler {
+            compile(value: string, lang: string): string {
+                void lang;
+                return value;
+            }
+            compileTranslations(
+                translations: InterpolatableTranslationObject,
+                lang: string,
+            ): InterpolatableTranslationObject {
+                void lang;
+                return translations;
+            }
+        }
+
+        beforeEach(() => {
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTestableTranslateService({
+                        loader: provideTranslateLoader(FakeLoader),
+                        compiler: provideTranslateCompiler(SpyCompiler),
+                    }),
+                ],
+            });
+            spyTranslate = TestBed.inject(TranslateService) as TestableTranslateService;
+            compileTranslationsSpy = spyOn(
+                spyTranslate.getCompiler() as SpyCompiler,
+                "compileTranslations",
+            ).and.callThrough();
+        });
+
+        it("does NOT invoke the compiler when storing compiled translations", () => {
+            spyTranslate.setCompiledTranslation("en", {
+                GREETING: () => "hi",
+            });
+            // use() short-circuits via store.hasTranslationFor, so it does NOT
+            // trigger the loader/compiler path here — we're only exercising
+            // setCompiledTranslation / setTranslation.
+            spyTranslate.use("en");
+
+            expect(compileTranslationsSpy).not.toHaveBeenCalled();
+            expect(spyTranslate.instant("GREETING")).toBe("hi");
+        });
+
+        it("DOES invoke the compiler when setTranslation is called, as a control", () => {
+            spyTranslate.setTranslation("en", { GREETING: "hi" });
+            // use() short-circuits via store.hasTranslationFor, so it does NOT
+            // trigger the loader/compiler path here — we're only exercising
+            // setCompiledTranslation / setTranslation.
+            spyTranslate.use("en");
+
+            expect(compileTranslationsSpy).toHaveBeenCalledTimes(1);
+            expect(spyTranslate.instant("GREETING")).toBe("hi");
         });
     });
 

@@ -113,6 +113,12 @@ export abstract class ITranslateService {
         shouldMerge?: boolean,
     ): void;
 
+    public abstract setCompiledTranslation(
+        lang: Language,
+        translations: InterpolatableTranslationObject,
+        shouldMerge?: boolean,
+    ): void;
+
     public abstract getParsedResult(
         key: string | string[],
         interpolateParams?: InterpolationParameters,
