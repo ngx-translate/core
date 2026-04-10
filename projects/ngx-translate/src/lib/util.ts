@@ -154,14 +154,21 @@ export function getValue(target: unknown, key: string): unknown {
             }
 
             if (isArray(target)) {
-                const index = parseInt(key, 10);
-                if (
-                    isDefined(target[index]) &&
-                    (isDict(target[index]) || isArray(target[index]) || isLastKey)
-                ) {
-                    target = target[index];
+                if (key === "length" && isLastKey) {
+                    target = target.length;
                     key = "";
                     continue;
+                }
+                if (/^\d+$/.test(key)) {
+                    const index = parseInt(key, 10);
+                    if (
+                        isDefined(target[index]) &&
+                        (isDict(target[index]) || isArray(target[index]) || isLastKey)
+                    ) {
+                        target = target[index];
+                        key = "";
+                        continue;
+                    }
                 }
             }
         }

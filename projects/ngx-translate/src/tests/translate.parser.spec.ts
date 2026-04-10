@@ -35,6 +35,20 @@ describe("Parser", () => {
             ).toEqual("This is a value3");
         });
 
+        it("should interpolate an array's length (regression #1609)", () => {
+            expect(
+                parser.interpolate("Found {{matches.length}} items", {
+                    matches: ["a", "b", "c"],
+                }),
+            ).toEqual("Found 3 items");
+
+            expect(
+                parser.interpolate("You have {{items.length}} messages", {
+                    items: [],
+                }),
+            ).toEqual("You have 0 messages");
+        });
+
         it("should support interpolation functions", () => {
             const uc: InterpolateFunction = (params) => {
                 return (getValue(params, "x") as string)?.toUpperCase() + " YOU!";

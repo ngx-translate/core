@@ -226,6 +226,24 @@ describe("Utils", () => {
             expect(getValue(["A", ["a", "b", "c"], "C"], "1.2")).toEqual("c");
 
             expect(getValue("test", "key")).not.toBeDefined();
+
+            // length property on arrays — regression guard for #1609
+            expect(getValue([1, 2, 3], "length")).toEqual(3);
+            expect(getValue([], "length")).toEqual(0);
+            expect(getValue({ matches: ["a", "b", "c"] }, "matches.length")).toEqual(3);
+
+            // malformed numeric keys are rejected (parseInt-leading-digits loophole)
+            expect(getValue([1, 2, 3], "1x")).not.toBeDefined();
+            expect(getValue([1, 2, 3], "1.5")).not.toBeDefined();
+            expect(getValue([1, 2, 3], "-1")).not.toBeDefined();
+
+            // tight contract: other array properties are NOT exposed via getValue
+            expect(getValue([1, 2, 3], "constructor")).not.toBeDefined();
+            expect(getValue([1, 2, 3], "toString")).not.toBeDefined();
+            expect(getValue([1, 2, 3], "push")).not.toBeDefined();
+
+            // length is terminal — chaining past it returns undefined
+            expect(getValue([1, 2, 3], "length.foo")).not.toBeDefined();
         });
     });
 
