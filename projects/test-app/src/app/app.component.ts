@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
     }
 
     reloadLang() {
-        this.translate.reloadLang(this.translate.getCurrentLang()).subscribe((translations) => {
+        this.translate.reloadLang(this.translate.getCurrentLang()!).subscribe((translations) => {
             console.info("reloadLang", translations);
         });
     }
