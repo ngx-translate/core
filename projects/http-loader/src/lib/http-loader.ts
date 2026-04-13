@@ -6,7 +6,6 @@ import { catchError, forkJoin, map, Observable, of } from "rxjs";
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
     suffix?: string;
-    showLog?: boolean;
     enforceLoading: boolean;
     useHttpBackend: boolean;
 }
@@ -14,11 +13,9 @@ export interface TranslateHttpLoaderConfig {
 export interface TranslateHttpLoaderResource {
     prefix: string;
     suffix?: string;
-    showLog?: boolean;
 }
 
 export interface TranslateMultiHttpLoaderConfig {
-    showLog?: boolean;
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
@@ -38,7 +35,6 @@ export class TranslateHttpLoader implements TranslateLoader {
             resources: [],
             enforceLoading: false,
             useHttpBackend: false,
-            showLog: false,
             ...inject(TRANSLATE_HTTP_LOADER_CONFIG),
         };
 
@@ -54,16 +50,13 @@ export class TranslateHttpLoader implements TranslateLoader {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
-            let path: string;
-
-            if (typeof resource === "string") path = `${resource}${lang}.json`;
-            else path = `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
+            const path =  (typeof resource === "string")
+                        ? `${resource}${lang}.json`
+                        : `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
 
             return this.http.get<TranslationObject>(`${path}${cacheBuster}`).pipe(
                 catchError((err: HttpErrorResponse) => {
-                    if (this.config.showLog) {
-                        console.error(`Error loading translation for ${lang}:`, err);
-                    }
+                    console.warn(`@ngx-translate/http-loader: error loading translation for ${lang}:`, err);
                     return of({});
                 }),
             );
@@ -86,7 +79,6 @@ export function provideTranslateHttpLoader(
     // Otherwise, convert single config to multi-config
     const singleConfig = config as Partial<TranslateHttpLoaderConfig>;
     const multiConfig: Partial<TranslateMultiHttpLoaderConfig> = {
-        showLog: singleConfig.showLog ?? false,
         enforceLoading: singleConfig.enforceLoading ?? false,
         useHttpBackend: singleConfig.useHttpBackend ?? false,
         resources: [

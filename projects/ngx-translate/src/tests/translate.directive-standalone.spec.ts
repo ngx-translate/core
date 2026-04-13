@@ -52,6 +52,7 @@ describe("TranslateDirective (standalone)", () => {
     let fixture: ComponentFixture<AppComponent>;
 
     beforeEach(() => {
+        spyOn(console, "warn");
         TestBed.configureTestingModule({
             providers: [provideTranslateService({})],
         });

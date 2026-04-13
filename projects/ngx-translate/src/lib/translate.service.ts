@@ -223,7 +223,7 @@ export class TranslateService implements ITranslateService {
                     });
                 },
                 error: (err) => {
-                    console.warn("@ngx-translate: error loading translations", err);
+                    console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
                 },
             });
             return pending;
@@ -266,7 +266,7 @@ export class TranslateService implements ITranslateService {
                     this.changeLang(lang);
                 },
                 error: (err) => {
-                    console.warn("@ngx-translate: error loading translations", err);
+                    console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
                 },
             });
             return pending;
@@ -339,7 +339,7 @@ export class TranslateService implements ITranslateService {
         // trigger loading if nobody subscribes from outside
         translations$.subscribe({
             error: (err) => {
-                console.warn("@ngx-translate: error loading translations", err);
+                console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
             },
         });
 

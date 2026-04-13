@@ -29,7 +29,7 @@ export class ContentKeyHandler {
         if (!ContentKeyHandler.warned) {
             ContentKeyHandler.warned = true;
             console.warn(
-                "@ngx-translate: Using element content as a translation key is deprecated. " +
+                "@ngx-translate/core: Using element content as a translation key is deprecated. " +
                     'Use [translate]="\'KEY\'" or *translateBlock="let t" instead. ' +
                     "This feature will be removed in the next major version.",
             );

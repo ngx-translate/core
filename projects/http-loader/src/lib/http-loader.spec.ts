@@ -294,6 +294,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should handle error in one resource and still merge others", () => {
+        spyOn(console, "warn");
         prepareMulti({
             resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });
@@ -306,25 +307,28 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         expect(translate.instant("TEST")).toBe("A");
     });
 
-    it("should log error if showLog is true", () => {
+    it("should log warning on failed resource", () => {
         prepareMulti({
             resources: [
                 "/assets/i18n/",
-                { prefix: "/custom/", suffix: ".lang.json", showLog: true },
+                { prefix: "/custom/", suffix: ".lang.json" },
             ],
-            showLog: true,
         });
-        spyOn(console, "error");
+        const spy = spyOn(console, "warn");
         translate.use("en").subscribe();
         http.expectOne("/assets/i18n/en.json").flush({ TEST: "A" });
         http.expectOne("/custom/en.lang.json").flush(null, {
             status: 500,
             statusText: "Server Error",
         });
-        expect(console.error).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(
+            "@ngx-translate/http-loader: error loading translation for en:",
+            jasmine.any(Object),
+        );
     });
 
     it("should fallback to empty object if all resources fail", () => {
+        spyOn(console, "warn");
         prepareMulti({
             resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });

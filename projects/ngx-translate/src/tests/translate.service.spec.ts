@@ -1373,6 +1373,7 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
         }
 
         it("should handle loader error in use", (done) => {
+            spyOn(console, "warn");
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
                 providers: [
@@ -1397,6 +1398,7 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
         });
 
         it("should handle loader error in setFallbackLang", (done) => {
+            spyOn(console, "warn");
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
                 providers: [
@@ -1936,7 +1938,7 @@ describe("error logging", () => {
         service.use("en").subscribe({ error: () => {} });
 
         expect(spy).toHaveBeenCalledWith(
-            "@ngx-translate: error loading translations",
+            "@ngx-translate/core: error loading translations for en:",
             error,
         );
     });
@@ -1962,7 +1964,7 @@ describe("error logging", () => {
         service.use("en");
 
         expect(spy).toHaveBeenCalledWith(
-            "@ngx-translate: error loading translations",
+            "@ngx-translate/core: error loading translations for en:",
             error,
         );
     });
