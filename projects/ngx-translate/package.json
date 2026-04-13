@@ -19,8 +19,8 @@
     "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
     "license": "MIT",
     "peerDependencies": {
-        "@angular/common": ">=16",
-        "@angular/core": ">=16",
+        "@angular/common": ">=18",
+        "@angular/core": ">=18",
         "rxjs": ">=7"
     },
     "sideEffects": false
