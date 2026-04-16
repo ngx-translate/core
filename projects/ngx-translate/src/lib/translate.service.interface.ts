@@ -71,16 +71,21 @@ export abstract class ITranslateService {
 
     /**
      * Returns a Signal that provides the translated value and automatically updates
-     * when the language changes, translations are updated, or when the input signals change.
+     * whenever the currentLang, fallbackLang, or the translations change.
      *
-     * @param key - The translation key, either as a string or a Signal<string>
-     * @param params - Optional interpolation parameters, either as an object or a Signal
+     * Parameters accept plain values or arrow functions. Signal reads inside
+     * the function are tracked reactively. Signals themselves are also accepted
+     * directly, since Signal<T> is callable.
+     *
+     * @param key - The translation key (or array of keys), a function returning one
+     * @param params - Optional interpolation parameters, or a function returning them
+     * @param lang - Optional language override, or a function returning one
      * @returns A Signal that emits the translated value
      */
     public abstract translate(
-        key: string | Signal<string>,
-        params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
-        lang?: Language | Signal<Language>,
+        key: string | string[] | (() => string | string[]),
+        params?: InterpolationParameters | (() => InterpolationParameters | undefined),
+        lang?: Language | (() => Language | undefined),
     ): Signal<Translation | TranslationObject>;
 
     public abstract stream(

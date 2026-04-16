@@ -1755,6 +1755,99 @@ describe("TranslateService.translate() Signal", () => {
             expect(result()).toEqual("Count: 100");
         });
     });
+
+    describe("with function-form key", () => {
+        it("should accept an arrow function returning a plain key", () => {
+            translate.setTranslation("en", { HELLO: "Hello" });
+            translate.use("en");
+
+            const result = translate.translate(() => "HELLO");
+
+            expect(result()).toEqual("Hello");
+        });
+
+        it("should react to signal reads inside an arrow-function key", () => {
+            translate.setTranslation("en", {
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+            translate.use("en");
+
+            const wrapper = signal<{ label: string }>({ label: "KEY1" });
+            const result = translate.translate(() => wrapper().label);
+
+            expect(result()).toEqual("Value 1");
+
+            wrapper.set({ label: "KEY2" });
+            expect(result()).toEqual("Value 2");
+        });
+    });
+
+    describe("with array key", () => {
+        it("should accept a plain string array as key", () => {
+            translate.setTranslation("en", {
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+            translate.use("en");
+
+            const result = translate.translate(["KEY1", "KEY2"]);
+
+            expect(result()).toEqual({
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+        });
+
+        it("should accept an arrow function returning a string array", () => {
+            translate.setTranslation("en", {
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+            translate.use("en");
+
+            const result = translate.translate(() => ["KEY1", "KEY2"]);
+
+            expect(result()).toEqual({
+                KEY1: "Value 1",
+                KEY2: "Value 2",
+            });
+        });
+    });
+
+    describe("with function-form params", () => {
+        it("should react to signal reads inside an arrow-function params", () => {
+            translate.setTranslation("en", { GREETING: "Hello, {{name}}!" });
+            translate.use("en");
+
+            const userName = signal("Alice");
+            const result = translate.translate(
+                "GREETING",
+                () => ({ name: userName() }),
+            );
+
+            expect(result()).toEqual("Hello, Alice!");
+
+            userName.set("Bob");
+            expect(result()).toEqual("Hello, Bob!");
+        });
+    });
+
+    describe("with function-form lang", () => {
+        it("should react to signal reads inside an arrow-function lang", () => {
+            translate.setTranslation("en", { HELLO: "Hello" });
+            translate.setTranslation("fr", { HELLO: "Bonjour" });
+            translate.use("en");
+
+            const langSel = signal<"en" | "fr">("en");
+            const result = translate.translate("HELLO", undefined, () => langSel());
+
+            expect(result()).toEqual("Hello");
+
+            langSel.set("fr");
+            expect(result()).toEqual("Bonjour");
+        });
+    });
 });
 
 describe("TranslateService.onTranslationRefresh", () => {

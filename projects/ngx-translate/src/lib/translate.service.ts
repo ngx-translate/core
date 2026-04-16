@@ -3,7 +3,6 @@ import {
     inject,
     Injectable,
     InjectionToken,
-    isSignal,
     Signal,
     signal,
     WritableSignal,
@@ -638,45 +637,41 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
-     * Returns a Signal that provides the translated value and automatically updates
-     * when the language changes, translations are updated, or when the input signals change.
+     * Returns a Signal that provides the translated value and automatically
+     * updates when the language changes or translations are reloaded.
      *
-     * @param key - The translation key, either as a string or a Signal<string>
-     * @param params - Optional interpolation parameters, either as an object or a Signal
-     * @returns A Signal that emits the translated value
+     * Parameters accept plain values or arrow functions. Signal reads inside
+     * the function are tracked reactively. Signals themselves are also
+     * accepted directly, since Signal<T> is callable.
      *
-     * @example
-     * // Static key and params
-     * title = this.translate.translate('page.title');
-     *
-     * @example
-     * // Reactive key
-     * key = signal('greeting');
-     * message = this.translate.translate(this.key);
+     * @param key The translation key (or array of keys), a function returning one
+     * @param params Optional interpolation parameters, or a function returning them
+     * @param lang Optional language override, or a function returning one
+     * @returns A Signal that emits the translated value(s)
      *
      * @example
-     * // Reactive params
-     * userName = signal('John');
-     * params = computed(() => ({ name: this.userName() }));
-     * greeting = this.translate.translate('hello', this.params);
+     * // Static key
+     * greeting = this.translate.translate('HELLO');
+     *
+     * @example
+     * // Derived key from another signal (no separate computed needed)
+     * model = signal({ currentKey: 'HELLO' });
+     * greeting = this.translate.translate(() => this.model().currentKey);
+     *
+     * @example
+     * // Multi-key lookup
+     * labels = this.translate.translate(['SAVE', 'CANCEL']);
      */
     public translate(
-        key: string | Signal<string>,
-        params?: InterpolationParameters | Signal<InterpolationParameters | undefined>,
-        lang?: Language | Signal<Language | undefined>,
+        key: string | string[] | (() => string | string[]),
+        params?: InterpolationParameters | (() => InterpolationParameters | undefined),
+        lang?: Language | (() => Language | undefined),
     ): Signal<Translation | TranslationObject> {
         return computed(() => {
-            // Unwrap signals if needed
-            const currentKey = isSignal(key) ? key() : key;
-            const currentParams = params !== undefined && isSignal(params)
-                ? (params as Signal<InterpolationParameters | undefined>)()
-                : params;
-            const currentLang = lang !== undefined && isSignal(lang)
-                ? lang()
-                : lang;
+            const currentKey = typeof key === "function" ? key() : key;
+            const currentParams = typeof params === "function" ? params() : params;
+            const currentLang = typeof lang === "function" ? lang() : lang;
 
-            // instant() internally reads the store's translations() signal,
-            // which provides reactivity for lang/translation/fallback changes.
             return this.instant(currentKey, currentParams, currentLang);
         });
     }
