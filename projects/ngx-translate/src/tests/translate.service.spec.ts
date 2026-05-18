@@ -161,6 +161,42 @@ describe("TranslateService get() during in-flight loading", () => {
 
         expect(result).toEqual("Bonjour");
     }));
+
+    it("get(_,_,lang) with an explicit lang should not block on an unrelated in-flight use() load", fakeAsync(() => {
+        // Pre-load "de" synchronously so it's in the store before any in-flight load starts
+        translate.setTranslation("de", { HELLO: "Hallo" });
+
+        // Start loading "en" — this keeps loadingTranslations["en"] open for 10 ms
+        translate.use("en");
+        // lastUseLanguage is now "en", and "en" is still loading
+
+        let result: Translation | undefined;
+        // Requesting "de" explicitly should resolve immediately without waiting for "en"
+        translate.get("HELLO", undefined, "de").subscribe((val) => (result = val));
+
+        // Without the fix: result would still be undefined here because the gate
+        // would block on the "en" load. With the fix: resolved synchronously.
+        expect(result).toEqual("Hallo");
+
+        // Clean up the in-flight "en" load
+        tick(10);
+    }));
+
+    it("get() without explicit lang still waits on in-flight lastUseLanguage load", fakeAsync(() => {
+        // Start loading "en" — keeps loadingTranslations["en"] open for 10 ms
+        translate.use("en");
+
+        let result: Translation | undefined;
+        translate.get("HELLO").subscribe((val) => (result = val));
+
+        // Should not have resolved yet — still waiting on the "en" load
+        expect(result).toBeUndefined();
+
+        tick(10);
+
+        // Now the "en" load completed → get() resolves
+        expect(result).toEqual("Hello");
+    }));
 });
 
 describe("TranslateService", () => {

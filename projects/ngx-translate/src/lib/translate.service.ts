@@ -572,8 +572,9 @@ export class TranslateService implements ITranslateService {
         }
 
         // check if we are loading a new translation to use
-        if (this.lastUseLanguage && this.loadingTranslations[this.lastUseLanguage]) {
-            return this.loadingTranslations[this.lastUseLanguage].pipe(
+        const effectiveLang = lang ?? this.lastUseLanguage;
+        if (effectiveLang && this.loadingTranslations[effectiveLang]) {
+            return this.loadingTranslations[effectiveLang].pipe(
                 concatMap(() => {
                     return makeObservable(this.getParsedResult(key, interpolateParams, lang));
                 }),
