@@ -655,9 +655,24 @@ export class TranslateService implements ITranslateService {
             return "";
         }
 
+        if (lang && !this.store.hasTranslationFor(lang)) {
+            this.warnUnloadedInstantLang(lang);
+        }
+
         const result = this.getParsedResult(key, interpolateParams, lang);
 
         return isObservable(result) ? this.keyToObject(key) : result;
+    }
+
+    private warnedUnloadedInstantLangs = new Set<Language>();
+    private warnUnloadedInstantLang(lang: Language): void {
+        if (this.warnedUnloadedInstantLangs.has(lang)) return;
+        this.warnedUnloadedInstantLangs.add(lang);
+        console.warn(
+            `@ngx-translate/core: instant() called with lang="${lang}" but no ` +
+                `translations are loaded for that language. Returning the key as ` +
+                `fallback. Load with use("${lang}") or setTranslation("${lang}", ...) first.`,
+        );
     }
 
     /**
