@@ -1,5 +1,6 @@
 import {
     computed,
+    DestroyRef,
     inject,
     Injectable,
     InjectionToken,
@@ -194,6 +195,14 @@ export class TranslateService implements ITranslateService {
             if (!this.isRoot) {
                 this.loadOrExtendLanguage(event.lang)?.subscribe();
             }
+        });
+
+        // Complete this service's Subjects when its injector tears down.
+        // Root singletons live as long as the app, but child services on
+        // lazy routes would otherwise pin their Subjects until GC.
+        inject(DestroyRef).onDestroy(() => {
+            this._onLangChange.complete();
+            this._onFallbackLangChange.complete();
         });
     }
 

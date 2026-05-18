@@ -1,4 +1,4 @@
-import { Injectable, Signal, signal } from "@angular/core";
+import { DestroyRef, Injectable, Signal, inject, signal } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
 import {
@@ -28,6 +28,15 @@ export class TranslateStore {
     private readonly _translationChange$ = new Subject<TranslationChangeEvent>();
     readonly translationChange$: Observable<TranslationChangeEvent> =
         this._translationChange$.asObservable();
+
+    constructor() {
+        // Complete the Subject when the owning injector tears down. Without
+        // this, child-service stores on lazy routes leak `translationChange$`
+        // subscribers across navigations.
+        inject(DestroyRef).onDestroy(() => {
+            this._translationChange$.complete();
+        });
+    }
 
     public getTranslations(language: Language): DeepReadonly<InterpolatableTranslationObject> {
         return this.translations()[language];
