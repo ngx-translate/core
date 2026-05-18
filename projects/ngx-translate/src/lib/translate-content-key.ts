@@ -12,13 +12,11 @@ interface ExtendedNode extends Text {
 }
 
 /**
- * @deprecated Using element content as a translation key is deprecated.
- * Use [translate]="'KEY'" or *translateBlock="let t" instead.
- * This class will be removed in the next major version.
+ * @deprecated Using element content as a translation key is deprecated and
+ * will be removed in v19. Use `[translate]="'KEY'"` or `*translateBlock="let t"`
+ * instead.
  */
 export class ContentKeyHandler {
-    private static warned = false;
-
     private lastParams?: InterpolationParameters;
 
     constructor(
@@ -26,14 +24,17 @@ export class ContentKeyHandler {
         private changeDetectorRef: ChangeDetectorRef,
         private translateService: TranslateService,
     ) {
-        if (!ContentKeyHandler.warned) {
-            ContentKeyHandler.warned = true;
-            console.warn(
-                "@ngx-translate/core: Using element content as a translation key is deprecated. " +
-                    'Use [translate]="\'KEY\'" or *translateBlock="let t" instead. ' +
-                    "This feature will be removed in the next major version.",
-            );
-        }
+        // Pass the offending element as a second `console.warn` arg so DevTools
+        // can highlight it. Warn per element rather than once-per-page because
+        // a single console line for an entire app of 50+ legacy elements is
+        // not actionable; this matches the spirit of Angular's own
+        // deprecation warnings (e.g. `provideHttpClient` migration warnings).
+        console.warn(
+            "@ngx-translate/core: Using element content as a translation key " +
+                "is deprecated and will be removed in v19. " +
+                'Use [translate]="\'KEY\'" or *translateBlock="let t" instead.',
+            this.element?.nativeElement,
+        );
     }
 
     checkNodes(currentParams: InterpolationParameters | undefined, forceUpdate = false): void {

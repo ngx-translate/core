@@ -41,6 +41,18 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
+/**
+ * Abstract interface for {@link TranslateService}, useful for typing in tests
+ * and library code that wants to depend on the shape rather than the concrete
+ * class.
+ *
+ * @experimental v18 — the shape is expected to evolve in v19. Specifically,
+ * the Observable-based event surface (`onLangChange`, `onFallbackLangChange`,
+ * `onTranslationChange`, `onDefaultLangChange`) is planned to gain Signal-based
+ * counterparts (or be replaced by them) as part of the v18→v19 signal
+ * migration. Code that types against this interface should plan for that
+ * change; the concrete `TranslateService` class is the stable target for v18.
+ */
 export abstract class ITranslateService {
     public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
