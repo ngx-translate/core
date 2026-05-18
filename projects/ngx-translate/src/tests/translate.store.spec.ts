@@ -116,9 +116,9 @@ describe("TranslateStore", () => {
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
-            // since the root module imports the TranslateModule with forRoot and the lazy loaded module with forChild
-            // the translate service is shared between both modules
-            // the constructor of the ChildLazyLoadedComponent overwrote the "TEST" key of the root TranslateService
+            // The lazy-loaded child reuses the root TranslateService (no new
+            // provideTranslateService in its providers), so its setTranslation
+            // mutates the shared store. "TEST" now resolves to "Lazy".
             expect(translate.instant("TEST")).toEqual("Lazy");
         }),
     ));
@@ -139,9 +139,10 @@ describe("TranslateStore", () => {
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
-            // since both the root module and the lazy loaded module use forRoot to define the TranslateModule
-            // the translate service is NOT shared, and 2 instances co-exist
-            // the constructor of the ChildLazyLoadedComponent didn't overwrote the "TEST" key of the root TranslateService
+            // The lazy-loaded child has its own provideTranslateService(), so
+            // a separate TranslateService instance is created in the child
+            // injector. The child's setTranslation does not mutate the root
+            // store; "TEST" still resolves to "Root" in the root scope.
             expect(translate.instant("TEST")).toEqual("Root");
         }),
     ));
@@ -162,9 +163,8 @@ describe("TranslateStore", () => {
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
-            // since both the root module and the lazy loaded module use forRoot to define the TranslateModule
-            // the translate service is NOT shared, and 2 instances co-exist
-            // the constructor of the ChildLazyLoadedComponent didn't overwrote the "TEST" key of the root TranslateService
+            // Same as above: provideTranslateService in the lazy route creates
+            // an isolated child service; the root store keeps "TEST" → "Root".
             expect(translate.instant("TEST")).toEqual("Root");
         }),
     ));

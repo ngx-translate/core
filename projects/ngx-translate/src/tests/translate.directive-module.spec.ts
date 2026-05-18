@@ -47,7 +47,9 @@ class AppComponent {
     value = { value: "ok" };
 }
 
-describe("TranslateDirective (modules)", () => {
+// File-name is historical: these tests covered the `TranslateModule.forRoot`
+// path in v17 and were retained against `provideTranslateService` in v18.
+describe("TranslateDirective (provider config)", () => {
     let translate: TranslateService;
     let fixture: ComponentFixture<AppComponent>;
 
