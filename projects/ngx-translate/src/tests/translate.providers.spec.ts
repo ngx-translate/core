@@ -404,14 +404,14 @@ describe("Translate Providers", () => {
         });
     });
 
-    describe("bare-class footgun prevention", () => {
-        // Runtime warning — fires when TS is bypassed (any/JS consumer/`as` casts).
-        // Type-level rejection is enforced via `TranslateProvider = Exclude<Provider, TypeProvider>`
-        // and is covered by the `@ts-expect-error` tests below.
+    describe("bare-class auto-wrap", () => {
+        // Bare classes (TypeProvider) passed to plugin slots are automatically
+        // wrapped by the corresponding provideTranslate* helper, registering
+        // them under the correct DI token. No warning is emitted.
 
         class BareLoader extends TranslateLoader {
-            getTranslation(): Observable<TranslationObject> {
-                return of({});
+            getTranslation(lang: string): Observable<TranslationObject> {
+                return of({ [lang]: "bare-loader" });
             }
         }
         class BareCompiler extends TranslateCompiler {
@@ -426,100 +426,97 @@ describe("Translate Providers", () => {
         }
         class BareParser extends TranslateParser {
             interpolate(expr: InterpolateFunction | string): string {
-                return String(expr);
+                return `bare:${String(expr)}`;
             }
         }
         class BareHandler extends MissingTranslationHandler {
             handle(params: MissingTranslationHandlerParams): string {
-                return params.key;
+                return `bare-missing:${params.key}`;
             }
         }
 
-        let warnSpy: jasmine.Spy;
-        beforeEach(() => {
-            warnSpy = spyOn(console, "warn");
+        it("auto-wraps a bare loader class to the TranslateLoader token", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ loader: BareLoader }),
+                ],
+            });
+            const loader = TestBed.inject(TranslateLoader);
+            expect(loader).toBeInstanceOf(BareLoader);
         });
 
-        it("warns when 'loader' is a bare class and names the helper", () => {
-            // Bypass the TS guard the way a JS or `any`-cast consumer would.
-            provideTranslateService({
-                loader: BareLoader as unknown as ReturnType<typeof provideTranslateLoader>,
-            });
-            expect(warnSpy).toHaveBeenCalled();
-            const msg = warnSpy.calls.mostRecent().args[0] as string;
-            expect(msg).toContain('"loader"');
-            expect(msg).toContain("BareLoader");
-            expect(msg).toContain("provideTranslateLoader");
+        it("bare loader class resolves to useClass provider in the array", () => {
+            const providers = provideTranslateService({ loader: BareLoader });
+            expect(providers[0]).toEqual({ provide: TranslateLoader, useClass: BareLoader });
         });
 
-        it("warns when 'compiler' is a bare class and names the helper", () => {
-            provideTranslateService({
-                compiler: BareCompiler as unknown as ReturnType<typeof provideTranslateCompiler>,
+        it("auto-wraps a bare compiler class to the TranslateCompiler token", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ compiler: BareCompiler }),
+                ],
             });
-            expect(warnSpy).toHaveBeenCalled();
-            const msg = warnSpy.calls.mostRecent().args[0] as string;
-            expect(msg).toContain('"compiler"');
-            expect(msg).toContain("BareCompiler");
-            expect(msg).toContain("provideTranslateCompiler");
+            const compiler = TestBed.inject(TranslateCompiler);
+            expect(compiler).toBeInstanceOf(BareCompiler);
         });
 
-        it("warns when 'parser' is a bare class and names the helper", () => {
-            provideTranslateService({
-                parser: BareParser as unknown as ReturnType<typeof provideTranslateParser>,
+        it("auto-wraps a bare parser class to the TranslateParser token", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ parser: BareParser }),
+                ],
             });
-            expect(warnSpy).toHaveBeenCalled();
-            const msg = warnSpy.calls.mostRecent().args[0] as string;
-            expect(msg).toContain('"parser"');
-            expect(msg).toContain("BareParser");
-            expect(msg).toContain("provideTranslateParser");
+            const parser = TestBed.inject(TranslateParser);
+            expect(parser).toBeInstanceOf(BareParser);
         });
 
-        it("warns when 'missingTranslationHandler' is a bare class and names the helper", () => {
-            provideChildTranslateService({
-                missingTranslationHandler: BareHandler as unknown as ReturnType<
-                    typeof provideMissingTranslationHandler
-                >,
+        it("auto-wraps a bare missingTranslationHandler class to the MissingTranslationHandler token", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideChildTranslateService({ missingTranslationHandler: BareHandler }),
+                ],
             });
-            expect(warnSpy).toHaveBeenCalled();
-            const msg = warnSpy.calls.mostRecent().args[0] as string;
-            expect(msg).toContain('"missingTranslationHandler"');
-            expect(msg).toContain("BareHandler");
-            expect(msg).toContain("provideMissingTranslationHandler");
+            const handler = TestBed.inject(MissingTranslationHandler);
+            expect(handler).toBeInstanceOf(BareHandler);
         });
 
-        it("does not warn for ClassProvider/FactoryProvider/ValueProvider inputs", () => {
-            provideTranslateService({
-                loader: provideTranslateLoader(TestTranslateLoader),
-                compiler: provideTranslateCompiler(() => new TestTranslateCompiler()),
-                parser: { provide: TranslateParser, useClass: TestTranslateParser },
-                missingTranslationHandler: {
-                    provide: MissingTranslationHandler,
-                    useValue: new TestMissingTranslationHandler(),
-                },
+        it("auto-wraps a bare factory function for any plugin slot", () => {
+            const factory = () => new BareLoader();
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ loader: factory }),
+                ],
             });
+            const loader = TestBed.inject(TranslateLoader);
+            expect(loader).toBeInstanceOf(BareLoader);
+        });
+
+        it("explicit provideTranslateLoader(SomeClass) wrap still works (regression guard)", () => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({
+                        loader: provideTranslateLoader(BareLoader),
+                    }),
+                ],
+            });
+            const loader = TestBed.inject(TranslateLoader);
+            expect(loader).toBeInstanceOf(BareLoader);
+        });
+
+        it("does not emit a console warning for bare classes", () => {
+            const warnSpy = spyOn(console, "warn");
+            provideTranslateService({ loader: BareLoader });
+            provideTranslateService({ compiler: BareCompiler });
+            provideTranslateService({ parser: BareParser });
+            provideChildTranslateService({ missingTranslationHandler: BareHandler });
             expect(warnSpy).not.toHaveBeenCalled();
         });
 
-        it("does not warn when the field is omitted (defaults used)", () => {
+        it("does not emit a console warning when fields are omitted (defaults used)", () => {
+            const warnSpy = spyOn(console, "warn");
             provideTranslateService();
             provideChildTranslateService();
             expect(warnSpy).not.toHaveBeenCalled();
-        });
-
-        // Type-level rejection — these are compile-time assertions.
-        // The `@ts-expect-error` directive fails at typecheck if the line ever
-        // becomes valid, which would mean the type narrowing regressed.
-        it("type-rejects bare classes on each field", () => {
-            // @ts-expect-error — bare class on `loader` must be a TS error
-            const a = provideTranslateService({ loader: BareLoader });
-            // @ts-expect-error — bare class on `compiler` must be a TS error
-            const b = provideTranslateService({ compiler: BareCompiler });
-            // @ts-expect-error — bare class on `parser` must be a TS error
-            const c = provideTranslateService({ parser: BareParser });
-            // @ts-expect-error — bare class on `missingTranslationHandler` must be a TS error
-            const d = provideChildTranslateService({ missingTranslationHandler: BareHandler });
-            // Variables exist only to keep TS from optimizing the calls away.
-            expect(a.length + b.length + c.length + d.length).toBeGreaterThan(0);
         });
     });
 

@@ -4,7 +4,6 @@ import {
     Provider,
     ProviderToken,
     Type,
-    TypeProvider,
 } from "@angular/core";
 import {
     DefaultMissingTranslationHandler,
@@ -25,13 +24,12 @@ import { Language } from "./translate.service.interface";
  * Provider shape accepted by the four plugin slots on
  * {@link RootTranslateServiceConfig} and {@link ChildTranslateServiceConfig}.
  *
- * Excludes {@link TypeProvider} (a bare class) because a bare class registers
- * under its own token instead of the plugin's DI token, which silently
- * disables the plugin. Use the matching `provideTranslate*` helper to wrap
- * a class, or pass an explicit `{ provide: Token, useClass|useValue|... }`
- * object.
+ * Accepts any Angular {@link Provider} — including bare classes (TypeProvider)
+ * and bare factory functions. When a bare class or factory is passed, it is
+ * automatically wrapped by the corresponding `provideTranslate*` helper so it
+ * is registered under the correct DI token.
  */
-export type TranslateProvider = Exclude<Provider, TypeProvider>;
+export type TranslateProvider = Provider | (() => unknown);
 
 export interface TranslateProviders {
     loader?: TranslateProvider;
@@ -108,51 +106,39 @@ interface InternalProvidersConfig extends RootTranslateServiceConfig {
     isRoot: boolean;
 }
 
-const BARE_CLASS_HELPER: Record<keyof TranslateProviders, string> = {
-    loader: "provideTranslateLoader",
-    compiler: "provideTranslateCompiler",
-    parser: "provideTranslateParser",
-    missingTranslationHandler: "provideMissingTranslationHandler",
-};
-
-function isBareClass(value: unknown): boolean {
-    return typeof value === "function";
-}
-
-function warnIfBareClass(fieldName: keyof TranslateProviders, value: unknown): void {
-    if (isBareClass(value)) {
-        const className =
-            (value as { name?: string }).name && (value as { name: string }).name.length > 0
-                ? (value as { name: string }).name
-                : "YourClass";
-        const helper = BARE_CLASS_HELPER[fieldName];
-        console.warn(
-            `@ngx-translate/core: "${fieldName}" received a bare class (${className}). ` +
-                `It will be ignored. Wrap it: ${fieldName}: ${helper}(${className})`,
-        );
-    }
+/**
+ * Resolves a plugin slot to a concrete Angular provider.
+ *
+ * - If `value` is `undefined`, the default class is wrapped with `toProvider`.
+ * - If `value` is a function (bare class or bare factory), it is auto-wrapped
+ *   via `toProvider`, which uses `isClass` to pick `useClass` vs `useFactory`.
+ * - Otherwise `value` is already a proper Provider object and is passed through.
+ */
+function resolvePluginProvider<T>(
+    token: ProviderToken<T>,
+    value: TranslateProvider | undefined,
+    defaultClass: Type<T>,
+): Provider {
+    if (value === undefined) return toProvider(token, defaultClass);
+    if (typeof value === "function") return toProvider(token, value as Type<T> | (() => T));
+    return value as Provider;
 }
 
 function defaultProviders(config: InternalProvidersConfig): Provider[] {
     const providers: Provider[] = [];
 
-    const loader: TranslateProvider =
-        (config.loader as TranslateProvider | undefined) ??
-        provideTranslateLoader(TranslateNoOpLoader);
-    const compiler: TranslateProvider =
-        (config.compiler as TranslateProvider | undefined) ??
-        provideTranslateCompiler(TranslateNoOpCompiler);
-    const parser: TranslateProvider =
-        (config.parser as TranslateProvider | undefined) ??
-        provideTranslateParser(TranslateDefaultParser);
-    const missingTranslationHandler: TranslateProvider =
-        (config.missingTranslationHandler as TranslateProvider | undefined) ??
-        provideMissingTranslationHandler(DefaultMissingTranslationHandler);
-
-    warnIfBareClass("loader", config.loader);
-    warnIfBareClass("compiler", config.compiler);
-    warnIfBareClass("parser", config.parser);
-    warnIfBareClass("missingTranslationHandler", config.missingTranslationHandler);
+    const loader = resolvePluginProvider(TranslateLoader, config.loader, TranslateNoOpLoader);
+    const compiler = resolvePluginProvider(
+        TranslateCompiler,
+        config.compiler,
+        TranslateNoOpCompiler,
+    );
+    const parser = resolvePluginProvider(TranslateParser, config.parser, TranslateDefaultParser);
+    const missingTranslationHandler = resolvePluginProvider(
+        MissingTranslationHandler,
+        config.missingTranslationHandler,
+        DefaultMissingTranslationHandler,
+    );
 
     providers.push(loader, compiler, parser, missingTranslationHandler);
     providers.push(TranslateStore);
