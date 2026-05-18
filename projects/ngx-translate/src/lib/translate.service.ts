@@ -175,6 +175,8 @@ export class TranslateService implements ITranslateService {
 
         this.isRoot = config.isRoot;
 
+        const destroyRef = inject(DestroyRef);
+
         if (this.isRoot) {
             if (config.lang) {
                 this.use(config.lang);
@@ -186,31 +188,31 @@ export class TranslateService implements ITranslateService {
             // Child services should initially load the root's current and fallback languages
             const currentLang = this.getCurrentLang();
             if (currentLang) {
-                this.loadOrExtendLanguage(currentLang)?.subscribe();
+                this.loadOrExtendLanguage(currentLang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
             }
             const fallbackLang = this.getFallbackLang();
             if (fallbackLang) {
-                this.loadOrExtendLanguage(fallbackLang)?.subscribe();
+                this.loadOrExtendLanguage(fallbackLang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
             }
         }
 
         // Child services should load translations when the language changes on the root
-        this.onLangChange.pipe(takeUntilDestroyed()).subscribe((event) => {
+        this.onLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
             if (!this.isRoot) {
-                this.loadOrExtendLanguage(event.lang)?.subscribe();
+                this.loadOrExtendLanguage(event.lang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
             }
         });
 
-        this.onFallbackLangChange.pipe(takeUntilDestroyed()).subscribe((event) => {
+        this.onFallbackLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
             if (!this.isRoot) {
-                this.loadOrExtendLanguage(event.lang)?.subscribe();
+                this.loadOrExtendLanguage(event.lang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
             }
         });
 
         // Complete this service's Subjects when its injector tears down.
         // Root singletons live as long as the app, but child services on
         // lazy routes would otherwise pin their Subjects until GC.
-        inject(DestroyRef).onDestroy(() => {
+        destroyRef.onDestroy(() => {
             this._onLangChange.complete();
             this._onFallbackLangChange.complete();
         });
