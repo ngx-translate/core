@@ -353,4 +353,24 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         http.expectOne("/custom/en.lang.json").flush({ TEST: "B" });
         expect(translate.instant("TEST")).toBe("B");
     });
+
+    it("returns empty translations when resources is []", (done: DoneFn) => {
+        prepareMulti({ resources: [] });
+
+        let completed = false;
+        translate.use("en").subscribe({
+            next: () => {
+                completed = true;
+            },
+            complete: done,
+            error: done.fail,
+        });
+
+        // No HTTP requests should be pending — forkJoin([]) must not hang
+        http.verify();
+
+        expect(completed).toBeTrue();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(translate.getTranslations("en") as any).toEqual({});
+    });
 });

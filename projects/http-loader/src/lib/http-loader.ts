@@ -79,6 +79,10 @@ export class TranslateHttpLoader implements TranslateLoader {
             );
         });
 
+        if (requests.length === 0) {
+            return of({});
+        }
+
         return forkJoin(requests).pipe(
             map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
         ) as Observable<TranslationObject>;
