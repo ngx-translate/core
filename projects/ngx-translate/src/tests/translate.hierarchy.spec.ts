@@ -200,6 +200,83 @@ describe("TranslateService Hierarchy", () => {
         expect(childService.instant("ROOT_KEY", undefined, "en")).toEqual("root-val");
     });
 
+    it("child.instant(_, _, lang) does not warn when ancestor has the lang loaded", () => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ GREETING: "Hallo" }),
+                    },
+                }),
+            ],
+        });
+        const rootService = rootInjector.get(TranslateService);
+        rootService.setTranslation("de", { GREETING: "Hallo" });
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ GREETING: "Hello" }),
+                    },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+        childService.setTranslation("en", { GREETING: "Hello" });
+
+        const warnSpy = spyOn(console, "warn");
+
+        const result = childService.instant("GREETING", undefined, "de");
+
+        expect(result).toBe("Hallo");
+        expect(warnSpy).not.toHaveBeenCalledWith(
+            jasmine.stringContaining("no translations are loaded"),
+        );
+    });
+
+    it("child.stream(_, _, lang) re-emits when ancestor store updates that lang", (done) => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({}),
+                    },
+                }),
+            ],
+        });
+        const rootService = rootInjector.get(TranslateService);
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({}),
+                    },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+
+        const emissions: unknown[] = [];
+
+        childService.stream("GREETING", undefined, "de").subscribe((val) => {
+            emissions.push(val);
+        });
+
+        // Trigger root to update "de" — child's stream must pick this up
+        rootService.setTranslation("de", { GREETING: "Hallo" });
+
+        expect(emissions).toContain("Hallo");
+        done();
+    });
+
     it("should propagate parent translation changes to child translate() signal", () => {
         const rootInjector = Injector.create({
             providers: [

@@ -87,6 +87,16 @@ export class TranslateService implements ITranslateService {
         return this.parent ? this.parent.getRoot() : this;
     }
 
+    protected hasTranslationInChain(lang: Language): boolean {
+        return this.store.hasTranslationFor(lang) || (this.parent?.hasTranslationInChain(lang) ?? false);
+    }
+
+    protected chainTranslationChange$(): Observable<TranslationChangeEvent> {
+        return this.parent
+            ? merge(this.store.translationChange$, this.parent.chainTranslationChange$())
+            : this.store.translationChange$;
+    }
+
     /**
      * An Observable to listen to translation change events
      * onTranslationChange.subscribe((params: TranslationChangeEvent) => {
@@ -623,7 +633,7 @@ export class TranslateService implements ITranslateService {
         const reemit$: Observable<unknown> = lang
             ? merge(
                   this.onLangChange,
-                  this.store.translationChange$.pipe(filter((e) => e.lang === lang)),
+                  this.chainTranslationChange$().pipe(filter((e) => e.lang === lang)),
               )
             : this.onLangChange;
 
@@ -655,7 +665,7 @@ export class TranslateService implements ITranslateService {
             return "";
         }
 
-        if (lang && !this.store.hasTranslationFor(lang)) {
+        if (lang && !this.hasTranslationInChain(lang)) {
             this.warnUnloadedInstantLang(lang);
         }
 
