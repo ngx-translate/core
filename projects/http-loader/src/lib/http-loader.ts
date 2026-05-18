@@ -8,6 +8,15 @@ export interface TranslateHttpLoaderConfig {
     suffix?: string;
     enforceLoading: boolean;
     useHttpBackend: boolean;
+    /**
+     * If true, a failed HTTP fetch (e.g. 404) propagates the error and fails
+     * the whole language load (v17 behaviour). If false (default), each
+     * resource failure is caught and replaced with an empty object, with a
+     * `console.warn` per failure; remaining resources still contribute their
+     * keys. Set this to `true` if you want deploys to fail loudly on a
+     * missing translation file rather than serve partial translations.
+     */
+    failOnError?: boolean;
 }
 
 export interface TranslateHttpLoaderResource {
@@ -19,6 +28,8 @@ export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
+    /** See {@link TranslateHttpLoaderConfig.failOnError}. */
+    failOnError?: boolean;
 }
 
 export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<
@@ -54,7 +65,13 @@ export class TranslateHttpLoader implements TranslateLoader {
                         ? `${resource}${lang}.json`
                         : `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
 
-            return this.http.get<TranslationObject>(`${path}${cacheBuster}`).pipe(
+            const request$ = this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+
+            if (this.config.failOnError) {
+                return request$;
+            }
+
+            return request$.pipe(
                 catchError((err: HttpErrorResponse) => {
                     console.warn(`@ngx-translate/http-loader: error loading translation for ${lang}:`, err);
                     return of({});
@@ -81,6 +98,7 @@ export function provideTranslateHttpLoader(
     const multiConfig: Partial<TranslateMultiHttpLoaderConfig> = {
         enforceLoading: singleConfig.enforceLoading ?? false,
         useHttpBackend: singleConfig.useHttpBackend ?? false,
+        failOnError: singleConfig.failOnError ?? false,
         resources: [
             {
                 prefix: singleConfig.prefix ?? "/assets/i18n/",
