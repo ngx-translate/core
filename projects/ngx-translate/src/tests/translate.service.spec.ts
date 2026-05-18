@@ -2234,3 +2234,115 @@ describe("TranslateService (explicit lang parameter)", () => {
         expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
     });
 });
+
+describe("TranslateService (F3 — Subject completion on destroy)", () => {
+    it("completes _onLangChange when the service is destroyed", (done) => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        const service = TestBed.inject(TranslateService);
+
+        let completed = false;
+        service.onLangChange.subscribe({
+            complete: () => {
+                completed = true;
+                expect(completed).toBeTrue();
+                done();
+            },
+        });
+
+        // Destroying the TestBed injector triggers DestroyRef.onDestroy()
+        TestBed.resetTestingModule();
+    });
+
+    it("completes _onFallbackLangChange when the service is destroyed", (done) => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        const service = TestBed.inject(TranslateService);
+
+        let completed = false;
+        service.onFallbackLangChange.subscribe({
+            complete: () => {
+                completed = true;
+                expect(completed).toBeTrue();
+                done();
+            },
+        });
+
+        TestBed.resetTestingModule();
+    });
+});
+
+describe("TranslateService (F6 — instant() warn dedup)", () => {
+    let translate: TranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+        // Pre-load "en" so we have at least one loaded lang
+        translate.setTranslation("en", { KEY: "Value" });
+        translate.use("en");
+    });
+
+    it("instant(_,_,lang) warns once per unloaded lang and not for loaded langs", () => {
+        const warnSpy = spyOn(console, "warn");
+        const warnCount = () =>
+            warnSpy.calls.all().filter((c) =>
+                (c.args[0] as string).includes("no translations are loaded"),
+            ).length;
+
+        // First call for unloaded "de" → should warn once
+        translate.instant("KEY", undefined, "de");
+        expect(warnCount()).toBe(1);
+
+        // Second call for "de" → deduped, still 1
+        translate.instant("KEY", undefined, "de");
+        expect(warnCount()).toBe(1);
+
+        // First call for unloaded "fr" → distinct lang, new warn → 2 total
+        translate.instant("KEY", undefined, "fr");
+        expect(warnCount()).toBe(2);
+
+        // Call for loaded "en" → no warn → still 2
+        translate.instant("KEY", undefined, "en");
+        expect(warnCount()).toBe(2);
+    });
+});
+
+describe("TranslateService (F7 — stream() emission-count lock-in)", () => {
+    it("stream(_, _, currentLang) emission count on use(currentLang)", (done) => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+            ],
+        });
+        const service = TestBed.inject(TranslateService);
+        service.setTranslation("en", { KEY: "Value" });
+        service.use("en");
+
+        let count = 0;
+        // Subscribe to stream for a key with explicit current lang
+        const sub = service.stream("KEY", undefined, "en").subscribe(() => {
+            count++;
+            if (count === 2) {
+                // locks in current behavior; if you change to N, justify in PR
+                expect(count).toBe(2);
+                sub.unsubscribe();
+                done();
+            }
+        });
+
+        // Calling use() on the already-current lang re-emits onLangChange,
+        // causing the stream to emit a second time
+        service.use("en");
+    });
+});

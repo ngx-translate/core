@@ -307,4 +307,38 @@ describe("TranslateService Hierarchy", () => {
 
         expect(childService.instant("KEY")).toBe("updated-value");
     });
+
+    it("completes child store translationChange$ when child injector is destroyed", (done) => {
+        const rootInjector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                }),
+            ],
+        });
+
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                }),
+            ],
+            parent: rootInjector,
+        });
+        const childService = childInjector.get(TranslateService);
+
+        // onTranslationChange proxies the child's own store.translationChange$
+        let completed = false;
+        childService.onTranslationChange.subscribe({
+            complete: () => {
+                completed = true;
+                expect(completed).toBeTrue();
+                done();
+            },
+        });
+
+        // Destroying the child injector fires DestroyRef.onDestroy() on the child
+        // store, which completes _translationChange$. The root is unaffected.
+        childInjector.destroy();
+    });
 });

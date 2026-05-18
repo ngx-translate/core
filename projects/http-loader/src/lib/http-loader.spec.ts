@@ -373,4 +373,75 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect(translate.getTranslations("en") as any).toEqual({});
     });
+
+    describe("F8 failOnError", () => {
+        it("failOnError: true forwards HTTP errors to translate.use()", (done: DoneFn) => {
+            prepareMulti({
+                resources: ["/assets/i18n/"],
+                failOnError: true,
+            });
+
+            let errored = false;
+            translate.use("en").subscribe({
+                next: () => done.fail("Expected an error, got a next value"),
+                error: (err: unknown) => {
+                    errored = true;
+                    expect(errored).toBeTrue();
+                    expect(err).toBeDefined();
+                    done();
+                },
+            });
+
+            http.expectOne("/assets/i18n/en.json").flush(null, {
+                status: 500,
+                statusText: "Server Error",
+            });
+        });
+
+        it("failOnError: true via single-config provideTranslateHttpLoader path", (done: DoneFn) => {
+            // Uses the provideTranslateHttpLoader(single) overload which converts to
+            // multi-config at http-loader.ts:101-114. Verifies failOnError is preserved.
+            prepareSingle({
+                prefix: "/i18n/",
+                suffix: ".json",
+                failOnError: true,
+            });
+
+            let errored = false;
+            translate.use("en").subscribe({
+                next: () => done.fail("Expected an error, got a next value"),
+                error: (err: unknown) => {
+                    errored = true;
+                    expect(errored).toBeTrue();
+                    expect(err).toBeDefined();
+                    done();
+                },
+            });
+
+            http.expectOne("/i18n/en.json").flush(null, {
+                status: 500,
+                statusText: "Server Error",
+            });
+        });
+
+        it("failOnError defaults to false (silent swallow)", () => {
+            // Regression guard: the default must stay false (swallow errors silently).
+            spyOn(console, "warn");
+            prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" }); // no failOnError
+
+            let resolved = false;
+            translate.use("en").subscribe({
+                next: () => { resolved = true; },
+                error: () => fail("Expected silent swallow, got an error"),
+            });
+
+            http.expectOne("/assets/i18n/en.json").flush(null, {
+                status: 500,
+                statusText: "Server Error",
+            });
+
+            expect(resolved).toBeTrue();
+            expect(translate.instant("ANY")).toBe("ANY"); // no translations loaded
+        });
+    });
 });

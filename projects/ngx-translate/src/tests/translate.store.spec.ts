@@ -293,3 +293,26 @@ describe("TranslateStore (signals)", () => {
         expect(event as any).toEqual({ lang: "en", translations: { A: "a" } });
     });
 });
+
+describe("TranslateStore (F3 — translationChange$ completion on destroy)", () => {
+    it("completes _translationChange$ when the owning injector is destroyed", (done) => {
+        TestBed.configureTestingModule({
+            providers: [provideTranslateService()],
+        });
+
+        const store = TestBed.inject(TranslateStore);
+
+        let completed = false;
+        store.translationChange$.subscribe({
+            complete: () => {
+                completed = true;
+                expect(completed).toBeTrue();
+                done();
+            },
+        });
+
+        // resetTestingModule() tears down the TestBed injector, which fires
+        // DestroyRef.onDestroy() on the store, completing _translationChange$.
+        TestBed.resetTestingModule();
+    });
+});
