@@ -2155,6 +2155,23 @@ describe("TranslateService (explicit lang parameter)", () => {
         });
     });
 
+    it("stream() with per-call lang re-emits when that lang's translations change", (done) => {
+        const emissions: Translation[] = [];
+        const sub = translate.stream("GREETING", undefined, "de").subscribe((result) => {
+            emissions.push(result);
+            if (emissions.length === 2) {
+                expect(emissions[0]).toEqual("Hallo");
+                expect(emissions[1]).toEqual("Hallo (updated)");
+                sub.unsubscribe();
+                done();
+            }
+        });
+        // Trigger a translation change for the per-call lang. With the v18 fix,
+        // stream() should pick this up even though current lang ("en") didn't
+        // change. Before the fix, the stream stayed stuck on the initial value.
+        translate.setTranslation("de", { GREETING: "Hallo (updated)" });
+    });
+
     it("getStreamOnTranslationChange() should return translation from the specified language", (done) => {
         translate.getStreamOnTranslationChange("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
             expect(result).toEqual("Hallo");

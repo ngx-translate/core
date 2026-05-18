@@ -600,7 +600,15 @@ export class TranslateService implements ITranslateService {
 
     /**
      * Returns a stream of translated values of a key (or an array of keys) which updates
-     * whenever the language changes.
+     * whenever the language changes, the requested language's translations are
+     * (re)loaded, or the explicitly-requested `lang` argument's translations change.
+     *
+     * Without `lang`: re-emits on `onLangChange` (active-language switches via
+     * {@link use}). With `lang`: also re-emits when translations for that specific
+     * language are loaded or updated via `store.translationChange$`, so an
+     * explicit `stream("KEY", undefined, "de")` updates once "de" finishes
+     * loading.
+     *
      * @returns A stream of the translated key, or an object of translated keys
      */
     public stream(
@@ -612,9 +620,16 @@ export class TranslateService implements ITranslateService {
             throw new Error(`Parameter "key" required`);
         }
 
+        const reemit$: Observable<unknown> = lang
+            ? merge(
+                  this.onLangChange,
+                  this.store.translationChange$.pipe(filter((e) => e.lang === lang)),
+              )
+            : this.onLangChange;
+
         return concat(
             defer(() => this.get(key, interpolateParams, lang)),
-            this.onLangChange.pipe(
+            reemit$.pipe(
                 switchMap(() => {
                     const res = this.getParsedResult(key, interpolateParams, lang);
                     return makeObservable(res);
