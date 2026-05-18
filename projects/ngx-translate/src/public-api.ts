@@ -9,7 +9,20 @@ export * from "./lib/translate.parser";
 export * from "./lib/translate.pipe";
 export * from "./lib/translate.service";
 export * from "./lib/translate.store";
-export * from "./lib/translate.providers";
+export {
+    provideTranslateService,
+    provideChildTranslateService,
+    provideTranslateLoader,
+    provideTranslateCompiler,
+    provideTranslateParser,
+    provideMissingTranslationHandler,
+} from "./lib/translate.providers";
+export type {
+    RootTranslateServiceConfig,
+    ChildTranslateServiceConfig,
+    TranslateProviders,
+    TranslateProvider,
+} from "./lib/translate.providers";
 export * from "./lib/util";
 export { ITranslateService } from "./lib/translate.service.interface";
 export type { FallbackLangChangeEvent } from "./lib/translate.service.interface";

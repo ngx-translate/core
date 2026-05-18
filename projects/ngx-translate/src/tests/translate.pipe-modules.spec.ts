@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, Injectable, Provider } from "@angular/core";
+import { ChangeDetectionStrategy, Component, Injectable } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     provideTranslateService,
     TranslateLoader,
     TranslatePipe,
+    TranslateProvider,
     TranslateService,
     TranslationObject,
 } from "../public-api";
@@ -28,11 +29,13 @@ class FakeLoader implements TranslateLoader {
     }
 }
 
-describe("TranslatePipe (module)", () => {
+// File-name is historical: these tests covered the `TranslateModule.forRoot`
+// path in v17 and were retained against `provideTranslateService` in v18.
+describe("TranslatePipe (provider config)", () => {
     let translate: TranslateService;
     let fixture: ComponentFixture<AppComponent>;
 
-    const prepare = (loader?: Provider) => {
+    const prepare = (loader?: TranslateProvider) => {
         TestBed.configureTestingModule({
             imports: [AppComponent],
             providers: [
