@@ -37,3 +37,4 @@ Thumbs.db
 
 packages/core/.idea
 packages/http-loader/.idea
+.gstack/

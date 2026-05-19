@@ -39,7 +39,7 @@ interface ServiceNode {
                     <div class="tree-column">
                         <div class="tree-label">Isolated</div>
                         <div class="hierarchy-tree">
-                            @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
+                            @for (service of hierarchy; track $index; let last = $last; let i = $index; let count = $count) {
                                 <ng-container
                                     *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count), isolated: true }"
                                 />
@@ -49,7 +49,7 @@ interface ServiceNode {
                 </div>
             } @else {
                 <div class="hierarchy-tree">
-                    @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
+                    @for (service of hierarchy; track $index; let last = $last; let i = $index; let count = $count) {
                         <ng-container
                             *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count), isolated: false }"
                         />

@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { toObservable, toSignal } from "@angular/core/rxjs-interop";
 import { switchMap } from "rxjs";
 import {
+    _,
+    translate,
     TranslateService,
     TranslatePipe,
     TranslateDirective,
@@ -15,7 +17,7 @@ import { IconComponent } from "../icon/icon.component";
     template: `
         <h4><app-icon name="beaker" /> Translation Methods Comparison</h4>
         <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Type a name below — all five methods translate <code>{{ key() }}</code> with it.
+            Type a name below — all six methods translate <code>{{ key() }}</code> with it.
         </p>
         <input
             type="text"
@@ -42,8 +44,12 @@ import { IconComponent } from "../icon/icon.component";
                 <span class="method-value">{{ greetingObs() }}</span>
             </div>
             <div class="method-item">
-                <span class="method-label signal">Signal (translate)</span>
+                <span class="method-label signal">Signal (service.translate)</span>
                 <span class="method-value">{{ greetingSignal() }}</span>
+            </div>
+            <div class="method-item">
+                <span class="method-label signal">Signal (translate fn)</span>
+                <span class="method-value">{{ greetingFn() }}</span>
             </div>
             <ng-container *translateBlock="let t">
                 <div class="method-item">
@@ -58,7 +64,8 @@ import { IconComponent } from "../icon/icon.component";
 export class MethodsComparisonComponent {
     private translate = inject(TranslateService);
 
-    key = input("demo.greeting");
+    // _() marks the string as translation key (for extraction - e.g. with BabelEdit)
+    key = input(_("demo.greeting"));
     name = signal("World");
 
     greetingObs = toSignal(
@@ -68,6 +75,11 @@ export class MethodsComparisonComponent {
     );
 
     greetingSignal = this.translate.translate(
+        this.key,
+        computed(() => ({ name: this.name() })),
+    );
+
+    greetingFn = translate(
         this.key,
         computed(() => ({ name: this.name() })),
     );
