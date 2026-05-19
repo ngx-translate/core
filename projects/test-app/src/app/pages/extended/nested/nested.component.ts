@@ -3,10 +3,11 @@ import { TranslatePipe, provideChildTranslateService } from "@ngx-translate/core
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { MethodsComparisonComponent } from "../../../components/methods-comparison/methods-comparison.component";
 import { HierarchyVizComponent } from "../../../components/hierarchy-viz/hierarchy-viz.component";
+import { IconComponent } from "../../../components/icon/icon.component";
 
 @Component({
     selector: "app-nested",
-    imports: [TranslatePipe, MethodsComparisonComponent, HierarchyVizComponent],
+    imports: [TranslatePipe, MethodsComparisonComponent, HierarchyVizComponent, IconComponent],
     providers: [
         provideChildTranslateService({
             loader: provideTranslateHttpLoader({
@@ -18,7 +19,7 @@ import { HierarchyVizComponent } from "../../../components/hierarchy-viz/hierarc
     ],
     template: `
         <div class="sub-card" style="margin-top: 2rem; border-style: dashed; background: #f8fafc;">
-            <h4><span>🍀</span> Nested Component (Grandchild)</h4>
+            <h4><app-icon name="cube" /> Nested Component (Grandchild)</h4>
             <div class="translation-item">
                 <span class="key">nested.own</span>
                 <span class="value">{{ "nested.own" | translate }}</span>

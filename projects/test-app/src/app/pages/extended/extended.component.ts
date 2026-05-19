@@ -10,6 +10,7 @@ import { LanguageSwitchComponent } from "../../components/language-switch/langua
 import { NestedComponent } from "./nested/nested.component";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
+import { IconComponent } from "../../components/icon/icon.component";
 import { ConsoleLogService } from "../../services/console-log.service";
 
 @Component({
@@ -20,6 +21,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
         NestedComponent,
         HierarchyVizComponent,
         MethodsComparisonComponent,
+        IconComponent,
     ],
     providers: [
         provideChildTranslateService({
@@ -40,7 +42,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
             </div>
 
             <div style="margin-bottom: 2rem;">
-                <h4><span>🌐</span> Global Language Control</h4>
+                <h4><app-icon name="globe" /> Global Language Control</h4>
                 <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                     This affects the root service and all child services.
                 </p>
@@ -49,7 +51,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
 
             <div class="demo-grid">
                 <div class="sub-card">
-                    <h4><span>🌿</span> Local & Derived Translations</h4>
+                    <h4><app-icon name="layers" /> Local & Derived Translations</h4>
                     <div class="translation-item">
                         <span class="key">extended.own</span>
                         <span class="value">{{ "extended.own" | translate }}</span>
@@ -74,7 +76,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
                 </div>
 
                 <div class="sub-card">
-                    <h4><span>⚙️</span> Configuration</h4>
+                    <h4><app-icon name="cog" /> Configuration</h4>
                     <p>
                         <strong>Current Lang:</strong> <code>{{ translate.getCurrentLang() }}</code>
                     </p>

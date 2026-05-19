@@ -7,12 +7,13 @@ import {
     TranslateDirective,
     TranslateBlockDirective,
 } from "@ngx-translate/core";
+import { IconComponent } from "../icon/icon.component";
 
 @Component({
     selector: "app-methods-comparison",
-    imports: [TranslatePipe, TranslateDirective, TranslateBlockDirective],
+    imports: [TranslatePipe, TranslateDirective, TranslateBlockDirective, IconComponent],
     template: `
-        <h4><span>🔬</span> Translation Methods Comparison</h4>
+        <h4><app-icon name="beaker" /> Translation Methods Comparison</h4>
         <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
             Type a name below — all five methods translate <code>{{ key() }}</code> with it.
         </p>

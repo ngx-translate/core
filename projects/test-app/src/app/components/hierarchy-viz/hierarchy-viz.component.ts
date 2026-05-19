@@ -1,6 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import { TranslateService } from "@ngx-translate/core";
+import { IconComponent } from "../icon/icon.component";
 
 interface ServiceNode {
     isRoot: boolean;
@@ -11,7 +12,7 @@ interface ServiceNode {
 
 @Component({
     selector: "app-hierarchy-viz",
-    imports: [NgTemplateOutlet],
+    imports: [NgTemplateOutlet, IconComponent],
     template: `
         <div class="hierarchy-container">
             <h3>Service Hierarchy</h3>
@@ -20,7 +21,7 @@ interface ServiceNode {
                     <div class="tree-column">
                         <div class="tree-label">Global</div>
                         <div class="service-node">
-                            <div class="node-icon"><span>🏠</span></div>
+                            <div class="node-icon"><app-icon name="tree-root" /></div>
                             <div class="node-info">
                                 <span class="node-type">Root Service</span>
                                 <span class="node-lang"
@@ -38,9 +39,9 @@ interface ServiceNode {
                     <div class="tree-column">
                         <div class="tree-label">Isolated</div>
                         <div class="hierarchy-tree">
-                            @for (service of hierarchy; track service; let last = $last) {
+                            @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
                                 <ng-container
-                                    *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last }"
+                                    *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count) }"
                                 />
                             }
                         </div>
@@ -48,25 +49,29 @@ interface ServiceNode {
                 </div>
             } @else {
                 <div class="hierarchy-tree">
-                    @for (service of hierarchy; track service; let last = $last) {
+                    @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
                         <ng-container
-                            *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last }"
+                            *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count) }"
                         />
                     }
                 </div>
             }
         </div>
 
-        <ng-template #nodeTemplate let-service let-last="last">
+        <ng-template #nodeTemplate let-service let-last="last" let-position="position">
             <div class="service-node" [class.current]="last">
                 <div class="node-icon">
-                    <span>
-                        @if (service.isRoot) {
-                            🏠
-                        } @else {
-                            📦
+                    @switch (position) {
+                        @case ("root") {
+                            <app-icon name="tree-root" />
                         }
-                    </span>
+                        @case ("leaf") {
+                            <app-icon name="tree-leaf" />
+                        }
+                        @default {
+                            <app-icon name="tree-child" />
+                        }
+                    }
                 </div>
                 <div class="node-info">
                     <span class="node-type">{{
@@ -143,7 +148,13 @@ interface ServiceNode {
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
         }
         .node-icon {
-            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            color: var(--primary);
+            flex-shrink: 0;
         }
         .node-info {
             display: flex;
@@ -193,6 +204,12 @@ export class HierarchyVizComponent {
             currentLang: root.getCurrentLang(),
             fallbackLang: root.getFallbackLang(),
         };
+    }
+
+    positionFor(index: number, count: number): "root" | "child" | "leaf" {
+        if (index === 0) return "root";
+        if (index === count - 1) return "leaf";
+        return "child";
     }
 
     get hierarchy(): ServiceNode[] {

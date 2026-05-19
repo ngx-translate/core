@@ -9,11 +9,18 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { LanguageSwitchComponent } from "../../components/language-switch/language-switch.component";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
+import { IconComponent } from "../../components/icon/icon.component";
 import { ConsoleLogService } from "../../services/console-log.service";
 
 @Component({
     selector: "app-isolated",
-    imports: [TranslatePipe, LanguageSwitchComponent, HierarchyVizComponent, MethodsComparisonComponent],
+    imports: [
+        TranslatePipe,
+        LanguageSwitchComponent,
+        HierarchyVizComponent,
+        MethodsComparisonComponent,
+        IconComponent,
+    ],
     providers: [
         provideTranslateService({
             loader: provideTranslateHttpLoader({
@@ -32,7 +39,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
             </div>
 
             <div style="margin-bottom: 2rem;">
-                <h4><span>🌐</span> Local Language Control</h4>
+                <h4><app-icon name="globe" /> Local Language Control</h4>
                 <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                     This switcher only affects THIS component and its children.
                 </p>
@@ -41,7 +48,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
 
             <div class="demo-grid">
                 <div class="sub-card">
-                    <h4><span>🔒</span> Isolated Translations</h4>
+                    <h4><app-icon name="lock" /> Isolated Translations</h4>
                     <div class="translation-item">
                         <span class="key">isolated.own</span>
                         <span class="value">{{ "isolated.own" | translate }}</span>
@@ -60,7 +67,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
                 </div>
 
                 <div class="sub-card">
-                    <h4><span>⚙️</span> Configuration</h4>
+                    <h4><app-icon name="cog" /> Configuration</h4>
                     <p>
                         <strong>Current Lang:</strong> <code>{{ translate.getCurrentLang() }}</code>
                     </p>

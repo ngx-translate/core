@@ -129,17 +129,14 @@ nav {
     border-radius: var(--radius-md);
     font-size: 0.9375rem;
     margin-bottom: 1.5rem;
-    border-left: 4px solid;
 
     &.info {
         background: #eff6ff;
-        border-color: #3b82f6;
         color: #1e40af;
     }
 
     &.warning {
         background: #fffbeb;
-        border-color: #f59e0b;
         color: #92400e;
     }
 }
@@ -165,6 +162,12 @@ nav {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+
+        app-icon {
+            width: 1.125rem;
+            height: 1.125rem;
+            color: var(--primary);
+        }
     }
 
     p {
