@@ -1,4 +1,4 @@
-import { Injector } from "@angular/core";
+import { EnvironmentInjector, Injector } from "@angular/core";
 import { Observable, of } from "rxjs";
 import {
     provideChildTranslateService,
@@ -339,6 +339,8 @@ describe("TranslateService Hierarchy", () => {
 
         // Destroying the child injector fires DestroyRef.onDestroy() on the child
         // store, which completes _translationChange$. The root is unaffected.
-        childInjector.destroy();
+        // Cast: Angular <20 typed Injector.create() as Injector (no .destroy());
+        // the runtime instance is an EnvironmentInjector on every supported version.
+        (childInjector as EnvironmentInjector).destroy();
     });
 });
