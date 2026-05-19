@@ -43,6 +43,19 @@ import { IconComponent } from "../../components/icon/icon.component";
                     </p>
                     <p><strong>Is Root:</strong> <code>true</code></p>
                 </div>
+
+                <div class="sub-card">
+                    <h4><app-icon name="cloud-download" /> Multi-resource Loader</h4>
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        The root loader is configured with two prefixes in
+                        <code>app.config.ts</code>. Keys are merged in order — values from the
+                        first resource win on collision.
+                    </p>
+                    <div class="translation-item">
+                        <span class="key">multi.loader</span>
+                        <span class="value">{{ "multi.loader" | translate }}</span>
+                    </div>
+                </div>
             </div>
 
             <div class="sub-card" style="margin-top: 1.5rem;">
@@ -58,3 +71,4 @@ import { IconComponent } from "../../components/icon/icon.component";
 export class GlobalComponent {
     translate = inject(TranslateService);
 }
+
