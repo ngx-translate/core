@@ -87,6 +87,17 @@ export class TranslateService implements ITranslateService {
         return this.parent ? this.parent.getRoot() : this;
     }
 
+    /**
+     * Returns the service this one inherits translations from, or `null` if
+     * this is a root (a top-level service or an isolated subtree root).
+     *
+     * A `null` return means the service is the terminus of its translation
+     * fallback chain — equivalent to "is this a root?".
+     */
+    public getParent(): TranslateService | null {
+        return this.isRoot ? null : this.parent;
+    }
+
     protected hasTranslationInChain(lang: Language): boolean {
         return this.store.hasTranslationFor(lang) || (this.parent?.hasTranslationInChain(lang) ?? false);
     }
