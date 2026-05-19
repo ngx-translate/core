@@ -18,12 +18,12 @@ describe("TranslateDirective — deprecated content-as-key", () => {
     };
 
     const makeCdRef = (): ChangeDetectorRef =>
-        ({ markForCheck: () => {} }) as unknown as ChangeDetectorRef;
+        ({ markForCheck: () => undefined }) as unknown as ChangeDetectorRef;
 
     const makeTranslateServiceStub = (): TranslateService =>
         ({
             instant: (key: string) => key,
-            onTranslationRefresh: { pipe: () => ({ subscribe: () => {} }) },
+            onTranslationRefresh: { pipe: () => ({ subscribe: () => undefined }) },
         }) as unknown as TranslateService;
 
     it("warns once per element when content is used as key", () => {
