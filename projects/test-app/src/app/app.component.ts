@@ -2,7 +2,9 @@ import { Component, inject, OnInit } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { _, TranslateService, TranslationObject } from "@ngx-translate/core";
 import { map } from "rxjs";
+import { ConsoleComponent } from "./components/console/console.component";
 import { LanguageSwitchComponent } from "./components/language-switch/language-switch.component";
+import { ConsoleLogService } from "./services/console-log.service";
 
 @Component({
     selector: "app-root",
@@ -10,14 +12,17 @@ import { LanguageSwitchComponent } from "./components/language-switch/language-s
         RouterModule,
 
         // Components
+        ConsoleComponent,
         LanguageSwitchComponent,
     ],
     templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
     private translate = inject(TranslateService);
+    private consoleLog = inject(ConsoleLogService);
 
-    title = _("test-app");
+    // just a translation id - not used anywhere
+    title = _("demo.title");
 
     ngOnInit() {
         // Service Get method with a set of string[]
@@ -29,20 +34,28 @@ export class AppComponent implements OnInit {
                 }),
             )
             .subscribe((result: string) => {
-                console.info(".get([])", result);
+                this.consoleLog.log(".get([])", result);
 
                 const instantTranslation = this.translate.instant("demo.simple.text-as-attribute");
-                console.info("instant", instantTranslation);
+                this.consoleLog.log("instant", instantTranslation);
             });
 
         this.translate.onTranslationChange.subscribe((event) => {
-            console.info("onTranslationChange", event);
+            this.consoleLog.log("[root] onTranslationChange", event);
+        });
+
+        this.translate.onLangChange.subscribe((event) => {
+            this.consoleLog.log("[root] onLangChange", { lang: event.lang });
+        });
+
+        this.translate.onFallbackLangChange.subscribe((event) => {
+            this.consoleLog.log("[root] onFallbackLangChange", { lang: event.lang });
         });
     }
 
     reloadLang() {
         this.translate.reloadLang(this.translate.getCurrentLang()!).subscribe((translations) => {
-            console.info("reloadLang", translations);
+            this.consoleLog.log("reloadLang", translations);
         });
     }
 }

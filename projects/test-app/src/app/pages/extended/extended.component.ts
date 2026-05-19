@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
     TranslateService,
     TranslatePipe,
@@ -9,6 +10,7 @@ import { LanguageSwitchComponent } from "../../components/language-switch/langua
 import { NestedComponent } from "./nested/nested.component";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
+import { ConsoleLogService } from "../../services/console-log.service";
 
 @Component({
     selector: "app-extended",
@@ -95,8 +97,28 @@ import { MethodsComparisonComponent } from "../../components/methods-comparison/
 })
 export class ExtendedComponent {
     translate = inject(TranslateService);
+    private consoleLog = inject(ConsoleLogService);
+    private destroyRef = inject(DestroyRef);
 
     constructor() {
         this.translate.addLangs(["de", "en"]);
+
+        this.translate.onLangChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[extended] onLangChange", { lang: event.lang });
+            });
+
+        this.translate.onFallbackLangChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[extended] onFallbackLangChange", { lang: event.lang });
+            });
+
+        this.translate.onTranslationChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[extended] onTranslationChange", event);
+            });
     }
 }

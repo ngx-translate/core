@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
     TranslateService,
     TranslatePipe,
@@ -8,6 +9,7 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { LanguageSwitchComponent } from "../../components/language-switch/language-switch.component";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
+import { ConsoleLogService } from "../../services/console-log.service";
 
 @Component({
     selector: "app-isolated",
@@ -85,10 +87,30 @@ import { MethodsComparisonComponent } from "../../components/methods-comparison/
 })
 export class IsolatedComponent {
     translate = inject(TranslateService);
+    private consoleLog = inject(ConsoleLogService);
+    private destroyRef = inject(DestroyRef);
 
     constructor() {
         this.translate.addLangs(["de", "en"]);
         this.translate.setFallbackLang("en");
         this.translate.use("en");
+
+        this.translate.onLangChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[isolated] onLangChange", { lang: event.lang });
+            });
+
+        this.translate.onFallbackLangChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[isolated] onFallbackLangChange", { lang: event.lang });
+            });
+
+        this.translate.onTranslationChange
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((event) => {
+                this.consoleLog.log("[isolated] onTranslationChange", event);
+            });
     }
 }

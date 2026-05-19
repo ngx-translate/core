@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
         provideTranslateService({
             loader: provideTranslateHttpLoader({
                 enforceLoading: true,
-                resources: [{ prefix: "./i18n/another/", suffix: ".json" }, { prefix: "./i18n/" }],
+                resources: [{ prefix: "./i18n/multiloader/", suffix: ".json" }, { prefix: "./i18n/" }],
             }),
         }),
         provideAppInitializer(() => {
