@@ -3,14 +3,10 @@
 		"greeting": "Hallo, {{name}}!",
 		"simple": {
 			"text-as-attribute": "Root: Text als Attribut",
-			"text-as-content": "Root: Text als Inhalt",
-			"text-as-pipe-with-params": "Root: Text mit {{value}}"
+			"text-as-content": "Root: Text als Inhalt"
 		},
 		"title": "Root: Testanwendung"
 	},
 	"root.own": "Ich bin nur in ROOT definiert (de)",
-	"shared.greeting": "Hallo von ROOT (de)",
-	"standalone-component": {
-		"title": "Root: Standalone Komponente"
-	}
+	"shared.greeting": "Hallo von ROOT (de)"
 }

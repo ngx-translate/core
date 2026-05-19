@@ -3,15 +3,11 @@
 		"greeting": "Hello, {{name}}! (isolated)",
 		"simple": {
 			"text-as-attribute": "Isolated: Text as attribute",
-			"text-as-content": "Isolated: Text as content",
-			"text-as-pipe-with-params": "Isolated: Text with {{value}}"
+			"text-as-content": "Isolated: Text as content"
 		},
 		"title": "Isolated: Test Application"
 	},
 	"isolated.own": "I am defined only in ISOLATED (en)",
 	"root.own": "ISOLATED cannot see root's translations (en)",
-	"shared.greeting": "Hello from ISOLATED - completely separate! (en)",
-	"standalone-component": {
-		"title": "Isolated: Standalone Component"
-	}
+	"shared.greeting": "Hello from ISOLATED - completely separate! (en)"
 }

@@ -125,21 +125,6 @@
 											</translation>
 										</translations>
 									</concept_node>
-									<concept_node>
-										<name>text-as-pipe-with-params</name>
-										<description/>
-										<comment/>
-										<translations>
-											<translation>
-												<language>de-DE</language>
-												<approved>false</approved>
-											</translation>
-											<translation>
-												<language>en-US</language>
-												<approved>false</approved>
-											</translation>
-										</translations>
-									</concept_node>
 								</children>
 							</folder_node>
 							<concept_node>
@@ -307,21 +292,6 @@
 									</concept_node>
 									<concept_node>
 										<name>text-as-content</name>
-										<description/>
-										<comment/>
-										<translations>
-											<translation>
-												<language>de-DE</language>
-												<approved>false</approved>
-											</translation>
-											<translation>
-												<language>en-US</language>
-												<approved>false</approved>
-											</translation>
-										</translations>
-									</concept_node>
-									<concept_node>
-										<name>text-as-pipe-with-params</name>
 										<description/>
 										<comment/>
 										<translations>
