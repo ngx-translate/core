@@ -407,7 +407,9 @@ describe("Translate Providers", () => {
     describe("bare-class auto-wrap", () => {
         // Bare classes (TypeProvider) passed to plugin slots are automatically
         // wrapped by the corresponding provideTranslate* helper, registering
-        // them under the correct DI token. No warning is emitted.
+        // them under the correct DI token. A one-line console.warn nudges the
+        // caller toward the explicit helper. Bare factory functions pass through
+        // silently — they are the documented compact form.
 
         class BareLoader extends TranslateLoader {
             getTranslation(lang: string): Observable<TranslationObject> {
@@ -503,16 +505,42 @@ describe("Translate Providers", () => {
             expect(loader).toBeInstanceOf(BareLoader);
         });
 
-        it("does not emit a console warning for bare classes", () => {
+        it("warns once per bare-class slot, naming the field and the helper", () => {
             const warnSpy = spyOn(console, "warn");
             provideTranslateService({ loader: BareLoader });
             provideTranslateService({ compiler: BareCompiler });
             provideTranslateService({ parser: BareParser });
             provideChildTranslateService({ missingTranslationHandler: BareHandler });
+
+            expect(warnSpy).toHaveBeenCalledTimes(4);
+            const messages = warnSpy.calls.allArgs().map((args) => String(args[0]));
+            expect(messages[0]).toContain('"loader"');
+            expect(messages[0]).toContain("BareLoader");
+            expect(messages[0]).toContain("provideTranslateLoader");
+            expect(messages[1]).toContain('"compiler"');
+            expect(messages[1]).toContain("provideTranslateCompiler");
+            expect(messages[2]).toContain('"parser"');
+            expect(messages[2]).toContain("provideTranslateParser");
+            expect(messages[3]).toContain('"missingTranslationHandler"');
+            expect(messages[3]).toContain("provideMissingTranslationHandler");
+        });
+
+        it("does not warn for bare factory functions", () => {
+            const warnSpy = spyOn(console, "warn");
+            provideTranslateService({ loader: () => new BareLoader() });
+            provideTranslateService({ compiler: () => new BareCompiler() });
+            provideTranslateService({ parser: () => new BareParser() });
+            provideChildTranslateService({ missingTranslationHandler: () => new BareHandler() });
             expect(warnSpy).not.toHaveBeenCalled();
         });
 
-        it("does not emit a console warning when fields are omitted (defaults used)", () => {
+        it("does not warn for explicit provideTranslate* helper output", () => {
+            const warnSpy = spyOn(console, "warn");
+            provideTranslateService({ loader: provideTranslateLoader(BareLoader) });
+            expect(warnSpy).not.toHaveBeenCalled();
+        });
+
+        it("does not warn when fields are omitted (defaults used)", () => {
             const warnSpy = spyOn(console, "warn");
             provideTranslateService();
             provideChildTranslateService();
