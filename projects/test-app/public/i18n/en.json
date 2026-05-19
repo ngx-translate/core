@@ -1,16 +1,16 @@
 {
-    "root.own": "I am defined only in ROOT (en)",
-    "shared.greeting": "Hello from ROOT (en)",
-    "demo": {
-        "title": "Root: Test Application",
-        "simple": {
-            "text-as-attribute": "Root: Text as attribute",
-            "text-as-content": "Root: Text as content",
-            "text-as-pipe-with-params": "Root: Text with {{value}}"
-        },
-        "greeting": "Hello, {{name}}!"
-    },
-    "standalone-component": {
-        "title": "Root: Standalone Component"
-    }
+	"demo": {
+		"greeting": "Hello, {{name}}!",
+		"simple": {
+			"text-as-attribute": "Root: Text as attribute",
+			"text-as-content": "Root: Text as content",
+			"text-as-pipe-with-params": "Root: Text with {{value}}"
+		},
+		"title": "Root: Test Application"
+	},
+	"root.own": "I am defined only in ROOT (en)",
+	"shared.greeting": "Hello from ROOT (en)",
+	"standalone-component": {
+		"title": "Root: Standalone Component"
+	}
 }

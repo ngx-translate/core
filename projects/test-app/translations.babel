@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<babeledit_project be_version="5.2.1" version="1.3">
+<babeledit_project be_version="5.6.0" version="1.3">
 	<!--
 
     BabelEdit project file
@@ -12,16 +12,86 @@
 	<preset_collections/>
 	<framework>ngx-translate</framework>
 	<filename>translations.babel</filename>
-	<source_root_dir>../../</source_root_dir>
+	<source_root_dir>.</source_root_dir>
 	<folder_node>
 		<name/>
 		<children>
 			<package_node>
-				<name>main</name>
+				<name>extended</name>
 				<children>
 					<folder_node>
 						<name>demo</name>
 						<children>
+							<concept_node>
+								<name>greeting</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+					<concept_node>
+						<name>extended.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<concept_node>
+						<name>shared.greeting</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+				</children>
+			</package_node>
+			<package_node>
+				<name>isolated</name>
+				<children>
+					<folder_node>
+						<name>demo</name>
+						<children>
+							<concept_node>
+								<name>greeting</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
 							<folder_node>
 								<name>simple</name>
 								<children>
@@ -55,6 +125,21 @@
 											</translation>
 										</translations>
 									</concept_node>
+									<concept_node>
+										<name>text-as-pipe-with-params</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
 								</children>
 							</folder_node>
 							<concept_node>
@@ -74,6 +159,51 @@
 							</concept_node>
 						</children>
 					</folder_node>
+					<concept_node>
+						<name>isolated.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<concept_node>
+						<name>root.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<concept_node>
+						<name>shared.greeting</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
 					<folder_node>
 						<name>standalone-component</name>
 						<children>
@@ -96,8 +226,254 @@
 					</folder_node>
 				</children>
 			</package_node>
+			<package_node>
+				<name>isolated-child</name>
+				<children>
+					<folder_node>
+						<name>demo</name>
+						<children>
+							<concept_node>
+								<name>greeting</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+					<concept_node>
+						<name>isolated-child.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+				</children>
+			</package_node>
+			<package_node>
+				<name>main</name>
+				<children>
+					<folder_node>
+						<name>demo</name>
+						<children>
+							<concept_node>
+								<name>greeting</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+							<folder_node>
+								<name>simple</name>
+								<children>
+									<concept_node>
+										<name>text-as-attribute</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>text-as-content</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>text-as-pipe-with-params</name>
+										<description/>
+										<comment/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+								</children>
+							</folder_node>
+							<concept_node>
+								<name>title</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+					<concept_node>
+						<name>root.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<concept_node>
+						<name>shared.greeting</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<folder_node>
+						<name>standalone-component</name>
+						<children>
+							<concept_node>
+								<name>title</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+				</children>
+			</package_node>
+			<package_node>
+				<name>multiloader</name>
+				<children>
+					<folder_node>
+						<name>multi</name>
+						<children>
+							<concept_node>
+								<name>loader</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+				</children>
+			</package_node>
+			<package_node>
+				<name>nested</name>
+				<children>
+					<folder_node>
+						<name>demo</name>
+						<children>
+							<concept_node>
+								<name>greeting</name>
+								<description/>
+								<comment/>
+								<translations>
+									<translation>
+										<language>de-DE</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>en-US</language>
+										<approved>false</approved>
+									</translation>
+								</translations>
+							</concept_node>
+						</children>
+					</folder_node>
+					<concept_node>
+						<name>nested.own</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+				</children>
+			</package_node>
 		</children>
 	</folder_node>
+	<embedded_source_texts>false</embedded_source_texts>
 	<isTemplateProject>false</isTemplateProject>
 	<languages>
 		<language>
@@ -108,6 +484,45 @@
 		</language>
 	</languages>
 	<translation_packages>
+		<translation_package>
+			<name>extended</name>
+			<translation_urls>
+				<translation_url>
+					<path>public/i18n-extended/de.json</path>
+					<language>de-DE</language>
+				</translation_url>
+				<translation_url>
+					<path>public/i18n-extended/en.json</path>
+					<language>en-US</language>
+				</translation_url>
+			</translation_urls>
+		</translation_package>
+		<translation_package>
+			<name>isolated</name>
+			<translation_urls>
+				<translation_url>
+					<path>public/i18n-isolated/de.json</path>
+					<language>de-DE</language>
+				</translation_url>
+				<translation_url>
+					<path>public/i18n-isolated/en.json</path>
+					<language>en-US</language>
+				</translation_url>
+			</translation_urls>
+		</translation_package>
+		<translation_package>
+			<name>isolated-child</name>
+			<translation_urls>
+				<translation_url>
+					<path>public/i18n-isolated-child/de.json</path>
+					<language>de-DE</language>
+				</translation_url>
+				<translation_url>
+					<path>public/i18n-isolated-child/en.json</path>
+					<language>en-US</language>
+				</translation_url>
+			</translation_urls>
+		</translation_package>
 		<translation_package>
 			<name>main</name>
 			<translation_urls>
@@ -121,6 +536,32 @@
 				</translation_url>
 			</translation_urls>
 		</translation_package>
+		<translation_package>
+			<name>multiloader</name>
+			<translation_urls>
+				<translation_url>
+					<path>public/i18n/multiloader/de.json</path>
+					<language>de-DE</language>
+				</translation_url>
+				<translation_url>
+					<path>public/i18n/multiloader/en.json</path>
+					<language>en-US</language>
+				</translation_url>
+			</translation_urls>
+		</translation_package>
+		<translation_package>
+			<name>nested</name>
+			<translation_urls>
+				<translation_url>
+					<path>public/i18n-nested/de.json</path>
+					<language>de-DE</language>
+				</translation_url>
+				<translation_url>
+					<path>public/i18n-nested/en.json</path>
+					<language>en-US</language>
+				</translation_url>
+			</translation_urls>
+		</translation_package>
 	</translation_packages>
 	<editor_configuration>
 		<save_empty_translations>true</save_empty_translations>
@@ -129,11 +570,15 @@
 			<copy_template>{{'%1' | translate}}</copy_template>
 			<copy_template>[translate]=&quot;'%1'&quot;</copy_template>
 			<copy_template>_('%1')</copy_template>
+			<copy_template>{{ t('%1') }}</copy_template>
+			<copy_template>translate('%1')</copy_template>
 		</copy_templates>
 		<custom_languages/>
 		<id_extractor_ignores>
 			<string>${this.prefix}${lang}${this.suffix}</string>
 		</id_extractor_ignores>
+		<machine_translation_formality>default</machine_translation_formality>
+		<machine_translation_context/>
 	</editor_configuration>
 	<primary_language>en-US</primary_language>
 	<configuration>

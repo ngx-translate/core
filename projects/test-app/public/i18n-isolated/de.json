@@ -1,17 +1,17 @@
 {
-    "isolated.own": "Ich bin nur in ISOLATED definiert (de)",
-    "shared.greeting": "Hallo von ISOLATED - komplett getrennt! (de)",
-    "root.own": "ISOLATED kann root's Übersetzungen nicht sehen (de)",
-    "demo": {
-        "title": "Isolated: Testanwendung",
-        "simple": {
-            "text-as-attribute": "Isolated: Text als Attribut",
-            "text-as-content": "Isolated: Text als Inhalt",
-            "text-as-pipe-with-params": "Isolated: Text mit {{value}}"
-        },
-        "greeting": "Hallo, {{name}}! (isoliert)"
-    },
-    "standalone-component": {
-        "title": "Isolated: Standalone Komponente"
-    }
+	"demo": {
+		"greeting": "Hallo, {{name}}! (isoliert)",
+		"simple": {
+			"text-as-attribute": "Isolated: Text als Attribut",
+			"text-as-content": "Isolated: Text als Inhalt",
+			"text-as-pipe-with-params": "Isolated: Text mit {{value}}"
+		},
+		"title": "Isolated: Testanwendung"
+	},
+	"isolated.own": "Ich bin nur in ISOLATED definiert (de)",
+	"root.own": "ISOLATED kann root's Übersetzungen nicht sehen (de)",
+	"shared.greeting": "Hallo von ISOLATED - komplett getrennt! (de)",
+	"standalone-component": {
+		"title": "Isolated: Standalone Komponente"
+	}
 }
