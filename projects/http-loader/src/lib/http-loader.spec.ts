@@ -376,6 +376,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
 
     describe("F8 failOnError", () => {
         it("failOnError: true forwards HTTP errors to translate.use()", (done: DoneFn) => {
+            spyOn(console, "warn");
             prepareMulti({
                 resources: ["/assets/i18n/"],
                 failOnError: true,
@@ -401,6 +402,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         it("failOnError: true via single-config provideTranslateHttpLoader path", (done: DoneFn) => {
             // Uses the provideTranslateHttpLoader(single) overload which converts to
             // multi-config at http-loader.ts:101-114. Verifies failOnError is preserved.
+            spyOn(console, "warn");
             prepareSingle({
                 prefix: "/i18n/",
                 suffix: ".json",

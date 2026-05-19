@@ -438,6 +438,7 @@ describe("Translate Providers", () => {
         }
 
         it("auto-wraps a bare loader class to the TranslateLoader token", () => {
+            spyOn(console, "warn");
             TestBed.configureTestingModule({
                 providers: [
                     provideTranslateService({ loader: BareLoader }),
@@ -448,11 +449,13 @@ describe("Translate Providers", () => {
         });
 
         it("bare loader class resolves to useClass provider in the array", () => {
+            spyOn(console, "warn");
             const providers = provideTranslateService({ loader: BareLoader });
             expect(providers[0]).toEqual({ provide: TranslateLoader, useClass: BareLoader });
         });
 
         it("auto-wraps a bare compiler class to the TranslateCompiler token", () => {
+            spyOn(console, "warn");
             TestBed.configureTestingModule({
                 providers: [
                     provideTranslateService({ compiler: BareCompiler }),
@@ -463,6 +466,7 @@ describe("Translate Providers", () => {
         });
 
         it("auto-wraps a bare parser class to the TranslateParser token", () => {
+            spyOn(console, "warn");
             TestBed.configureTestingModule({
                 providers: [
                     provideTranslateService({ parser: BareParser }),
@@ -473,6 +477,7 @@ describe("Translate Providers", () => {
         });
 
         it("auto-wraps a bare missingTranslationHandler class to the MissingTranslationHandler token", () => {
+            spyOn(console, "warn");
             TestBed.configureTestingModule({
                 providers: [
                     provideChildTranslateService({ missingTranslationHandler: BareHandler }),
