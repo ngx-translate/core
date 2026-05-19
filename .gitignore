@@ -37,4 +37,6 @@ Thumbs.db
 
 packages/core/.idea
 packages/http-loader/.idea
+**/.idea
 .gstack/
+.gstack-design-audit/
