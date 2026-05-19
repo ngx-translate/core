@@ -41,7 +41,7 @@ interface ServiceNode {
                         <div class="hierarchy-tree">
                             @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
                                 <ng-container
-                                    *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count) }"
+                                    *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count), isolated: true }"
                                 />
                             }
                         </div>
@@ -51,19 +51,29 @@ interface ServiceNode {
                 <div class="hierarchy-tree">
                     @for (service of hierarchy; track service; let last = $last; let i = $index; let count = $count) {
                         <ng-container
-                            *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count) }"
+                            *ngTemplateOutlet="nodeTemplate; context: { $implicit: service, last, position: positionFor(i, count), isolated: false }"
                         />
                     }
                 </div>
             }
         </div>
 
-        <ng-template #nodeTemplate let-service let-last="last" let-position="position">
+        <ng-template
+            #nodeTemplate
+            let-service
+            let-last="last"
+            let-position="position"
+            let-isolated="isolated"
+        >
             <div class="service-node" [class.current]="last">
                 <div class="node-icon">
                     @switch (position) {
                         @case ("root") {
-                            <app-icon name="tree-root" />
+                            @if (isolated) {
+                                <app-icon name="tree-isolated-root" />
+                            } @else {
+                                <app-icon name="tree-root" />
+                            }
                         }
                         @case ("leaf") {
                             <app-icon name="tree-leaf" />
@@ -188,22 +198,43 @@ interface ServiceNode {
 export class HierarchyVizComponent {
     private currentService = inject(TranslateService);
 
-    /** Non-null when the current service is an isolated root (separate tree from global root) */
+    /**
+     * Non-null when the current service lives inside an isolated tree —
+     * either it is an isolated root, or it descends from one. Returns the
+     * global root that sits OUTSIDE the isolated tree, via the DI parent
+     * link of the isolated root.
+     */
     get globalRoot(): ServiceNode | null {
-        const svc = this.currentService as any;
-        if (!svc.isRoot || !svc.parent) {
+        const isolated = this.isolatedRoot;
+        if (!isolated) {
             return null;
         }
-        // Walk up to the true global root
-        let root = svc.parent;
-        while (root.parent) {
-            root = root.parent;
+        let global = isolated.parent;
+        while (global && global.parent) {
+            global = global.parent;
         }
-        return {
-            isRoot: true,
-            currentLang: root.getCurrentLang(),
-            fallbackLang: root.getFallbackLang(),
-        };
+        return global
+            ? {
+                  isRoot: true,
+                  currentLang: global.getCurrentLang(),
+                  fallbackLang: global.getFallbackLang(),
+              }
+            : null;
+    }
+
+    /**
+     * Walk the parent chain until we hit an `isRoot` service. If that root
+     * has its own DI parent, it is an isolated root (a separate tree).
+     */
+    private get isolatedRoot(): any | null {
+        let current: any = this.currentService;
+        while (current) {
+            if (current.isRoot) {
+                return current.parent ? current : null;
+            }
+            current = current.parent;
+        }
+        return null;
     }
 
     positionFor(index: number, count: number): "root" | "child" | "leaf" {

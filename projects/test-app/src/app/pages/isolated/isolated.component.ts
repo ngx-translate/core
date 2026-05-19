@@ -10,6 +10,7 @@ import { LanguageSwitchComponent } from "../../components/language-switch/langua
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
 import { IconComponent } from "../../components/icon/icon.component";
+import { IsolatedChildComponent } from "./isolated-child/isolated-child.component";
 import { ConsoleLogService } from "../../services/console-log.service";
 
 @Component({
@@ -20,6 +21,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
         HierarchyVizComponent,
         MethodsComparisonComponent,
         IconComponent,
+        IsolatedChildComponent,
     ],
     providers: [
         provideTranslateService({
@@ -85,6 +87,8 @@ import { ConsoleLogService } from "../../services/console-log.service";
             <div class="sub-card" style="margin-top: 1.5rem;">
                 <app-methods-comparison />
             </div>
+
+            <app-isolated-child />
 
             <app-hierarchy-viz />
         </div>

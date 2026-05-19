@@ -10,7 +10,8 @@ type IconName =
     | "lock"
     | "tree-root"
     | "tree-child"
-    | "tree-leaf";
+    | "tree-leaf"
+    | "tree-isolated-root";
 
 @Component({
     selector: "app-icon",
@@ -102,6 +103,15 @@ type IconName =
                     <circle cx="12" cy="4" r="2" fill="none" />
                     <path stroke-linecap="round" d="M12 6v9" />
                     <circle cx="12" cy="18" r="3" fill="currentColor" stroke="none" />
+                }
+                @case ("tree-isolated-root") {
+                    <!-- Root node drawn as (X): circle with X inside, signaling
+                         "no parent link". Branches down to two outline children. -->
+                    <circle cx="12" cy="6" r="3.5" fill="none" />
+                    <path stroke-linecap="round" d="m9.7 3.7 4.6 4.6M14.3 3.7l-4.6 4.6" />
+                    <path stroke-linecap="round" d="M12 9.5v2.5M12 12h-6v3M12 12h6v3" />
+                    <circle cx="6" cy="18" r="2" fill="none" />
+                    <circle cx="18" cy="18" r="2" fill="none" />
                 }
             }
         </svg>

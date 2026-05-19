@@ -1,0 +1,6 @@
+{
+    "isolated-child.own": "Ich bin nur in ISOLATED CHILD definiert (de)",
+    "demo": {
+        "greeting": "Hallo, {{name}}! (isoliertes Kind)"
+    }
+}
