@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    TranslateService,
-    TranslatePipe,
-    provideChildTranslateService,
-} from "@ngx-translate/core";
+import { TranslateService, TranslatePipe, provideChildTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { LanguageSwitchComponent } from "../../components/language-switch/language-switch.component";
 import { NestedComponent } from "./nested/nested.component";
@@ -105,11 +101,9 @@ export class ExtendedComponent {
     constructor() {
         this.translate.addLangs(["de", "en"]);
 
-        this.translate.onLangChange
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((event) => {
-                this.consoleLog.log("[extended] onLangChange", { lang: event.lang });
-            });
+        this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+            this.consoleLog.log("[extended] onLangChange", { lang: event.lang });
+        });
 
         this.translate.onFallbackLangChange
             .pipe(takeUntilDestroyed(this.destroyRef))

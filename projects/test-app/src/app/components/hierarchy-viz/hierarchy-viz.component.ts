@@ -24,7 +24,13 @@ interface ServiceNode {
         <div class="hierarchy-container">
             <h3>Service Hierarchy</h3>
             <div class="hierarchy-tree">
-                @for (service of hierarchy; track $index; let last = $last; let i = $index; let count = $count) {
+                @for (
+                    service of hierarchy;
+                    track $index;
+                    let last = $last;
+                    let i = $index;
+                    let count = $count
+                ) {
                     <div class="service-node" [class.current]="last">
                         <div class="node-icon">
                             @switch (positionFor(i, count)) {

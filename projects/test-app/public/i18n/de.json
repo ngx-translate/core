@@ -1,12 +1,12 @@
 {
-	"demo": {
-		"greeting": "Hallo, {{name}}!",
-		"simple": {
-			"text-as-attribute": "Root: Text als Attribut",
-			"text-as-content": "Root: Text als Inhalt"
-		},
-		"title": "Root: Testanwendung"
-	},
-	"root.own": "Ich bin nur in ROOT definiert (de)",
-	"shared.greeting": "Hallo von ROOT (de)"
+    "demo": {
+        "greeting": "Hallo, {{name}}!",
+        "simple": {
+            "text-as-attribute": "Root: Text als Attribut",
+            "text-as-content": "Root: Text als Inhalt"
+        },
+        "title": "Root: Testanwendung"
+    },
+    "root.own": "Ich bin nur in ROOT definiert (de)",
+    "shared.greeting": "Hallo von ROOT (de)"
 }

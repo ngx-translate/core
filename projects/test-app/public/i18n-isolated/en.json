@@ -1,13 +1,13 @@
 {
-	"demo": {
-		"greeting": "Hello, {{name}}! (isolated)",
-		"simple": {
-			"text-as-attribute": "Isolated: Text as attribute",
-			"text-as-content": "Isolated: Text as content"
-		},
-		"title": "Isolated: Test Application"
-	},
-	"isolated.own": "I am defined only in ISOLATED (en)",
-	"root.own": "ISOLATED cannot see root's translations (en)",
-	"shared.greeting": "Hello from ISOLATED - completely separate! (en)"
+    "demo": {
+        "greeting": "Hello, {{name}}! (isolated)",
+        "simple": {
+            "text-as-attribute": "Isolated: Text as attribute",
+            "text-as-content": "Isolated: Text as content"
+        },
+        "title": "Isolated: Test Application"
+    },
+    "isolated.own": "I am defined only in ISOLATED (en)",
+    "root.own": "ISOLATED cannot see root's translations (en)",
+    "shared.greeting": "Hello from ISOLATED - completely separate! (en)"
 }

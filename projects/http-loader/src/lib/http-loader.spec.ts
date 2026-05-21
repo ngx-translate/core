@@ -309,10 +309,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
 
     it("should log warning on failed resource", () => {
         prepareMulti({
-            resources: [
-                "/assets/i18n/",
-                { prefix: "/custom/", suffix: ".lang.json" },
-            ],
+            resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });
         const spy = spyOn(console, "warn");
         translate.use("en").subscribe();
@@ -433,7 +430,9 @@ describe("TranslateHttpLoader (HttpClient)", () => {
 
             let resolved = false;
             translate.use("en").subscribe({
-                next: () => { resolved = true; },
+                next: () => {
+                    resolved = true;
+                },
                 error: () => fail("Expected silent swallow, got an error"),
             });
 

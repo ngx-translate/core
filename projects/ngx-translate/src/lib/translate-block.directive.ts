@@ -23,7 +23,10 @@ export class TranslateBlockDirective implements OnInit {
             return this.translateService.instant(key, params);
         };
 
-        this.viewContainer.createEmbeddedView(this.templateRef, new TranslateBlockContext(translateFn));
+        this.viewContainer.createEmbeddedView(
+            this.templateRef,
+            new TranslateBlockContext(translateFn),
+        );
     }
 
     static ngTemplateContextGuard(

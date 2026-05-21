@@ -1,10 +1,4 @@
-import {
-    ClassProvider,
-    FactoryProvider,
-    Provider,
-    ProviderToken,
-    Type,
-} from "@angular/core";
+import { ClassProvider, FactoryProvider, Provider, ProviderToken, Type } from "@angular/core";
 import {
     DefaultMissingTranslationHandler,
     MissingTranslationHandler,

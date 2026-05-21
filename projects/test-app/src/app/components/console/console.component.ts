@@ -76,11 +76,7 @@ import { ConsoleLogService } from "../../services/console-log.service";
             bottom: 1rem;
             right: 1rem;
             z-index: 1000;
-            font-family:
-                ui-monospace,
-                SFMono-Regular,
-                Menlo,
-                monospace;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             font-size: 0.7rem;
         }
 

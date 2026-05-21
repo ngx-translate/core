@@ -1,6 +1,6 @@
 {
-	"demo": {
-		"greeting": "Hello, {{name}}! (isolated child)"
-	},
-	"isolated-child.own": "I am defined only in ISOLATED CHILD (en)"
+    "demo": {
+        "greeting": "Hello, {{name}}! (isolated child)"
+    },
+    "isolated-child.own": "I am defined only in ISOLATED CHILD (en)"
 }

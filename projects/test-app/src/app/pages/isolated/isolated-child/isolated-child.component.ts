@@ -20,8 +20,8 @@ import { HierarchyVizComponent } from "../../../components/hierarchy-viz/hierarc
         <div class="sub-card" style="margin-top: 2rem; border-style: dashed; background: #f8fafc;">
             <h4>Child of Isolated Service</h4>
             <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
-                A child service nested inside the isolated tree. It falls back to the isolated
-                root, NOT to the global root.
+                A child service nested inside the isolated tree. It falls back to the isolated root,
+                NOT to the global root.
             </p>
             <div class="translation-item">
                 <span class="key">isolated-child.own</span>

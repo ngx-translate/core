@@ -91,10 +91,7 @@ type IconName =
                 @case ("tree-root") {
                     <!-- Filled node at top with branches down to two outline nodes -->
                     <circle cx="12" cy="5" r="3" fill="currentColor" stroke="none" />
-                    <path
-                        stroke-linecap="round"
-                        d="M12 8v4M12 12h-6v3M12 12h6v3"
-                    />
+                    <path stroke-linecap="round" d="M12 8v4M12 12h-6v3M12 12h6v3" />
                     <circle cx="6" cy="18" r="2" fill="none" />
                     <circle cx="18" cy="18" r="2" fill="none" />
                 }

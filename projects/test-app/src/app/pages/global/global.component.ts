@@ -46,10 +46,12 @@ import { IconComponent } from "../../components/icon/icon.component";
 
                 <div class="sub-card">
                     <h4><app-icon name="cloud-download" /> Multi-resource Loader</h4>
-                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    <p
+                        style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;"
+                    >
                         The root loader is configured with two prefixes in
-                        <code>app.config.ts</code>. Keys are merged in order — values from the
-                        first resource win on collision.
+                        <code>app.config.ts</code>. Keys are merged in order — values from the first
+                        resource win on collision.
                     </p>
                     <div class="translation-item">
                         <span class="key">multi.loader</span>
@@ -71,4 +73,3 @@ import { IconComponent } from "../../components/icon/icon.component";
 export class GlobalComponent {
     translate = inject(TranslateService);
 }
-

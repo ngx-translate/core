@@ -61,9 +61,10 @@ export class TranslateHttpLoader implements TranslateLoader {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
-            const path =  (typeof resource === "string")
-                        ? `${resource}${lang}.json`
-                        : `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
+            const path =
+                typeof resource === "string"
+                    ? `${resource}${lang}.json`
+                    : `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
 
             const request$ = this.http.get<TranslationObject>(`${path}${cacheBuster}`);
 
@@ -73,7 +74,10 @@ export class TranslateHttpLoader implements TranslateLoader {
 
             return request$.pipe(
                 catchError((err: HttpErrorResponse) => {
-                    console.warn(`@ngx-translate/http-loader: error loading translation for ${lang}:`, err);
+                    console.warn(
+                        `@ngx-translate/http-loader: error loading translation for ${lang}:`,
+                        err,
+                    );
                     return of({});
                 }),
             );
