@@ -273,39 +273,39 @@ The module-based API (`TranslateModule.forRoot()` / `forChild()`) is removed. Th
 ```typescript
 // Before (module-based)
 @NgModule({
-  imports: [
-    TranslateModule.forRoot({
-      defaultLang: "en",
-      useDefaultLang: true,
-      loader: {
-        provide: TranslateLoader,
-        useFactory: (http: HttpClient) => new TranslateHttpLoader(http),
-        deps: [HttpClient]
-      }
-    })
-  ]
+    imports: [
+        TranslateModule.forRoot({
+            defaultLang: "en",
+            useDefaultLang: true,
+            loader: {
+                provide: TranslateLoader,
+                useFactory: (http: HttpClient) => new TranslateHttpLoader(http),
+                deps: [HttpClient],
+            },
+        }),
+    ],
 })
 export class AppModule {}
 
 // After (works in both standalone and module-based apps)
 @NgModule({
-  providers: [
-    provideTranslateService({
-      fallbackLang: "en",  // replaces defaultLang + useDefaultLang
-      loader: provideTranslateHttpLoader()
-    })
-  ]
+    providers: [
+        provideTranslateService({
+            fallbackLang: "en", // replaces defaultLang + useDefaultLang
+            loader: provideTranslateHttpLoader(),
+        }),
+    ],
 })
 export class AppModule {}
 
 // Or in standalone app
 bootstrapApplication(AppComponent, {
-  providers: [
-    provideTranslateService({
-      fallbackLang: "en",
-      loader: provideTranslateHttpLoader()
-    })
-  ]
+    providers: [
+        provideTranslateService({
+            fallbackLang: "en",
+            loader: provideTranslateHttpLoader(),
+        }),
+    ],
 });
 ```
 
@@ -314,39 +314,39 @@ bootstrapApplication(AppComponent, {
 ```typescript
 // Before (module-based)
 @NgModule({
-  imports: [
-    TranslateModule.forChild({
-      extend: true,
-      loader: {
-        provide: TranslateLoader,
-        useFactory: (http: HttpClient) => new TranslateHttpLoader(http, "./feature-i18n/"),
-        deps: [HttpClient]
-      }
-    })
-  ]
+    imports: [
+        TranslateModule.forChild({
+            extend: true,
+            loader: {
+                provide: TranslateLoader,
+                useFactory: (http: HttpClient) => new TranslateHttpLoader(http, "./feature-i18n/"),
+                deps: [HttpClient],
+            },
+        }),
+    ],
 })
 export class FeatureModule {}
 
 // After (works in both standalone and module-based apps)
 @NgModule({
-  providers: [
-    provideChildTranslateService({
-      loader: provideTranslateHttpLoader({ prefix: "./feature-i18n/" })
-    })
-  ]
+    providers: [
+        provideChildTranslateService({
+            loader: provideTranslateHttpLoader({ prefix: "./feature-i18n/" }),
+        }),
+    ],
 })
 export class FeatureModule {}
 ```
 
 ### Key Changes
 
-| Old API | New API | Notes |
-|---------|---------|-------|
-| `TranslateModule.forRoot()` | `provideTranslateService()` | Use in `providers` array |
-| `TranslateModule.forChild({ extend: true })` | `provideChildTranslateService()` | Connected mode is now the default for child services |
-| `TranslateModule.forChild({ isolate: true })` | `provideTranslateService()` | Creates isolated service |
-| `defaultLang` + `useDefaultLang: true` | `fallbackLang` | Simplified API |
-| `defaultLang` + `useDefaultLang: false` | (removed) | Use `fallbackLang: undefined` if no fallback desired |
+| Old API                                       | New API                          | Notes                                                |
+| --------------------------------------------- | -------------------------------- | ---------------------------------------------------- |
+| `TranslateModule.forRoot()`                   | `provideTranslateService()`      | Use in `providers` array                             |
+| `TranslateModule.forChild({ extend: true })`  | `provideChildTranslateService()` | Connected mode is now the default for child services |
+| `TranslateModule.forChild({ isolate: true })` | `provideTranslateService()`      | Creates isolated service                             |
+| `defaultLang` + `useDefaultLang: true`        | `fallbackLang`                   | Simplified API                                       |
+| `defaultLang` + `useDefaultLang: false`       | (removed)                        | Use `fallbackLang: undefined` if no fallback desired |
 
 ### TranslatePipe and TranslateDirective
 
@@ -366,7 +366,7 @@ These remain unchanged. Import them directly:
 
 ## Summary
 
-| Provider                         | Creates Store    | Lang/Fallback | Translation Lookup     |
-|----------------------------------|------------------|---------------|------------------------|
-| `provideTranslateService()`      | Yes (isolated)   | Own           | Own + fallbackLang     |
-| `provideChildTranslateService()` | Yes (connected)  | From parent   | Bubbles up to parent   |
+| Provider                         | Creates Store   | Lang/Fallback | Translation Lookup   |
+| -------------------------------- | --------------- | ------------- | -------------------- |
+| `provideTranslateService()`      | Yes (isolated)  | Own           | Own + fallbackLang   |
+| `provideChildTranslateService()` | Yes (connected) | From parent   | Bubbles up to parent |
