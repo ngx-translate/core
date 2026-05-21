@@ -9,7 +9,7 @@ import {
 } from "../public-api";
 
 class FakeLoader implements TranslateLoader {
-    constructor(private translations: TranslationObject) { }
+    constructor(private translations: TranslationObject) {}
     getTranslation(): Observable<TranslationObject> {
         return of(this.translations);
     }
@@ -23,7 +23,10 @@ describe("TranslateService Hierarchy", () => {
                 provideTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useValue: new FakeLoader({ ROOT_KEY: "root-val", COMMON_KEY: "root-common" }),
+                        useValue: new FakeLoader({
+                            ROOT_KEY: "root-val",
+                            COMMON_KEY: "root-common",
+                        }),
                     },
                 }),
             ],
@@ -37,7 +40,10 @@ describe("TranslateService Hierarchy", () => {
                 provideChildTranslateService({
                     loader: {
                         provide: TranslateLoader,
-                        useValue: new FakeLoader({ CHILD_KEY: "child-val", COMMON_KEY: "child-common" }),
+                        useValue: new FakeLoader({
+                            CHILD_KEY: "child-val",
+                            COMMON_KEY: "child-common",
+                        }),
                     },
                 }),
             ],
@@ -108,7 +114,10 @@ describe("TranslateService Hierarchy", () => {
         const rootInjector = Injector.create({
             providers: [
                 provideTranslateService({
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({ ROOT: "root" }) },
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ ROOT: "root" }),
+                    },
                 }),
             ],
         });
@@ -118,7 +127,10 @@ describe("TranslateService Hierarchy", () => {
         const sibling1Injector = Injector.create({
             providers: [
                 provideChildTranslateService({
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({ SIB1: "sib1" }) },
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ SIB1: "sib1" }),
+                    },
                 }),
             ],
             parent: rootInjector,
@@ -128,7 +140,10 @@ describe("TranslateService Hierarchy", () => {
         const sibling2Injector = Injector.create({
             providers: [
                 provideChildTranslateService({
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({ SIB2: "sib2" }) },
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ SIB2: "sib2" }),
+                    },
                 }),
             ],
             parent: rootInjector,
@@ -149,7 +164,10 @@ describe("TranslateService Hierarchy", () => {
             providers: [
                 provideTranslateService({
                     lang: "en",
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({ TEST: "test" }) },
+                    loader: {
+                        provide: TranslateLoader,
+                        useValue: new FakeLoader({ TEST: "test" }),
+                    },
                 }),
             ],
         });

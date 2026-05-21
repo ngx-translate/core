@@ -9,8 +9,21 @@ import {
     WritableSignal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { concat, defer, EMPTY, finalize, forkJoin, isObservable, merge, Observable, of, Subject, tap } from "rxjs";
+import {
+    concat,
+    defer,
+    EMPTY,
+    finalize,
+    forkJoin,
+    isObservable,
+    merge,
+    Observable,
+    of,
+    Subject,
+    tap,
+} from "rxjs";
 import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
+import { LoadingTranslationsRegistry } from "./loading-translations-registry";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
@@ -64,8 +77,7 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 
 @Injectable()
 export class TranslateService implements ITranslateService {
-    protected loadingTranslations: Record<Language, Observable<InterpolatableTranslationObject>> =
-        {};
+    protected readonly loadingTranslations = new LoadingTranslationsRegistry();
     protected lastUseLanguage: Language | null = null;
 
     protected currentLoader = inject(TranslateLoader);
@@ -74,8 +86,11 @@ export class TranslateService implements ITranslateService {
     protected missingTranslationHandler = inject(MissingTranslationHandler);
     protected store: TranslateStore = inject(TranslateStore);
 
-    protected readonly parent = inject(TranslateService, { optional: true, skipSelf: true });
-    protected readonly isRoot: boolean;
+    protected readonly parent: TranslateService | null;
+
+    protected get isRoot(): boolean {
+        return this.parent === null;
+    }
 
     protected _onLangChange = new Subject<LangChangeEvent>();
     protected _onFallbackLangChange = new Subject<FallbackLangChangeEvent>();
@@ -83,8 +98,35 @@ export class TranslateService implements ITranslateService {
     protected _fallbackLang: WritableSignal<Language | null> = signal(null);
     private _onTranslationRefresh: Observable<void> | null = null;
 
-    protected getRoot(): TranslateService {
-        return this.parent ? this.parent.getRoot() : this;
+    // Downward-inheritance: `true` if THIS service has loads in flight, OR any
+    // ancestor does. Walks the parent chain via the public `parent.isLoading()`
+    // getter (not by reaching into `parent.loadingTranslations`) so the
+    // encapsulation boundary holds. Angular signals re-collect dependencies on
+    // each evaluation; short-circuit is safe — the only signal whose flip
+    // could change the result is the one returned by short-circuit, and it IS
+    // tracked. Parent chain is acyclic (DI tree is acyclic; `skipSelf` only
+    // walks up), so no cycle guard needed.
+    //
+    // Set-based composition at each level: `loadingTranslations.hasAny()`
+    // stays true while ANY language has an in-flight load on this service,
+    // flips false only when the last entry is cleared.
+    private _isLoading: Signal<boolean> = computed(
+        () => this.loadingTranslations.hasAny() || (this.parent?.isLoading() ?? false),
+    );
+
+    /**
+     * Returns the root of this service's hierarchy — the topmost service in
+     * the `getParent()` chain. For an isolated subtree, returns the subtree's
+     * root (since `parent === null` at the isolation boundary).
+     *
+     * A root service returns itself. Equivalent to walking `getParent()` until
+     * it returns `null`, but provided as a convenience.
+     */
+    public getRoot(): TranslateService {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let svc: TranslateService = this;
+        while (svc.parent) svc = svc.parent;
+        return svc;
     }
 
     /**
@@ -95,17 +137,24 @@ export class TranslateService implements ITranslateService {
      * fallback chain — equivalent to "is this a root?".
      */
     public getParent(): TranslateService | null {
-        return this.isRoot ? null : this.parent;
+        return this.parent;
     }
 
     protected hasTranslationInChain(lang: Language): boolean {
-        return this.store.hasTranslationFor(lang) || (this.parent?.hasTranslationInChain(lang) ?? false);
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        for (let svc: TranslateService | null = this; svc; svc = svc.parent) {
+            if (svc.store.hasTranslationFor(lang)) return true;
+        }
+        return false;
     }
 
     protected chainTranslationChange$(): Observable<TranslationChangeEvent> {
-        return this.parent
-            ? merge(this.store.translationChange$, this.parent.chainTranslationChange$())
-            : this.store.translationChange$;
+        const streams: Observable<TranslationChangeEvent>[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        for (let svc: TranslateService | null = this; svc; svc = svc.parent) {
+            streams.push(svc.store.translationChange$);
+        }
+        return streams.length === 1 ? streams[0] : merge(...streams);
     }
 
     /**
@@ -184,7 +233,11 @@ export class TranslateService implements ITranslateService {
             }),
         };
 
-        this.isRoot = config.isRoot;
+        // parent === null exactly means "I am a root" (including isolated-subtree roots).
+        // isRoot is now a getter derived from this single source of truth.
+        this.parent = config.isRoot
+            ? null
+            : inject(TranslateService, { optional: true, skipSelf: true });
 
         const destroyRef = inject(DestroyRef);
 
@@ -196,27 +249,70 @@ export class TranslateService implements ITranslateService {
                 this.setFallbackLang(config.fallbackLang);
             }
         } else {
-            // Child services should initially load the root's current and fallback languages
+            // Child services should initially load the root's current and fallback languages.
+            // Loader failures are warned contextually here — the internal no-op subscribe
+            // inside loadAndCompileTranslations would otherwise swallow them silently.
+            // Best-effort: takeUntilDestroyed tears down the subscription on host destroy,
+            // so a destroy-then-error race silently drops the warn.
             const currentLang = this.getCurrentLang();
             if (currentLang) {
-                this.loadOrExtendLanguage(currentLang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
+                this.loadOrExtendLanguage(currentLang)
+                    ?.pipe(takeUntilDestroyed(destroyRef))
+                    .subscribe({
+                        error: (err) => {
+                            console.warn(
+                                `@ngx-translate/core: child failed to load "${currentLang}". Cause:`,
+                                err,
+                            );
+                        },
+                    });
             }
             const fallbackLang = this.getFallbackLang();
-            if (fallbackLang) {
-                this.loadOrExtendLanguage(fallbackLang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
+            // Dedup guard: currentLang === fallbackLang means both branches would
+            // resolve to the same in-flight observable (via the loading-translations
+            // registry's get-or-create) and double-log on error.
+            if (fallbackLang && fallbackLang !== currentLang) {
+                this.loadOrExtendLanguage(fallbackLang)
+                    ?.pipe(takeUntilDestroyed(destroyRef))
+                    .subscribe({
+                        error: (err) => {
+                            console.warn(
+                                `@ngx-translate/core: child failed to load "${fallbackLang}". Cause:`,
+                                err,
+                            );
+                        },
+                    });
             }
         }
 
         // Child services should load translations when the language changes on the root
         this.onLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
             if (!this.isRoot) {
-                this.loadOrExtendLanguage(event.lang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
+                this.loadOrExtendLanguage(event.lang)
+                    ?.pipe(takeUntilDestroyed(destroyRef))
+                    .subscribe({
+                        error: (err) => {
+                            console.warn(
+                                `@ngx-translate/core: child failed to load "${event.lang}". Cause:`,
+                                err,
+                            );
+                        },
+                    });
             }
         });
 
         this.onFallbackLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
             if (!this.isRoot) {
-                this.loadOrExtendLanguage(event.lang)?.pipe(takeUntilDestroyed(destroyRef)).subscribe();
+                this.loadOrExtendLanguage(event.lang)
+                    ?.pipe(takeUntilDestroyed(destroyRef))
+                    .subscribe({
+                        error: (err) => {
+                            console.warn(
+                                `@ngx-translate/core: child failed to load "${event.lang}". Cause:`,
+                                err,
+                            );
+                        },
+                    });
             }
         });
 
@@ -254,7 +350,10 @@ export class TranslateService implements ITranslateService {
                     });
                 },
                 error: (err) => {
-                    console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
+                    console.warn(
+                        `@ngx-translate/core: failed to load fallback "${lang}". Cause:`,
+                        err,
+                    );
                 },
             });
             return pending;
@@ -268,8 +367,22 @@ export class TranslateService implements ITranslateService {
         return of(this.store.getTranslations(lang));
     }
 
-    protected isLoading(): boolean {
-        return Object.keys(this.loadingTranslations).length > 0;
+    /**
+     * Signal that is `true` while one or more language loads are in flight at
+     * this service or any of its ancestors in the service hierarchy.
+     *
+     * Loading scope propagates DOWNWARD: a load triggered at the root marks
+     * the root and all descendants as loading. A load triggered at a child
+     * (e.g. a lazy-route bootstrap fetching its translations) marks only that
+     * child's subtree. Siblings and ancestors are unaffected by a descendant's
+     * loads.
+     *
+     * Drive a spinner by reading it from the service injected at the scope
+     * where the spinner should live: root for an app-shell spinner, the
+     * nearest child for a local spinner inside a lazy-loaded subtree.
+     */
+    public get isLoading(): Signal<boolean> {
+        return this._isLoading;
     }
 
     /**
@@ -280,9 +393,12 @@ export class TranslateService implements ITranslateService {
             return this.parent!.use(lang);
         }
 
-        // remember the language that was called
-        // we need this with multiple fast calls to use()
-        // where translation loads might complete in random order
+        // Snapshot prior state so we can roll back if the loader fails.
+        const prevLang = this._currentLang();
+        const prevLastUseLang = this.lastUseLanguage;
+
+        // Remember the language that was called — used by changeLang() to discard
+        // late-arriving completions from superseded calls.
         this.lastUseLanguage = lang;
 
         if (!this._currentLang()) {
@@ -291,20 +407,34 @@ export class TranslateService implements ITranslateService {
         }
 
         const pending = this.loadOrExtendLanguage(lang);
-        if (isObservable(pending)) {
-            pending.pipe(take(1)).subscribe({
-                next: () => {
-                    this.changeLang(lang);
-                },
-                error: (err) => {
-                    console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
-                },
-            });
-            return pending;
+        if (!isObservable(pending)) {
+            // Defensive: loadOrExtendLanguage is typed `Observable | undefined`.
+            // The undefined branch means "nothing to load" — synchronously activate.
+            this.changeLang(lang);
+            return of(this.store.getTranslations(lang));
         }
 
-        this.changeLang(lang);
-        return of(this.store.getTranslations(lang));
+        pending.pipe(take(1)).subscribe({
+            next: () => {
+                this.changeLang(lang);
+            },
+            error: (err) => {
+                // Only roll back if THIS call is still the most-recent one.
+                // A later use() may have superseded it (symmetric with the
+                // changeLang() guard).
+                if (this.lastUseLanguage === lang) {
+                    this._currentLang.set(prevLang);
+                    this.lastUseLanguage = prevLastUseLang;
+                }
+                console.warn(
+                    `@ngx-translate/core: failed to load "${lang}". ` +
+                        `currentLang was NOT changed; remains ` +
+                        `"${prevLang ?? "null"}". Cause:`,
+                    err,
+                );
+            },
+        });
+        return pending;
     }
 
     /**
@@ -346,32 +476,54 @@ export class TranslateService implements ITranslateService {
         return this.isRoot ? this._currentLang() : (this.parent?.getCurrentLang() ?? null);
     }
 
+    /**
+     * Loads translations for `lang` via the configured `TranslateLoader`,
+     * compiles them, and stores the result. Tracking via the protected
+     * `loadingTranslations` registry happens automatically.
+     *
+     * Subclasses that override this method bypass `isLoading` tracking
+     * unless they call `this.loadingTranslations.set(lang, obs)` and arrange
+     * a token-aware finalize (`this.loadingTranslations.clearIfOwner(lang, obs)`)
+     * from the override.
+     */
     protected loadAndCompileTranslations(
         lang: Language,
     ): Observable<InterpolatableTranslationObject> {
-        if (this.loadingTranslations[lang]) {
-            return this.loadingTranslations[lang];
+        const existing = this.loadingTranslations.get(lang);
+        if (existing) {
+            return existing;
         }
 
         const translations$ = this.currentLoader.getTranslation(lang).pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             tap((compiled: InterpolatableTranslationObject) => {
                 this.store.setTranslations(lang, compiled, false);
+                // Clear synchronously on success — this `tap` runs before
+                // `shareReplay` forwards `next` to subscribers, so subscribers
+                // receiving `next` observe `isLoading()` reflecting that this
+                // language is no longer in flight. The finalize below covers
+                // error / sync-throw / unsubscribe paths; clearIfOwner is
+                // idempotent so the double-clear on success is a safe no-op.
+                // Invariant: `tap` MUST stay before `shareReplay` in the pipe.
+                this.loadingTranslations.clearIfOwner(lang, translations$);
             }),
-            finalize(() => {
-                delete this.loadingTranslations[lang];
-            }),
+            // Token-aware clear: if `resetLang` + `reloadLang` raced between
+            // set() and finalize(), this load's finalize must NOT clobber the
+            // newer load's entry. clearIfOwner compares by reference identity.
+            finalize(() => this.loadingTranslations.clearIfOwner(lang, translations$)),
             // cache the single result & share it across all subscribers
             shareReplay({ bufferSize: 1, refCount: true }),
         );
 
-        this.loadingTranslations[lang] = translations$;
+        this.loadingTranslations.set(lang, translations$);
 
-        // trigger loading if nobody subscribes from outside
+        // Trigger loading if nobody subscribes from outside. The error callback
+        // is intentionally a no-op: use() and setFallbackLang() already emit a
+        // console.warn on loader failure for their own paths. Warning here
+        // would double-log for those callers.
         translations$.subscribe({
-            error: (err) => {
-                console.warn(`@ngx-translate/core: error loading translations for ${lang}:`, err);
-            },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            error: () => {},
         });
 
         return translations$;
@@ -456,7 +608,10 @@ export class TranslateService implements ITranslateService {
         return this.isRoot ? this._fallbackLang() : (this.parent?.getFallbackLang() ?? null);
     }
 
-    protected getTextToInterpolate(key: string, lang?: Language): InterpolatableTranslation | undefined {
+    protected getTextToInterpolate(
+        key: string,
+        lang?: Language,
+    ): InterpolatableTranslation | undefined {
         if (lang) {
             const res = this.store.getTranslationValue(lang, key);
             if (res !== undefined) {
@@ -586,8 +741,9 @@ export class TranslateService implements ITranslateService {
 
         // check if we are loading a new translation to use
         const effectiveLang = lang ?? this.lastUseLanguage;
-        if (effectiveLang && this.loadingTranslations[effectiveLang]) {
-            return this.loadingTranslations[effectiveLang].pipe(
+        const pending = effectiveLang ? this.loadingTranslations.get(effectiveLang) : undefined;
+        if (pending) {
+            return pending.pipe(
                 concatMap(() => {
                     return makeObservable(this.getParsedResult(key, interpolateParams, lang));
                 }),
@@ -690,6 +846,14 @@ export class TranslateService implements ITranslateService {
 
     private warnedUnloadedInstantLangs = new Set<Language>();
     private warnUnloadedInstantLang(lang: Language): void {
+        // Delegate to the root so the warn budget is shared across the isolated
+        // subtree. With parent === null at isolated boundaries, getRoot() stops
+        // at the right place — one warn per (isolated subtree, lang) pair.
+        const root = this.getRoot();
+        if (root !== this) {
+            root.warnUnloadedInstantLang(lang);
+            return;
+        }
         if (this.warnedUnloadedInstantLangs.has(lang)) return;
         this.warnedUnloadedInstantLangs.add(lang);
         console.warn(
@@ -779,10 +943,18 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
-     * Deletes inner translation
+     * Deletes stored translations for `lang` and clears the in-flight registry
+     * entry — `isLoading()` flips to `false` immediately on this service.
+     *
+     * Does NOT cancel the underlying network call: if the loader is mid-flight
+     * when this method returns, the request can still complete and `tap()`
+     * translations back into the store. To replace state and re-fetch
+     * deterministically, follow with `reloadLang(lang)`.
      */
     public resetLang(lang: Language): void {
-        delete this.loadingTranslations[lang];
+        // Unconditional clear — `resetLang`'s contract is "forget this entry
+        // NOW", regardless of which load owns it.
+        this.loadingTranslations.clear(lang);
         this.store.deleteTranslations(lang);
     }
 
@@ -810,8 +982,8 @@ export class TranslateService implements ITranslateService {
         return window.navigator.languages
             ? window.navigator.languages[0]
             : window.navigator.language ||
-            window.navigator.browserLanguage ||
-            window.navigator.userLanguage;
+                  window.navigator.browserLanguage ||
+                  window.navigator.userLanguage;
     }
 
     public getBrowserLang(): Language | undefined {
@@ -837,5 +1009,4 @@ export class TranslateService implements ITranslateService {
     get fallbackLang(): Signal<Language | null> {
         return this.isRoot ? this._fallbackLang.asReadonly() : this.parent!.fallbackLang;
     }
-
 }

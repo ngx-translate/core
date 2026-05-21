@@ -1,12 +1,5 @@
 import { Location } from "@angular/common";
-import {
-    Component,
-    inject as coreInject,
-    Injector,
-    NgModule,
-    Provider,
-    Type,
-} from "@angular/core";
+import { Component, inject as coreInject, Injector, NgModule, Provider, Type } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
 import { provideRouter, Router, RouterModule } from "@angular/router";
 import {
@@ -41,7 +34,7 @@ class RootComponent {
     selector: "app-lazy",
     template: "lazy-loaded-parent [<router-outlet></router-outlet>]",
 })
-class ParentLazyLoadedComponent { }
+class ParentLazyLoadedComponent {}
 
 function getLazyLoadedModule(providers: Provider[] = []) {
     // eslint-disable-next-line @angular-eslint/prefer-standalone
@@ -73,7 +66,7 @@ function getLazyLoadedModule(providers: Provider[] = []) {
         ],
         providers: providers,
     })
-    class LoadedModule { }
+    class LoadedModule {}
 
     return LoadedModule;
 }
@@ -225,12 +218,12 @@ describe("TranslateStore", () => {
             router.navigateByUrl("/lazy/loaded/child");
             advance(fixture);
 
-            // In hierarchy, ChildLazyLoadedComponent's local translate service (child) 
+            // In hierarchy, ChildLazyLoadedComponent's local translate service (child)
             // has the translation "Lazy" for key "TEST".
             // The root service is UNAFFECTED but the child service bubbles up for "ROOT".
 
             // We need to inject the service from the child scope to verify it.
-            // Since we can't easily do it here without getting the component instance, 
+            // Since we can't easily do it here without getting the component instance,
             // we've already done an expect() inside ChildLazyLoadedComponent constructor.
 
             expect(rootTranslate.instant("TEST")).toEqual("Root");

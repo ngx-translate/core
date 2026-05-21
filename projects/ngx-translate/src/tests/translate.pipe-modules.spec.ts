@@ -19,7 +19,7 @@ import { DelayedFakeLoader } from "./test-helpers";
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `{{ "TEST" | translate }}`,
 })
-class AppComponent { }
+class AppComponent {}
 
 @Injectable()
 class FakeLoader implements TranslateLoader {

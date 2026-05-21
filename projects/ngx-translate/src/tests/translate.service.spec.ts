@@ -123,9 +123,7 @@ describe("TranslateService get() during in-flight loading", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(DelayedLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(DelayedLoader) })],
         });
         translate = TestBed.inject(TranslateService);
     });
@@ -1204,7 +1202,7 @@ describe("TranslateService (isolate)", () => {
     };
 
     class StaticTranslateLoader implements TranslateLoader {
-        constructor(private translations: Record<string, TranslationObject>) { }
+        constructor(private translations: Record<string, TranslationObject>) {}
 
         getTranslation(lang: string): Observable<TranslationObject> {
             const translations = this.translations[lang];
@@ -1244,7 +1242,7 @@ describe("TranslateService (isolate)", () => {
         imports: [TranslatePipe],
         providers: [provideChildTranslateService()],
     })
-    class SharedChildComponent { }
+    class SharedChildComponent {}
 
     @Component({
         standalone: true,
@@ -1857,10 +1855,7 @@ describe("TranslateService.translate() Signal", () => {
             translate.use("en");
 
             const userName = signal("Alice");
-            const result = translate.translate(
-                "GREETING",
-                () => ({ name: userName() }),
-            );
+            const result = translate.translate("GREETING", () => ({ name: userName() }));
 
             expect(result()).toEqual("Hello, Alice!");
 
@@ -1989,9 +1984,7 @@ describe("TranslateService.currentLang signal", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         translate = TestBed.inject(TranslateService);
     });
@@ -2022,9 +2015,7 @@ describe("TranslateService.fallbackLang signal", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         translate = TestBed.inject(TranslateService);
     });
@@ -2045,7 +2036,7 @@ describe("TranslateService.fallbackLang signal", () => {
 });
 
 describe("error logging", () => {
-    it("should warn when loader fails in use()", () => {
+    it("should warn when loader fails in use() with rollback context", () => {
         const spy = spyOn(console, "warn");
         const error = new Error("Load failed");
 
@@ -2067,12 +2058,13 @@ describe("error logging", () => {
         service.use("en").subscribe({ error: () => {} });
 
         expect(spy).toHaveBeenCalledWith(
-            "@ngx-translate/core: error loading translations for en:",
+            '@ngx-translate/core: failed to load "en". currentLang was NOT ' +
+                'changed; remains "null". Cause:',
             error,
         );
     });
 
-    it("should warn when loader fails in loadAndCompileTranslations()", () => {
+    it("should not double-warn — loadAndCompileTranslations is silent now", () => {
         const spy = spyOn(console, "warn");
         const error = new Error("Load failed");
 
@@ -2090,12 +2082,12 @@ describe("error logging", () => {
         });
 
         const service = TestBed.inject(TranslateService);
-        service.use("en");
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        service.use("en").subscribe({ error: () => {} });
 
-        expect(spy).toHaveBeenCalledWith(
-            "@ngx-translate/core: error loading translations for en:",
-            error,
-        );
+        // Exactly one warn — use() emits the contextual message; the internal
+        // subscription in loadAndCompileTranslations no longer logs.
+        expect(spy).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -2104,9 +2096,7 @@ describe("TranslateService pre-initialization (no use() called)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         translate = TestBed.inject(TranslateService);
     });
@@ -2171,24 +2161,33 @@ describe("TranslateService (explicit lang parameter)", () => {
     });
 
     it("get() should return translation from the specified language", (done) => {
-        translate.get("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
-            expect(result).toEqual("Hallo");
-            done();
-        });
+        translate
+            .get("GREETING", undefined, "de")
+            .pipe(first())
+            .subscribe((result) => {
+                expect(result).toEqual("Hallo");
+                done();
+            });
     });
 
     it("get() with array keys should return translations from the specified language", (done) => {
-        translate.get(["GREETING", "ONLY_DE"], undefined, "de").pipe(first()).subscribe((result) => {
-            expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
-            done();
-        });
+        translate
+            .get(["GREETING", "ONLY_DE"], undefined, "de")
+            .pipe(first())
+            .subscribe((result) => {
+                expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
+                done();
+            });
     });
 
     it("stream() should return translation from the specified language", (done) => {
-        translate.stream("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
-            expect(result).toEqual("Hallo");
-            done();
-        });
+        translate
+            .stream("GREETING", undefined, "de")
+            .pipe(first())
+            .subscribe((result) => {
+                expect(result).toEqual("Hallo");
+                done();
+            });
     });
 
     it("stream() with per-call lang re-emits when that lang's translations change", (done) => {
@@ -2209,10 +2208,13 @@ describe("TranslateService (explicit lang parameter)", () => {
     });
 
     it("getStreamOnTranslationChange() should return translation from the specified language", (done) => {
-        translate.getStreamOnTranslationChange("GREETING", undefined, "de").pipe(first()).subscribe((result) => {
-            expect(result).toEqual("Hallo");
-            done();
-        });
+        translate
+            .getStreamOnTranslationChange("GREETING", undefined, "de")
+            .pipe(first())
+            .subscribe((result) => {
+                expect(result).toEqual("Hallo");
+                done();
+            });
     });
 
     it("translate() should return translation from the specified language (string)", () => {
@@ -2238,9 +2240,7 @@ describe("TranslateService (explicit lang parameter)", () => {
 describe("TranslateService (F3 — Subject completion on destroy)", () => {
     it("completes _onLangChange when the service is destroyed", (done) => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         const service = TestBed.inject(TranslateService);
 
@@ -2259,9 +2259,7 @@ describe("TranslateService (F3 — Subject completion on destroy)", () => {
 
     it("completes _onFallbackLangChange when the service is destroyed", (done) => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         const service = TestBed.inject(TranslateService);
 
@@ -2283,9 +2281,7 @@ describe("TranslateService (F6 — instant() warn dedup)", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         translate = TestBed.inject(TranslateService);
         // Pre-load "en" so we have at least one loaded lang
@@ -2296,9 +2292,9 @@ describe("TranslateService (F6 — instant() warn dedup)", () => {
     it("instant(_,_,lang) warns once per unloaded lang and not for loaded langs", () => {
         const warnSpy = spyOn(console, "warn");
         const warnCount = () =>
-            warnSpy.calls.all().filter((c) =>
-                (c.args[0] as string).includes("no translations are loaded"),
-            ).length;
+            warnSpy.calls
+                .all()
+                .filter((c) => (c.args[0] as string).includes("no translations are loaded")).length;
 
         // First call for unloaded "de" → should warn once
         translate.instant("KEY", undefined, "de");
@@ -2321,9 +2317,7 @@ describe("TranslateService (F6 — instant() warn dedup)", () => {
 describe("TranslateService (F7 — stream() emission-count lock-in)", () => {
     it("stream(_, _, currentLang) emission count on use(currentLang)", (done) => {
         TestBed.configureTestingModule({
-            providers: [
-                provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
-            ],
+            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
         });
         const service = TestBed.inject(TranslateService);
         service.setTranslation("en", { KEY: "Value" });

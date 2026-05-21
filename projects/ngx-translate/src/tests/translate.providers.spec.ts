@@ -11,10 +11,7 @@ import {
 } from "../lib/translate.providers";
 import { Observable, of } from "rxjs";
 
-import {
-    TranslateService,
-    TRANSLATE_SERVICE_CONFIG,
-} from "../lib/translate.service";
+import { TranslateService, TRANSLATE_SERVICE_CONFIG } from "../lib/translate.service";
 import { TranslateLoader, TranslateNoOpLoader } from "../lib/translate.loader";
 import { TranslateCompiler, TranslateNoOpCompiler } from "../lib/translate.compiler";
 import {
@@ -420,9 +417,7 @@ describe("Translate Providers", () => {
             compile(value: string): string {
                 return value;
             }
-            compileTranslations(
-                translations: TranslationObject,
-            ): InterpolatableTranslationObject {
+            compileTranslations(translations: TranslationObject): InterpolatableTranslationObject {
                 return translations as InterpolatableTranslationObject;
             }
         }
@@ -440,9 +435,7 @@ describe("Translate Providers", () => {
         it("auto-wraps a bare loader class to the TranslateLoader token", () => {
             spyOn(console, "warn");
             TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({ loader: BareLoader }),
-                ],
+                providers: [provideTranslateService({ loader: BareLoader })],
             });
             const loader = TestBed.inject(TranslateLoader);
             expect(loader).toBeInstanceOf(BareLoader);
@@ -457,9 +450,7 @@ describe("Translate Providers", () => {
         it("auto-wraps a bare compiler class to the TranslateCompiler token", () => {
             spyOn(console, "warn");
             TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({ compiler: BareCompiler }),
-                ],
+                providers: [provideTranslateService({ compiler: BareCompiler })],
             });
             const compiler = TestBed.inject(TranslateCompiler);
             expect(compiler).toBeInstanceOf(BareCompiler);
@@ -468,9 +459,7 @@ describe("Translate Providers", () => {
         it("auto-wraps a bare parser class to the TranslateParser token", () => {
             spyOn(console, "warn");
             TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({ parser: BareParser }),
-                ],
+                providers: [provideTranslateService({ parser: BareParser })],
             });
             const parser = TestBed.inject(TranslateParser);
             expect(parser).toBeInstanceOf(BareParser);
@@ -490,9 +479,7 @@ describe("Translate Providers", () => {
         it("auto-wraps a bare factory function for any plugin slot", () => {
             const factory = () => new BareLoader();
             TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({ loader: factory }),
-                ],
+                providers: [provideTranslateService({ loader: factory })],
             });
             const loader = TestBed.inject(TranslateLoader);
             expect(loader).toBeInstanceOf(BareLoader);
