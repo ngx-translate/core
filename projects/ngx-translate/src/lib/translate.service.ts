@@ -76,7 +76,7 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 };
 
 @Injectable()
-export class TranslateService implements ITranslateService {
+export class TranslateService<Key extends string = string> implements ITranslateService<Key> {
     protected readonly loadingTranslations = new LoadingTranslationsRegistry();
     protected lastUseLanguage: Language | null = null;
 
@@ -86,7 +86,7 @@ export class TranslateService implements ITranslateService {
     protected missingTranslationHandler = inject(MissingTranslationHandler);
     protected store: TranslateStore = inject(TranslateStore);
 
-    protected readonly parent: TranslateService | null;
+    protected readonly parent: TranslateService<Key> | null;
 
     protected get isRoot(): boolean {
         return this.parent === null;
@@ -122,9 +122,9 @@ export class TranslateService implements ITranslateService {
      * A root service returns itself. Equivalent to walking `getParent()` until
      * it returns `null`, but provided as a convenience.
      */
-    public getRoot(): TranslateService {
+    public getRoot(): TranslateService<Key> {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        let svc: TranslateService = this;
+        let svc: TranslateService<Key> = this;
         while (svc.parent) svc = svc.parent;
         return svc;
     }
@@ -136,13 +136,13 @@ export class TranslateService implements ITranslateService {
      * A `null` return means the service is the terminus of its translation
      * fallback chain — equivalent to "is this a root?".
      */
-    public getParent(): TranslateService | null {
+    public getParent(): TranslateService<Key> | null {
         return this.parent;
     }
 
     protected hasTranslationInChain(lang: Language): boolean {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        for (let svc: TranslateService | null = this; svc; svc = svc.parent) {
+        for (let svc: TranslateService<Key> | null = this; svc; svc = svc.parent) {
             if (svc.store.hasTranslationFor(lang)) return true;
         }
         return false;
@@ -151,7 +151,7 @@ export class TranslateService implements ITranslateService {
     protected chainTranslationChange$(): Observable<TranslationChangeEvent> {
         const streams: Observable<TranslationChangeEvent>[] = [];
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        for (let svc: TranslateService | null = this; svc; svc = svc.parent) {
+        for (let svc: TranslateService<Key> | null = this; svc; svc = svc.parent) {
             streams.push(svc.store.translationChange$);
         }
         return streams.length === 1 ? streams[0] : merge(...streams);
@@ -688,7 +688,7 @@ export class TranslateService implements ITranslateService {
      * Returns the parsed result of the translations
      */
     public getParsedResult(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
@@ -698,7 +698,7 @@ export class TranslateService implements ITranslateService {
     }
 
     protected getParsedResultForArray(
-        key: string[],
+        key: Key[],
         interpolateParams: InterpolationParameters | undefined,
         lang?: Language,
     ) {
@@ -731,7 +731,7 @@ export class TranslateService implements ITranslateService {
      * @returns the translated key, or an object of translated keys
      */
     public get(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation> {
@@ -759,7 +759,7 @@ export class TranslateService implements ITranslateService {
      * @returns A stream of the translated key, or an object of translated keys
      */
     public getStreamOnTranslationChange(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation> {
@@ -792,7 +792,7 @@ export class TranslateService implements ITranslateService {
      * @returns A stream of the translated key, or an object of translated keys
      */
     public stream(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation> {
@@ -827,7 +827,7 @@ export class TranslateService implements ITranslateService {
      * bypassing the current language and fallback chain.
      */
     public instant(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Translation {
@@ -890,7 +890,7 @@ export class TranslateService implements ITranslateService {
      * labels = this.translate.translate(['SAVE', 'CANCEL']);
      */
     public translate(
-        key: string | string[] | (() => string | string[]),
+        key: Key | Key[] | (() => Key | Key[]),
         params?: InterpolationParameters | (() => InterpolationParameters | undefined),
         lang?: Language | (() => Language | undefined),
     ): Signal<Translation | TranslationObject> {
@@ -903,7 +903,7 @@ export class TranslateService implements ITranslateService {
         });
     }
 
-    protected keyToObject(key: string | string[]) {
+    protected keyToObject(key: Key | Key[]) {
         if (Array.isArray(key)) {
             return key.reduce((acc: Record<string, string>, currKey: string) => {
                 acc[currKey] = currKey;
@@ -917,7 +917,7 @@ export class TranslateService implements ITranslateService {
      * Sets the translated value of a key, after compiling it
      */
     public set(
-        key: string,
+        key: Key,
         translation: string | TranslationObject,
         lang: Language = this.getCurrentLang()!,
     ): void {

@@ -41,7 +41,7 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
-export abstract class ITranslateService {
+export abstract class ITranslateService<Key extends string = string> {
     public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
     public abstract readonly onFallbackLangChange: Observable<FallbackLangChangeEvent>;
@@ -64,7 +64,7 @@ export abstract class ITranslateService {
     public abstract resetLang(lang: Language): void;
 
     public abstract instant(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Translation;
@@ -83,31 +83,31 @@ export abstract class ITranslateService {
      * @returns A Signal that emits the translated value
      */
     public abstract translate(
-        key: string | string[] | (() => string | string[]),
+        key: Key | Key[] | (() => Key | Key[]),
         params?: InterpolationParameters | (() => InterpolationParameters | undefined),
         lang?: Language | (() => Language | undefined),
     ): Signal<Translation | TranslationObject>;
 
     public abstract stream(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
 
     public abstract getStreamOnTranslationChange(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
 
     public abstract set(
-        key: string,
+        key: Key,
         translation: string | TranslationObject,
         lang?: Language,
     ): void;
 
     public abstract get(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
@@ -125,7 +125,7 @@ export abstract class ITranslateService {
     ): void;
 
     public abstract getParsedResult(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation>;
@@ -180,7 +180,7 @@ export abstract class ITranslateService {
      * A `null` return means the service is the terminus of its translation
      * fallback chain — equivalent to "is this a root?".
      */
-    public abstract getParent(): ITranslateService | null;
+    public abstract getParent(): ITranslateService<Key> | null;
 
     /**
      * Returns the root of this service's hierarchy — the topmost service in
@@ -189,5 +189,5 @@ export abstract class ITranslateService {
      *
      * A root service returns itself.
      */
-    public abstract getRoot(): ITranslateService;
+    public abstract getRoot(): ITranslateService<Key>;
 }
