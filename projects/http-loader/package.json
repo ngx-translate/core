@@ -1,6 +1,6 @@
 {
     "name": "@ngx-translate/http-loader",
-    "version": "18.0.0-rc.3",
+    "version": "18.0.0",
     "description": "http loader for dynamically loading translation files for @ngx-translate/core",
     "keywords": [
         "@ngx-translate",
@@ -14,7 +14,7 @@
     "peerDependencies": {
         "@angular/common": ">=18",
         "@angular/core": ">=18",
-        "@ngx-translate/core": ">=18.0.0-rc.3"
+        "@ngx-translate/core": ">=18.0.0"
     },
     "sideEffects": false
 }
