@@ -164,16 +164,6 @@
                         ],
                         "styles": ["projects/test-app/src/styles.scss"]
                     }
-                },
-                "lint": {
-                    "builder": "@angular-eslint/builder:lint",
-                    "options": {
-                        "lintFilePatterns": [
-                            "projects/test-app/**/*.ts",
-                            "projects/test-app/**/*.html"
-                        ],
-                        "eslintConfig": "projects/test-app/eslint.config.js"
-                    }
                 }
             }
         }

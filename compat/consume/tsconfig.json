@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "skipLibCheck": false,
+        "moduleResolution": "bundler",
+        "module": "esnext",
+        "target": "es2022",
+        "noEmit": true
+    },
+    "files": ["consume.ts"]
+}
