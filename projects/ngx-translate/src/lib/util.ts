@@ -186,7 +186,7 @@ export function getValue(target: unknown, key: string): unknown {
 /**
  * Sets a value on object using a dot separated key.
  * Returns a clone of the object without modifying it
- * parser.setValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
+ * insertValue({a:{b:{c: "test"}}}, 'a.b.c', "test2") ==> {a:{b:{c: "test2"}}}
  * @param target an object
  * @param key E.g. "a.b.c"
  * @param value to set

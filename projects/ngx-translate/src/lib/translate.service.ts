@@ -6,6 +6,7 @@ import {
     InjectionToken,
     Signal,
     signal,
+    untracked,
     WritableSignal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -85,6 +86,7 @@ export class TranslateService implements ITranslateService {
     protected parser = inject(TranslateParser);
     protected missingTranslationHandler = inject(MissingTranslationHandler);
     protected store: TranslateStore = inject(TranslateStore);
+    private readonly destroyRef = inject(DestroyRef);
 
     protected readonly parent: TranslateService | null;
 
@@ -138,6 +140,17 @@ export class TranslateService implements ITranslateService {
      */
     public getParent(): TranslateService | null {
         return this.parent;
+    }
+
+    /**
+     * The language most recently requested via `use()`. Always read from the
+     * root, because `use()` delegates to the root (`parent!.use(lang)`) and only
+     * the root ever assigns `lastUseLanguage`. A child's own `lastUseLanguage`
+     * stays `null`, so reading it directly would make `get()` miss the child's
+     * in-flight load. `null` until the first `use()` runs.
+     */
+    protected getActiveRequestedLang(): Language | null {
+        return this.getRoot().lastUseLanguage;
     }
 
     protected hasTranslationInChain(lang: Language): boolean {
@@ -520,8 +533,10 @@ export class TranslateService implements ITranslateService {
         // Trigger loading if nobody subscribes from outside. The error callback
         // is intentionally a no-op: use() and setFallbackLang() already emit a
         // console.warn on loader failure for their own paths. Warning here
-        // would double-log for those callers.
-        translations$.subscribe({
+        // would double-log for those callers. Bound to the service lifetime so a
+        // non-completing/hot custom loader cannot pin this subscription (and the
+        // upstream loader subscription) past service teardown.
+        translations$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             error: () => {},
         });
@@ -739,8 +754,12 @@ export class TranslateService implements ITranslateService {
             return of("");
         }
 
-        // check if we are loading a new translation to use
-        const effectiveLang = lang ?? this.lastUseLanguage;
+        // check if we are loading a new translation to use.
+        // Use the ROOT's last-requested language (not this service's own
+        // lastUseLanguage, which a child never sets) so a child's in-flight
+        // load is found in its registry; fall back to the current language when
+        // no use() has run yet.
+        const effectiveLang = lang ?? this.getActiveRequestedLang() ?? this.getCurrentLang();
         const pending = effectiveLang ? this.loadingTranslations.get(effectiveLang) : undefined;
         if (pending) {
             return pending.pipe(
@@ -855,12 +874,17 @@ export class TranslateService implements ITranslateService {
             return;
         }
         if (this.warnedUnloadedInstantLangs.has(lang)) return;
-        this.warnedUnloadedInstantLangs.add(lang);
-        console.warn(
-            `@ngx-translate/core: instant() called with lang="${lang}" but no ` +
-                `translations are loaded for that language. Returning the key as ` +
-                `fallback. Load with use("${lang}") or setTranslation("${lang}", ...) first.`,
-        );
+        // instant() runs inside the translate() computed; keep the Set write and
+        // console.warn out of the reactive graph so they never register as a
+        // producer during signal evaluation.
+        untracked(() => {
+            this.warnedUnloadedInstantLangs.add(lang);
+            console.warn(
+                `@ngx-translate/core: instant() called with lang="${lang}" but no ` +
+                    `translations are loaded for that language. Returning the key as ` +
+                    `fallback. Load with use("${lang}") or setTranslation("${lang}", ...) first.`,
+            );
+        });
     }
 
     /**
