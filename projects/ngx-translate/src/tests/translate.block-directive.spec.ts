@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { TranslateService } from "../lib/translate.service";
 import { provideTranslateService } from "../lib/translate.providers";
@@ -10,12 +10,12 @@ import { TranslateBlockDirective } from "../lib/translate-block.directive";
     template: `
         <ng-container *translateBlock="let t">
             <span class="title">{{ t("TEST") }}</span>
-            <span class="greeting">{{ t("GREETING", { name: userName }) }}</span>
+            <span class="greeting">{{ t("GREETING", { name: userName() }) }}</span>
         </ng-container>
     `,
 })
 class TestComponent {
-    userName = "World";
+    userName = signal("World");
 }
 
 @Component({
@@ -95,7 +95,7 @@ describe("TranslateBlockDirective", () => {
         const el = fixture.nativeElement.querySelector(".greeting");
         expect(el.textContent).toBe("Hello, World!");
 
-        fixture.componentInstance.userName = "Andreas";
+        fixture.componentInstance.userName.set("Andreas");
         fixture.detectChanges();
 
         expect(el.textContent).toBe("Hello, Andreas!");

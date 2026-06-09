@@ -1,4 +1,4 @@
-import { Component, inject, input } from "@angular/core";
+import { Component, inject, input, ChangeDetectionStrategy } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
 
 @Component({
@@ -13,6 +13,7 @@ import { TranslateService } from "@ngx-translate/core";
             </button>
         }
     `,
+    changeDetection: ChangeDetectionStrategy.Default,
     styles: `
         :host {
             display: flex;
