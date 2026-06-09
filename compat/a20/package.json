@@ -41,5 +41,6 @@
         "ng-packagr": "^20",
         "typescript": "~5.9.0",
         "typescript-eslint": "8.2.0"
-    }
+    },
+    "packageManager": "pnpm@10.12.4"
 }
