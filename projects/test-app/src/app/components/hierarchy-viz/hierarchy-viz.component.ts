@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
 import { IconComponent } from "../icon/icon.component";
 
@@ -68,6 +68,7 @@ interface ServiceNode {
             </div>
         </div>
     `,
+    changeDetection: ChangeDetectionStrategy.Default,
     styles: `
         .hierarchy-container {
             background: var(--surface);

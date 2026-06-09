@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { _, TranslateService, TranslationObject } from "@ngx-translate/core";
 import { map } from "rxjs";
@@ -15,6 +15,7 @@ import { ConsoleLogService } from "./services/console-log.service";
         ConsoleComponent,
         LanguageSwitchComponent,
     ],
+    changeDetection: ChangeDetectionStrategy.Default,
     templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {

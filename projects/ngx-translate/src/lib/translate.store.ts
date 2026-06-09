@@ -77,7 +77,6 @@ export class TranslateStore {
 
     public deleteTranslations(lang: string) {
         this._translations.update((current) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [lang]: _, ...rest } = current;
             return rest;
         });
