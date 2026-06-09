@@ -16,7 +16,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [20.x, 22.x, 24.x]
+                node-version: [22.x, 24.x]
 
         steps:
             - uses: actions/checkout@v5
@@ -50,7 +50,7 @@ jobs:
                       config-dir: compat/a20
                     - angular-version: 21
                       node-version: 22.x
-                      config-dir: compat/latest
+                      config-dir: compat/a21
 
         steps:
             - uses: actions/checkout@v5
