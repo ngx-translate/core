@@ -40,7 +40,9 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig 
 }
 
 function isClass<T>(fn: Type<T> | (() => T)): fn is Type<T> {
-    return /^class\s/.test(Function.prototype.toString.call(fn));
+    // for declarations, "class" is followed by \s: class Foo {...
+    // for expressions, "class" can be unnamed and followed by {: foo = class{...
+    return /^class[{\s]/.test(Function.prototype.toString.call(fn));
 }
 
 function toProvider<T>(
