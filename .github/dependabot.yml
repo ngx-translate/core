@@ -1,0 +1,46 @@
+version: 2
+updates:
+    # npm workspace (pnpm-lock.yaml at root). The published packages bundle no
+    # runtime deps, so everything here is dev/build/test toolchain. Group it to
+    # avoid PR spam. Major bumps stay ungrouped so Angular majors land as
+    # deliberate, reviewable upgrades.
+    - package-ecosystem: npm
+      directory: "/"
+      schedule:
+          interval: weekly
+          day: monday
+      open-pull-requests-limit: 5
+      commit-message:
+          prefix: chore
+          include: scope
+      groups:
+          angular:
+              patterns:
+                  - "@angular*"
+                  - "@angular-devkit/*"
+                  - "ng-packagr"
+              update-types:
+                  - minor
+                  - patch
+          dev-dependencies:
+              patterns:
+                  - "*"
+              exclude-patterns:
+                  - "@angular*"
+                  - "@angular-devkit/*"
+                  - "ng-packagr"
+              update-types:
+                  - minor
+                  - patch
+
+    - package-ecosystem: github-actions
+      directory: "/"
+      schedule:
+          interval: weekly
+          day: monday
+      commit-message:
+          prefix: ci
+      groups:
+          github-actions:
+              patterns:
+                  - "*"
