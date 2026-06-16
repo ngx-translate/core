@@ -1,4 +1,4 @@
-import { FactoryProvider, InjectionToken, inject } from "@angular/core";
+import { ClassProvider, FactoryProvider, InjectionToken, Type, inject } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import {
     provideTranslateService,
@@ -445,6 +445,20 @@ describe("Translate Providers", () => {
             spyOn(console, "warn");
             const providers = provideTranslateService({ loader: BareLoader });
             expect(providers[0]).toEqual({ provide: TranslateLoader, useClass: BareLoader });
+        });
+
+        it("wraps a nameless (minified) class as useClass, not useFactory (#1622)", () => {
+            // Minifiers emit anonymous class expressions as `class{…}` with no
+            // whitespace after the keyword. A class literal written here would be
+            // re-indented to `class … {` by Prettier and wouldn't reproduce the
+            // bug, so eval is used to preserve the exact minified source that
+            // Function.prototype.toString reports back.
+            const NamelessLoader = eval(
+                "(class{getTranslation(){return of({})}})",
+            ) as Type<TranslateLoader>;
+            const provider = provideTranslateLoader(NamelessLoader);
+            expect((provider as ClassProvider).useClass).toBe(NamelessLoader);
+            expect("useFactory" in provider).toBe(false);
         });
 
         it("auto-wraps a bare compiler class to the TranslateCompiler token", () => {
