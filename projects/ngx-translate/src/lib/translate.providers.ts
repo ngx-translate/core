@@ -40,7 +40,11 @@ export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig 
 }
 
 function isClass<T>(fn: Type<T> | (() => T)): fn is Type<T> {
-    return /^class\s/.test(Function.prototype.toString.call(fn));
+    // Match both source forms: `class Foo {` (named/unminified, whitespace after
+    // the keyword) and `class{` (anonymous, emitted by minifiers with no space).
+    // Missing the `class{` form mis-detects a minified class as a factory, so DI
+    // calls it without `new` and the app crashes. See ngx-translate/core#1622.
+    return /^class[{\s]/.test(Function.prototype.toString.call(fn));
 }
 
 function toProvider<T>(
