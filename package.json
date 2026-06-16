@@ -32,7 +32,7 @@
         "@angular/compiler-cli": "^22.0.0",
         "@commitlint/cli": "21.0.2",
         "@commitlint/config-conventional": "21.0.2",
-        "@types/jasmine": "5.1.13",
+        "@types/jasmine": "6.0.0",
         "angular-eslint": "^22.0.0",
         "eslint": "9.39.1",
         "eslint-config-prettier": "10.1.8",
