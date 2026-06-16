@@ -61,8 +61,8 @@ importers:
         specifier: 21.0.2
         version: 21.0.2
       '@types/jasmine':
-        specifier: 5.1.13
-        version: 5.1.13
+        specifier: 6.0.0
+        version: 6.0.0
       angular-eslint:
         specifier: ^22.0.0
         version: 22.0.0(@angular/cli@22.0.0(@types/node@25.5.2)(chokidar@5.0.0))(chokidar@5.0.0)(eslint@9.39.1(jiti@2.6.1))(typescript-eslint@8.61.0(eslint@9.39.1(jiti@2.6.1))(typescript@6.0.3))(typescript@6.0.3)
@@ -1713,8 +1713,8 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/jasmine@5.1.13':
-    resolution: {integrity: sha512-MYCcDkruFc92LeYZux5BC0dmqo2jk+M5UIZ4/oFnAPCXN9mCcQhLyj7F3/Za7rocVyt5YRr1MmqJqFlvQ9LVcg==}
+  '@types/jasmine@6.0.0':
+    resolution: {integrity: sha512-18lgGsLmEh3VJk9eZ5wAjTISxdqzl6YOwu8UdMpolajN57QOCNbl+AbHUd+Yu9ItrsFdB+c8LSZSGNg8nHaguw==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -5312,7 +5312,7 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/jasmine@5.1.13': {}
+  '@types/jasmine@6.0.0': {}
 
   '@types/json-schema@7.0.15': {}
 
