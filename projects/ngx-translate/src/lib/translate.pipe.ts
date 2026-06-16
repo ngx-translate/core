@@ -1,7 +1,11 @@
 import { inject, Injectable, Pipe, PipeTransform, Signal } from "@angular/core";
 import { TranslateService } from "./translate.service";
 import { equals, isDefinedAndNotNull, isDict, isString } from "./util";
-import { InterpolationParameters, Translation } from "./translate.service.interface";
+import {
+    InterpolationParameters,
+    Translation,
+    TranslationKey,
+} from "./translate.service.interface";
 
 @Injectable()
 @Pipe({
@@ -9,15 +13,15 @@ import { InterpolationParameters, Translation } from "./translate.service.interf
     standalone: true,
     pure: false, // required to update the value when the signal changes
 })
-export class TranslatePipe implements PipeTransform {
-    private translateService = inject(TranslateService);
+export class TranslatePipe<Key extends string = TranslationKey> implements PipeTransform {
+    private translateService = inject<TranslateService<Key>>(TranslateService<Key>);
 
     private cachedSignal: Signal<Translation> | null = null;
     private lastKey: string | null = null;
     private lastParams: InterpolationParameters | undefined;
 
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    transform(query: string | undefined | null, ...args: any[]): any {
+    transform(query: Key | undefined | null, ...args: any[]): any {
         if (!query || !query.length) {
             return query;
         }

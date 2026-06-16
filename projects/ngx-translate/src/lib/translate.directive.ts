@@ -18,6 +18,7 @@ import { equals, isDefinedAndNotNull, isString } from "./util";
 import {
     InterpolationParameters,
     Translation,
+    TranslationKey,
     TranslationObject,
 } from "./translate.service.interface";
 import { ContentKeyHandler } from "./translate-content-key";
@@ -34,11 +35,11 @@ export class TranslateDirective implements AfterViewChecked {
     private changeDetectorRef = inject(ChangeDetectorRef);
     private injector = inject(Injector);
 
-    private key!: string;
+    private key!: TranslationKey;
     private currentParams?: InterpolationParameters;
 
     // Signal-based explicit key path
-    private keySignal: WritableSignal<string> | null = null;
+    private keySignal: WritableSignal<TranslationKey> | null = null;
     private paramsSignal: WritableSignal<InterpolationParameters | undefined> | null = null;
     private translationSignal: Signal<Translation | TranslationObject> | null = null;
     private effectCreated = false;
@@ -46,7 +47,7 @@ export class TranslateDirective implements AfterViewChecked {
     // Deprecated content-as-key path
     private contentKeyHandler: ContentKeyHandler | null = null;
 
-    @Input() set translate(key: string) {
+    @Input() set translate(key: TranslationKey) {
         if (key) {
             this.key = key;
 

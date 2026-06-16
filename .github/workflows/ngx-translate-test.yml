@@ -31,6 +31,8 @@ jobs:
             - run: pnpm run lint
             - run: pnpm run build-all
             - run: pnpm run test-ci
+            - run: pnpm run test-types
+            - run: pnpm run test-templates
 
     compat:
         runs-on: ubuntu-latest

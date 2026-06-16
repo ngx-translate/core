@@ -11,8 +11,13 @@ export interface MissingTranslationHandlerParams {
 
     /**
      * an instance of the service that was unable to translate the key.
+     *
+     * Pinned to the unconstrained `string` key-space (not the augmentable
+     * `TranslateService` default, which narrows to the app's key union): a
+     * handler fires *because* a key was missing, so it must stay key-agnostic
+     * and work regardless of which typed key-space the originating service uses.
      */
-    translateService: TranslateService;
+    translateService: TranslateService<string>;
 
     /**
      * interpolation params that were passed along for translating the given key.

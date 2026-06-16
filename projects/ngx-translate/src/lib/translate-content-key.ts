@@ -22,7 +22,11 @@ export class ContentKeyHandler {
     constructor(
         private element: ElementRef,
         private changeDetectorRef: ChangeDetectorRef,
-        private translateService: TranslateService,
+        // Pinned to the unconstrained `string` key-space (not the augmentable
+        // `TranslateService` default, which narrows to the app's key union):
+        // the content-as-key path scrapes arbitrary DOM text and calls
+        // `instant()` with it, so the keys cannot be constrained to a union.
+        private translateService: TranslateService<string>,
     ) {
         // Pass the offending element as a second `console.warn` arg so DevTools
         // can highlight it. Warn per element rather than once-per-page because
