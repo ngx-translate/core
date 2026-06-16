@@ -1,0 +1,17 @@
+/* Isolated program for registry-augmentation type-tests. Kept separate from the
+   spec suite because `declare module` augmentation is compilation-global. Run
+   with `pnpm run test-types`. Resolves `@ngx-translate/core` to the library
+   source so the test runs against the current, unbuilt code. */
+{
+    "extends": "../../../tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "rootDir": "..",
+        "types": [],
+        "paths": {
+            "@ngx-translate/core": ["../src/public-api"]
+        },
+        "resolveJsonModule": true
+    },
+    "include": ["./**/*.type-test.ts"]
+}

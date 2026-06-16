@@ -1,0 +1,4 @@
+{
+    "extends": "./tsconfig.base.json",
+    "files": ["registry.ts", "bad-pipe.component.ts"]
+}

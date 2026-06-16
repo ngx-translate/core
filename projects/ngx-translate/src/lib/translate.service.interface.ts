@@ -2,6 +2,75 @@ import { InterpolateFunction } from "./translate.parser";
 import { Signal } from "@angular/core";
 import { Observable } from "rxjs";
 
+/**
+ * Augmentable registry for the application's translation key-space.
+ *
+ * The library ships this interface empty, so {@link TranslationKey} falls back
+ * to `string` and every key-accepting API stays unconstrained — fully
+ * backward-compatible with existing apps.
+ *
+ * Augment it once in your app to switch the whole library — `TranslateService`,
+ * `TranslatePipe` and the `[translate]` directive, in code *and* in templates —
+ * to a typed key-space:
+ *
+ * ```ts
+ * import en from "./assets/i18n/en.json";
+ *
+ * declare module "@ngx-translate/core" {
+ *   interface NgxTranslateConfig {
+ *     keys: DeepKeys<typeof en>;
+ *   }
+ * }
+ * ```
+ *
+ * The interface must stay empty here: declaration merging requires the consumer
+ * to *add* the `keys` member, which an optional or pre-typed member would
+ * forbid. This mirrors the `CustomTypeOptions` pattern from i18next.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- must stay empty so consumers can declaration-merge a `keys` member
+export interface NgxTranslateConfig {}
+
+/**
+ * The application's translation key type, resolved from {@link NgxTranslateConfig}.
+ *
+ * Resolves to the augmented `keys` union when an app registers one, and to
+ * `string` otherwise. Used as the default type argument for {@link ITranslateService}
+ * (and the concrete `TranslateService`, `TranslatePipe` and `[translate]`
+ * directive), so augmenting the registry retypes all of them at once.
+ */
+export type TranslationKey = NgxTranslateConfig extends { keys: infer Key extends string }
+    ? Key
+    : string;
+
+/**
+ * Derives the dotted leaf-path union from the shape of a statically-imported
+ * translation object: `{ a: "A", b: { c: "C" } }` yields `"a" | "b.c"`.
+ *
+ * Intended for {@link NgxTranslateConfig} augmentation. Only leaf paths — the
+ * actual translatable values — are produced; intermediate objects are not
+ * themselves keys. A leaf is anything that isn't a plain object: strings,
+ * numbers/booleans, and **arrays** (ngx-translate supports array translation
+ * values, which are translated under the array's own key, not by index). Only
+ * plain objects are recursed into. `NonNullable` strips `undefined` from
+ * optional members so they survive as leaf keys.
+ *
+ * Practical limits (the documented size envelope, verified by the
+ * big-dictionary type-test): the recursion handles deeply nested shapes up to
+ * TypeScript's instantiation-depth ceiling. Real i18n files are far shallower;
+ * pathologically deep dictionaries may hit `tsc`'s recursion limit.
+ */
+export type DeepKeys<Translations> = Translations extends string
+    ? never
+    : {
+          [Key in keyof Translations & string]: NonNullable<Translations[Key]> extends string
+              ? Key
+              : NonNullable<Translations[Key]> extends readonly unknown[]
+                ? Key
+                : NonNullable<Translations[Key]> extends object
+                  ? `${Key}.${DeepKeys<NonNullable<Translations[Key]>>}`
+                  : Key;
+      }[keyof Translations & string];
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpolationParameters = Record<string, any>;
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
@@ -41,7 +110,7 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
-export abstract class ITranslateService {
+export abstract class ITranslateService<Key extends string = TranslationKey> {
     public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
     public abstract readonly onFallbackLangChange: Observable<FallbackLangChangeEvent>;
@@ -64,7 +133,7 @@ export abstract class ITranslateService {
     public abstract resetLang(lang: Language): void;
 
     public abstract instant(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Translation;
@@ -83,31 +152,27 @@ export abstract class ITranslateService {
      * @returns A Signal that emits the translated value
      */
     public abstract translate(
-        key: string | string[] | (() => string | string[]),
+        key: Key | Key[] | (() => Key | Key[]),
         params?: InterpolationParameters | (() => InterpolationParameters | undefined),
         lang?: Language | (() => Language | undefined),
     ): Signal<Translation | TranslationObject>;
 
     public abstract stream(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
 
     public abstract getStreamOnTranslationChange(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
 
-    public abstract set(
-        key: string,
-        translation: string | TranslationObject,
-        lang?: Language,
-    ): void;
+    public abstract set(key: Key, translation: string | TranslationObject, lang?: Language): void;
 
     public abstract get(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): Observable<Translation>;
@@ -125,7 +190,7 @@ export abstract class ITranslateService {
     ): void;
 
     public abstract getParsedResult(
-        key: string | string[],
+        key: Key | Key[],
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation>;
@@ -180,7 +245,7 @@ export abstract class ITranslateService {
      * A `null` return means the service is the terminus of its translation
      * fallback chain — equivalent to "is this a root?".
      */
-    public abstract getParent(): ITranslateService | null;
+    public abstract getParent(): ITranslateService<Key> | null;
 
     /**
      * Returns the root of this service's hierarchy — the topmost service in
@@ -189,5 +254,5 @@ export abstract class ITranslateService {
      *
      * A root service returns itself.
      */
-    public abstract getRoot(): ITranslateService;
+    public abstract getRoot(): ITranslateService<Key>;
 }

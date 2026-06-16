@@ -1,9 +1,20 @@
 import { Directive, inject, OnInit, TemplateRef, ViewContainerRef } from "@angular/core";
 import { TranslateService } from "./translate.service";
-import { InterpolationParameters, Translation } from "./translate.service.interface";
+import {
+    InterpolationParameters,
+    Translation,
+    TranslationKey,
+} from "./translate.service.interface";
 
 export class TranslateBlockContext {
-    constructor(public $implicit: (key: string, params?: InterpolationParameters) => Translation) {}
+    // `$implicit` is the `t` bound via `*translateBlock="let t"`. Typing its key
+    // parameter to TranslationKey is what makes `{{ t('key') }}` key-checked
+    // under strictTemplates (Angular reads this context type via the
+    // ngTemplateContextGuard below), matching the registry-default typing the
+    // `| translate` pipe and `[translate]` directive get.
+    constructor(
+        public $implicit: (key: TranslationKey, params?: InterpolationParameters) => Translation,
+    ) {}
 }
 
 @Directive({
@@ -17,7 +28,10 @@ export class TranslateBlockDirective implements OnInit {
     private translateService = inject(TranslateService);
 
     ngOnInit(): void {
-        const translateFn = (key: string, params?: InterpolationParameters): Translation => {
+        const translateFn = (
+            key: TranslationKey,
+            params?: InterpolationParameters,
+        ): Translation => {
             // instant() internally reads the store's translations() signal, which establishes
             // Angular signal tracking during template evaluation — no explicit subscription needed.
             return this.translateService.instant(key, params);

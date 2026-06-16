@@ -9,6 +9,8 @@
         "watch": "ng build --watch --configuration development",
         "test": "ng test ngx-translate --code-coverage",
         "test-ci": "ng test ngx-translate --watch=false --browsers=ChromeHeadless && ng test http-loader --watch=false --browsers=ChromeHeadless",
+        "test-types": "tsc -p projects/ngx-translate/type-tests/tsconfig.json",
+        "test-templates": "node projects/ngx-translate/template-tests/run.mjs",
         "coverage": "ng test ngx-translate --code-coverage --watch=false --browsers=ChromeHeadless",
         "lint": "ng lint",
         "format": "prettier --write .",

@@ -1,5 +1,5 @@
 export * from "./lib/extraction-marker";
-export { translate } from "./lib/translate.function";
+export { translate, injectTranslateService } from "./lib/translate.function";
 export * from "./lib/translate-block.directive";
 export * from "./lib/missing-translation-handler";
 export * from "./lib/translate.compiler";
@@ -35,3 +35,6 @@ export type { TranslationObject } from "./lib/translate.service.interface";
 export type { Translation } from "./lib/translate.service.interface";
 export type { StrictTranslation } from "./lib/translate.service.interface";
 export type { InterpolationParameters } from "./lib/translate.service.interface";
+export type { NgxTranslateConfig } from "./lib/translate.service.interface";
+export type { TranslationKey } from "./lib/translate.service.interface";
+export type { DeepKeys } from "./lib/translate.service.interface";
