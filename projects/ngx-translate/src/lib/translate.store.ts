@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Signal, inject, signal } from "@angular/core";
+import { DestroyRef, Injectable, Signal, inject, signal, untracked } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import { getValue, mergeDeep } from "./util";
 import {
@@ -47,20 +47,30 @@ export class TranslateStore {
         translations: InterpolatableTranslationObject,
         extend: boolean,
     ): void {
-        this._translations.update((current) => ({
-            ...current,
-            [language]:
-                extend && this.hasTranslationFor(language)
-                    ? mergeDeep(current[language], translations)
-                    : translations,
-        }));
-        this.addLanguages([language]);
-        const event: TranslationChangeEvent = {
-            lang: language,
-            translations: this.getTranslations(language),
-        };
-        this._lastTranslationChange.set(event);
-        this._translationChange$.next(event);
+        // Void mutator: it writes `_translations`. Wrap the body in `untracked`
+        // so its reads of the `translations` signal (here and in
+        // `getTranslations`) never register as dependencies of a caller's
+        // reactive context. Defensive (issue #1633): this method does not
+        // self-retrigger an effect today because it reads `translations` one
+        // last time AFTER the write (for the change event), so the recorded
+        // dependency version matches the final one. The wrap keeps the "a
+        // command never leaks reads" invariant if that ordering ever changes.
+        untracked(() => {
+            this._translations.update((current) => ({
+                ...current,
+                [language]:
+                    extend && this.hasTranslationFor(language)
+                        ? mergeDeep(current[language], translations)
+                        : translations,
+            }));
+            this.addLanguages([language]);
+            const event: TranslationChangeEvent = {
+                lang: language,
+                translations: this.getTranslations(language),
+            };
+            this._lastTranslationChange.set(event);
+            this._translationChange$.next(event);
+        });
     }
 
     public getLanguages(): readonly Language[] {

@@ -347,37 +347,43 @@ export class TranslateService implements ITranslateService {
             return this.parent!.setFallbackLang(lang);
         }
 
-        if (!this._fallbackLang()) {
-            // on init set the fallbackLang immediately, but do not emit a change yet
+        // Command, not a reactive read — run the synchronous body in `untracked`
+        // so its _fallbackLang / loading-registry / store reads and writes do
+        // not leak into a caller's reactive context (issue #1633). Async loader
+        // callbacks fire outside this scope and need no guard.
+        return untracked(() => {
+            if (!this._fallbackLang()) {
+                // on init set the fallbackLang immediately, but do not emit a change yet
+                this._fallbackLang.set(lang);
+            }
+
+            const pending = this.loadOrExtendLanguage(lang);
+            if (isObservable(pending)) {
+                pending.pipe(take(1)).subscribe({
+                    next: () => {
+                        this._fallbackLang.set(lang);
+                        this._onFallbackLangChange.next({
+                            lang: lang,
+                            translations: this.store.getTranslations(lang),
+                        });
+                    },
+                    error: (err) => {
+                        console.warn(
+                            `@ngx-translate/core: failed to load fallback "${lang}". Cause:`,
+                            err,
+                        );
+                    },
+                });
+                return pending;
+            }
+
             this._fallbackLang.set(lang);
-        }
-
-        const pending = this.loadOrExtendLanguage(lang);
-        if (isObservable(pending)) {
-            pending.pipe(take(1)).subscribe({
-                next: () => {
-                    this._fallbackLang.set(lang);
-                    this._onFallbackLangChange.next({
-                        lang: lang,
-                        translations: this.store.getTranslations(lang),
-                    });
-                },
-                error: (err) => {
-                    console.warn(
-                        `@ngx-translate/core: failed to load fallback "${lang}". Cause:`,
-                        err,
-                    );
-                },
+            this._onFallbackLangChange.next({
+                lang: lang,
+                translations: this.store.getTranslations(lang),
             });
-            return pending;
-        }
-
-        this._fallbackLang.set(lang);
-        this._onFallbackLangChange.next({
-            lang: lang,
-            translations: this.store.getTranslations(lang),
+            return of(this.store.getTranslations(lang));
         });
-        return of(this.store.getTranslations(lang));
     }
 
     /**
@@ -406,48 +412,58 @@ export class TranslateService implements ITranslateService {
             return this.parent!.use(lang);
         }
 
-        // Snapshot prior state so we can roll back if the loader fails.
-        const prevLang = this._currentLang();
-        const prevLastUseLang = this.lastUseLanguage;
+        // use() is a command, not a reactive read. Run its synchronous body in
+        // `untracked` so the signal reads/writes it performs (_currentLang, the
+        // loading registry, the store's translations) never register as
+        // dependencies of a caller's reactive context. Without this, the
+        // idiomatic `effect(() => translate.use(lang()))` tracks those signals
+        // and the same call mutates them, re-triggering the effect (issue
+        // #1633). Async loader callbacks fire outside this scope and outside any
+        // reactive consumer, so they need no guard.
+        return untracked(() => {
+            // Snapshot prior state so we can roll back if the loader fails.
+            const prevLang = this._currentLang();
+            const prevLastUseLang = this.lastUseLanguage;
 
-        // Remember the language that was called — used by changeLang() to discard
-        // late-arriving completions from superseded calls.
-        this.lastUseLanguage = lang;
+            // Remember the language that was called — used by changeLang() to discard
+            // late-arriving completions from superseded calls.
+            this.lastUseLanguage = lang;
 
-        if (!this._currentLang()) {
-            // on init set the currentLang immediately, but do not emit a change yet
-            this._currentLang.set(lang);
-        }
+            if (!this._currentLang()) {
+                // on init set the currentLang immediately, but do not emit a change yet
+                this._currentLang.set(lang);
+            }
 
-        const pending = this.loadOrExtendLanguage(lang);
-        if (!isObservable(pending)) {
-            // Defensive: loadOrExtendLanguage is typed `Observable | undefined`.
-            // The undefined branch means "nothing to load" — synchronously activate.
-            this.changeLang(lang);
-            return of(this.store.getTranslations(lang));
-        }
-
-        pending.pipe(take(1)).subscribe({
-            next: () => {
+            const pending = this.loadOrExtendLanguage(lang);
+            if (!isObservable(pending)) {
+                // Defensive: loadOrExtendLanguage is typed `Observable | undefined`.
+                // The undefined branch means "nothing to load" — synchronously activate.
                 this.changeLang(lang);
-            },
-            error: (err) => {
-                // Only roll back if THIS call is still the most-recent one.
-                // A later use() may have superseded it (symmetric with the
-                // changeLang() guard).
-                if (this.lastUseLanguage === lang) {
-                    this._currentLang.set(prevLang);
-                    this.lastUseLanguage = prevLastUseLang;
-                }
-                console.warn(
-                    `@ngx-translate/core: failed to load "${lang}". ` +
-                        `currentLang was NOT changed; remains ` +
-                        `"${prevLang ?? "null"}". Cause:`,
-                    err,
-                );
-            },
+                return of(this.store.getTranslations(lang));
+            }
+
+            pending.pipe(take(1)).subscribe({
+                next: () => {
+                    this.changeLang(lang);
+                },
+                error: (err) => {
+                    // Only roll back if THIS call is still the most-recent one.
+                    // A later use() may have superseded it (symmetric with the
+                    // changeLang() guard).
+                    if (this.lastUseLanguage === lang) {
+                        this._currentLang.set(prevLang);
+                        this.lastUseLanguage = prevLastUseLang;
+                    }
+                    console.warn(
+                        `@ngx-translate/core: failed to load "${lang}". ` +
+                            `currentLang was NOT changed; remains ` +
+                            `"${prevLang ?? "null"}". Cause:`,
+                        err,
+                    );
+                },
+            });
+            return pending;
         });
-        return pending;
     }
 
     /**
@@ -940,30 +956,44 @@ export class TranslateService implements ITranslateService {
     /**
      * Sets the translated value of a key, after compiling it
      */
-    public set(
-        key: string,
-        translation: string | TranslationObject,
-        lang: Language = this.getCurrentLang()!,
-    ): void {
-        this.store.setTranslations(
-            lang,
-            insertValue(
-                this.store.getTranslations(lang),
-                key,
-                isString(translation)
-                    ? this.compiler.compile(translation, lang)
-                    : this.compiler.compileTranslations(translation, lang),
-            ),
-            false,
-        );
+    public set(key: string, translation: string | TranslationObject, lang?: Language): void {
+        // Void mutator: it writes the store's `translations` signal. The
+        // current value is read back (via getTranslations) and the language is
+        // resolved (via getCurrentLang) to merge the new key in. Run the whole
+        // body in `untracked` so those reads never register as dependencies of
+        // a caller's reactive context. Defensive (issue #1633): like
+        // store.setTranslations this does not self-retrigger an effect today
+        // (the store re-reads translations after its write), but its reads run
+        // here in the caller's context — outside the store's own untracked — so
+        // set() carries its own wrap to keep the invariant locally.
+        untracked(() => {
+            const targetLang = lang ?? this.getCurrentLang()!;
+            this.store.setTranslations(
+                targetLang,
+                insertValue(
+                    this.store.getTranslations(targetLang),
+                    key,
+                    isString(translation)
+                        ? this.compiler.compile(translation, targetLang)
+                        : this.compiler.compileTranslations(translation, targetLang),
+                ),
+                false,
+            );
+        });
     }
 
     /**
      * Allows reloading the lang file from the file
      */
     public reloadLang(lang: Language): Observable<InterpolatableTranslationObject> {
-        this.resetLang(lang);
-        return this.loadAndCompileTranslations(lang);
+        // Command, not a reactive read — run the synchronous body in `untracked`
+        // so resetLang's store/registry writes and loadAndCompileTranslations'
+        // registry read+write do not leak into a caller's reactive context
+        // (issue #1633).
+        return untracked(() => {
+            this.resetLang(lang);
+            return this.loadAndCompileTranslations(lang);
+        });
     }
 
     /**
