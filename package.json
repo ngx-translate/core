@@ -45,7 +45,7 @@
         "karma-jasmine": "5.1.0",
         "karma-jasmine-html-reporter": "2.2.0",
         "karma-mocha-reporter": "2.2.5",
-        "lint-staged": "16.2.6",
+        "lint-staged": "17.0.7",
         "ng-packagr": "^22.0.0",
         "prettier": "3.8.4",
         "ts-mocks": "3.0.1",
