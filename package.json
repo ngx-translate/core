@@ -38,7 +38,7 @@
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
-        "jasmine-core": "5.12.1",
+        "jasmine-core": "6.3.0",
         "karma": "6.4.4",
         "karma-chrome-launcher": "3.2.0",
         "karma-coverage": "2.2.1",
