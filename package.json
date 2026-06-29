@@ -34,7 +34,7 @@
         "@commitlint/config-conventional": "21.0.2",
         "@types/jasmine": "6.0.0",
         "angular-eslint": "^22.0.0",
-        "eslint": "9.39.1",
+        "eslint": "10.6.0",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
