@@ -28,7 +28,7 @@ import { LoadingTranslationsRegistry } from "./loading-translations-registry";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
-import { TranslateParser } from "./translate.parser";
+import { TranslateParser, type InterpolationContext } from "./translate.parser";
 import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
@@ -75,6 +75,11 @@ declare const window: Window;
 const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
+
+interface TranslationLookupResult {
+    translation: InterpolatableTranslation;
+    context: InterpolationContext;
+}
 
 @Injectable()
 export class TranslateService implements ITranslateService {
@@ -612,10 +617,10 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        const textToInterpolate = this.getTextToInterpolate(key, lang);
+        const lookup = this.getTextToInterpolateWithContext(key, lang);
 
-        if (isDefinedAndNotNull(textToInterpolate)) {
-            return this.runInterpolation(textToInterpolate, interpolateParams);
+        if (lookup && isDefinedAndNotNull(lookup.translation)) {
+            return this.runInterpolation(lookup.translation, interpolateParams, lookup.context);
         }
 
         const handler = this.getMissingTranslationHandler();
@@ -643,12 +648,19 @@ export class TranslateService implements ITranslateService {
         key: string,
         lang?: Language,
     ): InterpolatableTranslation | undefined {
+        return this.getTextToInterpolateWithContext(key, lang)?.translation;
+    }
+
+    protected getTextToInterpolateWithContext(
+        key: string,
+        lang?: Language,
+    ): TranslationLookupResult | undefined {
         if (lang) {
             const res = this.store.getTranslationValue(lang, key);
             if (res !== undefined) {
-                return res;
+                return { translation: res, context: { key, lang } };
             }
-            return this.parent?.getTextToInterpolate(key, lang);
+            return this.parent?.getTextToInterpolateWithContext(key, lang);
         }
 
         const currentLang = this.getCurrentLang();
@@ -656,58 +668,67 @@ export class TranslateService implements ITranslateService {
 
         // 1. Try own store (currentLang)
         let res: InterpolatableTranslation | undefined;
+        let resLang: Language | undefined;
         if (currentLang) {
             res = this.store.getTranslationValue(currentLang, key);
+            resLang = currentLang;
         }
 
         // 2. Try own store (fallbackLang) - null values also trigger fallback
         if (!isDefinedAndNotNull(res) && fallbackLang && fallbackLang !== currentLang) {
             res = this.store.getTranslationValue(fallbackLang, key);
+            resLang = fallbackLang;
         }
 
         if (res !== undefined) {
-            return res;
+            return {
+                translation: res,
+                context: resLang === undefined ? { key } : { key, lang: resLang },
+            };
         }
 
         // 3. Try parent
-        return this.parent?.getTextToInterpolate(key);
+        return this.parent?.getTextToInterpolateWithContext(key);
     }
 
     protected runInterpolation(
         translations: InterpolatableTranslation,
         interpolateParams?: InterpolationParameters,
+        context?: InterpolationContext,
     ): StrictTranslation {
         if (!isDefinedAndNotNull(translations)) {
             return;
         }
 
         if (isArray(translations)) {
-            return this.runInterpolationOnArray(translations, interpolateParams);
+            return this.runInterpolationOnArray(translations, interpolateParams, context);
         }
 
         if (isDict(translations)) {
-            return this.runInterpolationOnDict(translations, interpolateParams);
+            return this.runInterpolationOnDict(translations, interpolateParams, context);
         }
 
-        return this.parser.interpolate(translations, interpolateParams);
+        return this.parser.interpolate(translations, interpolateParams, context);
     }
 
     protected runInterpolationOnArray(
         translations: InterpolatableTranslation,
         interpolateParams: InterpolationParameters | undefined,
+        context?: InterpolationContext,
     ) {
         return (translations as StrictTranslation[]).map((translation) =>
-            this.runInterpolation(translation, interpolateParams),
+            this.runInterpolation(translation, interpolateParams, context),
         );
     }
 
     protected runInterpolationOnDict(
         translations: InterpolatableTranslationObject,
         interpolateParams: InterpolationParameters | undefined,
+        context?: InterpolationContext,
     ) {
         const result: TranslationObject = {};
         for (const key in translations) {
-            const res = this.runInterpolation(translations[key], interpolateParams);
+            const res = this.runInterpolation(translations[key], interpolateParams, context);
             if (res !== undefined) {
                 result[key] = res;
             }
