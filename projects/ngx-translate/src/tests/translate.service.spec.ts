@@ -1,17 +1,22 @@
-import { Component, inject, signal, computed } from "@angular/core";
+import { Component, Injectable, Injector, computed, inject, signal } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
     InterpolatableTranslationObject,
     InterpolationParameters,
+    InterpolationContext,
+    InterpolateFunction,
     LangChangeEvent,
     provideChildTranslateService,
     provideTranslateCompiler,
     provideTranslateLoader,
+    provideTranslateParser,
     provideTranslateService,
     TranslateCompiler,
+    TranslateDefaultParser,
     TranslateLoader,
+    TranslateParser,
     TranslatePipe,
     TranslateService,
     Translation,
@@ -195,6 +200,107 @@ describe("TranslateService get() during in-flight loading", () => {
         // Now the "en" load completed → get() resolves
         expect(result).toEqual("Hello");
     }));
+});
+
+describe("TranslateService interpolation context", () => {
+    let translate: TranslateService;
+    let parser: ContextCapturingParser;
+
+    @Injectable()
+    class ContextCapturingParser extends TranslateDefaultParser {
+        readonly contexts: Array<InterpolationContext | undefined> = [];
+
+        public override interpolate(
+            expr: InterpolateFunction | string,
+            params?: InterpolationParameters,
+            context?: InterpolationContext,
+        ): string | undefined {
+            this.contexts.push(context);
+            return super.interpolate(expr, params, context);
+        }
+    }
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    parser: provideTranslateParser(ContextCapturingParser),
+                }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+        parser = TestBed.inject(TranslateParser) as ContextCapturingParser;
+    });
+
+    it("passes the current language and key to the parser", () => {
+        translate.setTranslation("de", { TEST: "Hallo {{ name }}" });
+        translate.use("de");
+
+        expect(translate.instant("TEST", { name: "Ada" })).toEqual("Hallo Ada");
+        expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "de" });
+    });
+
+    it("passes the fallback language when fallback supplied the translation", () => {
+        translate.setTranslation("de", {});
+        translate.setTranslation("en", { TEST: "Hello {{ name }}" });
+        translate.setFallbackLang("en");
+        translate.use("de");
+
+        expect(translate.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
+        expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "en" });
+    });
+});
+
+describe("TranslateService nested interpolation via parser context", () => {
+    class TranslatedParam {
+        constructor(public readonly key: string) {}
+    }
+
+    @Injectable()
+    class NestedTranslateParser extends TranslateDefaultParser {
+        private readonly injector = inject(Injector);
+
+        protected override formatValue(
+            value: unknown,
+            context?: InterpolationContext,
+        ): string | undefined {
+            if (value instanceof TranslatedParam) {
+                const translate = this.injector.get(TranslateService);
+                return super.formatValue(
+                    translate.instant(value.key, undefined, context?.lang),
+                    context,
+                );
+            }
+
+            return super.formatValue(value, context);
+        }
+    }
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    parser: provideTranslateParser(NestedTranslateParser),
+                }),
+            ],
+        });
+    });
+
+    it("uses the resolved outer translation language for nested translations", () => {
+        const translate = TestBed.inject(TranslateService);
+
+        translate.setTranslation("de", { INNER: "deutscher innerer Wert" });
+        translate.setTranslation("en", {
+            OUTER: "Outer {{ nested }}",
+            INNER: "English inner value",
+        });
+        translate.setFallbackLang("en");
+        translate.use("de");
+
+        expect(translate.instant("OUTER", { nested: new TranslatedParam("INNER") })).toEqual(
+            "Outer English inner value",
+        );
+    });
 });
 
 describe("TranslateService", () => {
