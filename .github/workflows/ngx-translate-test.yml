@@ -19,11 +19,11 @@ jobs:
                 node-version: [22.x, 24.x]
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - name: Install pnpm
               uses: pnpm/action-setup@v6
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "pnpm"
@@ -53,11 +53,11 @@ jobs:
                       config-dir: compat/a21
 
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - name: Install pnpm
               uses: pnpm/action-setup@v6
             - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: ${{ matrix.node-version }}
             - name: Use compat config
