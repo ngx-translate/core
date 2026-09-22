@@ -25,6 +25,7 @@ provideTranslateService({
 - User can provide loader, compiler, parser, missingTranslationHandler
 - If not provided, defaults are used
 - `fallbackLang` replaces deprecated `defaultLang` + `useDefaultLang`
+- `retry` automatically retries a failed language load (default 0) — mitigates transient failures like "Http failure during parsing" (ngx-translate/core#1406)
 
 ### Child Service (Connected)
 

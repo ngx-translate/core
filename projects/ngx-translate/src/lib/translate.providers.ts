@@ -32,7 +32,10 @@ export interface TranslateProviders {
     missingTranslationHandler?: TranslateProvider;
 }
 
-export type ChildTranslateServiceConfig = Partial<TranslateProviders>;
+export type ChildTranslateServiceConfig = Partial<TranslateProviders> & {
+    /** Automatic retries for a failed language load (default 0). */
+    retry?: number;
+};
 
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
@@ -175,6 +178,7 @@ function defaultProviders(config: InternalProvidersConfig): Provider[] {
     const serviceConfig: TranslateServiceConfig = {
         fallbackLang: config.fallbackLang ?? null,
         lang: config.lang,
+        retry: config.retry,
         isRoot: config.isRoot,
     };
 
