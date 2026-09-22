@@ -1,13 +1,13 @@
 import { Injector } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
-import { Observable, of, throwError } from "rxjs";
+import { Observable } from "rxjs";
 import {
     provideChildTranslateService,
     provideTranslateService,
+    TRANSLATE_SERVICE_CONFIG,
     TranslateLoader,
     TranslateService,
     TranslateServiceConfig,
-    TRANSLATE_SERVICE_CONFIG,
     TranslationObject,
 } from "../public-api";
 
