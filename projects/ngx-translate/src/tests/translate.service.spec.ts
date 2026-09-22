@@ -757,6 +757,19 @@ describe("TranslateService", () => {
 
             expect(translate.instant("default")).toEqual("This is the default message");
         });
+
+        it("should not break sibling flat keys sharing a dotted prefix (issue #1561)", () => {
+            translate.setTranslation("en", { "a.b.key1": "v1", "a.b.key2": "v2" });
+            translate.use("en");
+
+            expect(translate.instant("a.b.key1")).toEqual("v1");
+            expect(translate.instant("a.b.key2")).toEqual("v2");
+
+            translate.set("a.b.key1", "newV1", "en");
+
+            expect(translate.instant("a.b.key1")).toEqual("newV1");
+            expect(translate.instant("a.b.key2")).toEqual("v2");
+        });
     });
 
     describe("setCompiledTranslation()", () => {
