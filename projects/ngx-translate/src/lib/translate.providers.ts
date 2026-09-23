@@ -37,6 +37,7 @@ export type ChildTranslateServiceConfig = Partial<TranslateProviders>;
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
     lang?: Language;
+    langs?: Language[];
 }
 
 function isClass<T>(fn: Type<T> | (() => T)): fn is Type<T> {
@@ -175,6 +176,7 @@ function defaultProviders(config: InternalProvidersConfig): Provider[] {
     const serviceConfig: TranslateServiceConfig = {
         fallbackLang: config.fallbackLang ?? null,
         lang: config.lang,
+        langs: config.langs,
         isRoot: config.isRoot,
     };
 

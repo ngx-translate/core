@@ -53,6 +53,7 @@ import {
  */
 export interface TranslateServiceConfig {
     lang?: Language;
+    langs?: Language[];
     fallbackLang?: Language | null;
     isRoot: boolean;
 }
@@ -255,6 +256,9 @@ export class TranslateService implements ITranslateService {
         const destroyRef = inject(DestroyRef);
 
         if (this.isRoot) {
+            if (config.langs?.length) {
+                this.addLangs(config.langs);
+            }
             if (config.lang) {
                 this.use(config.lang);
             }
