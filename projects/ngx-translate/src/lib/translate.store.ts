@@ -81,6 +81,10 @@ export class TranslateStore {
         this._languages.update((current) => Array.from(new Set([...current, ...langs])));
     }
 
+    public removeLanguages(langs: Language[]): void {
+        this._languages.update((current) => current.filter((lang) => !langs.includes(lang)));
+    }
+
     public hasTranslationFor(lang: string) {
         return typeof this.translations()[lang] !== "undefined";
     }

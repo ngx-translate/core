@@ -1013,6 +1013,32 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
+     * Deletes the language `lang` entirely: removes its translations from the
+     * store, unregisters it from `getLangs()`, and clears any in-flight load
+     * entry — `isLoading()` flips to `false` immediately on this service.
+     *
+     * This restores the pre-v18 escape hatch `delete translate.translations[lang]`,
+     * which left the language registered in `getLangs()`.
+     *
+     * If `lang` is the currently used language, the current-language pointer is
+     * kept: it is not reset and no `onLangChange` is emitted, matching the old
+     * `delete` workaround. Lookups for the deleted language resolve through the
+     * missing-translation handler until another language is activated with
+     * `use()`.
+     *
+     * Like `resetLang`, this does not cancel an underlying in-flight loader
+     * request: a load completing afterwards re-adds the language to the store
+     * and to `getLangs()`.
+     */
+    public deleteLanguage(lang: Language): void {
+        untracked(() => {
+            this.loadingTranslations.clear(lang);
+            this.store.deleteTranslations(lang);
+            this.store.removeLanguages([lang]);
+        });
+    }
+
+    /**
      * Returns the language code name from the browser, e.g. "de"
      */
     public static getBrowserLang(): Language | undefined {
