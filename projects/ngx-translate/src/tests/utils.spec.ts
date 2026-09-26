@@ -245,6 +245,14 @@ describe("Utils", () => {
             // length is terminal — chaining past it returns undefined
             expect(getValue([1, 2, 3], "length.foo")).not.toBeDefined();
         });
+
+        it("should not lose a flat sibling key shadowed by a same-prefix nested object (issue #1561)", () => {
+            /* Simulates the structure produced by set('a.b.key1', ...) on flat, dot-containing keys. */
+            const target = insertValue({ "a.b.key1": "v1", "a.b.key2": "v2" }, "a.b.key1", "newV1");
+
+            expect(getValue(target, "a.b.key1")).toEqual("newV1");
+            expect(getValue(target, "a.b.key2")).toEqual("v2");
+        });
     });
 
     describe("isDict()", () => {
