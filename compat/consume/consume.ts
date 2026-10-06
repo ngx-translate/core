@@ -7,6 +7,8 @@ import {
   TranslateDirective,
   TranslatePipe,
   TranslateService,
+  TranslateSlotsComponent,
+  TranslateSlotDirective,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
@@ -14,6 +16,8 @@ export const _p: typeof provideTranslateService = provideTranslateService;
 export type _S = TranslateService;
 export type _Pipe = TranslatePipe;
 export type _Dir = TranslateDirective;
+export type _Slots = TranslateSlotsComponent;
+export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
 // Checks that implementations without the new methods still satisfy ITranslateService.
