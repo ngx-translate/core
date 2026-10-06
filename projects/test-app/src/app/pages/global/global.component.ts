@@ -1,12 +1,27 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { TranslateService, TranslatePipe } from "@ngx-translate/core";
+import {
+    _,
+    TranslateSlotsComponent,
+    TranslateSlotDirective,
+    TranslateService,
+    TranslatePipe,
+} from "@ngx-translate/core";
+import { RouterLink } from "@angular/router";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
 import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
 import { IconComponent } from "../../components/icon/icon.component";
 
 @Component({
     selector: "app-global",
-    imports: [TranslatePipe, HierarchyVizComponent, MethodsComparisonComponent, IconComponent],
+    imports: [
+        TranslatePipe,
+        TranslateSlotsComponent,
+        TranslateSlotDirective,
+        RouterLink,
+        HierarchyVizComponent,
+        MethodsComparisonComponent,
+        IconComponent,
+    ],
     template: `
         <div class="card">
             <h2>Root Service (Global)</h2>
@@ -64,6 +79,15 @@ import { IconComponent } from "../../components/icon/icon.component";
                 <app-methods-comparison />
             </div>
 
+            <div class="sub-card">
+                <h4>Translation slots</h4>
+                <span [translateSlots]="slotsKey">
+                    <ng-template translateSlot="details">
+                        <a routerLink="/extended">{{ "demo.slots.link" | translate }}</a>
+                    </ng-template>
+                </span>
+            </div>
+
             <app-hierarchy-viz />
         </div>
     `,
@@ -72,4 +96,5 @@ import { IconComponent } from "../../components/icon/icon.component";
 })
 export class GlobalComponent {
     translate = inject(TranslateService);
+    readonly slotsKey = _("demo.slots.message");
 }

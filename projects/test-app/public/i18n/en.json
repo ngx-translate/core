@@ -5,6 +5,10 @@
             "text-as-attribute": "Root: Text as attribute",
             "text-as-content": "Root: Text as content"
         },
+        "slots": {
+            "message": "Explore {{details}} without reloading the page.",
+            "link": "scoped translations"
+        },
         "title": "Root: Test Application"
     },
     "root.own": "I am defined only in ROOT (en)",
