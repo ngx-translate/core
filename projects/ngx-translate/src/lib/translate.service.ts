@@ -904,6 +904,29 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
+     * Checks whether a translation exists for the given key, without invoking
+     * the missing-translation handler and without interpolating.
+     *
+     * Resolution mirrors `instant()`: with `lang`, the lookup goes directly to
+     * the specified language (and up the parent service chain); without, it
+     * falls back to the current language, then the fallback language, then up
+     * the parent chain.
+     *
+     * An empty string counts as an existing translation; an explicit `null`
+     * counts as missing (both match `instant()` / `get()` resolution).
+     *
+     * @returns true if the key resolves to a translation, false for a missing,
+     * empty, or undefined key
+     */
+    public hasTranslationKey(key: string, lang?: Language): boolean {
+        if (!isDefinedAndNotNull(key) || key.length === 0) {
+            return false;
+        }
+
+        return isDefinedAndNotNull(this.getTextToInterpolate(key, lang));
+    }
+
+    /**
      * Returns a Signal that provides the translated value and automatically
      * updates when the language changes or translations are reloaded.
      *
