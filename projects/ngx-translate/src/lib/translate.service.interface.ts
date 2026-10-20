@@ -41,6 +41,23 @@ export interface FallbackLangChangeEvent {
     translations: InterpolatableTranslationObject;
 }
 
+/**
+ * v18.1 capabilities stay optional for existing implementations and subclasses.
+ * TranslateService itself always provides these methods.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface ITranslateService {
+    deleteLanguage?(lang: Language): void;
+    getAsync?(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Promise<Translation>;
+    hasTranslationKey?(key: string, lang?: Language): boolean;
+}
+
+// Optional interface members add no runtime fields or abstract obligations.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export abstract class ITranslateService {
     public abstract readonly onTranslationChange: Observable<TranslationChangeEvent>;
     public abstract readonly onLangChange: Observable<LangChangeEvent>;
@@ -62,7 +79,6 @@ export abstract class ITranslateService {
     public abstract getLangs(): readonly Language[];
     public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
     public abstract resetLang(lang: Language): void;
-    public abstract deleteLanguage(lang: Language): void;
 
     public abstract instant(
         key: string | string[],

@@ -149,6 +149,16 @@ describe("TranslatePipe (unit)", () => {
             );
         });
 
+        it("should update when a Date parameter is replaced", () => {
+            translate.setTranslation("en", { TEST: "Date: {{date}}" });
+            translate.use("en");
+            const first = new Date("2020-01-01T00:00:00Z");
+            const second = new Date("2021-01-01T00:00:00Z");
+
+            expect(translatePipe.transform("TEST", { date: first })).toBe(`Date: ${first}`);
+            expect(translatePipe.transform("TEST", { date: second })).toBe(`Date: ${second}`);
+        });
+
         it("should throw if you don't give an object parameter", () => {
             translate.setTranslation("en", { TEST: "This is a test {{param}}" });
             translate.use("en");

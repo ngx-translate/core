@@ -18,6 +18,10 @@ export function equals(o1: unknown, o2: unknown): boolean {
     if (o1 === null || o2 === null) return false;
     if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
 
+    if (o1 instanceof Date || o2 instanceof Date) {
+        return o1 instanceof Date && o2 instanceof Date && equals(o1.getTime(), o2.getTime());
+    }
+
     const t1 = typeof o1,
         t2 = typeof o2;
     let length: number;
