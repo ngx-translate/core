@@ -15,6 +15,7 @@ import {
     defer,
     EMPTY,
     finalize,
+    firstValueFrom,
     forkJoin,
     isObservable,
     merge,
@@ -29,8 +30,6 @@ import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
-import { DeepReadonly, TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -44,6 +43,8 @@ import {
     TranslationChangeEvent,
     TranslationObject,
 } from "./translate.service.interface";
+import { DeepReadonly, TranslateStore } from "./translate.store";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -786,6 +787,19 @@ export class TranslateService implements ITranslateService {
         }
 
         return makeObservable(this.getParsedResult(key, interpolateParams, lang));
+    }
+
+    /**
+     * Gets the translated value of a key (or an array of keys) as a Promise,
+     * for usage in async functions without wrapping `get` into `firstValueFrom`.
+     * @returns a promise resolving with the translated key, or an object of translated keys
+     */
+    public getAsync(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Promise<Translation> {
+        return firstValueFrom(this.get(key, interpolateParams, lang));
     }
 
     /**
