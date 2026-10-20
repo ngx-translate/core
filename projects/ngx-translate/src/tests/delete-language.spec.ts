@@ -1,7 +1,8 @@
 import { firstValueFrom } from "rxjs";
-import { Injector } from "@angular/core";
+import { EnvironmentInjector, Injector } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import {
+    ITranslateService,
     provideChildTranslateService,
     provideTranslateLoader,
     provideTranslateService,
@@ -12,7 +13,7 @@ import { DelayedFakeLoader, provideTestableTranslateService } from "./test-helpe
 
 /** Resolves the first emission of get() as a promise. */
 const getOnce = (
-    translate: TranslateService,
+    translate: ITranslateService,
     key: string | string[],
     lang?: string,
 ): Promise<Translation> => firstValueFrom(translate.get(key, undefined, lang));
@@ -31,7 +32,7 @@ class CustomLangLoader {
 }
 
 describe("TranslateService.deleteLanguage", () => {
-    let translate: TranslateService;
+    let translate: ITranslateService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -294,8 +295,9 @@ describe("TranslateService.deleteLanguage (hierarchical)", () => {
         expect(refreshed).toEqual(["Parent", "HELLO"]);
         subscription.unsubscribe();
         refreshSubscription.unsubscribe();
-        childInjector.destroy();
-        rootInjector.destroy();
+        // Angular <20 types Injector.create() as Injector, without destroy().
+        (childInjector as EnvironmentInjector).destroy();
+        (rootInjector as EnvironmentInjector).destroy();
     });
 
     it("should delete the language only on the calling (child) service", () => {
