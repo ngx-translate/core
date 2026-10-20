@@ -57,7 +57,10 @@ export interface TranslateServiceConfig {
     lang?: Language;
     langs?: Language[];
     fallbackLang?: Language | null;
-    /** Automatic retries for a failed language load (default 0). */
+    /**
+     * Automatic retries for a failed language load (default 0).
+     * With `@ngx-translate/http-loader`, requires `failOnError: true` on the loader.
+     */
     retry?: number;
     isRoot: boolean;
 }

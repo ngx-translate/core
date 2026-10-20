@@ -29,6 +29,23 @@ provideTranslateService({
 - `retry` automatically retries a failed language load (default 0) — mitigates transient failures like "Http failure during parsing" (ngx-translate/core#1406)
 - `langs` declares the available languages at startup without loading them — equivalent to `translate.addLangs([...])`
 
+#### Retrying language loads
+
+When using `@ngx-translate/http-loader`, set `failOnError: true` on the loader to enable service-level retries. By default, the loader catches failed requests and returns empty translation objects, so `TranslateService` receives no error to retry.
+
+```typescript
+provideTranslateService({
+    lang: "en",
+    retry: 2,
+    loader: provideTranslateHttpLoader({
+        prefix: "./i18n/",
+        failOnError: true,
+    }),
+});
+```
+
+This allows two retries after the initial attempt, with 100 ms between attempts. The same requirement applies to multi-resource HTTP loaders and loaders configured through `provideChildTranslateService()`.
+
 ### Child Service (Connected)
 
 ```typescript
