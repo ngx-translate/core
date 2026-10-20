@@ -1063,9 +1063,9 @@ export class TranslateService implements ITranslateService {
      *
      * If `lang` is the currently used language, the current-language pointer is
      * kept: it is not reset and no `onLangChange` is emitted, matching the old
-     * `delete` workaround. Lookups for the deleted language resolve through the
-     * missing-translation handler until another language is activated with
-     * `use()`.
+     * `delete` workaround. Removing stored translations emits
+     * `onTranslationChange` with an empty translation object so subscribers
+     * refresh through the usual parent, fallback, or missing-translation lookup.
      *
      * Like `resetLang`, this does not cancel an underlying in-flight loader
      * request: a load completing afterwards re-adds the language to the store
@@ -1074,8 +1074,8 @@ export class TranslateService implements ITranslateService {
     public deleteLanguage(lang: Language): void {
         untracked(() => {
             this.loadingTranslations.clear(lang);
-            this.store.deleteTranslations(lang);
             this.store.removeLanguages([lang]);
+            this.store.deleteTranslations(lang);
         });
     }
 

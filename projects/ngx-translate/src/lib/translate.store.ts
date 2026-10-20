@@ -90,9 +90,16 @@ export class TranslateStore {
     }
 
     public deleteTranslations(lang: string) {
-        this._translations.update((current) => {
-            const { [lang]: _, ...rest } = current;
-            return rest;
+        untracked(() => {
+            if (!this.hasTranslationFor(lang)) return;
+
+            this._translations.update((current) => {
+                const { [lang]: _, ...rest } = current;
+                return rest;
+            });
+            const event: TranslationChangeEvent = { lang, translations: {} };
+            this._lastTranslationChange.set(event);
+            this._translationChange$.next(event);
         });
     }
 

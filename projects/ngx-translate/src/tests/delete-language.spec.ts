@@ -72,6 +72,77 @@ describe("TranslateService.deleteLanguage", () => {
         expect(await getOnce(translate, "HELLO", "custom")).toEqual("HELLO");
     });
 
+    it("should refresh translation-change subscribers when the current language is deleted", () => {
+        translate.setTranslation("custom", { HELLO: "Hello" });
+        translate.use("custom");
+        const values: Translation[] = [];
+        const subscription = translate
+            .getStreamOnTranslationChange("HELLO")
+            .subscribe((value) => values.push(value));
+
+        translate.deleteLanguage("custom");
+
+        expect(values).toEqual(["Hello", "HELLO"]);
+        subscription.unsubscribe();
+    });
+
+    it("should refresh streams for an explicitly requested language when it is deleted", () => {
+        translate.setTranslation("custom", { HELLO: "Hello" });
+        const values: Translation[] = [];
+        const subscription = translate
+            .stream("HELLO", undefined, "custom")
+            .subscribe((value) => values.push(value));
+
+        translate.deleteLanguage("custom");
+
+        expect(values).toEqual(["Hello", "HELLO"]);
+        subscription.unsubscribe();
+    });
+
+    it("should notify subscribers after the language has been fully deleted", () => {
+        translate.setTranslation("custom", { HELLO: "Hello" });
+        translate.use("custom");
+        const events: unknown[] = [];
+        const langChange = jasmine.createSpy("langChange");
+        const langSubscription = translate.onLangChange.subscribe(langChange);
+        const subscription = translate.onTranslationChange.subscribe((event) => {
+            events.push(event);
+            expect(translate.getTranslations("custom")).toBeUndefined();
+            expect(translate.getLangs()).not.toContain("custom");
+        });
+
+        translate.deleteLanguage("custom");
+
+        expect(events).toEqual([{ lang: "custom", translations: {} }]);
+        expect(langChange).not.toHaveBeenCalled();
+        subscription.unsubscribe();
+        langSubscription.unsubscribe();
+    });
+
+    it("should refresh subscribers when current or fallback translations are deleted", () => {
+        translate.setTranslation("custom", { HELLO: "Hello" });
+        translate.setTranslation("fallback", { HELLO: "Fallback" });
+        translate.use("custom");
+        translate.setFallbackLang("fallback");
+        const values: Translation[] = [];
+        const refreshed: Translation[] = [];
+        const subscription = translate
+            .getStreamOnTranslationChange("HELLO")
+            .subscribe((value) => values.push(value));
+        const refreshSubscription = translate.onTranslationRefresh.subscribe(() => {
+            refreshed.push(translate.instant("HELLO"));
+        });
+
+        translate.deleteLanguage("custom");
+        translate.deleteLanguage("fallback");
+
+        expect(values).toEqual(["Hello", "Fallback", "HELLO"]);
+        expect(refreshed).toEqual(["Fallback", "HELLO"]);
+        expect(translate.getFallbackLang()).toBe("fallback");
+        subscription.unsubscribe();
+        refreshSubscription.unsubscribe();
+    });
+
     it("should support the full runtime lifecycle: create, use, delete, re-create", async () => {
         // User creates their own language version at runtime
         translate.setTranslation("user-lang", { TITLE: "My title" });
@@ -117,8 +188,13 @@ describe("TranslateService.deleteLanguage", () => {
     });
 
     it("should be a no-op for a language that does not exist", () => {
+        const translationChange = jasmine.createSpy("translationChange");
+        const subscription = translate.onTranslationChange.subscribe(translationChange);
+
         expect(() => translate.deleteLanguage("never-existed")).not.toThrow();
         expect(translate.getLangs()).not.toContain("never-existed");
+        expect(translationChange).not.toHaveBeenCalled();
+        subscription.unsubscribe();
     });
 
     it("should not affect other languages", () => {
@@ -189,6 +265,39 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
 });
 
 describe("TranslateService.deleteLanguage (hierarchical)", () => {
+    it("should refresh child streams as child and parent translations are deleted", () => {
+        const rootInjector = Injector.create({
+            providers: [provideTranslateService()],
+        });
+        const root = rootInjector.get(TranslateService);
+        const childInjector = Injector.create({
+            providers: [provideChildTranslateService()],
+            parent: rootInjector,
+        });
+        const child = childInjector.get(TranslateService);
+        root.setTranslation("custom", { HELLO: "Parent" });
+        child.setTranslation("custom", { HELLO: "Child" });
+        root.use("custom");
+        const values: Translation[] = [];
+        const refreshed: Translation[] = [];
+        const subscription = child
+            .stream("HELLO", undefined, "custom")
+            .subscribe((value) => values.push(value));
+        const refreshSubscription = child.onTranslationRefresh.subscribe(() => {
+            refreshed.push(child.instant("HELLO"));
+        });
+
+        child.deleteLanguage("custom");
+        root.deleteLanguage("custom");
+
+        expect(values).toEqual(["Child", "Parent", "HELLO"]);
+        expect(refreshed).toEqual(["Parent", "HELLO"]);
+        subscription.unsubscribe();
+        refreshSubscription.unsubscribe();
+        childInjector.destroy();
+        rootInjector.destroy();
+    });
+
     it("should delete the language only on the calling (child) service", () => {
         /*
          * 1. Root service — children must be created in a separate injector
