@@ -1,12 +1,7 @@
 import { provideHttpClient, withXhr } from "@angular/common/http";
-import {
-    ApplicationConfig,
-    inject,
-    provideAppInitializer,
-    provideZoneChangeDetection,
-} from "@angular/core";
+import { ApplicationConfig, provideZoneChangeDetection } from "@angular/core";
 import { provideRouter } from "@angular/router";
-import { provideTranslateService, TranslateService } from "@ngx-translate/core";
+import { provideTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { routes } from "./app.routes";
 
@@ -16,6 +11,9 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes),
         provideHttpClient(withXhr()),
         provideTranslateService({
+            langs: ["de", "en"],
+            fallbackLang: "en",
+            lang: "en",
             loader: provideTranslateHttpLoader({
                 enforceLoading: true,
                 resources: [
@@ -23,12 +21,6 @@ export const appConfig: ApplicationConfig = {
                     { prefix: "./i18n/" },
                 ],
             }),
-        }),
-        provideAppInitializer(() => {
-            const translate = inject(TranslateService);
-            translate.addLangs(["de", "en"]);
-            translate.setFallbackLang("en");
-            translate.use("en");
         }),
     ],
 };
