@@ -81,14 +81,25 @@ export class TranslateStore {
         this._languages.update((current) => Array.from(new Set([...current, ...langs])));
     }
 
+    public removeLanguages(langs: Language[]): void {
+        this._languages.update((current) => current.filter((lang) => !langs.includes(lang)));
+    }
+
     public hasTranslationFor(lang: string) {
         return typeof this.translations()[lang] !== "undefined";
     }
 
     public deleteTranslations(lang: string) {
-        this._translations.update((current) => {
-            const { [lang]: _, ...rest } = current;
-            return rest;
+        untracked(() => {
+            if (!this.hasTranslationFor(lang)) return;
+
+            this._translations.update((current) => {
+                const { [lang]: _, ...rest } = current;
+                return rest;
+            });
+            const event: TranslationChangeEvent = { lang, translations: {} };
+            this._lastTranslationChange.set(event);
+            this._translationChange$.next(event);
         });
     }
 

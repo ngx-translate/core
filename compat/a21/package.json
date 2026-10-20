@@ -51,7 +51,7 @@
         "typescript": "~5.9.0",
         "typescript-eslint": "8.46.4"
     },
-    "packageManager": "pnpm@10.12.4",
+    "packageManager": "pnpm@12.14.0",
     "lint-staged": {
         "*.js": "eslint --cache --fix",
         "*.{js,css,md}": "prettier --write"

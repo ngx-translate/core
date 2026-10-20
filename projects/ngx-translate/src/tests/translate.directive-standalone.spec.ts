@@ -3,10 +3,16 @@ import {
     Component,
     ElementRef,
     Injectable,
+    Input,
     ViewChild,
 } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideTranslateService, TranslateDirective, TranslateService } from "../public-api";
+import {
+    InterpolationParameters,
+    provideTranslateService,
+    TranslateDirective,
+    TranslateService,
+} from "../public-api";
 
 @Injectable()
 @Component({
@@ -44,7 +50,7 @@ class AppComponent {
     @ViewChild("trailingSpaceNoKeyNoParams") trailingSpaceNoKeyNoParams!: ElementRef;
     @ViewChild("withSpaceAndLineBreakNoKeyNoParams")
     withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
-    value = { value: "ok" };
+    @Input() value: InterpolationParameters = { value: "ok" };
 }
 
 describe("TranslateDirective (standalone)", () => {
@@ -165,6 +171,24 @@ describe("TranslateDirective (standalone)", () => {
         expect(fixture.componentInstance.withParamsNoKey.nativeElement.innerHTML).toEqual(
             "It is changed",
         );
+    });
+
+    it("should update when a Date parameter is replaced", () => {
+        translate.setTranslation("en", { TEST: "Date: {{date}}" });
+        translate.use("en");
+        const first = new Date("2020-01-01T00:00:00Z");
+        const second = new Date("2021-01-01T00:00:00Z");
+
+        for (const date of [first, second]) {
+            fixture.componentRef.setInput("value", { date });
+            fixture.detectChanges();
+            expect(fixture.componentInstance.withParams.nativeElement.textContent).toBe(
+                `Date: ${date}`,
+            );
+            expect(fixture.componentInstance.withParamsNoKey.nativeElement.textContent).toBe(
+                `Date: ${date}`,
+            );
+        }
     });
 
     it("should update the DOM when the lang changes and the translation key starts with space", () => {

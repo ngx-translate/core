@@ -15,6 +15,7 @@ import {
     defer,
     EMPTY,
     finalize,
+    firstValueFrom,
     forkJoin,
     isObservable,
     merge,
@@ -30,8 +31,6 @@ import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
-import { DeepReadonly, TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -45,6 +44,8 @@ import {
     TranslationChangeEvent,
     TranslationObject,
 } from "./translate.service.interface";
+import { DeepReadonly, TranslateStore } from "./translate.store";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -54,6 +55,7 @@ import {
  */
 export interface TranslateServiceConfig {
     lang?: Language;
+    langs?: Language[];
     fallbackLang?: Language | null;
     /** Automatic retries for a failed language load (default 0). */
     retry?: number;
@@ -263,6 +265,9 @@ export class TranslateService implements ITranslateService {
         const destroyRef = inject(DestroyRef);
 
         if (this.isRoot) {
+            if (config.langs?.length) {
+                this.addLangs(config.langs);
+            }
             if (config.lang) {
                 this.use(config.lang);
             }
@@ -809,6 +814,19 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
+     * Gets the translated value of a key (or an array of keys) as a Promise,
+     * for usage in async functions without wrapping `get` into `firstValueFrom`.
+     * @returns a promise resolving with the translated key, or an object of translated keys
+     */
+    public getAsync(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Promise<Translation> {
+        return firstValueFrom(this.get(key, interpolateParams, lang));
+    }
+
+    /**
      * Returns a stream of translated values of a key (or an array of keys) which updates
      * whenever the translation changes.
      * @returns A stream of the translated key, or an object of translated keys
@@ -924,6 +942,29 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
+     * Checks whether a translation exists for the given key, without invoking
+     * the missing-translation handler and without interpolating.
+     *
+     * Resolution mirrors `instant()`: with `lang`, the lookup goes directly to
+     * the specified language (and up the parent service chain); without, it
+     * falls back to the current language, then the fallback language, then up
+     * the parent chain.
+     *
+     * An empty string counts as an existing translation; an explicit `null`
+     * counts as missing (both match `instant()` / `get()` resolution).
+     *
+     * @returns true if the key resolves to a translation, false for a missing,
+     * empty, or undefined key
+     */
+    public hasTranslationKey(key: string, lang?: Language): boolean {
+        if (!isDefinedAndNotNull(key) || key.length === 0) {
+            return false;
+        }
+
+        return isDefinedAndNotNull(this.getTextToInterpolate(key, lang));
+    }
+
+    /**
      * Returns a Signal that provides the translated value and automatically
      * updates when the language changes or translations are reloaded.
      *
@@ -1030,6 +1071,32 @@ export class TranslateService implements ITranslateService {
         // NOW", regardless of which load owns it.
         this.loadingTranslations.clear(lang);
         this.store.deleteTranslations(lang);
+    }
+
+    /**
+     * Deletes the language `lang` entirely: removes its translations from the
+     * store, unregisters it from `getLangs()`, and clears any in-flight load
+     * entry — `isLoading()` flips to `false` immediately on this service.
+     *
+     * This restores the pre-v18 escape hatch `delete translate.translations[lang]`,
+     * which left the language registered in `getLangs()`.
+     *
+     * If `lang` is the currently used language, the current-language pointer is
+     * kept: it is not reset and no `onLangChange` is emitted, matching the old
+     * `delete` workaround. Removing stored translations emits
+     * `onTranslationChange` with an empty translation object so subscribers
+     * refresh through the usual parent, fallback, or missing-translation lookup.
+     *
+     * Like `resetLang`, this does not cancel an underlying in-flight loader
+     * request: a load completing afterwards re-adds the language to the store
+     * and to `getLangs()`.
+     */
+    public deleteLanguage(lang: Language): void {
+        untracked(() => {
+            this.loadingTranslations.clear(lang);
+            this.store.removeLanguages([lang]);
+            this.store.deleteTranslations(lang);
+        });
     }
 
     /**

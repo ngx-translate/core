@@ -122,6 +122,18 @@ describe("Utils", () => {
             expect(equals(NaN, NaN)).toBeTrue();
         });
 
+        it("should compare Dates by their timestamps", () => {
+            expect(equals(new Date(0), new Date(0))).toBeTrue();
+            expect(equals(new Date(0), new Date(1))).toBeFalse();
+            expect(equals({ date: new Date(0) }, { date: new Date(1) })).toBeFalse();
+            expect(equals(new Date(NaN), new Date(NaN))).toBeTrue();
+        });
+
+        it("should not equate Dates with other objects", () => {
+            expect(equals(new Date(0), {})).toBeFalse();
+            expect(equals({}, new Date(0))).toBeFalse();
+        });
+
         it("should return true for equal arrays", () => {
             expect(equals([1, 2, 3], [1, 2, 3])).toBeTrue();
             expect(equals([], [])).toBeTrue();
@@ -244,6 +256,14 @@ describe("Utils", () => {
 
             // length is terminal — chaining past it returns undefined
             expect(getValue([1, 2, 3], "length.foo")).not.toBeDefined();
+        });
+
+        it("should not lose a flat sibling key shadowed by a same-prefix nested object (issue #1561)", () => {
+            /* Simulates the structure produced by set('a.b.key1', ...) on flat, dot-containing keys. */
+            const target = insertValue({ "a.b.key1": "v1", "a.b.key2": "v2" }, "a.b.key1", "newV1");
+
+            expect(getValue(target, "a.b.key1")).toEqual("newV1");
+            expect(getValue(target, "a.b.key2")).toEqual("v2");
         });
     });
 
