@@ -54,16 +54,16 @@ jobs:
 
         steps:
             - uses: actions/checkout@v7
+            - name: Use compat config
+              run: |
+                  cp ${{ matrix.config-dir }}/package.json package.json
+                  cp ${{ matrix.config-dir }}/angular.json angular.json
             - name: Install pnpm
               uses: pnpm/action-setup@v6
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v7
               with:
                   node-version: ${{ matrix.node-version }}
-            - name: Use compat config
-              run: |
-                  cp ${{ matrix.config-dir }}/package.json package.json
-                  cp ${{ matrix.config-dir }}/angular.json angular.json
             - run: pnpm install --no-frozen-lockfile
             - run: pnpm run build-all
             - run: pnpm run test-ci

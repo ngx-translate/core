@@ -95,9 +95,7 @@ export class Example {
 }
 
 // 2. In a Directive
-@Directive({
-    /*...*/
-})
+@Directive({/*...*/})
 export class MyDirective {
     private element = inject(ElementRef); // ✅ Field initializer
 }

@@ -48,9 +48,9 @@ export class TranslatePipe implements PipeTransform {
             try {
                 return JSON.parse(validArgs);
             } catch (e) {
-                void e;
                 throw new SyntaxError(
                     `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${args[0]}`,
+                    { cause: e },
                 );
             }
         }
