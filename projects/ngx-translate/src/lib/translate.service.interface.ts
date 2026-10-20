@@ -62,6 +62,7 @@ export abstract class ITranslateService {
     public abstract getLangs(): readonly Language[];
     public abstract reloadLang(lang: Language): Observable<InterpolatableTranslationObject>;
     public abstract resetLang(lang: Language): void;
+    public abstract deleteLanguage(lang: Language): void;
 
     public abstract instant(
         key: string | string[],
