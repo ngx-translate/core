@@ -135,6 +135,10 @@ export function mergeDeep(target: Readonly<unknown>, source: Readonly<unknown>):
  * @returns The value at the specified key path, or `undefined` if not found.
  */
 export function getValue(target: unknown, key: string): unknown {
+    /* Kept for the flat-key fallback below if the nested lookup misses. */
+    const originalTarget = target;
+    const originalKey = key;
+
     const keys = key.split(".");
 
     key = "";
@@ -179,6 +183,18 @@ export function getValue(target: unknown, key: string): unknown {
         }
         key += ".";
     } while (keys.length);
+
+    /* A nested match can shadow a sibling flat key sharing the same prefix
+       (e.g. after set('a.b.key1', ...) turns "a.b.key1" into a nested
+       object while "a.b.key2" stays flat). Fall back to a literal lookup
+       before giving up. See ngx-translate/core#1561. */
+    if (
+        typeof target === "undefined" &&
+        isDict(originalTarget) &&
+        isDefined(originalTarget[originalKey])
+    ) {
+        return originalTarget[originalKey];
+    }
 
     return target;
 }

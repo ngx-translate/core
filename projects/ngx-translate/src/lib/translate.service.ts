@@ -15,6 +15,7 @@ import {
     defer,
     EMPTY,
     finalize,
+    firstValueFrom,
     forkJoin,
     isObservable,
     merge,
@@ -29,8 +30,6 @@ import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
 import { TranslateParser } from "./translate.parser";
-import { DeepReadonly, TranslateStore } from "./translate.store";
-import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -44,6 +43,8 @@ import {
     TranslationChangeEvent,
     TranslationObject,
 } from "./translate.service.interface";
+import { DeepReadonly, TranslateStore } from "./translate.store";
+import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
 /**
  * Configuration object for the translation service.
@@ -53,6 +54,7 @@ import {
  */
 export interface TranslateServiceConfig {
     lang?: Language;
+    langs?: Language[];
     fallbackLang?: Language | null;
     isRoot: boolean;
 }
@@ -255,6 +257,9 @@ export class TranslateService implements ITranslateService {
         const destroyRef = inject(DestroyRef);
 
         if (this.isRoot) {
+            if (config.langs?.length) {
+                this.addLangs(config.langs);
+            }
             if (config.lang) {
                 this.use(config.lang);
             }
@@ -789,6 +794,19 @@ export class TranslateService implements ITranslateService {
     }
 
     /**
+     * Gets the translated value of a key (or an array of keys) as a Promise,
+     * for usage in async functions without wrapping `get` into `firstValueFrom`.
+     * @returns a promise resolving with the translated key, or an object of translated keys
+     */
+    public getAsync(
+        key: string | string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Promise<Translation> {
+        return firstValueFrom(this.get(key, interpolateParams, lang));
+    }
+
+    /**
      * Returns a stream of translated values of a key (or an array of keys) which updates
      * whenever the translation changes.
      * @returns A stream of the translated key, or an object of translated keys
@@ -901,6 +919,29 @@ export class TranslateService implements ITranslateService {
                     `fallback. Load with use("${lang}") or setTranslation("${lang}", ...) first.`,
             );
         });
+    }
+
+    /**
+     * Checks whether a translation exists for the given key, without invoking
+     * the missing-translation handler and without interpolating.
+     *
+     * Resolution mirrors `instant()`: with `lang`, the lookup goes directly to
+     * the specified language (and up the parent service chain); without, it
+     * falls back to the current language, then the fallback language, then up
+     * the parent chain.
+     *
+     * An empty string counts as an existing translation; an explicit `null`
+     * counts as missing (both match `instant()` / `get()` resolution).
+     *
+     * @returns true if the key resolves to a translation, false for a missing,
+     * empty, or undefined key
+     */
+    public hasTranslationKey(key: string, lang?: Language): boolean {
+        if (!isDefinedAndNotNull(key) || key.length === 0) {
+            return false;
+        }
+
+        return isDefinedAndNotNull(this.getTextToInterpolate(key, lang));
     }
 
     /**
