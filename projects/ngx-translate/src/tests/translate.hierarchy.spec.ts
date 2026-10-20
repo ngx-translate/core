@@ -246,54 +246,55 @@ describe("TranslateService Hierarchy", () => {
         const childService = childInjector.get(TranslateService);
         childService.setTranslation("en", { GREETING: "Hello" });
 
-        const warnSpy = spyOn(console, "warn");
+        const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
 
         const result = childService.instant("GREETING", undefined, "de");
 
         expect(result).toBe("Hallo");
         expect(warnSpy).not.toHaveBeenCalledWith(
-            jasmine.stringContaining("no translations are loaded"),
+            expect.stringContaining("no translations are loaded"),
         );
     });
 
-    it("child.stream(_, _, lang) re-emits when ancestor store updates that lang", (done) => {
-        const rootInjector = Injector.create({
-            providers: [
-                provideTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useValue: new FakeLoader({}),
-                    },
-                }),
-            ],
-        });
-        const rootService = rootInjector.get(TranslateService);
+    it("child.stream(_, _, lang) re-emits when ancestor store updates that lang", () =>
+        new Promise<void>((resolve) => {
+            const rootInjector = Injector.create({
+                providers: [
+                    provideTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: new FakeLoader({}),
+                        },
+                    }),
+                ],
+            });
+            const rootService = rootInjector.get(TranslateService);
 
-        const childInjector = Injector.create({
-            providers: [
-                provideChildTranslateService({
-                    loader: {
-                        provide: TranslateLoader,
-                        useValue: new FakeLoader({}),
-                    },
-                }),
-            ],
-            parent: rootInjector,
-        });
-        const childService = childInjector.get(TranslateService);
+            const childInjector = Injector.create({
+                providers: [
+                    provideChildTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: new FakeLoader({}),
+                        },
+                    }),
+                ],
+                parent: rootInjector,
+            });
+            const childService = childInjector.get(TranslateService);
 
-        const emissions: unknown[] = [];
+            const emissions: unknown[] = [];
 
-        childService.stream("GREETING", undefined, "de").subscribe((val) => {
-            emissions.push(val);
-        });
+            childService.stream("GREETING", undefined, "de").subscribe((val) => {
+                emissions.push(val);
+            });
 
-        // Trigger root to update "de" — child's stream must pick this up
-        rootService.setTranslation("de", { GREETING: "Hallo" });
+            // Trigger root to update "de" — child's stream must pick this up
+            rootService.setTranslation("de", { GREETING: "Hallo" });
 
-        expect(emissions).toContain("Hallo");
-        done();
-    });
+            expect(emissions).toContain("Hallo");
+            resolve();
+        }));
 
     it("should propagate parent translation changes to child translate() signal", () => {
         const rootInjector = Injector.create({
@@ -326,39 +327,40 @@ describe("TranslateService Hierarchy", () => {
         expect(childService.instant("KEY")).toBe("updated-value");
     });
 
-    it("completes child store translationChange$ when child injector is destroyed", (done) => {
-        const rootInjector = Injector.create({
-            providers: [
-                provideTranslateService({
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
-                }),
-            ],
-        });
+    it("completes child store translationChange$ when child injector is destroyed", () =>
+        new Promise<void>((resolve) => {
+            const rootInjector = Injector.create({
+                providers: [
+                    provideTranslateService({
+                        loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                    }),
+                ],
+            });
 
-        const childInjector = Injector.create({
-            providers: [
-                provideChildTranslateService({
-                    loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
-                }),
-            ],
-            parent: rootInjector,
-        });
-        const childService = childInjector.get(TranslateService);
+            const childInjector = Injector.create({
+                providers: [
+                    provideChildTranslateService({
+                        loader: { provide: TranslateLoader, useValue: new FakeLoader({}) },
+                    }),
+                ],
+                parent: rootInjector,
+            });
+            const childService = childInjector.get(TranslateService);
 
-        // onTranslationChange proxies the child's own store.translationChange$
-        let completed = false;
-        childService.onTranslationChange.subscribe({
-            complete: () => {
-                completed = true;
-                expect(completed).toBeTrue();
-                done();
-            },
-        });
+            // onTranslationChange proxies the child's own store.translationChange$
+            let completed = false;
+            childService.onTranslationChange.subscribe({
+                complete: () => {
+                    completed = true;
+                    expect(completed).toBe(true);
+                    resolve();
+                },
+            });
 
-        // Destroying the child injector fires DestroyRef.onDestroy() on the child
-        // store, which completes _translationChange$. The root is unaffected.
-        // Cast: Angular <20 typed Injector.create() as Injector (no .destroy());
-        // the runtime instance is an EnvironmentInjector on every supported version.
-        (childInjector as EnvironmentInjector).destroy();
-    });
+            // Destroying the child injector fires DestroyRef.onDestroy() on the child
+            // store, which completes _translationChange$. The root is unaffected.
+            // Cast: Angular <20 typed Injector.create() as Injector (no .destroy());
+            // the runtime instance is an EnvironmentInjector on every supported version.
+            (childInjector as EnvironmentInjector).destroy();
+        }));
 });

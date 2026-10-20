@@ -25,10 +25,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
+                    "builder": "@analogjs/vitest-angular:test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "configFile": "compat/vitest.config.mts",
+                        "testFiles": ["projects/ngx-translate/src"],
+                        "root": "."
                     }
                 }
             }
@@ -55,10 +56,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular-devkit/build-angular:karma",
+                    "builder": "@analogjs/vitest-angular:test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "configFile": "compat/vitest.config.mts",
+                        "testFiles": ["projects/http-loader/src"],
+                        "root": "."
                     }
                 }
             }

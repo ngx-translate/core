@@ -1,7 +1,7 @@
 import { Location } from "@angular/common";
 import { Component, inject as coreInject, Injector, NgModule, Provider, Type } from "@angular/core";
-import { ComponentFixture, fakeAsync, TestBed, tick, inject } from "@angular/core/testing";
-import { provideRouter, Router, RouterModule } from "@angular/router";
+import { ComponentFixture, TestBed, inject } from "@angular/core/testing";
+import { provideRouter, Router, RouterModule, RouterOutlet } from "@angular/router";
 import {
     provideChildTranslateService,
     provideTranslateService,
@@ -12,8 +12,8 @@ import {
 import { TranslateStore } from "../lib/translate.store";
 
 @Component({
-    // eslint-disable-next-line @angular-eslint/prefer-standalone
-    standalone: false,
+    standalone: true,
+    imports: [RouterOutlet],
     selector: "app-root-cmp",
     template: ` <router-outlet></router-outlet>`,
 })
@@ -71,41 +71,41 @@ function getLazyLoadedModule(providers: Provider[] = []) {
     return LoadedModule;
 }
 
-function advance<T>(fixture: ComponentFixture<T>): void {
-    tick();
+async function advance<T>(fixture: ComponentFixture<T>): Promise<void> {
+    await fixture.whenStable();
     fixture.detectChanges();
 }
 
-function createRoot<T>(router: Router, type: Type<T>): ComponentFixture<T> {
+async function createRoot<T>(router: Router, type: Type<T>): Promise<ComponentFixture<T>> {
     const f = TestBed.createComponent(type);
-    advance(f);
+    await advance(f);
     router.initialNavigation();
-    advance(f);
+    await advance(f);
     return f;
 }
 
 describe("TranslateStore", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [RouterModule, TranslatePipe, TranslateDirective],
-            declarations: [RootComponent],
+            imports: [RouterModule, TranslatePipe, TranslateDirective, RootComponent],
             providers: [provideRouter([]), provideTranslateService()],
         });
     });
 
-    it("should work when lazy loaded without new providers (shared root service)", fakeAsync(
-        inject([Router, Location], (router: Router, location: Location) => {
+    it("should work when lazy loaded without new providers (shared root service)", inject(
+        [Router, Location],
+        async (router: Router, location: Location) => {
             const LoadedModule = getLazyLoadedModule();
 
-            const fixture = createRoot(router, RootComponent),
+            const fixture = await createRoot(router, RootComponent),
                 translate = TestBed.inject(TranslateService);
 
             expect(translate.instant("TEST")).toEqual("Root");
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
@@ -113,22 +113,23 @@ describe("TranslateStore", () => {
             // provideTranslateService in its providers), so its setTranslation
             // mutates the shared store. "TEST" now resolves to "Lazy".
             expect(translate.instant("TEST")).toEqual("Lazy");
-        }),
+        },
     ));
 
-    it("should create 2 instances of the service when lazy loaded using provideTranslateService", fakeAsync(
-        inject([Router, Location], (router: Router, location: Location) => {
+    it("should create 2 instances of the service when lazy loaded using provideTranslateService", inject(
+        [Router, Location],
+        async (router: Router, location: Location) => {
             const LoadedModule = getLazyLoadedModule([provideTranslateService()]);
 
-            const fixture = createRoot(router, RootComponent),
+            const fixture = await createRoot(router, RootComponent),
                 translate = TestBed.inject(TranslateService);
 
             expect(translate.instant("TEST")).toEqual("Root");
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
@@ -137,86 +138,90 @@ describe("TranslateStore", () => {
             // injector. The child's setTranslation does not mutate the root
             // store; "TEST" still resolves to "Root" in the root scope.
             expect(translate.instant("TEST")).toEqual("Root");
-        }),
+        },
     ));
 
-    it("should create 2 instances of the service when lazy loaded using provideTranslateService (isolated)", fakeAsync(
-        inject([Router, Location], (router: Router, location: Location) => {
+    it("should create 2 instances of the service when lazy loaded using provideTranslateService (isolated)", inject(
+        [Router, Location],
+        async (router: Router, location: Location) => {
             const LoadedModule = getLazyLoadedModule([provideTranslateService()]);
 
-            const fixture = createRoot(router, RootComponent),
+            const fixture = await createRoot(router, RootComponent),
                 translate = TestBed.inject(TranslateService);
 
             expect(translate.instant("TEST")).toEqual("Root");
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             expect(location.path()).toEqual("/lazy/loaded/child");
 
             // Same as above: provideTranslateService in the lazy route creates
             // an isolated child service; the root store keeps "TEST" → "Root".
             expect(translate.instant("TEST")).toEqual("Root");
-        }),
+        },
     ));
 
-    it("should relay events when lazy loading without new providers (shared)", fakeAsync(
-        inject([Router], (router: Router) => {
+    it("should relay events when lazy loading without new providers (shared)", inject(
+        [Router],
+        async (router: Router) => {
             const LoadedModule = getLazyLoadedModule();
 
-            const fixture = createRoot(router, RootComponent);
+            const fixture = await createRoot(router, RootComponent);
             const translate = TestBed.inject(TranslateService);
 
-            const spy = jasmine.createSpy("translationChangeSpy");
+            const spy = vi.fn().mockName("translationChangeSpy");
             const sub = translate.onTranslationChange.subscribe(spy);
 
             expect(spy).toHaveBeenCalledTimes(0);
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             expect(spy).toHaveBeenCalledTimes(1);
             sub.unsubscribe();
-        }),
+        },
     ));
 
-    it("should not relay events when lazy loading & using an isolated service", fakeAsync(
-        inject([Router], (router: Router) => {
+    it("should not relay events when lazy loading & using an isolated service", inject(
+        [Router],
+        async (router: Router) => {
             const LoadedModule = getLazyLoadedModule([provideTranslateService()]);
 
-            const fixture = createRoot(router, RootComponent);
+            const fixture = await createRoot(router, RootComponent);
             const translate = TestBed.inject(TranslateService);
 
-            const spy = jasmine.createSpy("translationChangeSpy");
+            const spy = vi.fn().mockName("translationChangeSpy");
             const sub = translate.onTranslationChange.subscribe(spy);
 
             expect(spy).toHaveBeenCalledTimes(0);
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             expect(spy).toHaveBeenCalledTimes(0);
             sub.unsubscribe();
-        }),
+        },
     ));
 
-    it("should extend translations via hierarchy and provideChildTranslateService", fakeAsync(
-        inject([Router], (router: Router) => {
+    it("should extend translations via hierarchy and provideChildTranslateService", inject(
+        [Router],
+        async (router: Router) => {
             const LoadedModule = getLazyLoadedModule([provideChildTranslateService()]);
 
-            const fixture = createRoot(router, RootComponent);
+            const fixture = await createRoot(router, RootComponent);
             const rootTranslate: TranslateService = TestBed.inject(TranslateService);
 
             router.resetConfig([{ path: "lazy", loadChildren: () => LoadedModule }]);
 
-            router.navigateByUrl("/lazy/loaded/child");
-            advance(fixture);
+            await router.navigateByUrl("/lazy/loaded/child");
+            await advance(fixture);
 
             // In hierarchy, ChildLazyLoadedComponent's local translate service (child)
             // has the translation "Lazy" for key "TEST".
@@ -228,7 +233,7 @@ describe("TranslateStore", () => {
 
             expect(rootTranslate.instant("TEST")).toEqual("Root");
             expect(rootTranslate.instant("ROOT")).toEqual("Root");
-        }),
+        },
     ));
 });
 
@@ -288,24 +293,25 @@ describe("TranslateStore (signals)", () => {
 });
 
 describe("TranslateStore (F3 — translationChange$ completion on destroy)", () => {
-    it("completes _translationChange$ when the owning injector is destroyed", (done) => {
-        TestBed.configureTestingModule({
-            providers: [provideTranslateService()],
-        });
+    it("completes _translationChange$ when the owning injector is destroyed", () =>
+        new Promise<void>((resolve) => {
+            TestBed.configureTestingModule({
+                providers: [provideTranslateService()],
+            });
 
-        const store = TestBed.inject(TranslateStore);
+            const store = TestBed.inject(TranslateStore);
 
-        let completed = false;
-        store.translationChange$.subscribe({
-            complete: () => {
-                completed = true;
-                expect(completed).toBeTrue();
-                done();
-            },
-        });
+            let completed = false;
+            store.translationChange$.subscribe({
+                complete: () => {
+                    completed = true;
+                    expect(completed).toBe(true);
+                    resolve();
+                },
+            });
 
-        // resetTestingModule() tears down the TestBed injector, which fires
-        // DestroyRef.onDestroy() on the store, completing _translationChange$.
-        TestBed.resetTestingModule();
-    });
+            // resetTestingModule() tears down the TestBed injector, which fires
+            // DestroyRef.onDestroy() on the store, completing _translationChange$.
+            TestBed.resetTestingModule();
+        }));
 });

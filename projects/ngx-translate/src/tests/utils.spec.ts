@@ -98,98 +98,98 @@ describe("Utils", () => {
 
     describe("equals", () => {
         it("should return true for strictly equal primitives", () => {
-            expect(equals(1, 1)).toBeTrue();
-            expect(equals("test", "test")).toBeTrue();
-            expect(equals(true, true)).toBeTrue();
+            expect(equals(1, 1)).toBe(true);
+            expect(equals("test", "test")).toBe(true);
+            expect(equals(true, true)).toBe(true);
         });
 
         it("should return false for different primitives", () => {
-            expect(equals(1, 2)).toBeFalse();
-            expect(equals("test", "other")).toBeFalse();
-            expect(equals(true, false)).toBeFalse();
+            expect(equals(1, 2)).toBe(false);
+            expect(equals("test", "other")).toBe(false);
+            expect(equals(true, false)).toBe(false);
         });
 
         it("should return true for null comparisons", () => {
-            expect(equals(null, null)).toBeTrue();
+            expect(equals(null, null)).toBe(true);
         });
 
         it("should return false if one value is null", () => {
-            expect(equals(null, 1)).toBeFalse();
-            expect(equals({}, null)).toBeFalse();
+            expect(equals(null, 1)).toBe(false);
+            expect(equals({}, null)).toBe(false);
         });
 
         it("should return true for NaN comparisons", () => {
-            expect(equals(NaN, NaN)).toBeTrue();
+            expect(equals(NaN, NaN)).toBe(true);
         });
 
         it("should compare Dates by their timestamps", () => {
-            expect(equals(new Date(0), new Date(0))).toBeTrue();
-            expect(equals(new Date(0), new Date(1))).toBeFalse();
-            expect(equals({ date: new Date(0) }, { date: new Date(1) })).toBeFalse();
-            expect(equals(new Date(NaN), new Date(NaN))).toBeTrue();
+            expect(equals(new Date(0), new Date(0))).toBe(true);
+            expect(equals(new Date(0), new Date(1))).toBe(false);
+            expect(equals({ date: new Date(0) }, { date: new Date(1) })).toBe(false);
+            expect(equals(new Date(NaN), new Date(NaN))).toBe(true);
         });
 
         it("should not equate Dates with other objects", () => {
-            expect(equals(new Date(0), {})).toBeFalse();
-            expect(equals({}, new Date(0))).toBeFalse();
+            expect(equals(new Date(0), {})).toBe(false);
+            expect(equals({}, new Date(0))).toBe(false);
         });
 
         it("should return true for equal arrays", () => {
-            expect(equals([1, 2, 3], [1, 2, 3])).toBeTrue();
-            expect(equals([], [])).toBeTrue();
+            expect(equals([1, 2, 3], [1, 2, 3])).toBe(true);
+            expect(equals([], [])).toBe(true);
         });
 
         it("should return false for arrays of different lengths", () => {
-            expect(equals([1, 2], [1, 2, 3])).toBeFalse();
+            expect(equals([1, 2], [1, 2, 3])).toBe(false);
         });
 
         it("should return false for arrays with different elements", () => {
-            expect(equals([1, 2, 3], [1, 2, 4])).toBeFalse();
+            expect(equals([1, 2, 3], [1, 2, 4])).toBe(false);
         });
 
         it("should return true for deeply nested arrays", () => {
-            expect(equals([1, [2, [3]]], [1, [2, [3]]])).toBeTrue();
+            expect(equals([1, [2, [3]]], [1, [2, [3]]])).toBe(true);
         });
 
         it("should return true for equal objects", () => {
-            expect(equals({ a: 1, b: 2 }, { a: 1, b: 2 })).toBeTrue();
+            expect(equals({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true);
         });
 
         it("should return false for objects with different properties", () => {
-            expect(equals({ a: 1, b: 2 }, { a: 1, c: 3 })).toBeFalse();
+            expect(equals({ a: 1, b: 2 }, { a: 1, c: 3 })).toBe(false);
         });
 
         it("should use strictly equal comparison", () => {
-            expect(equals({ a: 1 }, { a: "1" })).toBeFalse();
+            expect(equals({ a: 1 }, { a: "1" })).toBe(false);
         });
 
         it("should return false for objects with different property values", () => {
-            expect(equals({ a: 1, b: 2 }, { a: 1, b: 3 })).toBeFalse();
+            expect(equals({ a: 1, b: 2 }, { a: 1, b: 3 })).toBe(false);
         });
 
         it("should return true for deeply nested objects", () => {
-            expect(equals({ a: { b: { c: 1 } } }, { a: { b: { c: 1 } } })).toBeTrue();
+            expect(equals({ a: { b: { c: 1 } } }, { a: { b: { c: 1 } } })).toBe(true);
         });
 
         it("should return false for objects and arrays", () => {
-            expect(equals({ a: 1 }, [1])).toBeFalse();
+            expect(equals({ a: 1 }, [1])).toBe(false);
         });
 
         it("should return false for arrays and objects", () => {
-            expect(equals([1], { 0: 1 })).toBeFalse();
+            expect(equals([1], { 0: 1 })).toBe(false);
         });
 
         it("should handle undefined properties correctly", () => {
-            expect(equals({ a: 1, b: undefined }, { a: 1 })).toBeTrue();
-            expect(equals({ a: 1 }, { a: 1, b: undefined })).toBeTrue();
-            expect(equals({ a: 1, b: 2 }, { a: 1, b: undefined })).toBeFalse();
+            expect(equals({ a: 1, b: undefined }, { a: 1 })).toBe(true);
+            expect(equals({ a: 1 }, { a: 1, b: undefined })).toBe(true);
+            expect(equals({ a: 1, b: 2 }, { a: 1, b: undefined })).toBe(false);
         });
 
         it("should return false when o2 has a property not present in o1", () => {
             const o1 = { a: 1, b: 2 };
             const o2 = { a: 1, b: 2, c: 3 }; // `c` is not present in `o1`
 
-            expect(equals(o1, o2)).toBeFalse();
+            expect(equals(o1, o2)).toBe(false);
         });
     });
 

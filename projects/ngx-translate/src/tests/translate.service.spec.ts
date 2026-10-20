@@ -1,5 +1,6 @@
+import type { MockInstance } from "vitest";
 import { Component, inject, signal, computed } from "@angular/core";
-import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
@@ -10,14 +11,14 @@ import {
     provideTranslateCompiler,
     provideTranslateLoader,
     provideTranslateService,
-    TranslateCompiler,
-    TranslateLoader,
     TranslatePipe,
-    TranslateService,
     Translation,
     TranslationChangeEvent,
     TranslationObject,
 } from "../public-api";
+import { TranslateCompiler } from "../lib/translate.compiler";
+import { TranslateLoader } from "../lib/translate.loader";
+import { TranslateService } from "../lib/translate.service";
 import { provideTestableTranslateService, TestableTranslateService } from "./test-helpers";
 
 let translations: TranslationObject = { TEST: "This is a test" };
@@ -66,7 +67,8 @@ describe("TranslateService (Delayed loading)", () => {
         translate = TestBed.inject(TranslateService) as TestableTranslateService;
     });
 
-    it("currentLang should be the language, on which use() was called last - in order", fakeAsync(() => {
+    it("currentLang should be the language, on which use() was called last - in order", () => {
+        vi.useFakeTimers();
         const completionOrder: string[] = [];
 
         translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
@@ -78,14 +80,15 @@ describe("TranslateService (Delayed loading)", () => {
         translate.use("delay-20").subscribe(() => completionOrder.push("delay-20"));
         expect(translate.getCurrentLang()).toEqual("delay-0"); // stays until loaded
 
-        tick(50);
+        vi.advanceTimersByTime(50);
 
         expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
 
         expect(translate.getCurrentLang()).toEqual("delay-20");
-    }));
+    });
 
-    it("currentLang should be the language, on which use() was called last - reverse order", fakeAsync(() => {
+    it("currentLang should be the language, on which use() was called last - reverse order", () => {
+        vi.useFakeTimers();
         const completionOrder: string[] = [];
 
         expect(translate.getCurrentLang()).toBeNull();
@@ -99,12 +102,12 @@ describe("TranslateService (Delayed loading)", () => {
         translate.use("delay-0").subscribe(() => completionOrder.push("delay-0"));
         expect(translate.getCurrentLang()).toEqual("delay-0"); // this one completes immediately
 
-        tick(50);
+        vi.advanceTimersByTime(50);
 
         expect(completionOrder).toEqual(["delay-0", "delay-10", "delay-20"]);
 
         expect(translate.getCurrentLang()).toEqual("delay-0");
-    }));
+    });
 });
 
 describe("TranslateService get() during in-flight loading", () => {
@@ -128,9 +131,10 @@ describe("TranslateService get() during in-flight loading", () => {
         translate = TestBed.inject(TranslateService);
     });
 
-    it("should not throw when get() is called during rapid use() switches", fakeAsync(() => {
+    it("should not throw when get() is called during rapid use() switches", () => {
+        vi.useFakeTimers();
         translate.use("en");
-        tick(10);
+        vi.advanceTimersByTime(10);
 
         // Now en is loaded and current. Start loading fr.
         translate.use("fr");
@@ -143,24 +147,26 @@ describe("TranslateService get() during in-flight loading", () => {
             translate.get("HELLO").subscribe();
         }).not.toThrow();
 
-        tick(20);
-    }));
+        vi.advanceTimersByTime(20);
+    });
 
-    it("should resolve to the correct translation after rapid use() switches", fakeAsync(() => {
+    it("should resolve to the correct translation after rapid use() switches", () => {
+        vi.useFakeTimers();
         translate.use("en");
-        tick(10);
+        vi.advanceTimersByTime(10);
 
         translate.use("fr");
 
         let result: Translation = "";
         translate.get("HELLO").subscribe((val) => (result = val));
 
-        tick(20);
+        vi.advanceTimersByTime(20);
 
         expect(result).toEqual("Bonjour");
-    }));
+    });
 
-    it("get(_,_,lang) with an explicit lang should not block on an unrelated in-flight use() load", fakeAsync(() => {
+    it("get(_,_,lang) with an explicit lang should not block on an unrelated in-flight use() load", () => {
+        vi.useFakeTimers();
         // Pre-load "de" synchronously so it's in the store before any in-flight load starts
         translate.setTranslation("de", { HELLO: "Hallo" });
 
@@ -177,10 +183,11 @@ describe("TranslateService get() during in-flight loading", () => {
         expect(result).toEqual("Hallo");
 
         // Clean up the in-flight "en" load
-        tick(10);
-    }));
+        vi.advanceTimersByTime(10);
+    });
 
-    it("get() without explicit lang still waits on in-flight lastUseLanguage load", fakeAsync(() => {
+    it("get() without explicit lang still waits on in-flight lastUseLanguage load", () => {
+        vi.useFakeTimers();
         // Start loading "en" — keeps loadingTranslations["en"] open for 10 ms
         translate.use("en");
 
@@ -190,11 +197,11 @@ describe("TranslateService get() during in-flight loading", () => {
         // Should not have resolved yet — still waiting on the "en" load
         expect(result).toBeUndefined();
 
-        tick(10);
+        vi.advanceTimersByTime(10);
 
         // Now the "en" load completed → get() resolves
         expect(result).toEqual("Hello");
-    }));
+    });
 });
 
 describe("TranslateService", () => {
@@ -364,30 +371,32 @@ describe("TranslateService", () => {
         });
     });
 
-    it("should merge translations if option shouldMerge is true", (done: DoneFn) => {
-        translations = {};
-        translate.setTranslation("en", { TEST: { sub1: "value1" } }, true);
-        translate.setTranslation("en", { TEST: { sub2: "value2" } }, true);
-        translate.use("en");
+    it("should merge translations if option shouldMerge is true", () =>
+        new Promise<void>((resolve) => {
+            translations = {};
+            translate.setTranslation("en", { TEST: { sub1: "value1" } }, true);
+            translate.setTranslation("en", { TEST: { sub2: "value2" } }, true);
+            translate.use("en");
 
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res as object).toEqual({ sub1: "value1", sub2: "value2" });
-            expect(translations as object).toEqual({});
-            done();
-        });
-    });
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res as object).toEqual({ sub1: "value1", sub2: "value2" });
+                expect(translations as object).toEqual({});
+                resolve();
+            });
+        }));
 
-    it("shouldn't call the current loader if you set the translation yourself", (done: DoneFn) => {
-        translations = {};
-        translate.setTranslation("en", { TEST: "This is a test" });
-        translate.use("en");
+    it("shouldn't call the current loader if you set the translation yourself", () =>
+        new Promise<void>((resolve) => {
+            translations = {};
+            translate.setTranslation("en", { TEST: "This is a test" });
+            translate.use("en");
 
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res).toEqual("This is a test");
-            expect(translations as object).toEqual({});
-            done();
-        });
-    });
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res).toEqual("This is a test");
+                expect(translations as object).toEqual({});
+                resolve();
+            });
+        }));
 
     describe("getStreamOnTranslationChange", () => {
         it("throws error if empty key is provided for stream", () => {
@@ -396,201 +405,217 @@ describe("TranslateService", () => {
             }).toThrowError('Parameter "key" is required and cannot be empty');
         });
 
-        it("should be able to get a stream array", (done: DoneFn) => {
+        it("should be able to get a stream array", () =>
+            new Promise<void>((resolve) => {
+                const tr = { TEST: "This is a test", TEST2: "This is a test2" };
+                translate.setTranslation("en", tr);
+                translate.use("en");
+
+                translate
+                    .getStreamOnTranslationChange(["TEST", "TEST2"])
+                    .subscribe((res: Translation) => {
+                        expect(res as object).toEqual(tr);
+                        resolve();
+                    });
+            }));
+
+        it("returns a function", () =>
+            new Promise<void>((resolve) => {
+                translate.setTranslation("en", { TEST: "This is a test" });
+                translate.use("en");
+
+                translate.getStreamOnTranslationChange(["TEST"]).subscribe((res: Translation) => {
+                    expect(res as object).toEqual({ TEST: "This is a test" });
+                    resolve();
+                });
+            }));
+
+        it("should initially return the same value for getStreamOnTranslationChange and non-streaming get", () =>
+            new Promise<void>((resolve) => {
+                translations = { TEST: "This is a test" };
+                translate.use("en");
+
+                zip(
+                    translate.getStreamOnTranslationChange("TEST"),
+                    translate.get("TEST"),
+                ).subscribe((value: Translation[]) => {
+                    const [streamed, nonStreamed] = value;
+                    expect(streamed).toEqual("This is a test");
+                    expect(nonStreamed).toEqual("This is a test");
+                    resolve();
+                });
+            }));
+
+        it("should be able to stream a translation on translation change", () =>
+            new Promise<void>((resolve) => {
+                translations = { TEST: "This is a test" };
+                translate.use("en");
+
+                translate
+                    .getStreamOnTranslationChange("TEST")
+                    .pipe(take(3), toArray())
+                    .subscribe((res: Translation[]) => {
+                        const expected = [
+                            "This is a test",
+                            "I changed the test value!",
+                            "I changed it again!",
+                        ];
+                        expect(res).toEqual(expected);
+                        resolve();
+                    });
+
+                translate.setTranslation("en", { TEST: "I changed the test value!" });
+                translate.setTranslation("en", { TEST: "I changed it again!" });
+            }));
+
+        it("should interpolate the same param into each streamed value when get stream on translation change", () =>
+            new Promise<void>((resolve) => {
+                translations = { TEST: "This is a test {{param}}" };
+                translate.use("en");
+
+                translate
+                    .getStreamOnTranslationChange("TEST", { param: "with param" })
+                    .subscribe((res: Translation) => {
+                        const expected = "This is a test with param";
+                        expect(res).toEqual(expected);
+                        resolve();
+                    });
+            }));
+    });
+
+    it("should be able to stream a translation for the current language", () =>
+        new Promise<void>((resolve) => {
+            translations = { TEST: "This is a test" };
+            translate.use("en");
+
+            translate.stream("TEST").subscribe((res: Translation) => {
+                expect(res).toEqual("This is a test");
+                resolve();
+            });
+        }));
+
+    it("should be able to stream a translation of an array for the current language", () =>
+        new Promise<void>((resolve) => {
             const tr = { TEST: "This is a test", TEST2: "This is a test2" };
             translate.setTranslation("en", tr);
             translate.use("en");
 
-            translate
-                .getStreamOnTranslationChange(["TEST", "TEST2"])
-                .subscribe((res: Translation) => {
-                    expect(res as object).toEqual(tr);
-                    done();
-                });
-        });
-
-        it("returns a function", (done: DoneFn) => {
-            translate.setTranslation("en", { TEST: "This is a test" });
-            translate.use("en");
-
-            translate.getStreamOnTranslationChange(["TEST"]).subscribe((res: Translation) => {
-                expect(res as object).toEqual({ TEST: "This is a test" });
-                done();
+            translate.stream(["TEST", "TEST2"]).subscribe((res: Translation) => {
+                expect(res as object).toEqual(tr);
+                resolve();
             });
-        });
+        }));
 
-        it("should initially return the same value for getStreamOnTranslationChange and non-streaming get", (done: DoneFn) => {
+    it("should initially return the same value for streaming and non-streaming get", () =>
+        new Promise<void>((resolve) => {
             translations = { TEST: "This is a test" };
             translate.use("en");
 
-            zip(translate.getStreamOnTranslationChange("TEST"), translate.get("TEST")).subscribe(
+            zip(translate.stream("TEST"), translate.get("TEST")).subscribe(
                 (value: Translation[]) => {
-                    const [streamed, nonStreamed] = value;
+                    const [streamed, nonStreamed] = value as string[];
                     expect(streamed).toEqual("This is a test");
-                    expect(nonStreamed).toEqual("This is a test");
-                    done();
+                    expect(streamed).toEqual(nonStreamed);
+                    resolve();
                 },
             );
-        });
+        }));
 
-        it("should be able to stream a translation on translation change", (done: DoneFn) => {
+    it("should update streaming translations on language change", () =>
+        new Promise<void>((resolve) => {
             translations = { TEST: "This is a test" };
             translate.use("en");
 
             translate
-                .getStreamOnTranslationChange("TEST")
+                .stream("TEST")
                 .pipe(take(3), toArray())
                 .subscribe((res: Translation[]) => {
-                    const expected = [
-                        "This is a test",
-                        "I changed the test value!",
-                        "I changed it again!",
-                    ];
+                    const expected = ["This is a test", "Dit is een test", "This is a test"];
                     expect(res).toEqual(expected);
-                    done();
+                    resolve();
                 });
 
-            translate.setTranslation("en", { TEST: "I changed the test value!" });
-            translate.setTranslation("en", { TEST: "I changed it again!" });
-        });
+            translate.setTranslation("nl", { TEST: "Dit is een test" });
+            translate.use("nl");
+            translate.use("en");
+        }));
 
-        it("should interpolate the same param into each streamed value when get stream on translation change", (done: DoneFn) => {
+    it("should update lazy streaming translations on translation change", () =>
+        new Promise<void>((resolve) => {
+            translations = { TEST: "This is a test" };
+            translate.use("en");
+
+            const translation$ = translate.getStreamOnTranslationChange("TEST");
+
+            translate.setTranslation("en", { TEST: "This is a test2" });
+
+            translation$.pipe(first()).subscribe((res: Translation) => {
+                const expected = "This is a test2";
+                expect(res).toEqual(expected);
+                resolve();
+            });
+        }));
+
+    it("should update lazy streaming translations on language change", () =>
+        new Promise<void>((resolve) => {
+            translations = { TEST: "This is a test" };
+            translate.use("en");
+
+            const translation$ = translate.stream("TEST");
+
+            translate.setTranslation("nl", { TEST: "Dit is een test" });
+            translate.use("nl");
+
+            translation$.pipe(first()).subscribe((res: Translation) => {
+                const expected = "Dit is een test";
+                expect(res).toEqual(expected);
+                resolve();
+            });
+        }));
+
+    it("should update streaming translations of an array on language change", () =>
+        new Promise<void>((resolve) => {
+            const en = { TEST: "This is a test", TEST2: "This is a test2" };
+            const nl = { TEST: "Dit is een test", TEST2: "Dit is een test2" };
+            translate.setTranslation("en", en);
+            translate.use("en");
+
+            translate
+                .stream(["TEST", "TEST2"])
+                .pipe(take(3), toArray())
+                .subscribe((res: Translation[]) => {
+                    const expected = [en, nl, en];
+                    expect(res).toEqual(expected);
+                    resolve();
+                });
+
+            translate.setTranslation("nl", nl);
+            translate.use("nl");
+            translate.use("en");
+        }));
+
+    it("should interpolate the same param into each streamed value", () =>
+        new Promise<void>((resolve) => {
             translations = { TEST: "This is a test {{param}}" };
             translate.use("en");
 
             translate
-                .getStreamOnTranslationChange("TEST", { param: "with param" })
-                .subscribe((res: Translation) => {
-                    const expected = "This is a test with param";
+                .stream("TEST", { param: "with param" })
+                .pipe(take(3), toArray())
+                .subscribe((res: Translation[]) => {
+                    const expected = [
+                        "This is a test with param",
+                        "Dit is een test with param",
+                        "This is a test with param",
+                    ];
                     expect(res).toEqual(expected);
-                    done();
+                    resolve();
                 });
-        });
-    });
 
-    it("should be able to stream a translation for the current language", (done: DoneFn) => {
-        translations = { TEST: "This is a test" };
-        translate.use("en");
-
-        translate.stream("TEST").subscribe((res: Translation) => {
-            expect(res).toEqual("This is a test");
-            done();
-        });
-    });
-
-    it("should be able to stream a translation of an array for the current language", (done: DoneFn) => {
-        const tr = { TEST: "This is a test", TEST2: "This is a test2" };
-        translate.setTranslation("en", tr);
-        translate.use("en");
-
-        translate.stream(["TEST", "TEST2"]).subscribe((res: Translation) => {
-            expect(res as object).toEqual(tr);
-            done();
-        });
-    });
-
-    it("should initially return the same value for streaming and non-streaming get", (done: DoneFn) => {
-        translations = { TEST: "This is a test" };
-        translate.use("en");
-
-        zip(translate.stream("TEST"), translate.get("TEST")).subscribe((value: Translation[]) => {
-            const [streamed, nonStreamed] = value as string[];
-            expect(streamed).toEqual("This is a test");
-            expect(streamed).toEqual(nonStreamed);
-            done();
-        });
-    });
-
-    it("should update streaming translations on language change", (done: DoneFn) => {
-        translations = { TEST: "This is a test" };
-        translate.use("en");
-
-        translate
-            .stream("TEST")
-            .pipe(take(3), toArray())
-            .subscribe((res: Translation[]) => {
-                const expected = ["This is a test", "Dit is een test", "This is a test"];
-                expect(res).toEqual(expected);
-                done();
-            });
-
-        translate.setTranslation("nl", { TEST: "Dit is een test" });
-        translate.use("nl");
-        translate.use("en");
-    });
-
-    it("should update lazy streaming translations on translation change", (done: DoneFn) => {
-        translations = { TEST: "This is a test" };
-        translate.use("en");
-
-        const translation$ = translate.getStreamOnTranslationChange("TEST");
-
-        translate.setTranslation("en", { TEST: "This is a test2" });
-
-        translation$.pipe(first()).subscribe((res: Translation) => {
-            const expected = "This is a test2";
-            expect(res).toEqual(expected);
-            done();
-        });
-    });
-
-    it("should update lazy streaming translations on language change", (done: DoneFn) => {
-        translations = { TEST: "This is a test" };
-        translate.use("en");
-
-        const translation$ = translate.stream("TEST");
-
-        translate.setTranslation("nl", { TEST: "Dit is een test" });
-        translate.use("nl");
-
-        translation$.pipe(first()).subscribe((res: Translation) => {
-            const expected = "Dit is een test";
-            expect(res).toEqual(expected);
-            done();
-        });
-    });
-
-    it("should update streaming translations of an array on language change", (done: DoneFn) => {
-        const en = { TEST: "This is a test", TEST2: "This is a test2" };
-        const nl = { TEST: "Dit is een test", TEST2: "Dit is een test2" };
-        translate.setTranslation("en", en);
-        translate.use("en");
-
-        translate
-            .stream(["TEST", "TEST2"])
-            .pipe(take(3), toArray())
-            .subscribe((res: Translation[]) => {
-                const expected = [en, nl, en];
-                expect(res).toEqual(expected);
-                done();
-            });
-
-        translate.setTranslation("nl", nl);
-        translate.use("nl");
-        translate.use("en");
-    });
-
-    it("should interpolate the same param into each streamed value", (done: DoneFn) => {
-        translations = { TEST: "This is a test {{param}}" };
-        translate.use("en");
-
-        translate
-            .stream("TEST", { param: "with param" })
-            .pipe(take(3), toArray())
-            .subscribe((res: Translation[]) => {
-                const expected = [
-                    "This is a test with param",
-                    "Dit is een test with param",
-                    "This is a test with param",
-                ];
-                expect(res).toEqual(expected);
-                done();
-            });
-
-        translate.setTranslation("nl", { TEST: "Dit is een test {{param}}" });
-        translate.use("nl");
-        translate.use("en");
-    });
+            translate.setTranslation("nl", { TEST: "Dit is een test {{param}}" });
+            translate.use("nl");
+            translate.use("en");
+        }));
 
     describe("instant()", () => {
         it("should accept an object for interpolation", () => {
@@ -858,7 +883,7 @@ describe("TranslateService", () => {
 
     describe("setCompiledTranslation() compiler bypass", () => {
         let spyTranslate: TestableTranslateService;
-        let compileTranslationsSpy: jasmine.Spy;
+        let compileTranslationsSpy: MockInstance;
 
         class SpyCompiler extends TranslateCompiler {
             compile(value: string, lang: string): string {
@@ -885,10 +910,10 @@ describe("TranslateService", () => {
                 ],
             });
             spyTranslate = TestBed.inject(TranslateService) as TestableTranslateService;
-            compileTranslationsSpy = spyOn(
+            compileTranslationsSpy = vi.spyOn(
                 spyTranslate.getCompiler() as SpyCompiler,
                 "compileTranslations",
-            ).and.callThrough();
+            );
         });
 
         it("does NOT invoke the compiler when storing compiled translations", () => {
@@ -926,24 +951,25 @@ describe("TranslateService", () => {
         translate.use("en");
     });
 
-    it("should be able to reset a lang", (done: DoneFn) => {
-        translate.use("en");
+    it("should be able to reset a lang", () =>
+        new Promise<void>((resolve) => {
+            translate.use("en");
 
-        // this will request the translation from the backend because we use a static files loader for TranslateService
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res).toEqual("This is a test");
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res).toEqual("This is a test");
 
-            // reset the lang as if it was never initiated
-            translate.resetLang("en");
+                // reset the lang as if it was never initiated
+                translate.resetLang("en");
 
-            expect(translate.instant("TEST")).toEqual("TEST");
+                expect(translate.instant("TEST")).toEqual("TEST");
 
-            translate.get("TEST").subscribe((res2: Translation) => {
-                expect(res2).toEqual("TEST"); // because the loader is "pristine" as if it was never called
-                done();
+                translate.get("TEST").subscribe((res2: Translation) => {
+                    expect(res2).toEqual("TEST"); // because the loader is "pristine" as if it was never called
+                    resolve();
+                });
             });
-        });
-    });
+        }));
 
     it("should be able to reload a lang", () => {
         translations = {};
@@ -989,23 +1015,24 @@ describe("TranslateService", () => {
         expect(typeof browserCultureLand === "string").toBeTruthy();
     });
 
-    it("should not make duplicate getTranslation calls", fakeAsync(() => {
+    it("should not make duplicate getTranslation calls", () => {
+        vi.useFakeTimers();
         let getTranslationCalls = 0;
-        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
+        vi.spyOn(translate.getCurrentLoader(), "getTranslation").mockImplementation(() => {
             getTranslationCalls += 1;
             return timer(1000).pipe(map(() => translations));
         });
         translate.use("en");
         translate.use("en");
 
-        tick(1001);
+        vi.advanceTimersByTime(1001);
 
         expect(getTranslationCalls).toEqual(1);
-    }));
+    });
 
     it("should subscribe to the loader just once", () => {
         let subscriptions = 0;
-        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
+        vi.spyOn(translate.getCurrentLoader(), "getTranslation").mockImplementation(() => {
             return defer(() => {
                 subscriptions++;
                 return of(translations);
@@ -1019,17 +1046,18 @@ describe("TranslateService", () => {
         expect(subscriptions).toEqual(1);
     });
 
-    it("should compile translations only once, even when subscribing to translations while translations are loading", fakeAsync(() => {
-        spyOn(translate.getCurrentLoader(), "getTranslation").and.callFake(() => {
+    it("should compile translations only once, even when subscribing to translations while translations are loading", () => {
+        vi.useFakeTimers();
+        vi.spyOn(translate.getCurrentLoader(), "getTranslation").mockImplementation(() => {
             return timer(1000).pipe(map(() => translations));
         });
 
         let translateCompilerCallCount = 0;
-        spyOn(translate.getCompiler(), "compile").and.callFake((value) => {
+        vi.spyOn(translate.getCompiler(), "compile").mockImplementation((value) => {
             ++translateCompilerCallCount;
             return value;
         });
-        spyOn(translate.getCompiler(), "compileTranslations").and.callFake((value) => {
+        vi.spyOn(translate.getCompiler(), "compileTranslations").mockImplementation((value) => {
             ++translateCompilerCallCount;
             return value;
         });
@@ -1040,10 +1068,10 @@ describe("TranslateService", () => {
         translate.get("TEST3").subscribe();
         translate.get("TEST4").subscribe();
 
-        tick(1001);
+        vi.advanceTimersByTime(1001);
 
         expect(translateCompilerCallCount).toBe(1);
-    }));
+    });
 
     it("throws error if empty key is provided for stream", () => {
         expect(() => {
@@ -1054,50 +1082,50 @@ describe("TranslateService", () => {
     describe("getBrowserLang()", () => {
         it("should return undefined when window is undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window, "navigator", "get").and.returnValue(void 0);
+            vi.spyOn(window, "navigator", "get").mockReturnValue(void 0);
             expect(translate.getBrowserLang()).toBeUndefined();
         });
 
         it("should return undefined if window is undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window, "navigator", "get").and.returnValue(void 0);
+            vi.spyOn(window, "navigator", "get").mockReturnValue(void 0);
 
             expect(translate.getBrowserLang()).toBeUndefined();
         });
 
         it("should return undefined if window.navigator is undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window, "navigator", "get").and.returnValue(void 0);
+            vi.spyOn(window, "navigator", "get").mockReturnValue(void 0);
 
             expect(translate.getBrowserLang()).toBeUndefined();
         });
 
         it("should return the first language from window.navigator.languages", () => {
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(["fr-FR", "en-US"]);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["fr-FR", "en-US"]);
 
             expect(translate.getBrowserLang()).toBe("fr");
         });
 
         it("should accept _ as separator in language codes", () => {
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(["fr_FR", "en_US"]);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["fr_FR", "en_US"]);
 
             expect(translate.getBrowserLang()).toBe("fr");
         });
 
         it("should return window.navigator.language if window.navigator.languages is not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
-            spyOnProperty(window.navigator, "language", "get").and.returnValue("es-ES");
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue("es-ES");
 
             expect(translate.getBrowserLang()).toBe("es");
         });
 
         it("should return window.navigator.browserLanguage if other properties are not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
             (window.navigator as unknown as FakeNavigator).browserLanguage = "de-DE";
 
             expect(translate.getBrowserLang()).toBe("de");
@@ -1105,10 +1133,10 @@ describe("TranslateService", () => {
 
         it("should return window.navigator.userLanguage if other properties are not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
 
             fakeNavigator.browserLanguage = undefined;
             fakeNavigator.userLanguage = "it-IT";
@@ -1118,10 +1146,10 @@ describe("TranslateService", () => {
 
         it("should return undefined if all navigator properties are undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
             fakeNavigator.browserLanguage = undefined;
             fakeNavigator.userLanguage = undefined;
 
@@ -1129,8 +1157,8 @@ describe("TranslateService", () => {
         });
 
         it("should handle language codes with underscores", () => {
-            spyOnProperty(window.navigator, "language", "get").and.returnValue("en_US");
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(["en_US"]);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue("en_US");
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["en_US"]);
 
             expect(translate.getBrowserLang()).toBe("en");
         });
@@ -1139,38 +1167,38 @@ describe("TranslateService", () => {
     describe("getBrowserCultureLang", () => {
         it("should return undefined if window is undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window, "navigator", "get").and.returnValue(undefined);
+            vi.spyOn(window, "navigator", "get").mockReturnValue(undefined);
 
             expect(translate.getBrowserCultureLang()).toBeUndefined();
         });
 
         it("should return undefined if window.navigator is undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window, "navigator", "get").and.returnValue(undefined);
+            vi.spyOn(window, "navigator", "get").mockReturnValue(undefined);
 
             expect(translate.getBrowserCultureLang()).toBeUndefined();
         });
 
         it("should return the first language from window.navigator.languages", () => {
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(["fr-FR", "en-US"]);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(["fr-FR", "en-US"]);
 
             expect(translate.getBrowserCultureLang()).toBe("fr-FR");
         });
 
         it("should return window.navigator.language if window.navigator.languages is not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
-            spyOnProperty(window.navigator, "language", "get").and.returnValue("es-ES");
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue("es-ES");
 
             expect(translate.getBrowserCultureLang()).toBe("es-ES");
         });
 
         it("should return window.navigator.browserLanguage if other properties are not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
             fakeNavigator.browserLanguage = "de-DE";
 
             expect(translate.getBrowserCultureLang()).toBe("de-DE");
@@ -1178,10 +1206,10 @@ describe("TranslateService", () => {
 
         it("should return window.navigator.userLanguage if other properties are not defined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
             fakeNavigator.browserLanguage = undefined;
             fakeNavigator.userLanguage = "it-IT";
 
@@ -1190,10 +1218,10 @@ describe("TranslateService", () => {
 
         it("should return undefined if all navigator properties are undefined", () => {
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "languages", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "languages", "get").mockReturnValue(undefined);
 
             // @ts-expect-error we simulate that the property does not exist - lint does not like this
-            spyOnProperty(window.navigator, "language", "get").and.returnValue(undefined);
+            vi.spyOn(window.navigator, "language", "get").mockReturnValue(undefined);
 
             fakeNavigator.browserLanguage = undefined;
             fakeNavigator.userLanguage = undefined;
@@ -1339,15 +1367,16 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
             });
         });
 
-        it("should handle array with invalid elements gracefully", (done) => {
-            // With honest nullable currentLang, invalid keys no longer crash —
-            // they fall through to the missing translation handler which returns the key
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            translate.get([null, undefined, ""] as any).subscribe((res: Translation) => {
-                expect(res).toEqual({ null: null, undefined: undefined, "": "" });
-                done();
-            });
-        });
+        it("should handle array with invalid elements gracefully", () =>
+            new Promise<void>((resolve) => {
+                // With honest nullable currentLang, invalid keys no longer crash —
+                // they fall through to the missing translation handler which returns the key
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                translate.get([null, undefined, ""] as any).subscribe((res: Translation) => {
+                    expect(res).toEqual({ null: null, undefined: undefined, "": "" });
+                    resolve();
+                });
+            }));
 
         it("should handle deeply nested invalid parameters", () => {
             const invalidParams = {
@@ -1419,55 +1448,57 @@ describe("TranslateService (Error Conditions and Recovery)", () => {
             }
         }
 
-        it("should handle loader error in use", (done) => {
-            spyOn(console, "warn");
-            TestBed.resetTestingModule();
-            TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({
-                        loader: provideTranslateLoader(ErrorLoader),
-                    }),
-                ],
-            });
+        it("should handle loader error in use", () =>
+            new Promise<void>((resolve, reject) => {
+                vi.spyOn(console, "warn").mockReturnValue(undefined);
+                TestBed.resetTestingModule();
+                TestBed.configureTestingModule({
+                    providers: [
+                        provideTranslateService({
+                            loader: provideTranslateLoader(ErrorLoader),
+                        }),
+                    ],
+                });
 
-            const errorTranslate = TestBed.inject(TranslateService);
+                const errorTranslate = TestBed.inject(TranslateService);
 
-            errorTranslate.use("en").subscribe({
-                next: () => {
-                    // Should not reach here
-                    done.fail("Expected error but got success");
-                },
-                error: (err) => {
-                    expect(err.message).toBe("Load failed");
-                    done();
-                },
-            });
-        });
+                errorTranslate.use("en").subscribe({
+                    next: () => {
+                        // Should not reach here
+                        reject("Expected error but got success");
+                    },
+                    error: (err) => {
+                        expect(err.message).toBe("Load failed");
+                        resolve();
+                    },
+                });
+            }));
 
-        it("should handle loader error in setFallbackLang", (done) => {
-            spyOn(console, "warn");
-            TestBed.resetTestingModule();
-            TestBed.configureTestingModule({
-                providers: [
-                    provideTranslateService({
-                        loader: provideTranslateLoader(ErrorLoader),
-                    }),
-                ],
-            });
+        it("should handle loader error in setFallbackLang", () =>
+            new Promise<void>((resolve, reject) => {
+                vi.spyOn(console, "warn").mockReturnValue(undefined);
+                TestBed.resetTestingModule();
+                TestBed.configureTestingModule({
+                    providers: [
+                        provideTranslateService({
+                            loader: provideTranslateLoader(ErrorLoader),
+                        }),
+                    ],
+                });
 
-            const errorTranslate = TestBed.inject(TranslateService);
+                const errorTranslate = TestBed.inject(TranslateService);
 
-            errorTranslate.setFallbackLang("en").subscribe({
-                next: () => {
-                    // Should not reach here
-                    done.fail("Expected error but got success");
-                },
-                error: (err) => {
-                    expect(err.message).toBe("Load failed");
-                    done();
-                },
-            });
-        });
+                errorTranslate.setFallbackLang("en").subscribe({
+                    next: () => {
+                        // Should not reach here
+                        reject("Expected error but got success");
+                    },
+                    error: (err) => {
+                        expect(err.message).toBe("Load failed");
+                        resolve();
+                    },
+                });
+            }));
 
         it("should handle configuration with lang in constructor", () => {
             TestBed.resetTestingModule();
@@ -1820,7 +1851,9 @@ describe("TranslateService.translate() Signal", () => {
             });
             translate.use("en");
 
-            const wrapper = signal<{ label: string }>({ label: "KEY1" });
+            const wrapper = signal<{
+                label: string;
+            }>({ label: "KEY1" });
             const result = translate.translate(() => wrapper().label);
 
             expect(result()).toEqual("Value 1");
@@ -1904,84 +1937,89 @@ describe("TranslateService.onTranslationRefresh", () => {
         translate = TestBed.inject(TranslateService);
     });
 
-    it("should emit when language changes", (done) => {
-        translate.setTranslation("en", { TEST: "English" });
-        translate.setTranslation("fr", { TEST: "French" });
-        translate.use("en");
+    it("should emit when language changes", () =>
+        new Promise<void>((resolve) => {
+            translate.setTranslation("en", { TEST: "English" });
+            translate.setTranslation("fr", { TEST: "French" });
+            translate.use("en");
 
-        translate.onTranslationRefresh.subscribe(() => {
-            expect(translate.getCurrentLang()).toEqual("fr");
-            done();
-        });
+            translate.onTranslationRefresh.subscribe(() => {
+                expect(translate.getCurrentLang()).toEqual("fr");
+                resolve();
+            });
 
-        translate.use("fr");
-    });
+            translate.use("fr");
+        }));
 
-    it("should emit when current language translations are updated", (done) => {
-        translate.setTranslation("en", { TEST: "Original" });
-        translate.use("en");
+    it("should emit when current language translations are updated", () =>
+        new Promise<void>((resolve) => {
+            translate.setTranslation("en", { TEST: "Original" });
+            translate.use("en");
 
-        translate.onTranslationRefresh.subscribe(() => {
-            expect(translate.instant("TEST")).toEqual("Updated");
-            done();
-        });
+            translate.onTranslationRefresh.subscribe(() => {
+                expect(translate.instant("TEST")).toEqual("Updated");
+                resolve();
+            });
 
-        translate.setTranslation("en", { TEST: "Updated" });
-    });
+            translate.setTranslation("en", { TEST: "Updated" });
+        }));
 
-    it("should emit when fallback language translations are updated", (done) => {
-        translate.setTranslation("en", {});
-        translate.setTranslation("de", { TEST: "German" });
-        translate.use("en");
-        translate.setFallbackLang("de");
+    it("should emit when fallback language translations are updated", () =>
+        new Promise<void>((resolve) => {
+            translate.setTranslation("en", {});
+            translate.setTranslation("de", { TEST: "German" });
+            translate.use("en");
+            translate.setFallbackLang("de");
 
-        // Skip initial emissions, wait for translation update
-        let emitCount = 0;
-        translate.onTranslationRefresh.subscribe(() => {
-            emitCount++;
-            if (emitCount === 1) {
-                expect(translate.instant("TEST")).toEqual("Updated German");
-                done();
-            }
-        });
+            // Skip initial emissions, wait for translation update
+            let emitCount = 0;
+            translate.onTranslationRefresh.subscribe(() => {
+                emitCount++;
+                if (emitCount === 1) {
+                    expect(translate.instant("TEST")).toEqual("Updated German");
+                    resolve();
+                }
+            });
 
-        translate.setTranslation("de", { TEST: "Updated German" });
-    });
+            translate.setTranslation("de", { TEST: "Updated German" });
+        }));
 
-    it("should emit when fallback language changes", (done) => {
-        translate.setTranslation("en", {});
-        translate.setTranslation("de", { TEST: "German" });
-        translate.setTranslation("fr", { TEST: "French" });
-        translate.use("en");
-        translate.setFallbackLang("de");
+    it("should emit when fallback language changes", () =>
+        new Promise<void>((resolve) => {
+            translate.setTranslation("en", {});
+            translate.setTranslation("de", { TEST: "German" });
+            translate.setTranslation("fr", { TEST: "French" });
+            translate.use("en");
+            translate.setFallbackLang("de");
 
-        translate.onTranslationRefresh.subscribe(() => {
-            expect(translate.getFallbackLang()).toEqual("fr");
-            done();
-        });
+            translate.onTranslationRefresh.subscribe(() => {
+                expect(translate.getFallbackLang()).toEqual("fr");
+                resolve();
+            });
 
-        translate.setFallbackLang("fr");
-    });
+            translate.setFallbackLang("fr");
+        }));
 
-    it("should NOT emit when unrelated language translations are updated", (done) => {
-        translate.setTranslation("en", { TEST: "English" });
-        translate.setTranslation("fr", { TEST: "French" });
-        translate.use("en");
+    it("should NOT emit when unrelated language translations are updated", () =>
+        new Promise<void>((resolve) => {
+            translate.setTranslation("en", { TEST: "English" });
+            translate.setTranslation("fr", { TEST: "French" });
+            translate.use("en");
 
-        let emitted = false;
-        translate.onTranslationRefresh.subscribe(() => {
-            emitted = true;
-        });
+            let emitted = false;
+            translate.onTranslationRefresh.subscribe(() => {
+                emitted = true;
+            });
 
-        // Update French translations while English is current (and no fallback)
-        translate.setTranslation("fr", { TEST: "Updated French" });
+            // Update French translations while English is current (and no fallback)
+            translate.setTranslation("fr", { TEST: "Updated French" });
 
-        // Give it a moment then check
-        setTimeout(() => {
-            expect(emitted).toBe(false);
-            done();
-        }, 50);
-    });
+            // Give it a moment then check
+            setTimeout(() => {
+                expect(emitted).toBe(false);
+                resolve();
+            }, 50);
+        }));
 
     describe("onTranslationRefresh caching", () => {
         it("should return the same observable instance on multiple accesses", () => {
@@ -2008,15 +2046,16 @@ describe("TranslateService.currentLang signal", () => {
         expect(langSignal()).toBe("en");
     });
 
-    it("should update when use() is called", fakeAsync(() => {
+    it("should update when use() is called", () => {
+        vi.useFakeTimers();
         translate.use("en");
         const langSignal = translate.currentLang;
         expect(langSignal()).toBe("en");
 
         translate.use("fr");
-        tick();
+        vi.advanceTimersByTime(0);
         expect(langSignal()).toBe("fr");
-    }));
+    });
 
     it("should be the same reference on repeated access", () => {
         expect(translate.currentLang).toBe(translate.currentLang);
@@ -2037,11 +2076,12 @@ describe("TranslateService.fallbackLang signal", () => {
         expect(translate.fallbackLang()).toBeNull();
     });
 
-    it("should update when setFallbackLang() is called", fakeAsync(() => {
+    it("should update when setFallbackLang() is called", () => {
+        vi.useFakeTimers();
         translate.setFallbackLang("en");
-        tick();
+        vi.advanceTimersByTime(0);
         expect(translate.fallbackLang()).toBe("en");
-    }));
+    });
 
     it("should be the same reference on repeated access", () => {
         expect(translate.fallbackLang).toBe(translate.fallbackLang);
@@ -2050,7 +2090,7 @@ describe("TranslateService.fallbackLang signal", () => {
 
 describe("error logging", () => {
     it("should warn when loader fails in use() with rollback context", () => {
-        const spy = spyOn(console, "warn");
+        const spy = vi.spyOn(console, "warn").mockReturnValue(undefined);
         const error = new Error("Load failed");
 
         const errorLoader = {
@@ -2078,7 +2118,7 @@ describe("error logging", () => {
     });
 
     it("should not double-warn — loadAndCompileTranslations is silent now", () => {
-        const spy = spyOn(console, "warn");
+        const spy = vi.spyOn(console, "warn").mockReturnValue(undefined);
         const error = new Error("Load failed");
 
         const errorLoader = {
@@ -2126,12 +2166,13 @@ describe("TranslateService pre-initialization (no use() called)", () => {
         expect(translate.instant("TEST")).toEqual("TEST");
     });
 
-    it("get() should return the key before use() is called", (done) => {
-        translate.get("TEST").subscribe((result) => {
-            expect(result).toEqual("TEST");
-            done();
-        });
-    });
+    it("get() should return the key before use() is called", () =>
+        new Promise<void>((resolve) => {
+            translate.get("TEST").subscribe((result) => {
+                expect(result).toEqual("TEST");
+                resolve();
+            });
+        }));
 });
 
 describe("TranslateService (explicit lang parameter)", () => {
@@ -2173,62 +2214,67 @@ describe("TranslateService (explicit lang parameter)", () => {
         expect(translate.instant("ONLY_EN", undefined, "en")).toEqual("English only");
     });
 
-    it("get() should return translation from the specified language", (done) => {
-        translate
-            .get("GREETING", undefined, "de")
-            .pipe(first())
-            .subscribe((result) => {
-                expect(result).toEqual("Hallo");
-                done();
-            });
-    });
+    it("get() should return translation from the specified language", () =>
+        new Promise<void>((resolve) => {
+            translate
+                .get("GREETING", undefined, "de")
+                .pipe(first())
+                .subscribe((result) => {
+                    expect(result).toEqual("Hallo");
+                    resolve();
+                });
+        }));
 
-    it("get() with array keys should return translations from the specified language", (done) => {
-        translate
-            .get(["GREETING", "ONLY_DE"], undefined, "de")
-            .pipe(first())
-            .subscribe((result) => {
-                expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
-                done();
-            });
-    });
+    it("get() with array keys should return translations from the specified language", () =>
+        new Promise<void>((resolve) => {
+            translate
+                .get(["GREETING", "ONLY_DE"], undefined, "de")
+                .pipe(first())
+                .subscribe((result) => {
+                    expect(result).toEqual({ GREETING: "Hallo", ONLY_DE: "Nur Deutsch" });
+                    resolve();
+                });
+        }));
 
-    it("stream() should return translation from the specified language", (done) => {
-        translate
-            .stream("GREETING", undefined, "de")
-            .pipe(first())
-            .subscribe((result) => {
-                expect(result).toEqual("Hallo");
-                done();
-            });
-    });
+    it("stream() should return translation from the specified language", () =>
+        new Promise<void>((resolve) => {
+            translate
+                .stream("GREETING", undefined, "de")
+                .pipe(first())
+                .subscribe((result) => {
+                    expect(result).toEqual("Hallo");
+                    resolve();
+                });
+        }));
 
-    it("stream() with per-call lang re-emits when that lang's translations change", (done) => {
-        const emissions: Translation[] = [];
-        const sub = translate.stream("GREETING", undefined, "de").subscribe((result) => {
-            emissions.push(result);
-            if (emissions.length === 2) {
-                expect(emissions[0]).toEqual("Hallo");
-                expect(emissions[1]).toEqual("Hallo (updated)");
-                sub.unsubscribe();
-                done();
-            }
-        });
-        // Trigger a translation change for the per-call lang. With the v18 fix,
-        // stream() should pick this up even though current lang ("en") didn't
-        // change. Before the fix, the stream stayed stuck on the initial value.
-        translate.setTranslation("de", { GREETING: "Hallo (updated)" });
-    });
-
-    it("getStreamOnTranslationChange() should return translation from the specified language", (done) => {
-        translate
-            .getStreamOnTranslationChange("GREETING", undefined, "de")
-            .pipe(first())
-            .subscribe((result) => {
-                expect(result).toEqual("Hallo");
-                done();
+    it("stream() with per-call lang re-emits when that lang's translations change", () =>
+        new Promise<void>((resolve) => {
+            const emissions: Translation[] = [];
+            const sub = translate.stream("GREETING", undefined, "de").subscribe((result) => {
+                emissions.push(result);
+                if (emissions.length === 2) {
+                    expect(emissions[0]).toEqual("Hallo");
+                    expect(emissions[1]).toEqual("Hallo (updated)");
+                    sub.unsubscribe();
+                    resolve();
+                }
             });
-    });
+            // Trigger a translation change for the per-call lang. With the v18 fix,
+            // stream() should pick this up even though current lang ("en") didn't
+            // change. Before the fix, the stream stayed stuck on the initial value.
+            translate.setTranslation("de", { GREETING: "Hallo (updated)" });
+        }));
+
+    it("getStreamOnTranslationChange() should return translation from the specified language", () =>
+        new Promise<void>((resolve) => {
+            translate
+                .getStreamOnTranslationChange("GREETING", undefined, "de")
+                .pipe(first())
+                .subscribe((result) => {
+                    expect(result).toEqual("Hallo");
+                    resolve();
+                });
+        }));
 
     it("translate() should return translation from the specified language (string)", () => {
         const result = translate.translate("GREETING", undefined, "de");
@@ -2251,42 +2297,48 @@ describe("TranslateService (explicit lang parameter)", () => {
 });
 
 describe("TranslateService (F3 — Subject completion on destroy)", () => {
-    it("completes _onLangChange when the service is destroyed", (done) => {
-        TestBed.configureTestingModule({
-            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
-        });
-        const service = TestBed.inject(TranslateService);
+    it("completes _onLangChange when the service is destroyed", () =>
+        new Promise<void>((resolve) => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+                ],
+            });
+            const service = TestBed.inject(TranslateService);
 
-        let completed = false;
-        service.onLangChange.subscribe({
-            complete: () => {
-                completed = true;
-                expect(completed).toBeTrue();
-                done();
-            },
-        });
+            let completed = false;
+            service.onLangChange.subscribe({
+                complete: () => {
+                    completed = true;
+                    expect(completed).toBe(true);
+                    resolve();
+                },
+            });
 
-        // Destroying the TestBed injector triggers DestroyRef.onDestroy()
-        TestBed.resetTestingModule();
-    });
+            // Destroying the TestBed injector triggers DestroyRef.onDestroy()
+            TestBed.resetTestingModule();
+        }));
 
-    it("completes _onFallbackLangChange when the service is destroyed", (done) => {
-        TestBed.configureTestingModule({
-            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
-        });
-        const service = TestBed.inject(TranslateService);
+    it("completes _onFallbackLangChange when the service is destroyed", () =>
+        new Promise<void>((resolve) => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+                ],
+            });
+            const service = TestBed.inject(TranslateService);
 
-        let completed = false;
-        service.onFallbackLangChange.subscribe({
-            complete: () => {
-                completed = true;
-                expect(completed).toBeTrue();
-                done();
-            },
-        });
+            let completed = false;
+            service.onFallbackLangChange.subscribe({
+                complete: () => {
+                    completed = true;
+                    expect(completed).toBe(true);
+                    resolve();
+                },
+            });
 
-        TestBed.resetTestingModule();
-    });
+            TestBed.resetTestingModule();
+        }));
 });
 
 describe("TranslateService (F6 — instant() warn dedup)", () => {
@@ -2303,11 +2355,12 @@ describe("TranslateService (F6 — instant() warn dedup)", () => {
     });
 
     it("instant(_,_,lang) warns once per unloaded lang and not for loaded langs", () => {
-        const warnSpy = spyOn(console, "warn");
+        const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
         const warnCount = () =>
-            warnSpy.calls
-                .all()
-                .filter((c) => (c.args[0] as string).includes("no translations are loaded")).length;
+            vi
+                .mocked(warnSpy)
+                .mock.calls.filter((c) => (c[0] as string).includes("no translations are loaded"))
+                .length;
 
         // First call for unloaded "de" → should warn once
         translate.instant("KEY", undefined, "de");
@@ -2328,28 +2381,31 @@ describe("TranslateService (F6 — instant() warn dedup)", () => {
 });
 
 describe("TranslateService (F7 — stream() emission-count lock-in)", () => {
-    it("stream(_, _, currentLang) emission count on use(currentLang)", (done) => {
-        TestBed.configureTestingModule({
-            providers: [provideTranslateService({ loader: provideTranslateLoader(FakeLoader) })],
-        });
-        const service = TestBed.inject(TranslateService);
-        service.setTranslation("en", { KEY: "Value" });
-        service.use("en");
+    it("stream(_, _, currentLang) emission count on use(currentLang)", () =>
+        new Promise<void>((resolve) => {
+            TestBed.configureTestingModule({
+                providers: [
+                    provideTranslateService({ loader: provideTranslateLoader(FakeLoader) }),
+                ],
+            });
+            const service = TestBed.inject(TranslateService);
+            service.setTranslation("en", { KEY: "Value" });
+            service.use("en");
 
-        let count = 0;
-        // Subscribe to stream for a key with explicit current lang
-        const sub = service.stream("KEY", undefined, "en").subscribe(() => {
-            count++;
-            if (count === 2) {
-                // locks in current behavior; if you change to N, justify in PR
-                expect(count).toBe(2);
-                sub.unsubscribe();
-                done();
-            }
-        });
+            let count = 0;
+            // Subscribe to stream for a key with explicit current lang
+            const sub = service.stream("KEY", undefined, "en").subscribe(() => {
+                count++;
+                if (count === 2) {
+                    // locks in current behavior; if you change to N, justify in PR
+                    expect(count).toBe(2);
+                    sub.unsubscribe();
+                    resolve();
+                }
+            });
 
-        // Calling use() on the already-current lang re-emits onLangChange,
-        // causing the stream to emit a second time
-        service.use("en");
-    });
+            // Calling use() on the already-current lang re-emits onLangChange,
+            // causing the stream to emit a second time
+            service.use("en");
+        }));
 });

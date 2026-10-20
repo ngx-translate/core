@@ -77,7 +77,6 @@ describe("TranslateHttpLoader (HttpClient)", () => {
             prepareSingle({ prefix: "XXXX/" });
             translate.use("en");
             http.expectOne("XXXX/en.json").flush({});
-            expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses multipleHttpLoader prefix", () => {
@@ -85,21 +84,18 @@ describe("TranslateHttpLoader (HttpClient)", () => {
             translate.use("en");
             http.expectOne("XXXX/en.json").flush({});
             http.expectOne("YYYY/en.json").flush({});
-            expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses suffix", () => {
             prepareSingle({ suffix: ".XXXX" });
             translate.use("en");
             http.expectOne("/assets/i18n/en.XXXX").flush({});
-            expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses multipleHttpLoader suffix", () => {
             prepareMulti({ resources: [{ prefix: "/assets/i18n/", suffix: ".XXXX" }] });
             translate.use("en");
             http.expectOne("/assets/i18n/en.XXXX").flush({});
-            expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
 
         it("uses cache buster", () => {
@@ -108,7 +104,6 @@ describe("TranslateHttpLoader (HttpClient)", () => {
             http.expectOne((req) =>
                 req.url.startsWith("/assets/i18n/en.json?enforceLoading="),
             ).flush({});
-            expect(true).toBeTruthy(); // http.expectOne() is not detected by jasmine...
         });
     });
 
@@ -220,65 +215,67 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
     });
 
-    it("should be able to reset a lang", (done: DoneFn) => {
-        prepareSingle();
+    it("should be able to reset a lang", () =>
+        new Promise<void>((resolve) => {
+            prepareSingle();
 
-        translate.use("en");
-        spyOn(http, "expectOne").and.callThrough();
+            translate.use("en");
+            vi.spyOn(http, "expectOne");
 
-        // this will request the translation from the backend because we use a static files loader for TranslateService
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res as string).toEqual("This is a test");
-            expect(http.expectOne).toHaveBeenCalledTimes(1);
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res as string).toEqual("This is a test");
+                expect(http.expectOne).toHaveBeenCalledTimes(1);
 
-            // reset the lang as if it was never initiated
-            translate.resetLang("en");
+                // reset the lang as if it was never initiated
+                translate.resetLang("en");
 
-            expect(translate.instant("TEST") as string).toEqual("TEST");
+                expect(translate.instant("TEST") as string).toEqual("TEST");
 
-            // use set timeout because no request is really made and we need to trigger zone to resolve the observable
-            setTimeout(() => {
-                translate.get("TEST").subscribe((res2: Translation) => {
-                    expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
-                    expect(http.expectOne).toHaveBeenCalledTimes(1);
-                    done();
-                });
-            }, 10);
-        });
+                // use set timeout because no request is really made and we need to trigger zone to resolve the observable
+                setTimeout(() => {
+                    translate.get("TEST").subscribe((res2: Translation) => {
+                        expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
+                        expect(http.expectOne).toHaveBeenCalledTimes(1);
+                        resolve();
+                    });
+                }, 10);
+            });
 
-        // mock response after the xhr request, otherwise it will be undefined
-        http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
-    });
+            // mock response after the xhr request, otherwise it will be undefined
+            http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
+        }));
 
-    it("should be able to reset a lang from MultiHttpLoader", (done: DoneFn) => {
-        prepareMulti();
+    it("should be able to reset a lang from MultiHttpLoader", () =>
+        new Promise<void>((resolve) => {
+            prepareMulti();
 
-        translate.use("en");
-        spyOn(http, "expectOne").and.callThrough();
+            translate.use("en");
+            vi.spyOn(http, "expectOne");
 
-        // this will request the translation from the backend because we use a static files loader for TranslateService
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res as string).toEqual("This is a test");
-            expect(http.expectOne).toHaveBeenCalledTimes(1);
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res as string).toEqual("This is a test");
+                expect(http.expectOne).toHaveBeenCalledTimes(1);
 
-            // reset the lang as if it was never initiated
-            translate.resetLang("en");
+                // reset the lang as if it was never initiated
+                translate.resetLang("en");
 
-            expect(translate.instant("TEST") as string).toEqual("TEST");
+                expect(translate.instant("TEST") as string).toEqual("TEST");
 
-            // use set timeout because no request is really made and we need to trigger zone to resolve the observable
-            setTimeout(() => {
-                translate.get("TEST").subscribe((res2: Translation) => {
-                    expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
-                    expect(http.expectOne).toHaveBeenCalledTimes(1);
-                    done();
-                });
-            }, 10);
-        });
+                // use set timeout because no request is really made and we need to trigger zone to resolve the observable
+                setTimeout(() => {
+                    translate.get("TEST").subscribe((res2: Translation) => {
+                        expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
+                        expect(http.expectOne).toHaveBeenCalledTimes(1);
+                        resolve();
+                    });
+                }, 10);
+            });
 
-        // mock response after the xhr request, otherwise it will be undefined
-        http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
-    });
+            // mock response after the xhr request, otherwise it will be undefined
+            http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
+        }));
 
     it("should merge translations from multiple resources", () => {
         prepareMulti({
@@ -294,7 +291,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
     });
 
     it("should handle error in one resource and still merge others", () => {
-        spyOn(console, "warn");
+        vi.spyOn(console, "warn").mockReturnValue(undefined);
         prepareMulti({
             resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });
@@ -311,7 +308,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         prepareMulti({
             resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });
-        const spy = spyOn(console, "warn");
+        const spy = vi.spyOn(console, "warn").mockReturnValue(undefined);
         translate.use("en").subscribe();
         http.expectOne("/assets/i18n/en.json").flush({ TEST: "A" });
         http.expectOne("/custom/en.lang.json").flush(null, {
@@ -320,12 +317,12 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         });
         expect(spy).toHaveBeenCalledWith(
             "@ngx-translate/http-loader: error loading translation for en:",
-            jasmine.any(Object),
+            expect.any(Object),
         );
     });
 
     it("should fallback to empty object if all resources fail", () => {
-        spyOn(console, "warn");
+        vi.spyOn(console, "warn").mockReturnValue(undefined);
         prepareMulti({
             resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
         });
@@ -351,81 +348,84 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         expect(translate.instant("TEST")).toBe("B");
     });
 
-    it("returns empty translations when resources is []", (done: DoneFn) => {
-        prepareMulti({ resources: [] });
+    it("returns empty translations when resources is []", () =>
+        new Promise<void>((resolve, reject) => {
+            prepareMulti({ resources: [] });
 
-        let completed = false;
-        translate.use("en").subscribe({
-            next: () => {
-                completed = true;
-            },
-            complete: done,
-            error: done.fail,
-        });
+            let completed = false;
+            translate.use("en").subscribe({
+                next: () => {
+                    completed = true;
+                },
+                complete: resolve,
+                error: reject,
+            });
 
-        // No HTTP requests should be pending — forkJoin([]) must not hang
-        http.verify();
+            // No HTTP requests should be pending — forkJoin([]) must not hang
+            http.verify();
 
-        expect(completed).toBeTrue();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect(translate.getTranslations("en") as any).toEqual({});
-    });
+            expect(completed).toBe(true);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            expect(translate.getTranslations("en") as any).toEqual({});
+        }));
 
     describe("F8 failOnError", () => {
-        it("failOnError: true forwards HTTP errors to translate.use()", (done: DoneFn) => {
-            spyOn(console, "warn");
-            prepareMulti({
-                resources: ["/assets/i18n/"],
-                failOnError: true,
-            });
+        it("failOnError: true forwards HTTP errors to translate.use()", () =>
+            new Promise<void>((resolve, reject) => {
+                vi.spyOn(console, "warn").mockReturnValue(undefined);
+                prepareMulti({
+                    resources: ["/assets/i18n/"],
+                    failOnError: true,
+                });
 
-            let errored = false;
-            translate.use("en").subscribe({
-                next: () => done.fail("Expected an error, got a next value"),
-                error: (err: unknown) => {
-                    errored = true;
-                    expect(errored).toBeTrue();
-                    expect(err).toBeDefined();
-                    done();
-                },
-            });
+                let errored = false;
+                translate.use("en").subscribe({
+                    next: () => reject("Expected an error, got a next value"),
+                    error: (err: unknown) => {
+                        errored = true;
+                        expect(errored).toBe(true);
+                        expect(err).toBeDefined();
+                        resolve();
+                    },
+                });
 
-            http.expectOne("/assets/i18n/en.json").flush(null, {
-                status: 500,
-                statusText: "Server Error",
-            });
-        });
+                http.expectOne("/assets/i18n/en.json").flush(null, {
+                    status: 500,
+                    statusText: "Server Error",
+                });
+            }));
 
-        it("failOnError: true via single-config provideTranslateHttpLoader path", (done: DoneFn) => {
-            // Uses the provideTranslateHttpLoader(single) overload which converts to
-            // multi-config at http-loader.ts:101-114. Verifies failOnError is preserved.
-            spyOn(console, "warn");
-            prepareSingle({
-                prefix: "/i18n/",
-                suffix: ".json",
-                failOnError: true,
-            });
+        it("failOnError: true via single-config provideTranslateHttpLoader path", () =>
+            new Promise<void>((resolve, reject) => {
+                // Uses the provideTranslateHttpLoader(single) overload which converts to
+                // multi-config at http-loader.ts:101-114. Verifies failOnError is preserved.
+                vi.spyOn(console, "warn").mockReturnValue(undefined);
+                prepareSingle({
+                    prefix: "/i18n/",
+                    suffix: ".json",
+                    failOnError: true,
+                });
 
-            let errored = false;
-            translate.use("en").subscribe({
-                next: () => done.fail("Expected an error, got a next value"),
-                error: (err: unknown) => {
-                    errored = true;
-                    expect(errored).toBeTrue();
-                    expect(err).toBeDefined();
-                    done();
-                },
-            });
+                let errored = false;
+                translate.use("en").subscribe({
+                    next: () => reject("Expected an error, got a next value"),
+                    error: (err: unknown) => {
+                        errored = true;
+                        expect(errored).toBe(true);
+                        expect(err).toBeDefined();
+                        resolve();
+                    },
+                });
 
-            http.expectOne("/i18n/en.json").flush(null, {
-                status: 500,
-                statusText: "Server Error",
-            });
-        });
+                http.expectOne("/i18n/en.json").flush(null, {
+                    status: 500,
+                    statusText: "Server Error",
+                });
+            }));
 
         it("failOnError defaults to false (silent swallow)", () => {
             // Regression guard: the default must stay false (swallow errors silently).
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" }); // no failOnError
 
             let resolved = false;
@@ -433,7 +433,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
                 next: () => {
                     resolved = true;
                 },
-                error: () => fail("Expected silent swallow, got an error"),
+                error: () => expect.fail("Expected silent swallow, got an error"),
             });
 
             http.expectOne("/assets/i18n/en.json").flush(null, {
@@ -441,7 +441,7 @@ describe("TranslateHttpLoader (HttpClient)", () => {
                 statusText: "Server Error",
             });
 
-            expect(resolved).toBeTrue();
+            expect(resolved).toBe(true);
             expect(translate.instant("ANY")).toBe("ANY"); // no translations loaded
         });
     });

@@ -33,3 +33,28 @@ When using an EOL (End Of Lifetime) version, you have a few options:
 ## Recommended tools
 
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for ngx-translate files
+
+## Development tests
+
+Tests use Vitest with jsdom and do not require Chrome.
+
+```sh
+pnpm install
+pnpm run build-all
+pnpm run test-ci                  # Both libraries, once
+pnpm test --watch                 # Core tests with coverage, in watch mode
+pnpm run coverage                # Core coverage report in coverage/
+pnpm exec ng test http-loader --watch=false
+pnpm exec ng test test-app --watch=false
+```
+
+Angular 21–22 use the native `@angular/build:unit-test` builder. On Angular 22,
+code splitting is disabled to avoid uninitialized exports across test bundles with Vitest 4.
+Angular 18–20 use Analog's Vitest builder and the shared setup in `compat/`.
+Angular 18–19 have no native Vitest builder; Angular 20's experimental runner
+fails to initialize shared classes in this suite.
+These older configurations run the same specs with Vitest 3 and Vite 6 to
+retain Node 18 support. `test-and-build-for-all.sh` runs the compatibility matrix.
+
+Use Vitest spies and fake timers in new specs. Return a promise or use `async`/`await`
+for asynchronous assertions; callback-style `done` tests are not supported.

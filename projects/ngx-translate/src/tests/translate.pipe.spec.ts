@@ -1,4 +1,4 @@
-import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 import {
     provideTranslateLoader,
     provideTranslateService,
@@ -164,14 +164,12 @@ describe("TranslatePipe (unit)", () => {
             translate.use("en");
             const param = 'param: "with param"';
 
-            expect(() => {
-                translatePipe.transform("TEST", param);
-            }).toThrowError(
-                SyntaxError,
-                `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`,
-            );
-            expect(() => translatePipe.transform("TEST", param)).toThrowMatching(
-                (error) => error.cause instanceof SyntaxError,
+            expect(() => translatePipe.transform("TEST", param)).toThrowError(
+                expect.objectContaining({
+                    name: "SyntaxError",
+                    message: `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`,
+                    cause: expect.any(SyntaxError),
+                }),
             );
         });
 
@@ -257,28 +255,30 @@ describe("TranslatePipe (unit)", () => {
     });
 
     describe("updates - async", () => {
-        it("on default lang change", fakeAsync(() => {
+        it("on default lang change", () => {
+            vi.useFakeTimers();
             translate.setFallbackLang("en");
-            tick(10);
+            vi.advanceTimersByTime(10);
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
             translate.setFallbackLang("fr");
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            tick(10);
+            vi.advanceTimersByTime(10);
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
-        }));
+        });
 
-        it("on lang change", fakeAsync(() => {
+        it("on lang change", () => {
+            vi.useFakeTimers();
             translate.use("en");
-            tick(10);
+            vi.advanceTimersByTime(10);
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
             translate.use("fr");
             expect(translatePipe.transform("TEST")).toEqual("This is a test");
 
-            tick(10);
+            vi.advanceTimersByTime(10);
             expect(translatePipe.transform("TEST")).toEqual("C'est un test");
-        }));
+        });
     });
 });

@@ -41,7 +41,7 @@ function buildService(
 
 describe("provideTranslateService({ langs })", () => {
     beforeEach(() => {
-        spyOn(console, "warn");
+        vi.spyOn(console, "warn").mockReturnValue(undefined);
     });
 
     it("forwards langs to the TRANSLATE_SERVICE_CONFIG provider", () => {
@@ -85,50 +85,53 @@ describe("provideTranslateService({ langs })", () => {
         expect(empty.getLangs()).toEqual([]);
     });
 
-    it("replaces the provideAppInitializer addLangs pattern (#1581)", (done) => {
-        const loader = new RecordingDictLoader();
-        const svc = buildService(loader, {
-            langs: ["de", "en"],
-            fallbackLang: "en",
-            lang: "en",
-        });
+    it("replaces the provideAppInitializer addLangs pattern (#1581)", () =>
+        new Promise<void>((resolve) => {
+            const loader = new RecordingDictLoader();
+            const svc = buildService(loader, {
+                langs: ["de", "en"],
+                fallbackLang: "en",
+                lang: "en",
+            });
 
-        expect(svc.getLangs()).toEqual(["de", "en"]);
-        svc.get("TEST").subscribe((res) => {
-            expect(res).toEqual("This is a test");
-            expect(svc.getCurrentLang()).toBe("en");
-            done();
-        });
-    });
+            expect(svc.getLangs()).toEqual(["de", "en"]);
+            svc.get("TEST").subscribe((res) => {
+                expect(res).toEqual("This is a test");
+                expect(svc.getCurrentLang()).toBe("en");
+                resolve();
+            });
+        }));
 
-    it("falls back to the fallbackLang for keys missing from the active declared lang", (done) => {
-        const loader = new RecordingDictLoader();
-        const svc = buildService(loader, {
-            langs: ["de", "en"],
-            fallbackLang: "en",
-            lang: "de",
-        });
+    it("falls back to the fallbackLang for keys missing from the active declared lang", () =>
+        new Promise<void>((resolve) => {
+            const loader = new RecordingDictLoader();
+            const svc = buildService(loader, {
+                langs: ["de", "en"],
+                fallbackLang: "en",
+                lang: "de",
+            });
 
-        // "TEST" only exists in "en"; current lang is "de".
-        svc.get("TEST").subscribe((res) => {
-            expect(res).toEqual("This is a test");
-            done();
-        });
-    });
+            // "TEST" only exists in "en"; current lang is "de".
+            svc.get("TEST").subscribe((res) => {
+                expect(res).toEqual("This is a test");
+                resolve();
+            });
+        }));
 
-    it("lets use() activate a declared lang afterwards", (done) => {
-        const loader = new RecordingDictLoader();
-        const svc = buildService(loader, { langs: ["de", "en"], fallbackLang: "en" });
+    it("lets use() activate a declared lang afterwards", () =>
+        new Promise<void>((resolve, reject) => {
+            const loader = new RecordingDictLoader();
+            const svc = buildService(loader, { langs: ["de", "en"], fallbackLang: "en" });
 
-        svc.use("de").subscribe({
-            next: () => {
-                expect(svc.getCurrentLang()).toBe("de");
-                svc.get("DE_ONLY").subscribe((res) => {
-                    expect(res).toEqual("Nur Deutsch");
-                    done();
-                });
-            },
-            error: () => done.fail("de load should succeed"),
-        });
-    });
+            svc.use("de").subscribe({
+                next: () => {
+                    expect(svc.getCurrentLang()).toBe("de");
+                    svc.get("DE_ONLY").subscribe((res) => {
+                        expect(res).toEqual("Nur Deutsch");
+                        resolve();
+                    });
+                },
+                error: () => reject("de load should succeed"),
+            });
+        }));
 });

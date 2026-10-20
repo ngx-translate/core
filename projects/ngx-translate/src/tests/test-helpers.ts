@@ -4,11 +4,11 @@ import { map } from "rxjs/operators";
 import {
     provideTranslateService,
     RootTranslateServiceConfig,
-    TranslateCompiler,
-    TranslateLoader,
-    TranslateService,
     TranslationObject,
 } from "../public-api";
+import { TranslateCompiler } from "../lib/translate.compiler";
+import { TranslateLoader } from "../lib/translate.loader";
+import { TranslateService } from "../lib/translate.service";
 
 @Injectable()
 export class DelayedFakeLoader implements TranslateLoader {

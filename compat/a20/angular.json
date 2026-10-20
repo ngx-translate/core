@@ -25,10 +25,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@analogjs/vitest-angular:test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "configFile": "compat/vitest.config.mts",
+                        "testFiles": ["projects/ngx-translate/src"],
+                        "root": "."
                     }
                 },
                 "lint": {
@@ -65,10 +66,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@analogjs/vitest-angular:test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "configFile": "compat/vitest.config.mts",
+                        "testFiles": ["projects/http-loader/src"],
+                        "root": "."
                     }
                 },
                 "lint": {
@@ -152,17 +154,11 @@
                     "builder": "@angular/build:extract-i18n"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@analogjs/vitest-angular:test",
                     "options": {
-                        "polyfills": ["zone.js", "zone.js/testing"],
-                        "tsConfig": "tsconfig.spec.json",
-                        "assets": [
-                            {
-                                "glob": "projects/test-app/src/**/*",
-                                "input": "public"
-                            }
-                        ],
-                        "styles": ["projects/test-app/src/styles.scss"]
+                        "configFile": "compat/vitest.config.mts",
+                        "testFiles": ["projects/test-app/src"],
+                        "root": "."
                     }
                 }
             }

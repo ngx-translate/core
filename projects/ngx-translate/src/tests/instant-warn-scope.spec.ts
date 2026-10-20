@@ -69,7 +69,7 @@ describe("instant() warn scope", () => {
     it("emits exactly one warn per isolated subtree for an unloaded lang", () => {
         const { rootService, childAService, childBService, isolatedService } = setup();
 
-        const warnSpy = spyOn(console, "warn");
+        const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
 
         rootService.instant("KEY", undefined, "de");
         childAService.instant("KEY", undefined, "de");

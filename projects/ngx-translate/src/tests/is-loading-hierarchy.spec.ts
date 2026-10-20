@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 import { Injector } from "@angular/core";
 import { Observable, Subject } from "rxjs";
 import {
@@ -88,7 +89,10 @@ class FailingLoader implements TranslateLoader {
     }
 }
 
-function makeRoot(loader: TranslateLoader): { svc: TranslateService; injector: Injector } {
+function makeRoot(loader: TranslateLoader): {
+    svc: TranslateService;
+    injector: Injector;
+} {
     const injector = Injector.create({
         providers: [
             provideTranslateService({
@@ -102,7 +106,10 @@ function makeRoot(loader: TranslateLoader): { svc: TranslateService; injector: I
 function makeChild(
     parent: Injector,
     loader: TranslateLoader,
-): { svc: TranslateService; injector: Injector } {
+): {
+    svc: TranslateService;
+    injector: Injector;
+} {
     const injector = Injector.create({
         providers: [
             provideChildTranslateService({
@@ -115,7 +122,7 @@ function makeChild(
 }
 
 describe("isLoading — downward inheritance", () => {
-    beforeEach(() => spyOn(console, "warn"));
+    beforeEach(() => vi.spyOn(console, "warn").mockReturnValue(undefined));
 
     it("root loads, child sees true; resolve flips both false", () => {
         const rootLoader = new ControllableLoader();
@@ -338,9 +345,9 @@ describe("isLoading — downward inheritance", () => {
         const childLoader = new FailingLoader(new Set(["de"]));
         makeChild(rootInj, childLoader);
 
-        const warn = console.warn as jasmine.Spy;
+        const warn = console.warn as Mock;
         expect(warn).toHaveBeenCalledTimes(1);
-        const msg = warn.calls.argsFor(0)[0] as string;
+        const msg = vi.mocked(warn).mock.calls[0][0] as string;
         expect(msg).toContain("child failed to load");
         expect(msg).toContain("de");
     });
@@ -355,12 +362,12 @@ describe("isLoading — downward inheritance", () => {
         makeChild(rootInj, childLoader);
         // Initial child load of 'en' succeeds; subsequent root.use('fr') triggers
         // the child's onLangChange handler, which fails.
-        const warnBefore = (console.warn as jasmine.Spy).calls.count();
+        const warnBefore = vi.mocked(console.warn as Mock).mock.calls.length;
         root.use("fr");
         rootLoader.resolve("fr");
-        const warns = (console.warn as jasmine.Spy).calls
-            .all()
-            .map((c) => c.args[0] as string)
+        const warns = vi
+            .mocked(console.warn as Mock)
+            .mock.calls.map((c) => c[0] as string)
             .slice(warnBefore);
         const childWarn = warns.find((m) => m.includes("child failed to load"));
         expect(childWarn).toBeDefined();
@@ -378,12 +385,12 @@ describe("isLoading — downward inheritance", () => {
 
         // Child fails 'xx' but succeeds 'en'.
         const childLoaderA = new FailingLoader(new Set(["xx"]));
-        const warnA = (console.warn as jasmine.Spy).calls.count();
+        const warnA = vi.mocked(console.warn as Mock).mock.calls.length;
         makeChild(rootInj, childLoaderA);
-        const warnsA = (console.warn as jasmine.Spy).calls
-            .all()
-            .slice(warnA)
-            .map((c) => c.args[0] as string)
+        const warnsA = vi
+            .mocked(console.warn as Mock)
+            .mock.calls.slice(warnA)
+            .map((c) => c[0] as string)
             .filter((m) => m.includes("child failed to load"));
         expect(warnsA.length).toBe(1);
         expect(warnsA[0]).toContain("xx");
@@ -398,12 +405,12 @@ describe("isLoading — downward inheritance", () => {
         root2Loader.reject("yy");
 
         const childLoaderB = new FailingLoader(new Set(["yy"]));
-        const warnB = (console.warn as jasmine.Spy).calls.count();
+        const warnB = vi.mocked(console.warn as Mock).mock.calls.length;
         makeChild(root2Inj, childLoaderB);
-        const warnsB = (console.warn as jasmine.Spy).calls
-            .all()
-            .slice(warnB)
-            .map((c) => c.args[0] as string)
+        const warnsB = vi
+            .mocked(console.warn as Mock)
+            .mock.calls.slice(warnB)
+            .map((c) => c[0] as string)
             .filter((m) => m.includes("child failed to load"));
         expect(warnsB.length).toBe(1); // not 2 — dedup guard fired
     });
@@ -418,13 +425,13 @@ describe("isLoading — downward inheritance", () => {
         const childLoader = new FailingLoader(new Set(["xx"]));
         makeChild(rootInj, childLoader);
 
-        const warnBefore = (console.warn as jasmine.Spy).calls.count();
+        const warnBefore = vi.mocked(console.warn as Mock).mock.calls.length;
         root.setFallbackLang("xx");
         rootLoader.resolve("xx"); // root succeeds for tracking purposes
-        const warns = (console.warn as jasmine.Spy).calls
-            .all()
-            .slice(warnBefore)
-            .map((c) => c.args[0] as string)
+        const warns = vi
+            .mocked(console.warn as Mock)
+            .mock.calls.slice(warnBefore)
+            .map((c) => c[0] as string)
             .filter((m) => m.includes("child failed to load"));
         expect(warns.length).toBe(1);
         expect(warns[0]).toContain("xx");

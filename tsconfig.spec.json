@@ -4,7 +4,8 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "out-tsc/spec",
-        "types": ["jasmine"]
+        "types": ["vitest/globals"]
     },
+    "files": ["vitest.setup.ts"],
     "include": ["./projects/**/*.spec.ts", "./projects/**/*.d.ts"]
 }
