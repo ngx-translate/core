@@ -32,7 +32,7 @@ class CustomLangLoader {
 }
 
 describe("TranslateService.deleteLanguage", () => {
-    let translate: ITranslateService;
+    let translate: TranslateService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({

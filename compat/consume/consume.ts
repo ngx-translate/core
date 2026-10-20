@@ -4,6 +4,7 @@
 import {
     provideTranslateService,
     TranslateService,
+    ITranslateService,
     TranslatePipe,
     TranslateDirective,
 } from "@ngx-translate/core";
@@ -14,3 +15,17 @@ export type _S = TranslateService;
 export type _Pipe = TranslatePipe;
 export type _Dir = TranslateDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
+
+// Existing v18.0 implementations need not acquire the v18.1 capabilities.
+export function _legacyService(
+    service: Omit<ITranslateService, "getAsync" | "hasTranslationKey" | "deleteLanguage">,
+): ITranslateService {
+    return service;
+}
+
+export function _serviceCapabilities(service: ITranslateService) {
+    const result = service.getAsync?.(["HELLO"], { name: "Ada" }, "en");
+    const exists = service.hasTranslationKey?.("HELLO", "en");
+    service.deleteLanguage?.("en");
+    return { result, exists };
+}
