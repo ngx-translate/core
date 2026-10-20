@@ -2,11 +2,11 @@
 // packed v22/TS6-built packages so `tsc` must resolve their emitted .d.ts.
 // Type-checked under each older TypeScript with skipLibCheck:false — see run.sh.
 import {
-    provideTranslateService,
-    TranslateService,
-    ITranslateService,
-    TranslatePipe,
-    TranslateDirective,
+  ITranslateService,
+  provideTranslateService,
+  TranslateDirective,
+  TranslatePipe,
+  TranslateService,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
@@ -16,14 +16,15 @@ export type _Pipe = TranslatePipe;
 export type _Dir = TranslateDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
-// Existing v18.0 implementations need not acquire the v18.1 capabilities.
-export function _legacyService(
+// Checks that implementations without the new methods still satisfy ITranslateService.
+export function legacyService(
     service: Omit<ITranslateService, "getAsync" | "hasTranslationKey" | "deleteLanguage">,
 ): ITranslateService {
     return service;
 }
 
-export function _serviceCapabilities(service: ITranslateService) {
+// Checks that the new methods are callable through ITranslateService with these arguments.
+export function serviceCapabilities(service: ITranslateService) {
     const result = service.getAsync?.(["HELLO"], { name: "Ada" }, "en");
     const exists = service.hasTranslationKey?.("HELLO", "en");
     service.deleteLanguage?.("en");
