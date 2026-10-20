@@ -16,56 +16,46 @@
     },
     "private": true,
     "dependencies": {
-        "@angular/common": "^22.0.1",
-        "@angular/compiler": "^22.0.1",
-        "@angular/core": "^22.0.1",
-        "@angular/forms": "^22.0.1",
-        "@angular/platform-browser": "^22.0.1",
-        "@angular/router": "^22.0.1",
+        "@angular/common": "^22.2.3",
+        "@angular/compiler": "^22.2.3",
+        "@angular/core": "^22.2.3",
+        "@angular/forms": "^22.2.3",
+        "@angular/platform-browser": "^22.2.3",
+        "@angular/router": "^22.2.3",
         "rxjs": "7.8.2",
         "tslib": "2.8.1",
-        "zone.js": "~0.16.0"
+        "zone.js": "~0.16.3"
     },
     "devDependencies": {
-        "@angular/build": "^22.0.1",
-        "@angular/cli": "^22.0.1",
-        "@angular/compiler-cli": "^22.0.1",
-        "@commitlint/cli": "21.0.2",
-        "@commitlint/config-conventional": "21.0.2",
+        "@angular/build": "^22.2.3",
+        "@angular/cli": "^22.2.3",
+        "@angular/compiler-cli": "^22.2.3",
+        "@commitlint/cli": "21.2.4",
+        "@commitlint/config-conventional": "21.2.4",
+        "@eslint/js": "10.0.1",
         "@types/jasmine": "6.0.0",
-        "angular-eslint": "^22.0.0",
-        "eslint": "9.39.1",
+        "angular-eslint": "^22.6.0",
+        "eslint": "10.13.0",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
-        "jasmine-core": "5.12.1",
+        "jasmine-core": "5.13.0",
         "karma": "6.4.4",
         "karma-chrome-launcher": "3.2.0",
         "karma-coverage": "2.2.1",
         "karma-jasmine": "5.1.0",
-        "karma-jasmine-html-reporter": "2.2.0",
+        "karma-jasmine-html-reporter": "2.3.0",
         "karma-mocha-reporter": "2.2.5",
-        "lint-staged": "16.2.6",
-        "ng-packagr": "^22.0.0",
-        "prettier": "3.8.4",
+        "lint-staged": "16.4.0",
+        "ng-packagr": "^22.2.4",
+        "prettier": "3.9.10",
         "ts-mocks": "3.0.1",
         "typescript": "~6.0.0",
-        "typescript-eslint": "^8.61.1"
+        "typescript-eslint": "^8.72.0"
     },
-    "packageManager": "pnpm@10.12.4",
+    "packageManager": "pnpm@12.14.0",
     "lint-staged": {
         "*.js": "eslint --cache --fix",
         "*.{js,css,md}": "prettier --write"
-    },
-    "pnpm": {
-        "overrides": {
-            "fast-uri": ">=3.1.2 <4",
-            "follow-redirects": ">=1.16.0",
-            "hono": ">=4.12.21",
-            "ip-address": ">=10.1.1",
-            "postcss": ">=8.5.10",
-            "qs": ">=6.15.2",
-            "tmp": ">=0.2.6"
-        }
     }
 }

@@ -13,6 +13,7 @@ By default, a single `TranslateService` exists at the application root. All pipe
 
 ```typescript
 provideTranslateService({
+  langs: ["de", "en"],
   fallbackLang: "en",
   lang: "de",
   loader: provideTranslateHttpLoader({ prefix: "./i18n/" }),
@@ -25,6 +26,7 @@ provideTranslateService({
 - User can provide loader, compiler, parser, missingTranslationHandler
 - If not provided, defaults are used
 - `fallbackLang` replaces deprecated `defaultLang` + `useDefaultLang`
+- `langs` declares the available languages at startup without loading them — equivalent to `translate.addLangs([...])`
 
 ### Child Service (Connected)
 
