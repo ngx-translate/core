@@ -32,9 +32,10 @@
         "@angular/compiler-cli": "^22.2.3",
         "@commitlint/cli": "21.2.4",
         "@commitlint/config-conventional": "21.2.4",
+        "@eslint/js": "10.0.1",
         "@types/jasmine": "6.0.0",
         "angular-eslint": "^22.6.0",
-        "eslint": "9.39.5",
+        "eslint": "10.13.0",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
@@ -56,16 +57,5 @@
     "lint-staged": {
         "*.js": "eslint --cache --fix",
         "*.{js,css,md}": "prettier --write"
-    },
-    "pnpm": {
-        "overrides": {
-            "fast-uri": ">=3.1.2 <4",
-            "follow-redirects": ">=1.16.0",
-            "hono": ">=4.12.21",
-            "ip-address": ">=10.1.1",
-            "postcss": ">=8.5.10",
-            "qs": ">=6.15.2",
-            "tmp": ">=0.2.6"
-        }
     }
 }

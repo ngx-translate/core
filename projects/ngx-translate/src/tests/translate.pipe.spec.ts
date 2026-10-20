@@ -157,7 +157,11 @@ describe("TranslatePipe (unit)", () => {
             expect(() => {
                 translatePipe.transform("TEST", param);
             }).toThrowError(
+                SyntaxError,
                 `Wrong parameter in TranslatePipe. Expected a valid Object, received: ${param}`,
+            );
+            expect(() => translatePipe.transform("TEST", param)).toThrowMatching(
+                (error) => error.cause instanceof SyntaxError,
             );
         });
 

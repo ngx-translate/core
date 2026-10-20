@@ -3,6 +3,14 @@ allowBuilds:
   esbuild: true
   lmdb: true
   msgpackr-extract: true
+overrides:
+  fast-uri: '>=3.1.2 <4'
+  follow-redirects: '>=1.16.0'
+  hono: '>=4.12.21'
+  ip-address: '>=10.1.1'
+  postcss: '>=8.5.10'
+  qs: '>=6.15.2'
+  tmp: '>=0.2.6'
 minimumReleaseAgeExclude:
   - '@typescript-eslint/eslint-plugin@8.72.0'
   - '@typescript-eslint/parser@8.72.0'
