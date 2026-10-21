@@ -6,8 +6,8 @@
             "text-as-content": "Root: Text als Inhalt"
         },
         "slots": {
-            "message": "{{details}} ansehen, ohne die Seite neu zu laden.",
-            "link": "Übersetzungen in eigenen Bereichen"
+            "message": "Navigiere zur {{details}} Seite",
+            "link": "nächsten"
         },
         "title": "Root: Testanwendung"
     },
