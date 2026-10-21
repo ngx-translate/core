@@ -2,13 +2,13 @@
 // packed v22/TS6-built packages so `tsc` must resolve their emitted .d.ts.
 // Type-checked under each older TypeScript with skipLibCheck:false — see run.sh.
 import {
-  ITranslateService,
-  provideTranslateService,
-  TranslateDirective,
-  TranslatePipe,
-  TranslateService,
-  TranslateSlotsComponent,
-  TranslateSlotDirective,
+    ITranslateService,
+    provideTranslateService,
+    TranslateDirective,
+    TranslatePipe,
+    TranslateService,
+    TranslateSlotsComponent,
+    TranslateSlotDirective,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
@@ -19,6 +19,16 @@ export type _Dir = TranslateDirective;
 export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
+
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Check the HTTP loader flatten option against supported consumer TypeScript versions.
+ */
+export const flattenLoader = provideTranslateHttpLoader({
+    resources: ["/library/", "/application/"],
+    flatten: true,
+});
 
 // Checks that implementations without the new methods still satisfy ITranslateService.
 export function legacyService(

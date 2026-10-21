@@ -6,6 +6,11 @@ import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rx
 // Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
 const DOT_SEGMENT = /^\.{1,2}$/;
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Add opt-in flattening to the single and multiple resource loader configuration.
+ */
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
     suffix?: string;
@@ -21,6 +26,12 @@ export interface TranslateHttpLoaderConfig {
      * Must be `true` for the translation service's `retry` option to retry HTTP failures.
      */
     failOnError?: boolean;
+    /**
+     * Flatten each resource's nested objects into dotted keys before merging (default false).
+     * Later resources then override equivalent flat or nested keys. Arrays and null stay intact.
+     * Within one resource, the last encountered equivalent key wins.
+     */
+    flatten?: boolean;
 }
 
 export interface TranslateHttpLoaderResource {
@@ -28,12 +39,19 @@ export interface TranslateHttpLoaderResource {
     suffix?: string;
 }
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Add opt-in flattening to the single and multiple resource loader configuration.
+ */
 export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
     /** See {@link TranslateHttpLoaderConfig.failOnError}. */
     failOnError?: boolean;
+    /** See {@link TranslateHttpLoaderConfig.flatten}. */
+    flatten?: boolean;
 }
 
 export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<
@@ -60,6 +78,11 @@ export class TranslateHttpLoader implements TranslateLoader {
 
     /**
      * Gets the translations from the server
+     */
+    /*
+     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+     * Model: GPT-6
+     * Prompt: Add opt-in resource flattening before translation files are merged.
      */
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
@@ -100,11 +123,43 @@ export class TranslateHttpLoader implements TranslateLoader {
         }
 
         return forkJoin(requests).pipe(
-            map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
+            map((response) =>
+                response.reduce(
+                    (acc, curr) =>
+                        mergeDeep(acc, this.config.flatten ? flattenTranslations(curr) : curr),
+                    {},
+                ),
+            ),
         ) as Observable<TranslationObject>;
     }
 }
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Flatten translation objects while preserving arrays, null and empty objects.
+ */
+function flattenTranslations(translations: TranslationObject): TranslationObject {
+    return Object.fromEntries(
+        Object.entries(translations).flatMap(([key, value]) =>
+            value !== null &&
+            typeof value === "object" &&
+            !Array.isArray(value) &&
+            Object.keys(value).length
+                ? Object.entries(flattenTranslations(value)).map(([child, translation]) => [
+                      `${key}.${child}`,
+                      translation,
+                  ])
+                : [[key, value]],
+        ),
+    );
+}
+
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Forward the optional flatten setting for single-resource HTTP loaders.
+ */
 export function provideTranslateHttpLoader(
     config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
@@ -119,6 +174,7 @@ export function provideTranslateHttpLoader(
         enforceLoading: singleConfig.enforceLoading ?? false,
         useHttpBackend: singleConfig.useHttpBackend ?? false,
         failOnError: singleConfig.failOnError ?? false,
+        flatten: singleConfig.flatten ?? false,
         resources: [
             {
                 prefix: singleConfig.prefix ?? "/assets/i18n/",
