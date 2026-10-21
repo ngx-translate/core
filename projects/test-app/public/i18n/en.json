@@ -6,8 +6,8 @@
             "text-as-content": "Root: Text as content"
         },
         "slots": {
-            "message": "Explore {{details}} without reloading the page.",
-            "link": "scoped translations"
+            "message": "Navigate to {{details}} page",
+            "link": "the next"
         },
         "title": "Root: Test Application"
     },
