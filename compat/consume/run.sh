@@ -31,8 +31,6 @@ echo "http tarball: $HTTP_TGZ"
 
 # name : typescript range : angular major
 MATRIX=(
-  "a18:5.5:18"
-  "a19:5.7:19"
   "a20:5.9:20"
   "a21:5.9:21"
 )

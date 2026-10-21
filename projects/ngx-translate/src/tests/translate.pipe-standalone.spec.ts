@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Injectable, Provider } from "@angular/core";
-import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Observable, of } from "rxjs";
 import {
     provideTranslateService,
@@ -55,7 +55,8 @@ describe("TranslatePipe (standalone)", () => {
     });
 
     describe("should update translations on lang change - async", () => {
-        it("should detect changes with OnPush", fakeAsync(() => {
+        it("should detect changes with OnPush", () => {
+            vi.useFakeTimers();
             prepare({ provide: TranslateLoader, useClass: DelayedFakeLoader });
 
             fixture.detectChanges();
@@ -65,9 +66,9 @@ describe("TranslatePipe (standalone)", () => {
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("TEST");
 
-            tick(10);
+            vi.advanceTimersByTime(10);
             fixture.detectChanges();
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is a test");
-        }));
+        });
     });
 });

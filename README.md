@@ -3,12 +3,13 @@
 The internationalization (i18n) library for Angular.
 <br/>
 
-## Angular 16 - 21
+## Angular compatibility
 
-The new [documentation](https://ngx-translate.org/) now covers installation on
-Angular 16+ and is divided into smaller, more readable sections, making it
-easier to digest than this big README. It also documents the additional
-interfaces and explains how to develop custom plugins.
+This version of `@ngx-translate/core` and `@ngx-translate/http-loader` requires
+Angular 20 or newer. Angular 18 and 19 are no longer supported.
+
+The [documentation](https://ngx-translate.org/) covers installation, the available
+interfaces, and how to develop custom plugins.
 
 - [Full documentation](https://ngx-translate.org)
 - [Migration guide ngx-translate v17 -> v18](https://ngx-translate.org/getting-started/migration-guide/)
@@ -33,3 +34,17 @@ When using an EOL (End Of Lifetime) version, you have a few options:
 ## Recommended tools
 
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for ngx-translate files
+
+## Development tests
+
+Tests use Vitest with jsdom.
+
+```sh
+pnpm install
+pnpm run build-all
+pnpm run test-ci                  # Both libraries, once
+pnpm test --watch                 # Core tests with coverage, in watch mode
+pnpm run coverage                # Core coverage report in coverage/
+pnpm exec ng test http-loader --watch=false
+pnpm exec ng test test-app --watch=false
+```

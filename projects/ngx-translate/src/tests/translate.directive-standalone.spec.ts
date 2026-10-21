@@ -39,18 +39,28 @@ import {
     `,
 })
 class AppComponent {
-    @ViewChild("noKey", { static: true }) noKey!: ElementRef;
-    @ViewChild("contentAsKey", { static: true }) contentAsKey!: ElementRef;
-    @ViewChild("withKey", { static: true }) withKey!: ElementRef;
-    @ViewChild("withOtherElements", { static: true }) withOtherElements!: ElementRef;
-    @ViewChild("withParams", { static: true }) withParams!: ElementRef;
-    @ViewChild("withParamsNoKey", { static: true }) withParamsNoKey!: ElementRef;
-    @ViewChild("noContent", { static: true }) noContent!: ElementRef;
-    @ViewChild("leadingSpaceNoKeyNoParams") leadingSpaceNoKeyNoParams!: ElementRef;
-    @ViewChild("trailingSpaceNoKeyNoParams") trailingSpaceNoKeyNoParams!: ElementRef;
+    @ViewChild("noKey", { static: true })
+    noKey!: ElementRef;
+    @ViewChild("contentAsKey", { static: true })
+    contentAsKey!: ElementRef;
+    @ViewChild("withKey", { static: true })
+    withKey!: ElementRef;
+    @ViewChild("withOtherElements", { static: true })
+    withOtherElements!: ElementRef;
+    @ViewChild("withParams", { static: true })
+    withParams!: ElementRef;
+    @ViewChild("withParamsNoKey", { static: true })
+    withParamsNoKey!: ElementRef;
+    @ViewChild("noContent", { static: true })
+    noContent!: ElementRef;
+    @ViewChild("leadingSpaceNoKeyNoParams")
+    leadingSpaceNoKeyNoParams!: ElementRef;
+    @ViewChild("trailingSpaceNoKeyNoParams")
+    trailingSpaceNoKeyNoParams!: ElementRef;
     @ViewChild("withSpaceAndLineBreakNoKeyNoParams")
     withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
-    @Input() value: InterpolationParameters = { value: "ok" };
+    @Input()
+    value: InterpolationParameters = { value: "ok" };
 }
 
 describe("TranslateDirective (standalone)", () => {
@@ -58,7 +68,7 @@ describe("TranslateDirective (standalone)", () => {
     let fixture: ComponentFixture<AppComponent>;
 
     beforeEach(() => {
-        spyOn(console, "warn");
+        vi.spyOn(console, "warn").mockReturnValue(undefined);
         TestBed.configureTestingModule({
             providers: [provideTranslateService({})],
         });

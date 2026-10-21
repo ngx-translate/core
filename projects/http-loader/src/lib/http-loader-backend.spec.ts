@@ -94,30 +94,31 @@ describe("TranslateHttpLoader (HttpBackend)", () => {
         http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
     });
 
-    it("should be able to reset a lang", (done: DoneFn) => {
-        translate.use("en");
-        spyOn(http, "expectOne").and.callThrough();
+    it("should be able to reset a lang", () =>
+        new Promise<void>((resolve) => {
+            translate.use("en");
+            vi.spyOn(http, "expectOne");
 
-        // this will request the translation from the backend because we use a static files loader for TranslateService
-        translate.get("TEST").subscribe((res: Translation) => {
-            expect(res as string).toEqual("This is a test");
-            expect(http.expectOne).toHaveBeenCalledTimes(1);
+            // this will request the translation from the backend because we use a static files loader for TranslateService
+            translate.get("TEST").subscribe((res: Translation) => {
+                expect(res as string).toEqual("This is a test");
+                expect(http.expectOne).toHaveBeenCalledTimes(1);
 
-            // reset the lang as if it was never initiated
-            translate.resetLang("en");
-            expect(translate.instant("TEST") as string).toEqual("TEST");
+                // reset the lang as if it was never initiated
+                translate.resetLang("en");
+                expect(translate.instant("TEST") as string).toEqual("TEST");
 
-            // use set timeout because no request is really made and we need to trigger zone to resolve the observable
-            setTimeout(() => {
-                translate.get("TEST").subscribe((res2: Translation) => {
-                    expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
-                    expect(http.expectOne).toHaveBeenCalledTimes(1);
-                    done();
-                });
-            }, 10);
-        });
+                // use set timeout because no request is really made and we need to trigger zone to resolve the observable
+                setTimeout(() => {
+                    translate.get("TEST").subscribe((res2: Translation) => {
+                        expect(res2 as string).toEqual("TEST"); // because the loader is "pristine" as if it was never called
+                        expect(http.expectOne).toHaveBeenCalledTimes(1);
+                        resolve();
+                    });
+                }, 10);
+            });
 
-        // mock response after the xhr request, otherwise it will be undefined
-        http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
-    });
+            // mock response after the xhr request, otherwise it will be undefined
+            http.expectOne("/assets/i18n/en.json").flush({ TEST: "This is a test" });
+        }));
 });

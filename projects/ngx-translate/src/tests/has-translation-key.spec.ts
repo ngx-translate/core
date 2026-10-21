@@ -48,7 +48,10 @@ class RecordingHandler implements MissingTranslationHandler {
     }
 }
 
-function createRootAndChild(): { root: TranslateService; child: TranslateService } {
+function createRootAndChild(): {
+    root: TranslateService;
+    child: TranslateService;
+} {
     const rootInjector = Injector.create({
         providers: [provideTranslateService({ loader: provideTranslateLoader(MultiLangLoader) })],
     });
@@ -86,13 +89,13 @@ describe("TranslateService.hasTranslationKey", () => {
     it("returns true for an existing key in the current language", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("HELLO")).toBeTrue();
+        expect(translate.hasTranslationKey("HELLO")).toBe(true);
     });
 
     it("returns false for a missing key without invoking the missing-translation handler", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("MISSING")).toBeFalse();
+        expect(translate.hasTranslationKey("MISSING")).toBe(false);
         expect(handler.calls).toEqual(0);
 
         /*
@@ -106,13 +109,13 @@ describe("TranslateService.hasTranslationKey", () => {
     it("returns true when only the fallback language has the key", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("HALLO")).toBeTrue();
+        expect(translate.hasTranslationKey("HALLO")).toBe(true);
     });
 
     it("counts an empty string as an existing translation", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("EMPTY")).toBeTrue();
+        expect(translate.hasTranslationKey("EMPTY")).toBe(true);
         expect(translate.instant("EMPTY")).toEqual("");
     });
 
@@ -120,7 +123,7 @@ describe("TranslateService.hasTranslationKey", () => {
         prepare();
         translate.setTranslation("en", { NULL_KEY: null });
 
-        expect(translate.hasTranslationKey("NULL_KEY")).toBeFalse();
+        expect(translate.hasTranslationKey("NULL_KEY")).toBe(false);
     });
 
     it("resolves an explicit null through the fallback language", () => {
@@ -128,50 +131,50 @@ describe("TranslateService.hasTranslationKey", () => {
         translate.setTranslation("en", { ONLY_NULL: null });
 
         // "en" has null, "de" has a real value → the key exists
-        expect(translate.hasTranslationKey("ONLY_NULL")).toBeTrue();
+        expect(translate.hasTranslationKey("ONLY_NULL")).toBe(true);
     });
 
     it("supports nested (dotted) keys and sub-trees", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("SUBTREE")).toBeTrue();
-        expect(translate.hasTranslationKey("SUBTREE.NESTED")).toBeTrue();
-        expect(translate.hasTranslationKey("SUBTREE.MISSING")).toBeFalse();
+        expect(translate.hasTranslationKey("SUBTREE")).toBe(true);
+        expect(translate.hasTranslationKey("SUBTREE.NESTED")).toBe(true);
+        expect(translate.hasTranslationKey("SUBTREE.MISSING")).toBe(false);
     });
 
     it("with per-call lang looks up the specified language directly", () => {
         prepare();
 
         // "de" has HELLO even though the current language is "en"
-        expect(translate.hasTranslationKey("HELLO", "de")).toBeTrue();
+        expect(translate.hasTranslationKey("HELLO", "de")).toBe(true);
 
         // EMPTY only exists in "en"; lang="de" bypasses the current language
         // and the fallback chain entirely
-        expect(translate.hasTranslationKey("EMPTY", "de")).toBeFalse();
+        expect(translate.hasTranslationKey("EMPTY", "de")).toBe(false);
 
         // "fr" is neither current nor fallback. Per-call lang does not
         // auto-load a language (same as instant()); preload it into the store
         // with reloadLang, which does not change the current language
         translate.reloadLang("fr").subscribe();
-        expect(translate.hasTranslationKey("BONJOUR", "fr")).toBeTrue();
-        expect(translate.hasTranslationKey("BONJOUR")).toBeFalse();
+        expect(translate.hasTranslationKey("BONJOUR", "fr")).toBe(true);
+        expect(translate.hasTranslationKey("BONJOUR")).toBe(false);
     });
 
     it("returns false for an empty or undefined key without throwing", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("")).toBeFalse();
+        expect(translate.hasTranslationKey("")).toBe(false);
         expect(() => translate.hasTranslationKey(undefined as unknown as string)).not.toThrow();
-        expect(translate.hasTranslationKey(undefined as unknown as string)).toBeFalse();
+        expect(translate.hasTranslationKey(undefined as unknown as string)).toBe(false);
     });
 
     it("returns the same result for repeated calls (handler stays uninvoked)", () => {
         prepare();
 
-        expect(translate.hasTranslationKey("HELLO")).toBeTrue();
-        expect(translate.hasTranslationKey("HELLO")).toBeTrue();
-        expect(translate.hasTranslationKey("MISSING")).toBeFalse();
-        expect(translate.hasTranslationKey("MISSING")).toBeFalse();
+        expect(translate.hasTranslationKey("HELLO")).toBe(true);
+        expect(translate.hasTranslationKey("HELLO")).toBe(true);
+        expect(translate.hasTranslationKey("MISSING")).toBe(false);
+        expect(translate.hasTranslationKey("MISSING")).toBe(false);
         expect(handler.calls).toEqual(0);
     });
 });
@@ -181,8 +184,8 @@ describe("TranslateService.hasTranslationKey (hierarchical)", () => {
         const { root: _root, child } = createRootAndChild();
 
         // Child's own store is empty; the key resolves in the root
-        expect(child.hasTranslationKey("HELLO")).toBeTrue();
-        expect(child.hasTranslationKey("MISSING_EVERYWHERE")).toBeFalse();
+        expect(child.hasTranslationKey("HELLO")).toBe(true);
+        expect(child.hasTranslationKey("MISSING_EVERYWHERE")).toBe(false);
     });
 
     it("sees child-local translations that the parent cannot see", () => {
@@ -192,7 +195,7 @@ describe("TranslateService.hasTranslationKey (hierarchical)", () => {
         // child stores into the child's own store for that language
         child.setTranslation("en", { CHILD_KEY: "Child value" });
 
-        expect(child.hasTranslationKey("CHILD_KEY")).toBeTrue();
-        expect(root.hasTranslationKey("CHILD_KEY")).toBeFalse();
+        expect(child.hasTranslationKey("CHILD_KEY")).toBe(true);
+        expect(root.hasTranslationKey("CHILD_KEY")).toBe(false);
     });
 });

@@ -1,4 +1,3 @@
-import { fakeAsync, tick } from "@angular/core/testing";
 import { Injector } from "@angular/core";
 import { Observable, timer } from "rxjs";
 import { map } from "rxjs/operators";
@@ -22,7 +21,8 @@ class DelayedLoader implements TranslateLoader {
 describe("translate() signal late async load", () => {
     // A translate() signal created BEFORE the loader resolves must re-emit the
     // translated value once the late load lands — without re-creating the signal.
-    it("flips from key to translated value when the load completes", fakeAsync(() => {
+    it("flips from key to translated value when the load completes", () => {
+        vi.useFakeTimers();
         const injector = Injector.create({
             providers: [
                 provideTranslateService({
@@ -41,9 +41,9 @@ describe("translate() signal late async load", () => {
         // Before the load resolves, the signal returns the key.
         expect(sig()).toBe("TEST");
 
-        tick(20);
+        vi.advanceTimersByTime(20);
 
         // Same signal instance now reflects the loaded translation.
         expect(sig()).toBe("This is a test");
-    }));
+    });
 });

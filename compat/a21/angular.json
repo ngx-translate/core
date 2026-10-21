@@ -25,10 +25,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "tsConfig": "tsconfig.spec.json",
+                        "setupFiles": ["vitest.setup.ts"],
+                        "runnerConfig": "compat/a21/vitest.config.mts"
                     }
                 },
                 "lint": {
@@ -65,10 +66,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "tsConfig": "./tsconfig.spec.json",
-                        "polyfills": ["zone.js", "zone.js/testing"]
+                        "tsConfig": "tsconfig.spec.json",
+                        "setupFiles": ["vitest.setup.ts"],
+                        "runnerConfig": "compat/a21/vitest.config.mts"
                     }
                 },
                 "lint": {
@@ -152,17 +154,11 @@
                     "builder": "@angular/build:extract-i18n"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "polyfills": ["zone.js", "zone.js/testing"],
                         "tsConfig": "tsconfig.spec.json",
-                        "assets": [
-                            {
-                                "glob": "projects/test-app/src/**/*",
-                                "input": "public"
-                            }
-                        ],
-                        "styles": ["projects/test-app/src/styles.scss"]
+                        "setupFiles": ["vitest.setup.ts"],
+                        "runnerConfig": "compat/a21/vitest.config.mts"
                     }
                 }
             }

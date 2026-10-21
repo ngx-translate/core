@@ -1,6 +1,6 @@
 import { firstValueFrom } from "rxjs";
 import { EnvironmentInjector, Injector } from "@angular/core";
-import { fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
 import {
     ITranslateService,
     provideChildTranslateService,
@@ -104,7 +104,7 @@ describe("TranslateService.deleteLanguage", () => {
         translate.setTranslation("custom", { HELLO: "Hello" });
         translate.use("custom");
         const events: unknown[] = [];
-        const langChange = jasmine.createSpy("langChange");
+        const langChange = vi.fn().mockName("langChange");
         const langSubscription = translate.onLangChange.subscribe(langChange);
         const subscription = translate.onTranslationChange.subscribe((event) => {
             events.push(event);
@@ -189,7 +189,7 @@ describe("TranslateService.deleteLanguage", () => {
     });
 
     it("should be a no-op for a language that does not exist", () => {
-        const translationChange = jasmine.createSpy("translationChange");
+        const translationChange = vi.fn().mockName("translationChange");
         const subscription = translate.onTranslationChange.subscribe(translationChange);
 
         expect(() => translate.deleteLanguage("never-existed")).not.toThrow();
@@ -235,20 +235,22 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
         translate = TestBed.inject(TranslateService);
     });
 
-    it("should flip isLoading() to false immediately", fakeAsync(() => {
+    it("should flip isLoading() to false immediately", () => {
+        vi.useFakeTimers();
         translate.use("en");
-        expect(translate.isLoading()).toBeTrue();
+        expect(translate.isLoading()).toBe(true);
 
         translate.deleteLanguage("en");
 
-        expect(translate.isLoading()).toBeFalse();
+        expect(translate.isLoading()).toBe(false);
 
-        tick(20);
-    }));
+        vi.advanceTimersByTime(20);
+    });
 
-    it("should let use() re-create the deleted language with a fresh load", fakeAsync(() => {
+    it("should let use() re-create the deleted language with a fresh load", () => {
+        vi.useFakeTimers();
         translate.use("en");
-        tick(9);
+        vi.advanceTimersByTime(9);
         expect(translate.getTranslations("en") as PlainTranslations).toEqual({
             TEST: "This is a test",
         });
@@ -257,12 +259,12 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
         expect(translate.getTranslations("en")).toBeUndefined();
 
         translate.use("en").subscribe();
-        tick(9);
+        vi.advanceTimersByTime(9);
 
         expect(translate.getTranslations("en") as PlainTranslations).toEqual({
             TEST: "This is a test",
         });
-    }));
+    });
 });
 
 describe("TranslateService.deleteLanguage (hierarchical)", () => {

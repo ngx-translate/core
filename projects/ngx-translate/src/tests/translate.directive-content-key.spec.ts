@@ -27,7 +27,7 @@ describe("TranslateDirective — deprecated content-as-key", () => {
         }) as unknown as TranslateService;
 
     it("warns once per element when content is used as key", () => {
-        const spy = spyOn(console, "warn");
+        const spy = vi.spyOn(console, "warn").mockReturnValue(undefined);
 
         const el1 = makeElementRef("DIV");
         const el2 = makeElementRef("SPAN");
@@ -37,15 +37,15 @@ describe("TranslateDirective — deprecated content-as-key", () => {
         new ContentKeyHandler(el1, cd, svc);
         new ContentKeyHandler(el2, cd, svc);
 
-        const deprecationCalls = spy.calls
-            .all()
-            .filter((c) => typeof c.args[0] === "string" && c.args[0].includes(DEPRECATION_MSG));
+        const deprecationCalls = vi
+            .mocked(spy)
+            .mock.calls.filter((c) => typeof c[0] === "string" && c[0].includes(DEPRECATION_MSG));
 
         expect(deprecationCalls.length).toBe(2);
     });
 
     it("includes the offending element as the second console.warn arg", () => {
-        const spy = spyOn(console, "warn");
+        const spy = vi.spyOn(console, "warn").mockReturnValue(undefined);
 
         const el = makeElementRef("DIV");
         const cd = makeCdRef();
@@ -53,12 +53,12 @@ describe("TranslateDirective — deprecated content-as-key", () => {
 
         new ContentKeyHandler(el, cd, svc);
 
-        const deprecationCall = spy.calls
-            .all()
-            .find((c) => typeof c.args[0] === "string" && c.args[0].includes(DEPRECATION_MSG));
+        const deprecationCall = vi
+            .mocked(spy)
+            .mock.calls.find((c) => typeof c[0] === "string" && c[0].includes(DEPRECATION_MSG));
 
         expect(deprecationCall).toBeDefined();
-        expect(deprecationCall!.args[1]).toBeInstanceOf(HTMLElement);
-        expect((deprecationCall!.args[1] as HTMLElement).tagName).toBe("DIV");
+        expect(deprecationCall![1]).toBeInstanceOf(HTMLElement);
+        expect((deprecationCall![1] as HTMLElement).tagName).toBe("DIV");
     });
 });

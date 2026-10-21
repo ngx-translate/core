@@ -2,7 +2,7 @@
 
 ## Project Overview
 - This monorepo contains the main `@ngx-translate/core` library (Angular i18n), the `@ngx-translate/http-loader` for loading translations via HTTP, and related test/demo apps.
-- Supports Angular 16+ (see https://ngx-translate.org for full docs and migration guides).
+- See the published packages' `peerDependencies` for the minimum supported Angular version.
 - Key packages: `projects/ngx-translate` (core), `projects/http-loader` (HTTP loader), `projects/test-app` (demo/test app).
 
 ## Architecture & Patterns
@@ -28,7 +28,7 @@
 - **Demo/test app:**
   - Located in `projects/test-app`. Use `ng serve` to run locally.
 - **Multi-version support:**
-  - Scripts and configs for Angular 16/17/18/19+ are in `package-a16.json`, `package-a17.json`, etc.
+  - Supported Angular configurations are in `compat/a*/` and `compat/latest/`.
   - Use `test-and-build-for-all.sh` to loop over all supported versions.
 
 ## Project Conventions

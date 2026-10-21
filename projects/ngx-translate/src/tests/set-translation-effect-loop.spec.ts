@@ -1,10 +1,6 @@
 import { effect, Injector, runInInjectionContext, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import {
-    provideTranslateLoader,
-    provideTranslateService,
-    TranslateService,
-} from "../public-api";
+import { provideTranslateLoader, provideTranslateService, TranslateService } from "../public-api";
 import { TranslateStore } from "../lib/translate.store";
 import { FakeLoader } from "./test-helpers";
 
@@ -58,7 +54,10 @@ function effectRunsWhenCalling(injector: Injector, body: () => void): number {
 describe("issue #1633 — translation mutators must not leak signal reads into the caller", () => {
     beforeEach(() => TestBed.resetTestingModule());
 
-    function configure(withLoader = false): { service: TranslateService; injector: Injector } {
+    function configure(withLoader = false): {
+        service: TranslateService;
+        injector: Injector;
+    } {
         TestBed.configureTestingModule({
             providers: [
                 withLoader
@@ -74,12 +73,16 @@ describe("issue #1633 — translation mutators must not leak signal reads into t
     it("store.setTranslations inside an effect does not re-trigger the effect [invariant]", () => {
         const { injector } = configure();
         const store = TestBed.inject(TranslateStore);
-        expect(effectRunsWhenCalling(injector, () => store.setTranslations("en", { A: "a" }, true))).toBe(1);
+        expect(
+            effectRunsWhenCalling(injector, () => store.setTranslations("en", { A: "a" }, true)),
+        ).toBe(1);
     });
 
     it("service.setTranslation inside an effect does not re-trigger the effect [invariant]", () => {
         const { service, injector } = configure();
-        expect(effectRunsWhenCalling(injector, () => service.setTranslation("en", { A: "a" }, true))).toBe(1);
+        expect(
+            effectRunsWhenCalling(injector, () => service.setTranslation("en", { A: "a" }, true)),
+        ).toBe(1);
     });
 
     it("service.set inside an effect does not re-trigger the effect [invariant]", () => {

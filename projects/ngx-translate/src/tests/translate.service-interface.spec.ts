@@ -25,11 +25,11 @@ describe("ITranslateService compatibility", () => {
         service.setTranslation("en", { HELLO: "Hello {{name}}" });
         service.use("en");
 
-        expect(service.hasTranslationKey?.("HELLO", "en")).toBeTrue();
+        expect(service.hasTranslationKey?.("HELLO", "en")).toBe(true);
         expect(await service.getAsync?.(["HELLO"], { name: "Ada" }, "en")).toEqual({
             HELLO: "Hello Ada",
         });
         service.deleteLanguage?.("en");
-        expect(service.hasTranslationKey?.("HELLO")).toBeFalse();
+        expect(service.hasTranslationKey?.("HELLO")).toBe(false);
     });
 });

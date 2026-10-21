@@ -1,4 +1,3 @@
-import { fakeAsync, tick } from "@angular/core/testing";
 import { Injector } from "@angular/core";
 import { Observable, timer } from "rxjs";
 import { map } from "rxjs/operators";
@@ -26,7 +25,8 @@ describe("child get() awaits in-flight load", () => {
     // sets (use() delegates to the root). The fix reads the root's requested lang.
     // The key here exists ONLY in the child's translations, so bubbling to the
     // root cannot mask a missing await.
-    it("emits the child's translated value once its load completes, not the key", fakeAsync(() => {
+    it("emits the child's translated value once its load completes, not the key", () => {
+        vi.useFakeTimers();
         const rootInjector = Injector.create({
             providers: [
                 provideTranslateService({
@@ -62,8 +62,8 @@ describe("child get() awaits in-flight load", () => {
         // Nothing should have resolved synchronously to the key.
         expect(emissions).toEqual([]);
 
-        tick(20); // resolve both loads
+        vi.advanceTimersByTime(20); // resolve both loads
 
         expect(emissions).toEqual(["child-val"]);
-    }));
+    });
 });

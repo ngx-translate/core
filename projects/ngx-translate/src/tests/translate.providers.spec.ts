@@ -437,7 +437,7 @@ describe("Translate Providers", () => {
         }
 
         it("auto-wraps a bare loader class to the TranslateLoader token", () => {
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             TestBed.configureTestingModule({
                 providers: [provideTranslateService({ loader: BareLoader })],
             });
@@ -446,7 +446,7 @@ describe("Translate Providers", () => {
         });
 
         it("bare loader class resolves to useClass provider in the array", () => {
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             const providers = provideTranslateService({ loader: BareLoader });
             expect(providers[0]).toEqual({ provide: TranslateLoader, useClass: BareLoader });
         });
@@ -455,18 +455,19 @@ describe("Translate Providers", () => {
             // Minifiers emit anonymous class expressions as `class{…}` with no
             // whitespace after the keyword. A class literal written here would be
             // re-indented to `class … {` by Prettier and wouldn't reproduce the
-            // bug, so eval is used to preserve the exact minified source that
+            // bug, so Function is used to preserve the exact minified source that
             // Function.prototype.toString reports back.
-            const NamelessLoader = eval(
-                "(class{getTranslation(){return of({})}})",
-            ) as Type<TranslateLoader>;
+            const NamelessLoader = new Function(
+                "of",
+                "return class{getTranslation(){return of({})}}",
+            )(of) as Type<TranslateLoader>;
             const provider = provideTranslateLoader(NamelessLoader);
             expect((provider as ClassProvider).useClass).toBe(NamelessLoader);
             expect("useFactory" in provider).toBe(false);
         });
 
         it("auto-wraps a bare compiler class to the TranslateCompiler token", () => {
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             TestBed.configureTestingModule({
                 providers: [provideTranslateService({ compiler: BareCompiler })],
             });
@@ -475,7 +476,7 @@ describe("Translate Providers", () => {
         });
 
         it("auto-wraps a bare parser class to the TranslateParser token", () => {
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             TestBed.configureTestingModule({
                 providers: [provideTranslateService({ parser: BareParser })],
             });
@@ -484,7 +485,7 @@ describe("Translate Providers", () => {
         });
 
         it("auto-wraps a bare missingTranslationHandler class to the MissingTranslationHandler token", () => {
-            spyOn(console, "warn");
+            vi.spyOn(console, "warn").mockReturnValue(undefined);
             TestBed.configureTestingModule({
                 providers: [
                     provideChildTranslateService({ missingTranslationHandler: BareHandler }),
@@ -516,14 +517,14 @@ describe("Translate Providers", () => {
         });
 
         it("warns once per bare-class slot, naming the field and the helper", () => {
-            const warnSpy = spyOn(console, "warn");
+            const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
             provideTranslateService({ loader: BareLoader });
             provideTranslateService({ compiler: BareCompiler });
             provideTranslateService({ parser: BareParser });
             provideChildTranslateService({ missingTranslationHandler: BareHandler });
 
             expect(warnSpy).toHaveBeenCalledTimes(4);
-            const messages = warnSpy.calls.allArgs().map((args) => String(args[0]));
+            const messages = vi.mocked(warnSpy).mock.calls.map((args) => String(args[0]));
             expect(messages[0]).toContain('"loader"');
             expect(messages[0]).toContain("BareLoader");
             expect(messages[0]).toContain("provideTranslateLoader");
@@ -536,7 +537,7 @@ describe("Translate Providers", () => {
         });
 
         it("does not warn for bare factory functions", () => {
-            const warnSpy = spyOn(console, "warn");
+            const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
             provideTranslateService({ loader: () => new BareLoader() });
             provideTranslateService({ compiler: () => new BareCompiler() });
             provideTranslateService({ parser: () => new BareParser() });
@@ -545,13 +546,13 @@ describe("Translate Providers", () => {
         });
 
         it("does not warn for explicit provideTranslate* helper output", () => {
-            const warnSpy = spyOn(console, "warn");
+            const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
             provideTranslateService({ loader: provideTranslateLoader(BareLoader) });
             expect(warnSpy).not.toHaveBeenCalled();
         });
 
         it("does not warn when fields are omitted (defaults used)", () => {
-            const warnSpy = spyOn(console, "warn");
+            const warnSpy = vi.spyOn(console, "warn").mockReturnValue(undefined);
             provideTranslateService();
             provideChildTranslateService();
             expect(warnSpy).not.toHaveBeenCalled();
