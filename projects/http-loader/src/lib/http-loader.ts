@@ -1,7 +1,10 @@
 import { HttpBackend, HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
-import { catchError, forkJoin, map, Observable, of } from "rxjs";
+import { catchError, forkJoin, map, Observable, of, throwError } from "rxjs";
+
+// Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
+const DOT_SEGMENT = /^\.{1,2}$/;
 
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
@@ -15,6 +18,7 @@ export interface TranslateHttpLoaderConfig {
      * `console.warn` per failure; remaining resources still contribute their
      * keys. Set this to `true` if you want deploys to fail loudly on a
      * missing translation file rather than serve partial translations.
+     * Must be `true` for the translation service's `retry` option to retry HTTP failures.
      */
     failOnError?: boolean;
 }
@@ -58,22 +62,28 @@ export class TranslateHttpLoader implements TranslateLoader {
      * Gets the translations from the server
      */
     public getTranslation(lang: string): Observable<TranslationObject> {
+        // The language may come from a route or query parameter. Encoding it keeps it a
+        // single path segment, so it cannot escape the prefix, drop the suffix, or change
+        // the origin of the request.
+        const langSegment = encodeURIComponent(lang);
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
             const path =
                 typeof resource === "string"
-                    ? `${resource}${lang}.json`
-                    : `${resource.prefix}${lang}${resource.suffix ?? ".json"}`;
+                    ? `${resource}${langSegment}.json`
+                    : `${resource.prefix}${langSegment}${resource.suffix ?? ".json"}`;
 
-            const request$ = this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+            const request$ = DOT_SEGMENT.test(lang)
+                ? throwError(() => new Error(`"${lang}" is a path segment, not a language`))
+                : this.http.get<TranslationObject>(`${path}${cacheBuster}`);
 
             if (this.config.failOnError) {
                 return request$;
             }
 
             return request$.pipe(
-                catchError((err: HttpErrorResponse) => {
+                catchError((err: HttpErrorResponse | Error) => {
                     console.warn(
                         `@ngx-translate/http-loader: error loading translation for ${lang}:`,
                         err,
