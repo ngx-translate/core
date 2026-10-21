@@ -304,6 +304,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
+                        retry: undefined,
                         langs: undefined,
                         isRoot: false,
                     },
@@ -334,6 +335,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
+                        retry: undefined,
                         langs: undefined,
                         isRoot: false,
                     },
@@ -361,6 +363,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
+                        retry: undefined,
                         langs: undefined,
                         isRoot: true,
                     },
@@ -392,6 +395,7 @@ describe("Translate Providers", () => {
                     useValue: {
                         fallbackLang: null,
                         lang: undefined,
+                        retry: undefined,
                         langs: undefined,
                         isRoot: true,
                     },

@@ -15,6 +15,7 @@ export interface TranslateHttpLoaderConfig {
      * `console.warn` per failure; remaining resources still contribute their
      * keys. Set this to `true` if you want deploys to fail loudly on a
      * missing translation file rather than serve partial translations.
+     * Must be `true` for the translation service's `retry` option to retry HTTP failures.
      */
     failOnError?: boolean;
 }

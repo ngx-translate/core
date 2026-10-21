@@ -21,6 +21,7 @@ import {
     merge,
     Observable,
     of,
+    retry,
     Subject,
     tap,
 } from "rxjs";
@@ -56,6 +57,11 @@ export interface TranslateServiceConfig {
     lang?: Language;
     langs?: Language[];
     fallbackLang?: Language | null;
+    /**
+     * Automatic retries for a failed language load (default 0).
+     * With `@ngx-translate/http-loader`, requires `failOnError: true` on the loader.
+     */
+    retry?: number;
     isRoot: boolean;
 }
 
@@ -78,10 +84,13 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
     return isObservable(value) ? value : of(value);
 };
 
+const RETRY_DELAY_MS = 100;
+
 @Injectable()
 export class TranslateService implements ITranslateService {
     protected readonly loadingTranslations = new LoadingTranslationsRegistry();
     protected lastUseLanguage: Language | null = null;
+    private readonly retry: number;
 
     protected currentLoader = inject(TranslateLoader);
     protected compiler = inject(TranslateCompiler);
@@ -253,6 +262,8 @@ export class TranslateService implements ITranslateService {
         this.parent = config.isRoot
             ? null
             : inject(TranslateService, { optional: true, skipSelf: true });
+
+        this.retry = Math.max(0, config.retry ?? 0);
 
         const destroyRef = inject(DestroyRef);
 
@@ -528,7 +539,19 @@ export class TranslateService implements ITranslateService {
             return existing;
         }
 
-        const translations$ = this.currentLoader.getTranslation(lang).pipe(
+        /*
+         * Only the loader source is resubscribed: intermediate failures never
+         * reach the map/tap/finalize chain below, so the registry entry stays
+         * in-flight (isLoading stays true) until the terminal outcome.
+         */
+        const source$ =
+            this.retry > 0
+                ? this.currentLoader
+                      .getTranslation(lang)
+                      .pipe(retry({ count: this.retry, delay: RETRY_DELAY_MS }))
+                : this.currentLoader.getTranslation(lang);
+
+        const translations$ = source$.pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             tap((compiled: InterpolatableTranslationObject) => {
                 this.store.setTranslations(lang, compiled, false);
