@@ -3,6 +3,7 @@
     "version": "1.0.0-rc.0",
     "scripts": {
         "ng": "ng",
+        "dev": "ng serve",
         "start": "ng serve",
         "build": "ng build",
         "build-all": "ng build ngx-translate && ng build http-loader",
