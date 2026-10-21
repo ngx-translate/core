@@ -83,7 +83,7 @@ import { IconComponent } from "../../components/icon/icon.component";
 
             <div class="sub-card">
                 <h4>Translation slots</h4>
-                <span [translateSlots]="slotsKey">
+                <span translateSlots="demo.slots.message">
                     <ng-template translateSlot="details">
                         <a routerLink="/extended">{{ "demo.slots.link" | translate }}</a>
                     </ng-template>
@@ -98,5 +98,4 @@ import { IconComponent } from "../../components/icon/icon.component";
 })
 export class GlobalComponent {
     translate = inject(TranslateService);
-    readonly slotsKey = _("demo.slots.message");
 }
