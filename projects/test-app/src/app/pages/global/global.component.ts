@@ -79,6 +79,8 @@ import { IconComponent } from "../../components/icon/icon.component";
                 <app-methods-comparison />
             </div>
 
+            <br />
+
             <div class="sub-card">
                 <h4>Translation slots</h4>
                 <span [translateSlots]="slotsKey">
