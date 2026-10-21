@@ -1,4 +1,4 @@
-import { HttpBackend, HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpBackend, HttpClient } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
 import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rxjs";
@@ -6,6 +6,11 @@ import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rx
 // Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
 const DOT_SEGMENT = /^\.{1,2}$/;
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Add an optional resource error reporter to the loader configuration.
+ */
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
     suffix?: string;
@@ -21,6 +26,12 @@ export interface TranslateHttpLoaderConfig {
      * Must be `true` for the translation service's `retry` option to retry HTTP failures.
      */
     failOnError?: boolean;
+    /**
+     * Reports each failed resource attempt instead of the loader's default warning.
+     * Called in both failure modes; failOnError still controls error propagation.
+     * Exceptions from this callback are warned about without replacing the loading error.
+     */
+    onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
 
 export interface TranslateHttpLoaderResource {
@@ -28,12 +39,32 @@ export interface TranslateHttpLoaderResource {
     suffix?: string;
 }
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Expose the resource, language, URL and original error to custom loader diagnostics.
+ */
+export interface TranslateHttpLoaderError {
+    lang: string;
+    resource: string | TranslateHttpLoaderResource;
+    /** The request URL, or undefined if language encoding failed before URL construction. */
+    url: string | undefined;
+    error: unknown;
+}
+
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Add an optional resource error reporter to the loader configuration.
+ */
 export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
     useHttpBackend: boolean;
     /** See {@link TranslateHttpLoaderConfig.failOnError}. */
     failOnError?: boolean;
+    /** See {@link TranslateHttpLoaderConfig.onLoadError}. */
+    onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
 
 export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<
@@ -61,10 +92,16 @@ export class TranslateHttpLoader implements TranslateLoader {
     /**
      * Gets the translations from the server
      */
+    /*
+     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+     * Model: GPT-6
+     * Prompt: Report resource failures without changing permissive loading or strict retries.
+     */
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
+            let url: string | undefined;
             const request$ = defer(() => {
                 // The language may come from a route or query parameter. Encoding it keeps it a
                 // single path segment, so it cannot escape the prefix, drop the suffix, or change
@@ -74,23 +111,17 @@ export class TranslateHttpLoader implements TranslateLoader {
                     typeof resource === "string"
                         ? `${resource}${langSegment}.json`
                         : `${resource.prefix}${langSegment}${resource.suffix ?? ".json"}`;
+                url = `${path}${cacheBuster}`;
 
                 return DOT_SEGMENT.test(lang)
                     ? throwError(() => new Error(`"${lang}" is a path segment, not a language`))
-                    : this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+                    : this.http.get<TranslationObject>(url);
             });
 
-            if (this.config.failOnError) {
-                return request$;
-            }
-
             return request$.pipe(
-                catchError((err: HttpErrorResponse | Error) => {
-                    console.warn(
-                        `@ngx-translate/http-loader: error loading translation for ${lang}:`,
-                        err,
-                    );
-                    return of({});
+                catchError((error: unknown) => {
+                    this.reportError({ lang, resource, url, error });
+                    return this.config.failOnError ? throwError(() => error) : of({});
                 }),
             );
         });
@@ -103,8 +134,33 @@ export class TranslateHttpLoader implements TranslateLoader {
             map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
         ) as Observable<TranslationObject>;
     }
+
+    /*
+     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+     * Model: GPT-6
+     * Prompt: Let applications replace loader warnings while preserving the loading outcome.
+     */
+    private reportError(failure: TranslateHttpLoaderError): void {
+        if (this.config.onLoadError) {
+            try {
+                this.config.onLoadError(failure);
+            } catch (error) {
+                console.warn("@ngx-translate/http-loader: onLoadError callback failed:", error);
+            }
+        } else if (!this.config.failOnError) {
+            console.warn(
+                `@ngx-translate/http-loader: error loading translation for ${failure.lang}:`,
+                failure.error,
+            );
+        }
+    }
 }
 
+/*
+ * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
+ * Model: GPT-6
+ * Prompt: Forward custom error reporting for single-resource HTTP loaders.
+ */
 export function provideTranslateHttpLoader(
     config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
@@ -119,6 +175,7 @@ export function provideTranslateHttpLoader(
         enforceLoading: singleConfig.enforceLoading ?? false,
         useHttpBackend: singleConfig.useHttpBackend ?? false,
         failOnError: singleConfig.failOnError ?? false,
+        onLoadError: singleConfig.onLoadError,
         resources: [
             {
                 prefix: singleConfig.prefix ?? "/assets/i18n/",
