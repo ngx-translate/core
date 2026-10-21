@@ -1,15 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import {
-    _,
-    TranslateSlotsComponent,
-    TranslateSlotDirective,
-    TranslateService,
-    TranslatePipe,
-} from "@ngx-translate/core";
 import { RouterLink } from "@angular/router";
+import {
+    TranslatePipe,
+    TranslateService,
+    TranslateSlotDirective,
+    TranslateSlotsComponent,
+} from "@ngx-translate/core";
 import { HierarchyVizComponent } from "../../components/hierarchy-viz/hierarchy-viz.component";
-import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
 import { IconComponent } from "../../components/icon/icon.component";
+import { MethodsComparisonComponent } from "../../components/methods-comparison/methods-comparison.component";
 
 @Component({
     selector: "app-global",
