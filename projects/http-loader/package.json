@@ -16,7 +16,7 @@
     "repository": {
         "url": "https://github.com/ngx-translate/core"
     },
-    "author":"Andreas Löw / CodeAndWeb GmbH, Olivier Combe",
+    "author": "Andreas Löw / CodeAndWeb GmbH, Olivier Combe, Raphael Balet",
     "license": "MIT",
     "peerDependencies": {
         "@angular/common": ">=18",
