@@ -1,0 +1,7 @@
+@for (part of parts(); track part.id) {
+    @if (part.template) {
+        <ng-container [ngTemplateOutlet]="part.template" />
+    } @else {
+        <ng-container>{{ part.text }}</ng-container>
+    }
+}

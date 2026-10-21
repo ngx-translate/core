@@ -4,6 +4,8 @@ export * from "./lib/translate-block.directive";
 export * from "./lib/missing-translation-handler";
 export * from "./lib/translate.compiler";
 export * from "./lib/translate.directive";
+export * from "./lib/translate-slot.directive";
+export * from "./lib/translate-slots.component";
 export * from "./lib/translate.loader";
 export * from "./lib/translate.parser";
 export * from "./lib/translate.pipe";
