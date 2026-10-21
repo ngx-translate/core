@@ -6,6 +6,8 @@ The `@ngx-translate/http-loader` package enables the dynamic loading of translat
 files from a server, making it a flexible solution for internationalizing Angular  
 applications with JSON translation files.
 
+Requires Angular 20 or newer.
+
 ### Documentation
 
 - [Official Documentation](https://ngx-translate.org/)

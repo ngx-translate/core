@@ -39,12 +39,6 @@ jobs:
         strategy:
             matrix:
                 include:
-                    - angular-version: 18
-                      node-version: 18.x
-                      config-dir: compat/a18
-                    - angular-version: 19
-                      node-version: 18.x
-                      config-dir: compat/a19
                     - angular-version: 20
                       node-version: 20.x
                       config-dir: compat/a20

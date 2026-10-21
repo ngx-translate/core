@@ -7,6 +7,8 @@ applications, allowing developers to easily implement and manage multiple langua
 in their projects. With `@ngx-translate/core`, you can dynamically switch languages  
 within the app, seamlessly adapting content to suit various locales.
 
+Requires Angular 20 or newer.
+
 ### Documentation
 
 - [Official Documentation](https://ngx-translate.org/)
