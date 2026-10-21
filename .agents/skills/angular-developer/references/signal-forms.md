@@ -441,10 +441,7 @@ validateAsync(s.username, {
 // WRONG - missing onError (it's required!)
 validateAsync(s.username, {
     params: ({ value }) => value(),
-    factory: (username) =>
-        resource({
-            /* ... */
-        }),
+    factory: (username) => resource({/* ... */}),
     onSuccess: (result) => (result ? { kind: "error" } : undefined),
     // ERROR: 'onError' is missing but required!
 });
