@@ -1,7 +1,7 @@
 import { HttpBackend, HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
-import { catchError, forkJoin, map, Observable, of, throwError } from "rxjs";
+import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rxjs";
 
 // Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
 const DOT_SEGMENT = /^\.{1,2}$/;
@@ -62,21 +62,23 @@ export class TranslateHttpLoader implements TranslateLoader {
      * Gets the translations from the server
      */
     public getTranslation(lang: string): Observable<TranslationObject> {
-        // The language may come from a route or query parameter. Encoding it keeps it a
-        // single path segment, so it cannot escape the prefix, drop the suffix, or change
-        // the origin of the request.
-        const langSegment = encodeURIComponent(lang);
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
-            const path =
-                typeof resource === "string"
-                    ? `${resource}${langSegment}.json`
-                    : `${resource.prefix}${langSegment}${resource.suffix ?? ".json"}`;
+            const request$ = defer(() => {
+                // The language may come from a route or query parameter. Encoding it keeps it a
+                // single path segment, so it cannot escape the prefix, drop the suffix, or change
+                // the origin of the request.
+                const langSegment = encodeURIComponent(lang);
+                const path =
+                    typeof resource === "string"
+                        ? `${resource}${langSegment}.json`
+                        : `${resource.prefix}${langSegment}${resource.suffix ?? ".json"}`;
 
-            const request$ = DOT_SEGMENT.test(lang)
-                ? throwError(() => new Error(`"${lang}" is a path segment, not a language`))
-                : this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+                return DOT_SEGMENT.test(lang)
+                    ? throwError(() => new Error(`"${lang}" is a path segment, not a language`))
+                    : this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+            });
 
             if (this.config.failOnError) {
                 return request$;
