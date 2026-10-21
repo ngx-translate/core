@@ -85,6 +85,8 @@ Run commands from the repository root:
 
 ## Contributions
 
+- For version bumps, release tags, publishing, or release failures, read and follow
+  [RELEASING.md](RELEASING.md).
 - Use Conventional Commit messages, enforced by `commitlint.config.ts` and the commit-msg hook.
 - The pre-commit hook runs lint-staged, builds both libraries, and runs both library test suites;
   account for the Chrome requirement when committing.
