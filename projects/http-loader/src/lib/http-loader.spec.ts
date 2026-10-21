@@ -371,6 +371,84 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         expect(translate.getTranslations("en") as any).toEqual({});
     });
 
+    describe("language id confinement", () => {
+        const origin = "https://app.example";
+
+        beforeEach(() => {
+            spyOn(console, "warn");
+        });
+
+        const requestUrlsFor = (lang: string): URL[] => {
+            translate.use(lang).subscribe({ error: () => undefined });
+            const requests = http.match(() => true);
+            requests.forEach((request) => request.flush({}));
+            return requests.map((request) => new URL(request.request.url, `${origin}/`));
+        };
+
+        const hostileLanguageIds = [
+            "../../api/user/profile",
+            "..\\..\\uploads\\42",
+            "../../uploads/42.json#",
+            "en?redirect=1&x=",
+            "https://evil.example/x",
+            "//evil.example/x",
+            "%2e%2e/%2e%2e/uploads/42",
+        ];
+
+        hostileLanguageIds.forEach((lang) => {
+            it(`keeps "${lang}" beneath the prefix with the suffix intact`, () => {
+                prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" });
+
+                requestUrlsFor(lang).forEach((url) => {
+                    expect(url.origin).toBe(origin);
+                    expect(url.pathname.startsWith("/assets/i18n/")).toBeTrue();
+                    expect(url.pathname.endsWith(".json")).toBeTrue();
+                    expect(url.pathname.slice("/assets/i18n/".length)).not.toContain("/");
+                    expect(url.search).toBe("");
+                    expect(url.hash).toBe("");
+                });
+            });
+        });
+
+        it("cannot change the origin when the prefix is empty", () => {
+            prepareSingle({ prefix: "", suffix: ".json" });
+
+            requestUrlsFor("https://evil.example/x").forEach((url) => {
+                expect(url.origin).toBe(origin);
+            });
+        });
+
+        ["..", "."].forEach((lang) => {
+            it(`does not request a "${lang}" dot segment`, () => {
+                prepareMulti({ resources: [{ prefix: "/locales/", suffix: "/common.json" }] });
+
+                expect(requestUrlsFor(lang)).toEqual([]);
+            });
+        });
+
+        it("encodes a slash in the language id", () => {
+            prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" });
+
+            translate.use("admin/en").subscribe();
+
+            http.expectOne("/assets/i18n/admin%2Fen.json").flush({ TEST: "A" });
+            expect(translate.instant("TEST")).toBe("A");
+        });
+
+        it("still loads ordinary language ids unchanged", () => {
+            prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" });
+
+            const urls = ["en", "en-US", "zh_Hant", "sr-Latn-RS"].flatMap(requestUrlsFor);
+
+            expect(urls.map((url) => url.pathname)).toEqual([
+                "/assets/i18n/en.json",
+                "/assets/i18n/en-US.json",
+                "/assets/i18n/zh_Hant.json",
+                "/assets/i18n/sr-Latn-RS.json",
+            ]);
+        });
+    });
+
     describe("F8 failOnError", () => {
         it("failOnError: true forwards HTTP errors to translate.use()", (done: DoneFn) => {
             spyOn(console, "warn");
