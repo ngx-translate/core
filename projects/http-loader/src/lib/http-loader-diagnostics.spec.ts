@@ -1,8 +1,3 @@
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Cover custom loader reporting, unchanged defaults, strict errors and retries.
- */
 import { provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";

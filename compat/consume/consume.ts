@@ -20,11 +20,6 @@ export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Check contextual typing of loader error callbacks in supported TypeScript versions.
- */
 export const reportingLoader = provideTranslateHttpLoader({
     onLoadError: ({ lang, resource, url, error }) => {
         const requestUrl: string | undefined = url;

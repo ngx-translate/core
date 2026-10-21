@@ -6,11 +6,6 @@ import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rx
 // Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
 const DOT_SEGMENT = /^\.{1,2}$/;
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Add an optional resource error reporter to the loader configuration.
- */
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
     suffix?: string;
@@ -30,6 +25,7 @@ export interface TranslateHttpLoaderConfig {
      * Reports each failed resource attempt instead of the loader's default warning.
      * Called in both failure modes; failOnError still controls error propagation.
      * Exceptions from this callback are warned about without replacing the loading error.
+     * Does not suppress separate TranslateService warnings after a terminal loading failure.
      */
     onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
@@ -39,11 +35,6 @@ export interface TranslateHttpLoaderResource {
     suffix?: string;
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Expose the resource, language, URL and original error to custom loader diagnostics.
- */
 export interface TranslateHttpLoaderError {
     lang: string;
     resource: string | TranslateHttpLoaderResource;
@@ -52,11 +43,6 @@ export interface TranslateHttpLoaderError {
     error: unknown;
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Add an optional resource error reporter to the loader configuration.
- */
 export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
@@ -91,11 +77,6 @@ export class TranslateHttpLoader implements TranslateLoader {
 
     /**
      * Gets the translations from the server
-     */
-    /*
-     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
-     * Model: GPT-6
-     * Prompt: Report resource failures without changing permissive loading or strict retries.
      */
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
@@ -135,11 +116,6 @@ export class TranslateHttpLoader implements TranslateLoader {
         ) as Observable<TranslationObject>;
     }
 
-    /*
-     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
-     * Model: GPT-6
-     * Prompt: Let applications replace loader warnings while preserving the loading outcome.
-     */
     private reportError(failure: TranslateHttpLoaderError): void {
         if (this.config.onLoadError) {
             try {
@@ -156,11 +132,6 @@ export class TranslateHttpLoader implements TranslateLoader {
     }
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Forward custom error reporting for single-resource HTTP loaders.
- */
 export function provideTranslateHttpLoader(
     config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
