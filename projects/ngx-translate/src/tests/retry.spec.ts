@@ -158,4 +158,76 @@ describe("retry", () => {
         expect(childLoader.getCalls("en")).toBe(2);
         expect(childSvc.getTranslations("en")).toBeDefined();
     }));
+
+    it("cancels a scheduled retry and completes subscribers without an error", fakeAsync(() => {
+        const loader = new FlakyLoader(99);
+        const svc = buildService(loader, { retry: 2 });
+        const next = jasmine.createSpy("next");
+        const error = jasmine.createSpy("error");
+        const complete = jasmine.createSpy("complete");
+        const load = svc.use("fr");
+        load.subscribe({ next, error, complete });
+        tick(50);
+
+        svc.deleteLanguage("fr");
+        expect(svc.isLoading()).toBeFalse();
+        expect(complete).toHaveBeenCalledTimes(1);
+        load.subscribe({ next, error, complete });
+        tick(1000);
+
+        expect(loader.getCalls("fr")).toBe(1);
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(next).not.toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(svc.getTranslations("fr")).toBeUndefined();
+        expect(svc.getLangs()).not.toContain("fr");
+        expect(console.warn).not.toHaveBeenCalled();
+    }));
+
+    it("allows a fresh load with its own retries after cancellation", fakeAsync(() => {
+        const loader = new FlakyLoader(2);
+        const svc = buildService(loader, { retry: 2 });
+        svc.use("fr");
+        tick(50);
+        svc.deleteLanguage("fr");
+
+        svc.use("fr");
+        tick(50);
+        expect(loader.getCalls("fr")).toBe(2);
+        expect(svc.isLoading()).toBeTrue();
+        tick(50);
+
+        expect(loader.getCalls("fr")).toBe(3);
+        expect(svc.instant("TEST")).toBe("translation fr");
+        expect(svc.isLoading()).toBeFalse();
+    }));
+
+    it("cancels a retry that would otherwise restore the deleted language", fakeAsync(() => {
+        const loader = new FlakyLoader(1);
+        const svc = buildService(loader, { retry: 2 });
+        svc.use("fr");
+
+        svc.deleteLanguage("fr");
+        tick(100);
+
+        expect(loader.getCalls("fr")).toBe(1);
+        expect(svc.getLangs()).not.toContain("fr");
+        expect(svc.instant("TEST")).toBe("TEST");
+    }));
+
+    it("keeps another language's retries running", fakeAsync(() => {
+        const loader = new FlakyLoader(1);
+        const svc = buildService(loader, { retry: 2 });
+        svc.reloadLang("en");
+        svc.reloadLang("fr");
+
+        svc.deleteLanguage("fr");
+        expect(svc.isLoading()).toBeTrue();
+        tick(100);
+
+        expect(loader.getCalls("fr")).toBe(1);
+        expect(loader.getCalls("en")).toBe(2);
+        expect(svc.instant("TEST", undefined, "en")).toBe("translation en");
+        expect(svc.isLoading()).toBeFalse();
+    }));
 });

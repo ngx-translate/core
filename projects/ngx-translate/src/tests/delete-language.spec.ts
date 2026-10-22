@@ -1,4 +1,4 @@
-import { firstValueFrom } from "rxjs";
+import { finalize, firstValueFrom, of, Subject } from "rxjs";
 import { EnvironmentInjector, Injector } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import {
@@ -6,7 +6,10 @@ import {
     provideChildTranslateService,
     provideTranslateLoader,
     provideTranslateService,
+    TranslateCompiler,
+    TranslateLoader,
     Translation,
+    TranslationObject,
     TranslateService,
 } from "../public-api";
 import { DelayedFakeLoader, provideTestableTranslateService } from "./test-helpers";
@@ -235,7 +238,7 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
         translate = TestBed.inject(TranslateService);
     });
 
-    it("should flip isLoading() to false immediately", fakeAsync(() => {
+    it("should stop loading immediately and keep the language deleted", fakeAsync(() => {
         translate.use("en");
         expect(translate.isLoading()).toBeTrue();
 
@@ -244,6 +247,9 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
         expect(translate.isLoading()).toBeFalse();
 
         tick(20);
+        expect(translate.getLangs()).not.toContain("en");
+        expect(translate.getTranslations("en")).toBeUndefined();
+        expect(translate.instant("TEST")).toBe("TEST");
     }));
 
     it("should let use() re-create the deleted language with a fresh load", fakeAsync(() => {
@@ -265,7 +271,549 @@ describe("TranslateService.deleteLanguage during in-flight loading", () => {
     }));
 });
 
+describe("TranslateService.deleteLanguage cancellation", () => {
+    let translate: TranslateService;
+    let pending: Subject<TranslationObject>;
+    let loader: jasmine.Spy<TranslateLoader["getTranslation"]>;
+    let teardown: jasmine.Spy;
+
+    beforeEach(() => {
+        pending = new Subject<TranslationObject>();
+        teardown = jasmine.createSpy("loader teardown");
+        loader = jasmine
+            .createSpy("getTranslation")
+            .and.returnValue(pending.pipe(finalize(teardown)));
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useValue: { getTranslation: loader } },
+                }),
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+        translate.setTranslation("en", { HELLO: "Hello" });
+        translate.use("en");
+        translate.setFallbackLang("en");
+    });
+
+    it("should complete shared loads and pending lookups without restoring the language", () => {
+        const next = jasmine.createSpy("next");
+        const lookupNext = jasmine.createSpy("lookup next");
+        const error = jasmine.createSpy("error");
+        const complete = jasmine.createSpy("complete").and.callFake(() => {
+            expect(translate.isLoading()).toBeFalse();
+            expect(translate.getLangs()).not.toContain("fr");
+            expect(translate.getTranslations("fr")).toBeUndefined();
+        });
+        const langChange = jasmine.createSpy("langChange");
+        translate.onLangChange.subscribe(langChange);
+        translate.addLangs(["fr"]);
+        translate.use("fr").subscribe({ next, error, complete });
+        translate.use("fr").subscribe({ next, error, complete });
+        translate.get("HELLO", undefined, "fr").subscribe({ next: lookupNext, error, complete });
+
+        translate.deleteLanguage("fr");
+        pending.next({ HELLO: "Bonjour" });
+        pending.complete();
+
+        expect(loader).toHaveBeenCalledTimes(1);
+        expect(teardown).toHaveBeenCalledTimes(1);
+        expect(complete).toHaveBeenCalledTimes(3);
+        expect(next).not.toHaveBeenCalled();
+        expect(lookupNext).toHaveBeenCalledOnceWith("HELLO");
+        expect(error).not.toHaveBeenCalled();
+        expect(langChange).not.toHaveBeenCalled();
+        expect(translate.getLangs()).not.toContain("fr");
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        expect(translate.getCurrentLang()).toBe("en");
+    });
+
+    for (const method of ["use", "reloadLang"] as const) {
+        it(`should allow a fresh ${method} without stale writes or loading-state changes`, () => {
+            const fresh = new Subject<TranslationObject>();
+            loader.and.returnValues(pending, fresh);
+            const cancelled = translate.use("fr");
+            translate.deleteLanguage("fr");
+
+            translate[method]("fr").subscribe();
+            pending.next({ HELLO: "Stale" });
+            expect(translate.isLoading()).toBeTrue();
+            expect(translate.getTranslations("fr")).toBeUndefined();
+
+            fresh.next({ HELLO: "Fresh" });
+            fresh.complete();
+            pending.next({ HELLO: "Stale after fresh load" });
+            pending.complete();
+            const next = jasmine.createSpy("late next");
+            const complete = jasmine.createSpy("late complete");
+            cancelled.subscribe({ next, complete });
+
+            expect(loader).toHaveBeenCalledTimes(2);
+            expect(translate.isLoading()).toBeFalse();
+            expect(translate.instant("HELLO", undefined, "fr")).toBe("Fresh");
+            expect(next).not.toHaveBeenCalled();
+            expect(complete).toHaveBeenCalledTimes(1);
+        });
+    }
+
+    it("should cancel older loads even after reset and reload cleared their registry entries", () => {
+        const fresh = new Subject<TranslationObject>();
+        loader.and.returnValues(pending, fresh);
+        const complete = jasmine.createSpy("complete");
+        translate.use("fr").subscribe({ complete });
+        translate.reloadLang("fr").subscribe({ complete });
+
+        translate.deleteLanguage("fr");
+        pending.next({ HELLO: "Old" });
+        fresh.next({ HELLO: "Newer" });
+
+        expect(pending.observed).toBeFalse();
+        expect(fresh.observed).toBeFalse();
+        expect(complete).toHaveBeenCalledTimes(2);
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        expect(translate.getCurrentLang()).toBe("en");
+    });
+
+    it("should keep other languages loading", () => {
+        const other = new Subject<TranslationObject>();
+        loader.and.returnValues(pending, other);
+        translate.reloadLang("fr");
+        translate.reloadLang("de");
+
+        translate.deleteLanguage("fr");
+
+        expect(translate.isLoading()).toBeTrue();
+        expect(other.observed).toBeTrue();
+        other.next({ HELLO: "Hallo" });
+        other.complete();
+        expect(translate.isLoading()).toBeFalse();
+        expect(translate.instant("HELLO", undefined, "de")).toBe("Hallo");
+    });
+
+    it("should prevent a delayed fallback-language change", () => {
+        const fallbackChange = jasmine.createSpy("fallbackChange");
+        translate.onFallbackLangChange.subscribe(fallbackChange);
+        translate.setFallbackLang("fr");
+
+        translate.deleteLanguage("fr");
+        pending.next({ HELLO: "Bonjour" });
+
+        expect(translate.getFallbackLang()).toBe("en");
+        expect(fallbackChange).not.toHaveBeenCalled();
+        expect(translate.getTranslations("fr")).toBeUndefined();
+    });
+
+    it("should preserve current and fallback pointers when deleting their pending catalog", () => {
+        translate.reloadLang("en");
+
+        translate.deleteLanguage("en");
+
+        expect(translate.getCurrentLang()).toBe("en");
+        expect(translate.getFallbackLang()).toBe("en");
+        expect(translate.getTranslations("en")).toBeUndefined();
+    });
+
+    it("should resolve pending lookups through the normal language lookup rules", async () => {
+        translate.use("fr");
+        const current = translate.getAsync("HELLO");
+        const explicit = translate.getAsync("HELLO", undefined, "fr");
+
+        translate.deleteLanguage("fr");
+
+        await expectAsync(current).toBeResolvedTo("Hello");
+        await expectAsync(explicit).toBeResolvedTo("HELLO");
+    });
+
+    it("should resolve a pending lookup using fallback translations after deleting the current catalog", async () => {
+        translate.setTranslation("de", { HELLO: "Hallo {{name}}" });
+        translate.setFallbackLang("de");
+        translate.reloadLang("en");
+        const result = translate.getAsync(["HELLO"], { name: "Ada" });
+
+        translate.deleteLanguage("en");
+
+        await expectAsync(result).toBeResolvedTo({ HELLO: "Hallo Ada" });
+    });
+
+    for (const method of ["stream", "getStreamOnTranslationChange"] as const) {
+        it(`should emit the remaining translation and keep ${method} subscribed`, () => {
+            translate.use("fr");
+            const values: Translation[] = [];
+            const subscription = translate[method]("HELLO").subscribe((value) =>
+                values.push(value),
+            );
+
+            translate.deleteLanguage("fr");
+
+            expect(values).toEqual(["Hello"]);
+            expect(subscription.closed).toBeFalse();
+            translate.setTranslation("en", { HELLO: "Updated" });
+            translate.use("en");
+            expect(values).toEqual(["Hello", "Updated"]);
+            subscription.unsubscribe();
+        });
+    }
+
+    it("should still reject pending lookups when loading fails without deletion", async () => {
+        spyOn(console, "warn");
+        const failure = new Error("load failed");
+        translate.use("fr");
+        const result = translate.getAsync("HELLO");
+
+        pending.error(failure);
+
+        await expectAsync(result).toBeRejectedWith(failure);
+        expect(translate.getCurrentLang()).toBe("en");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should not replay a partial result from a cancelled load observable", () => {
+        const load = translate.use("fr");
+        pending.next({ HELLO: "Bonjour" });
+
+        translate.deleteLanguage("fr");
+        const next = jasmine.createSpy("next");
+        const complete = jasmine.createSpy("complete");
+        load.subscribe({ next, complete });
+
+        expect(next).not.toHaveBeenCalled();
+        expect(complete).toHaveBeenCalledTimes(1);
+        expect(teardown).toHaveBeenCalledTimes(1);
+    });
+
+    it("should preserve completed load snapshots without restoring the deleted catalog", async () => {
+        const beforeCompletion = translate.use("fr");
+        pending.next({ HELLO: "Bonjour" });
+        pending.complete();
+        const afterCompletion = translate.use("fr");
+
+        translate.deleteLanguage("fr");
+
+        expect((await firstValueFrom(beforeCompletion)) as PlainTranslations).toEqual({
+            HELLO: "Bonjour",
+        });
+        expect((await firstValueFrom(afterCompletion)) as PlainTranslations).toEqual({
+            HELLO: "Bonjour",
+        });
+        expect(loader).toHaveBeenCalledTimes(1);
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        expect(translate.getLangs()).not.toContain("fr");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should allow a fresh load from a cancellation completion callback", () => {
+        const fresh = new Subject<TranslationObject>();
+        loader.and.returnValues(pending, fresh);
+        translate.use("fr").subscribe({ complete: () => translate.use("fr") });
+
+        translate.deleteLanguage("fr");
+
+        expect(translate.isLoading()).toBeTrue();
+        fresh.next({ HELLO: "Fresh" });
+        fresh.complete();
+        expect(translate.instant("HELLO")).toBe("Fresh");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should allow a completion callback to recreate the language synchronously", () => {
+        loader.and.returnValues(pending, of({ HELLO: "Fresh" }));
+        translate.use("fr").subscribe({ complete: () => translate.use("fr") });
+
+        translate.deleteLanguage("fr");
+
+        expect(pending.observed).toBeFalse();
+        expect(translate.getLangs()).toContain("fr");
+        expect(translate.getCurrentLang()).toBe("fr");
+        expect(translate.instant("HELLO")).toBe("Fresh");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should invalidate stale writes before deletion notifies translation subscribers", () => {
+        const fresh = new Subject<TranslationObject>();
+        loader.and.returnValues(pending, fresh);
+        translate.use("fr");
+        translate.setTranslation("fr", { HELLO: "Manual" });
+        translate.onTranslationChange.subscribe((event) => {
+            if (event.lang === "fr" && Object.keys(event.translations).length === 0) {
+                pending.next({ HELLO: "Stale" });
+                translate.use("fr");
+            }
+        });
+
+        translate.deleteLanguage("fr");
+
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        expect(translate.getCurrentLang()).toBe("en");
+        expect(translate.isLoading()).toBeTrue();
+        fresh.next({ HELLO: "Fresh" });
+        fresh.complete();
+        expect(translate.instant("HELLO")).toBe("Fresh");
+    });
+
+    it("should discard a result when a custom compiler deletes the language", () => {
+        translate.use("fr");
+        spyOn(TestBed.inject(TranslateCompiler), "compileTranslations").and.callFake(
+            (translations, lang) => {
+                translate.deleteLanguage(lang);
+                return translations;
+            },
+        );
+
+        pending.next({ HELLO: "Stale" });
+
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        expect(translate.getCurrentLang()).toBe("en");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should settle loading when the loader deletes the language synchronously", () => {
+        loader.and.callFake((lang) => {
+            translate.deleteLanguage(lang);
+            return of({ HELLO: "Stale" });
+        });
+        const next = jasmine.createSpy("next");
+        const complete = jasmine.createSpy("complete");
+
+        translate.use("fr").subscribe({ next, complete });
+
+        expect(next).not.toHaveBeenCalled();
+        expect(complete).toHaveBeenCalledTimes(1);
+        expect(translate.isLoading()).toBeFalse();
+        expect(translate.getTranslations("fr")).toBeUndefined();
+        loader.and.returnValue(of({ HELLO: "Fresh" }));
+        translate.use("fr");
+        expect(translate.instant("HELLO")).toBe("Fresh");
+        expect(translate.isLoading()).toBeFalse();
+    });
+
+    it("should suppress a loader error triggered by deletion notifications", () => {
+        spyOn(console, "warn");
+        const injector = Injector.create({
+            providers: [
+                provideTranslateService({
+                    loader: { provide: TranslateLoader, useValue: { getTranslation: loader } },
+                }),
+            ],
+        });
+        const service = injector.get(TranslateService);
+        const error = jasmine.createSpy("error");
+        const complete = jasmine.createSpy("complete");
+        try {
+            service.use("fr").subscribe({ error, complete });
+            service.setTranslation("fr", { HELLO: "Manual" });
+            service.onTranslationChange.subscribe(() => pending.error(new Error("too late")));
+
+            service.deleteLanguage("fr");
+
+            expect(error).not.toHaveBeenCalled();
+            expect(complete).toHaveBeenCalledTimes(1);
+            expect(console.warn).not.toHaveBeenCalled();
+            expect(service.getCurrentLang()).toBe("fr");
+            expect(service.getTranslations("fr")).toBeUndefined();
+            expect(service.isLoading()).toBeFalse();
+        } finally {
+            (injector as EnvironmentInjector).destroy();
+        }
+    });
+
+    it("should complete a retained failed load after deletion without replaying its error", () => {
+        spyOn(console, "warn");
+        const failure = new Error("load failed");
+        const error = jasmine.createSpy("error");
+        const load = translate.use("fr");
+        load.subscribe({ error });
+        pending.error(failure);
+        expect(error).toHaveBeenCalledOnceWith(failure);
+
+        translate.deleteLanguage("fr");
+        const complete = jasmine.createSpy("complete");
+        load.subscribe({ error, complete });
+
+        expect(error).toHaveBeenCalledTimes(1);
+        expect(complete).toHaveBeenCalledTimes(1);
+        expect(translate.isLoading()).toBeFalse();
+    });
+});
+
 describe("TranslateService.deleteLanguage (hierarchical)", () => {
+    describe("ancestor request ordering", () => {
+        let rootInjector: Injector;
+        let childInjector: Injector;
+        let root: TranslateService;
+        let rootLoad: Subject<TranslationObject>;
+        let childLoad: Subject<TranslationObject>;
+        let freshChildLoad: Subject<TranslationObject>;
+        let childLoader: jasmine.Spy<TranslateLoader["getTranslation"]>;
+
+        beforeEach(() => {
+            rootLoad = new Subject<TranslationObject>();
+            childLoad = new Subject<TranslationObject>();
+            freshChildLoad = new Subject<TranslationObject>();
+            childLoader = jasmine
+                .createSpy("child loader")
+                .and.returnValues(childLoad, freshChildLoad);
+            rootInjector = Injector.create({
+                providers: [
+                    provideTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: { getTranslation: () => rootLoad },
+                        },
+                    }),
+                ],
+            });
+            root = rootInjector.get(TranslateService);
+            childInjector = Injector.create({
+                parent: rootInjector,
+                providers: [
+                    provideChildTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: { getTranslation: childLoader },
+                        },
+                    }),
+                ],
+            });
+        });
+
+        afterEach(() => {
+            (childInjector as EnvironmentInjector).destroy();
+            (rootInjector as EnvironmentInjector).destroy();
+        });
+
+        for (const method of ["use", "setFallbackLang"] as const) {
+            it(`should ignore an older parent ${method} and accept a later explicit request`, () => {
+                root[method]("fr");
+                const child = childInjector.get(TranslateService);
+                expect(childLoader).toHaveBeenCalledTimes(1);
+
+                child.deleteLanguage("fr");
+
+                expect(childLoad.observed).toBeFalse();
+                expect(rootLoad.observed).toBeTrue();
+                rootLoad.next({ HELLO: "Parent" });
+                rootLoad.complete();
+                expect(root.getLangs()).toContain("fr");
+                expect(child.getTranslations("fr")).toBeUndefined();
+                expect(childLoader).toHaveBeenCalledTimes(1);
+                expect(child.isLoading()).toBeFalse();
+
+                root[method]("fr");
+                expect(childLoader).toHaveBeenCalledTimes(2);
+                freshChildLoad.next({ HELLO: "Child" });
+                freshChildLoad.complete();
+                expect(child.getTranslations("fr") as PlainTranslations).toEqual({
+                    HELLO: "Child",
+                });
+            });
+
+            it(`should accept a new parent ${method} even when it shares the older pending load`, () => {
+                root[method]("fr");
+                const child = childInjector.get(TranslateService);
+                child.deleteLanguage("fr");
+
+                root[method]("fr");
+                rootLoad.next({ HELLO: "Parent" });
+                rootLoad.complete();
+
+                expect(childLoader).toHaveBeenCalledTimes(2);
+                freshChildLoad.next({ HELLO: "Child" });
+                freshChildLoad.complete();
+                expect(child.getLangs()).toContain("fr");
+                expect(child.isLoading()).toBeFalse();
+            });
+        }
+
+        it("should not treat an unrelated newer request as permission to restore an older language", () => {
+            root.setFallbackLang("fr");
+            const child = childInjector.get(TranslateService);
+            child.deleteLanguage("fr");
+            childLoader.and.returnValue(of({}));
+
+            root.setTranslation("de", { HELLO: "Hallo" });
+            root.use("de");
+            rootLoad.next({ HELLO: "Bonjour" });
+            rootLoad.complete();
+
+            expect(childLoader.calls.allArgs()).toEqual([["fr"], ["de"]]);
+            expect(child.getTranslations("fr")).toBeUndefined();
+            expect(root.getFallbackLang()).toBe("fr");
+            expect(child.getCurrentLang()).toBe("de");
+        });
+    });
+
+    for (const scope of ["root", "child", "isolated"] as const) {
+        it(`should cancel only loads owned by the ${scope} service`, () => {
+            const rootLoad = new Subject<TranslationObject>();
+            const childLoad = new Subject<TranslationObject>();
+            const isolatedLoad = new Subject<TranslationObject>();
+            const rootInjector = Injector.create({
+                providers: [
+                    provideTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: { getTranslation: () => rootLoad },
+                        },
+                    }),
+                ],
+            });
+            const childInjector = Injector.create({
+                providers: [
+                    provideChildTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: { getTranslation: () => childLoad },
+                        },
+                    }),
+                ],
+                parent: rootInjector,
+            });
+            const isolatedInjector = Injector.create({
+                providers: [
+                    provideTranslateService({
+                        loader: {
+                            provide: TranslateLoader,
+                            useValue: { getTranslation: () => isolatedLoad },
+                        },
+                    }),
+                ],
+                parent: rootInjector,
+            });
+            const services = {
+                root: rootInjector.get(TranslateService),
+                child: childInjector.get(TranslateService),
+                isolated: isolatedInjector.get(TranslateService),
+            };
+            const loads = { root: rootLoad, child: childLoad, isolated: isolatedLoad };
+
+            try {
+                Object.values(services).forEach((service) => service.reloadLang("fr"));
+                services[scope].deleteLanguage("fr");
+
+                expect(services.root.isLoading()).toBe(scope !== "root");
+                expect(services.child.isLoading()).toBeTrue();
+                expect(services.isolated.isLoading()).toBe(scope !== "isolated");
+                for (const key of ["root", "child", "isolated"] as const) {
+                    expect(loads[key].observed).toBe(key !== scope);
+                    loads[key].next({ HELLO: key });
+                    loads[key].complete();
+                    if (key === scope) {
+                        expect(services[key].getTranslations("fr")).toBeUndefined();
+                    } else {
+                        expect(services[key].getLangs()).toContain("fr");
+                    }
+                }
+                Object.values(services).forEach((service) =>
+                    expect(service.isLoading()).toBeFalse(),
+                );
+            } finally {
+                (isolatedInjector as EnvironmentInjector).destroy();
+                (childInjector as EnvironmentInjector).destroy();
+                (rootInjector as EnvironmentInjector).destroy();
+            }
+        });
+    }
+
     it("should refresh child streams as child and parent translations are deleted", () => {
         const rootInjector = Injector.create({
             providers: [provideTranslateService()],
