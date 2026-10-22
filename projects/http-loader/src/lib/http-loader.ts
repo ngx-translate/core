@@ -22,6 +22,12 @@ export interface TranslateHttpLoaderConfig {
      */
     failOnError?: boolean;
     /**
+     * Flatten each resource's nested objects into dotted keys before merging (default false).
+     * Later resources then override equivalent flat or nested keys. Arrays and null stay intact.
+     * Within one resource, the last encountered equivalent key wins.
+     */
+    flatten?: boolean;
+    /**
      * Reports each failed resource attempt instead of the loader's default warning.
      * Called in both failure modes; failOnError still controls error propagation.
      * Exceptions from this callback are warned about without replacing the loading error.
@@ -49,6 +55,8 @@ export interface TranslateMultiHttpLoaderConfig {
     useHttpBackend: boolean;
     /** See {@link TranslateHttpLoaderConfig.failOnError}. */
     failOnError?: boolean;
+    /** See {@link TranslateHttpLoaderConfig.flatten}. */
+    flatten?: boolean;
     /** See {@link TranslateHttpLoaderConfig.onLoadError}. */
     onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
@@ -112,7 +120,16 @@ export class TranslateHttpLoader implements TranslateLoader {
         }
 
         return forkJoin(requests).pipe(
-            map((response) => response.reduce((acc, curr) => mergeDeep(acc, curr), {})),
+            map((response) =>
+                response.reduce(
+                    (acc, curr) =>
+                        mergeDeep(
+                            acc,
+                            this.config.flatten ? flattenTranslations(curr ?? {}) : curr,
+                        ),
+                    {},
+                ),
+            ),
         ) as Observable<TranslationObject>;
     }
 
@@ -132,6 +149,22 @@ export class TranslateHttpLoader implements TranslateLoader {
     }
 }
 
+function flattenTranslations(translations: TranslationObject): TranslationObject {
+    return Object.fromEntries(
+        Object.entries(translations).flatMap(([key, value]) =>
+            value !== null &&
+            typeof value === "object" &&
+            !Array.isArray(value) &&
+            Object.keys(value).length
+                ? Object.entries(flattenTranslations(value)).map(([child, translation]) => [
+                      `${key}.${child}`,
+                      translation,
+                  ])
+                : [[key, value]],
+        ),
+    );
+}
+
 export function provideTranslateHttpLoader(
     config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
@@ -146,6 +179,7 @@ export function provideTranslateHttpLoader(
         enforceLoading: singleConfig.enforceLoading ?? false,
         useHttpBackend: singleConfig.useHttpBackend ?? false,
         failOnError: singleConfig.failOnError ?? false,
+        flatten: singleConfig.flatten ?? false,
         onLoadError: singleConfig.onLoadError,
         resources: [
             {

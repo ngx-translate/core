@@ -20,6 +20,11 @@ export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
+export const flattenLoader = provideTranslateHttpLoader({
+    resources: ["/library/", "/application/"],
+    flatten: true,
+});
+
 export const reportingLoader = provideTranslateHttpLoader({
     onLoadError: ({ lang, resource, url, error }) => {
         const requestUrl: string | undefined = url;
