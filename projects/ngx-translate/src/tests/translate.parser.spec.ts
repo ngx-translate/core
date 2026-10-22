@@ -1,6 +1,7 @@
 import {
     getValue,
     InterpolateFunction,
+    InterpolationContext,
     TranslateDefaultParser,
     TranslateParser,
 } from "../public-api";
@@ -55,6 +56,36 @@ describe("Parser", () => {
             };
 
             expect(parser.interpolate(uc, { x: "bless" })).toEqual("BLESS YOU!");
+        });
+
+        it("should pass context to interpolation functions", () => {
+            const interpolationContext: InterpolationContext = { key: "TEST", lang: "en" };
+            const fn: InterpolateFunction = (params, context) => {
+                return `${context?.key}:${context?.lang}:${getValue(params, "x")}`;
+            };
+
+            expect(parser.interpolate(fn, { x: "value" }, interpolationContext)).toEqual(
+                "TEST:en:value",
+            );
+        });
+
+        it("should pass context to protected formatting hooks", () => {
+            class ContextParser extends TranslateDefaultParser {
+                protected override formatValue(
+                    value: unknown,
+                    context?: InterpolationContext,
+                ): string | undefined {
+                    return `${context?.key}:${super.formatValue(value, context)}`;
+                }
+            }
+
+            expect(
+                new ContextParser().interpolate(
+                    "This is {{ value }}",
+                    { value: "contextual" },
+                    { key: "TEST", lang: "en" },
+                ),
+            ).toEqual("This is TEST:contextual");
         });
 
         it("should handle edge cases: value not found", () => {
