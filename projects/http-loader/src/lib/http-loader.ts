@@ -1,4 +1,4 @@
-import { HttpBackend, HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpBackend, HttpClient } from "@angular/common/http";
 import { inject, Injectable, InjectionToken, Provider } from "@angular/core";
 import { mergeDeep, TranslateLoader, TranslationObject } from "@ngx-translate/core";
 import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rxjs";
@@ -32,11 +32,34 @@ export interface TranslateHttpLoaderConfig {
      * Within one resource, the last encountered equivalent key wins.
      */
     flatten?: boolean;
+    /**
+     * Reports each failed resource attempt instead of the loader's default warning.
+     * Called in both failure modes; failOnError still controls error propagation.
+     * Exceptions from this callback are warned about without replacing the loading error.
+     * Does not suppress separate TranslateService warnings after a terminal loading failure.
+     */
+    onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
 
 export interface TranslateHttpLoaderResource {
     prefix: string;
     suffix?: string;
+}
+
+export interface TranslateHttpLoaderError {
+    lang: string;
+    resource: string | TranslateHttpLoaderResource;
+    /** The request URL, or undefined if language encoding failed before URL construction. */
+    url: string | undefined;
+    error: unknown;
+}
+
+export interface TranslateHttpLoaderError {
+    lang: string;
+    resource: string | TranslateHttpLoaderResource;
+    /** The request URL, or undefined if language encoding failed before URL construction. */
+    url: string | undefined;
+    error: unknown;
 }
 
 /*
@@ -52,6 +75,8 @@ export interface TranslateMultiHttpLoaderConfig {
     failOnError?: boolean;
     /** See {@link TranslateHttpLoaderConfig.flatten}. */
     flatten?: boolean;
+    /** See {@link TranslateHttpLoaderConfig.onLoadError}. */
+    onLoadError?: (failure: TranslateHttpLoaderError) => void;
 }
 
 export const TRANSLATE_HTTP_LOADER_CONFIG = new InjectionToken<
@@ -88,6 +113,7 @@ export class TranslateHttpLoader implements TranslateLoader {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
 
         const requests = this.config.resources.map((resource) => {
+            let url: string | undefined;
             const request$ = defer(() => {
                 // The language may come from a route or query parameter. Encoding it keeps it a
                 // single path segment, so it cannot escape the prefix, drop the suffix, or change
@@ -97,23 +123,17 @@ export class TranslateHttpLoader implements TranslateLoader {
                     typeof resource === "string"
                         ? `${resource}${langSegment}.json`
                         : `${resource.prefix}${langSegment}${resource.suffix ?? ".json"}`;
+                url = `${path}${cacheBuster}`;
 
                 return DOT_SEGMENT.test(lang)
                     ? throwError(() => new Error(`"${lang}" is a path segment, not a language`))
-                    : this.http.get<TranslationObject>(`${path}${cacheBuster}`);
+                    : this.http.get<TranslationObject>(url);
             });
 
-            if (this.config.failOnError) {
-                return request$;
-            }
-
             return request$.pipe(
-                catchError((err: HttpErrorResponse | Error) => {
-                    console.warn(
-                        `@ngx-translate/http-loader: error loading translation for ${lang}:`,
-                        err,
-                    );
-                    return of({});
+                catchError((error: unknown) => {
+                    this.reportError({ lang, resource, url, error });
+                    return this.config.failOnError ? throwError(() => error) : of({});
                 }),
             );
         });
@@ -131,6 +151,21 @@ export class TranslateHttpLoader implements TranslateLoader {
                 ),
             ),
         ) as Observable<TranslationObject>;
+    }
+
+    private reportError(failure: TranslateHttpLoaderError): void {
+        if (this.config.onLoadError) {
+            try {
+                this.config.onLoadError(failure);
+            } catch (error) {
+                console.warn("@ngx-translate/http-loader: onLoadError callback failed:", error);
+            }
+        } else if (!this.config.failOnError) {
+            console.warn(
+                `@ngx-translate/http-loader: error loading translation for ${failure.lang}:`,
+                failure.error,
+            );
+        }
     }
 }
 
@@ -175,6 +210,7 @@ export function provideTranslateHttpLoader(
         useHttpBackend: singleConfig.useHttpBackend ?? false,
         failOnError: singleConfig.failOnError ?? false,
         flatten: singleConfig.flatten ?? false,
+        onLoadError: singleConfig.onLoadError,
         resources: [
             {
                 prefix: singleConfig.prefix ?? "/assets/i18n/",
