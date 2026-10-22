@@ -33,11 +33,8 @@ export interface TranslateProviders {
 }
 
 export type ChildTranslateServiceConfig = Partial<TranslateProviders> & {
-    /**
-     * Automatic retries for a failed language load (default 0).
-     * With `@ngx-translate/http-loader`, requires `failOnError: true` on the loader.
-     */
-    retry?: number;
+    /** Retry policy for this service's own loads; not inherited from the parent. */
+    retry?: TranslateServiceConfig["retry"];
 };
 
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {

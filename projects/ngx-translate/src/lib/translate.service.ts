@@ -23,9 +23,11 @@ import {
     of,
     ReplaySubject,
     retry,
+    share,
     Subject,
     tap,
     throwError,
+    timer,
 } from "rxjs";
 import {
     catchError,
@@ -33,7 +35,6 @@ import {
     defaultIfEmpty,
     filter,
     map,
-    shareReplay,
     switchMap,
     take,
     takeUntil,
@@ -59,6 +60,20 @@ import {
 import { DeepReadonly, TranslateStore } from "./translate.store";
 import { insertValue, isArray, isDefinedAndNotNull, isDict, isString } from "./util";
 
+/** Retry policy for a failed language load. */
+export interface TranslateRetryConfig {
+    /** Maximum retries after the initial attempt. Zero or negative values disable retries. */
+    count: number;
+    /**
+     * Delay in milliseconds (default 100). The first retry has retryAttempt = 1.
+     * Values must be finite and between 0 and 2147483647; invalid values fail with RangeError.
+     * Exceptions from this callback or shouldRetry terminate the load with that exception.
+     */
+    delay?: number | ((error: unknown, retryAttempt: number) => number);
+    /** Return false to immediately propagate the original error. Defaults to retrying all errors. */
+    shouldRetry?: (error: unknown) => boolean;
+}
+
 /**
  * Configuration object for the translation service.
  *
@@ -73,9 +88,11 @@ export interface TranslateServiceConfig {
     fallbackLangs?: readonly Language[];
     /**
      * Automatic retries for a failed language load (default 0).
+     * A number uses a fixed 100 ms delay; a policy customizes timing and error filtering.
      * With `@ngx-translate/http-loader`, requires `failOnError: true` on the loader.
+     * Combining loader-level and service-level retries can multiply attempts.
      */
-    retry?: number;
+    retry?: number | TranslateRetryConfig;
     isRoot: boolean;
 }
 
@@ -99,6 +116,7 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 };
 
 const RETRY_DELAY_MS = 100;
+const MAX_RETRY_DELAY_MS = 2 ** 31 - 1;
 
 @Injectable()
 export class TranslateService implements ITranslateService {
@@ -110,7 +128,7 @@ export class TranslateService implements ITranslateService {
     private readonly languageRequestIds = new WeakMap<LangChangeEvent, number>();
     private readonly deletedLanguageRequests = new Map<Language, number>();
     protected lastUseLanguage: Language | null = null;
-    private readonly retry: number;
+    private readonly retry: number | TranslateRetryConfig;
 
     protected currentLoader = inject(TranslateLoader);
     protected compiler = inject(TranslateCompiler);
@@ -288,7 +306,8 @@ export class TranslateService implements ITranslateService {
             ? null
             : inject(TranslateService, { optional: true, skipSelf: true });
 
-        this.retry = Math.max(0, config.retry ?? 0);
+        this.retry =
+            typeof config.retry === "object" ? { ...config.retry } : Math.max(0, config.retry ?? 0);
 
         const destroyRef = inject(DestroyRef);
 
@@ -526,10 +545,11 @@ export class TranslateService implements ITranslateService {
                     this.changeLang(lang, requestId);
                 },
                 error: (err) => {
-                    // Only roll back if THIS call is still the most-recent one.
-                    // A later use() may have superseded it (symmetric with the
-                    // changeLang() guard).
-                    if (this.lastUseLanguage === lang) {
+                    // A policy load may have recovered in another subscriber's error handler.
+                    if (
+                        this.lastUseLanguage === lang &&
+                        (typeof this.retry === "number" || !this.store.hasTranslationFor(lang))
+                    ) {
                         this._currentLang.set(prevLang);
                         this.lastUseLanguage = prevLastUseLang;
                     }
@@ -606,6 +626,8 @@ export class TranslateService implements ITranslateService {
             return existing;
         }
 
+        const retryConfig: TranslateRetryConfig =
+            typeof this.retry === "number" ? { count: this.retry } : this.retry;
         let cancellation = this.loadCancellation.get(lang);
         if (!cancellation) {
             cancellation = new ReplaySubject<void>(1);
@@ -620,8 +642,30 @@ export class TranslateService implements ITranslateService {
         // Register before invoking custom loader code, which may delete the language.
         const source$ = defer(() => {
             const source = this.currentLoader.getTranslation(lang);
-            return this.retry > 0
-                ? source.pipe(retry({ count: this.retry, delay: RETRY_DELAY_MS }))
+            return retryConfig.count > 0
+                ? source.pipe(
+                      retry({
+                          count: retryConfig.count,
+                          delay: (error: unknown, retryAttempt) => {
+                              if (retryConfig.shouldRetry && !retryConfig.shouldRetry(error)) {
+                                  return throwError(() => error);
+                              }
+                              const delay = retryConfig.delay ?? RETRY_DELAY_MS;
+                              const delayMs =
+                                  typeof delay === "function" ? delay(error, retryAttempt) : delay;
+                              if (
+                                  !Number.isFinite(delayMs) ||
+                                  delayMs < 0 ||
+                                  delayMs > MAX_RETRY_DELAY_MS
+                              ) {
+                                  throw new RangeError(
+                                      "@ngx-translate/core: retry delay must be a finite number between 0 and 2147483647 milliseconds.",
+                                  );
+                              }
+                              return timer(delayMs);
+                          },
+                      }),
+                  )
                 : source;
         });
 
@@ -630,16 +674,18 @@ export class TranslateService implements ITranslateService {
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
             // Invalidate writes before deletion events can invoke user code.
             filter(() => this.loadCancellation.get(lang) === cancellation),
-            tap((compiled: InterpolatableTranslationObject) => {
-                this.store.setTranslations(lang, compiled, false);
-                // Clear synchronously on success — this `tap` runs before
-                // `shareReplay` forwards `next` to subscribers, so subscribers
-                // receiving `next` observe `isLoading()` reflecting that this
-                // language is no longer in flight. The finalize below covers
-                // error / sync-throw / unsubscribe paths; clearIfOwner is
-                // idempotent so the double-clear on success is a safe no-op.
-                // Invariant: `tap` MUST stay before `shareReplay` in the pipe.
-                this.loadingTranslations.clearIfOwner(lang, translations$);
+            tap({
+                next: (compiled: InterpolatableTranslationObject) => {
+                    this.store.setTranslations(lang, compiled, false);
+                    // Clear before notifying subscribers so isLoading reflects the completed load.
+                    this.loadingTranslations.clearIfOwner(lang, translations$);
+                },
+                error: () => {
+                    if (typeof this.retry !== "number") {
+                        // A fresh service call inside an error handler must not reuse this failed load.
+                        this.loadingTranslations.clearIfOwner(lang, translations$);
+                    }
+                },
             }),
             // Deletion events can trigger a source error before cancellation is notified.
             catchError((error: unknown) =>
@@ -655,8 +701,13 @@ export class TranslateService implements ITranslateService {
             // set() and finalize(), this load's finalize must NOT clobber the
             // newer load's entry. clearIfOwner compares by reference identity.
             finalize(() => this.loadingTranslations.clearIfOwner(lang, translations$)),
-            // cache the single result & share it across all subscribers
-            shareReplay({ bufferSize: 1, refCount: true }),
+            // Policies cache errors; numeric/default retries retain legacy resubscription behavior.
+            share({
+                connector: () => new ReplaySubject<InterpolatableTranslationObject>(1),
+                resetOnError: typeof this.retry === "number",
+                resetOnComplete: false,
+                resetOnRefCountZero: true,
+            }),
         );
         // Preserve completed snapshots, but never replay or restart a cancelled load.
         const translations$ = defer(() =>

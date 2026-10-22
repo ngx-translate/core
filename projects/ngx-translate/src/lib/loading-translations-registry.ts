@@ -19,11 +19,12 @@ function omit<V>(map: Record<Language, V>, key: Language): Record<Language, V> {
  * - Entries removed by `loadAndCompileTranslations`'s `tap` on the success
  *   path (synchronously between store update and subscriber notification, so
  *   subscribers observe this language gone from the registry — and
- *   `isLoading()` flips false if no other load is in flight) and by the
- *   `shareReplay`'d Observable's `finalize` for error / sync-throw /
+ *   `isLoading()` flips false if no other load is in flight), before error
+ *   notifications when using a retry policy, and by the shared Observable's
+ *   `finalize` for error / sync-throw /
  *   last-subscriber-unsubscribe paths. The success-path finalize is a safe
  *   no-op (idempotent `clearIfOwner`).
- * - Same-language back-to-back loads dedup via the existing `shareReplay`; the
+ * - Same-language back-to-back loads dedup via the shared replay; the
  *   registry stays at one entry per language regardless of subscriber count.
  *   `isLoading` therefore toggles `0 -> 1 -> 0` once per language load, not
  *   once per subscriber. Set-based, not count-based — matches user intent

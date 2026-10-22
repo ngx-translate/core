@@ -3,9 +3,11 @@
 // Type-checked under each older TypeScript with skipLibCheck:false — see run.sh.
 import {
     ITranslateService,
+    provideChildTranslateService,
     provideTranslateService,
     TranslateDirective,
     TranslatePipe,
+    TranslateRetryConfig,
     TranslateService,
     TranslateSlotDirective,
     TranslateSlotsComponent,
@@ -21,6 +23,26 @@ export type _Dir = TranslateDirective;
 export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
+
+export const retryPolicy: TranslateRetryConfig = {
+    count: 2,
+    delay: (_error, retryAttempt) => 250 * 2 ** (retryAttempt - 1),
+    shouldRetry: (error) => error instanceof Error,
+};
+export const retryProviders = [
+    provideTranslateService({ retry: retryPolicy }),
+    provideChildTranslateService({ retry: { count: 1, delay: 500 } }),
+    provideTranslateService({ retry: 2 }),
+];
+
+provideTranslateService({
+    // @ts-expect-error Retry delays must be numbers, not strings.
+    retry: { count: 1, delay: "250" },
+});
+provideTranslateService({
+    // @ts-expect-error Retry delay callbacks must return numbers.
+    retry: { count: 1, delay: () => "250" },
+});
 
 export const flattenLoader = provideTranslateHttpLoader({
     resources: ["/library/", "/application/"],
