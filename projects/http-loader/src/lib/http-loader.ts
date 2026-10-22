@@ -6,11 +6,6 @@ import { catchError, defer, forkJoin, map, Observable, of, throwError } from "rx
 // Browsers resolve "." and ".." as path navigation even though they contain nothing to encode.
 const DOT_SEGMENT = /^\.{1,2}$/;
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Add opt-in flattening to the single and multiple resource loader configuration.
- */
 export interface TranslateHttpLoaderConfig {
     prefix?: string;
     suffix?: string;
@@ -62,11 +57,6 @@ export interface TranslateHttpLoaderError {
     error: unknown;
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Add opt-in flattening to the single and multiple resource loader configuration.
- */
 export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
@@ -103,11 +93,6 @@ export class TranslateHttpLoader implements TranslateLoader {
 
     /**
      * Gets the translations from the server
-     */
-    /*
-     * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
-     * Model: GPT-6
-     * Prompt: Add opt-in resource flattening before translation files are merged.
      */
     public getTranslation(lang: string): Observable<TranslationObject> {
         const cacheBuster = this.config.enforceLoading ? `?enforceLoading=${Date.now()}` : "";
@@ -169,11 +154,6 @@ export class TranslateHttpLoader implements TranslateLoader {
     }
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Flatten translation objects while preserving arrays, null and empty objects.
- */
 function flattenTranslations(translations: TranslationObject): TranslationObject {
     return Object.fromEntries(
         Object.entries(translations).flatMap(([key, value]) =>
@@ -190,11 +170,6 @@ function flattenTranslations(translations: TranslationObject): TranslationObject
     );
 }
 
-/*
- * AI GENERATED CODE: This snippet was produced or modified by AI. Review it carefully before relying on it.
- * Model: GPT-6
- * Prompt: Forward the optional flatten setting for single-resource HTTP loaders.
- */
 export function provideTranslateHttpLoader(
     config: Partial<TranslateHttpLoaderConfig | TranslateMultiHttpLoaderConfig> = {},
 ): Provider[] {
