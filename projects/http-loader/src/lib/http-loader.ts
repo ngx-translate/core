@@ -123,10 +123,9 @@ export class TranslateHttpLoader implements TranslateLoader {
             map((response) =>
                 response.reduce(
                     (acc, curr) =>
-                        mergeDeep(
-                            acc,
-                            this.config.flatten ? flattenTranslations(curr ?? {}) : curr,
-                        ),
+                        this.config.flatten
+                            ? { ...acc, ...flattenTranslations(curr ?? {}) }
+                            : mergeDeep(acc, curr),
                     {},
                 ),
             ),

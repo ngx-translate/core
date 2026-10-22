@@ -69,6 +69,20 @@ describe("HTTP loader resource flattening", () => {
         });
     });
 
+    it("replaces an earlier array with a later empty object at the same flattened key", () => {
+        const translate = prepare({ resources: ["/library/", "/application/"], flatten: true });
+        const next = jasmine.createSpy("next");
+        translate.use("en").subscribe({ next, error: fail });
+        http.expectOne("/application/en.json").flush({ "menu.items": {} });
+        http.expectOne("/library/en.json").flush({
+            menu: { items: ["Library"], help: "Help" },
+        });
+
+        expect(next).toHaveBeenCalledOnceWith({ "menu.items": {}, "menu.help": "Help" });
+        expect(translate.instant("menu.items")).toEqual({});
+        expect(translate.instant("menu.help")).toBe("Help");
+    });
+
     [undefined, false].forEach((flatten) => {
         it(`keeps existing nested lookup precedence with flatten=${flatten}`, () => {
             const translate = prepare({ resources: ["/library/", "/application/"], flatten });
