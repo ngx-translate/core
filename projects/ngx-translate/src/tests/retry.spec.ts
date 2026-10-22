@@ -1,4 +1,4 @@
-import { Injector } from "@angular/core";
+import { EnvironmentInjector, Injector } from "@angular/core";
 import { fakeAsync, tick } from "@angular/core/testing";
 import { catchError, Observable, retry } from "rxjs";
 import {
@@ -547,9 +547,10 @@ describe("retry", () => {
         expect(childSvc.instant("TEST")).toBe("translation en");
         expect(rootSvc.getCurrentLang()).toBe("en");
         expect(isolatedSvc.getCurrentLang()).toBe("fr");
-        isolated.destroy();
-        child.destroy();
-        parent.destroy();
+        // Angular <20 types Injector.create() as Injector, without destroy().
+        (isolated as EnvironmentInjector).destroy();
+        (child as EnvironmentInjector).destroy();
+        (parent as EnvironmentInjector).destroy();
     }));
 
     it("does not inherit the root's retry policy for child loads", fakeAsync(() => {
@@ -581,7 +582,7 @@ describe("retry", () => {
         expect(childLoader.getCalls("en")).toBe(2);
         expect(rootSvc.isLoading()).toBeFalse();
         expect(childSvc.isLoading()).toBeFalse();
-        child.destroy();
-        parent.destroy();
+        (child as EnvironmentInjector).destroy();
+        (parent as EnvironmentInjector).destroy();
     }));
 });
