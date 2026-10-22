@@ -631,8 +631,7 @@ export class TranslateService implements ITranslateService {
             // Invalidate writes before deletion events can invoke user code.
             filter(() => this.loadCancellation.get(lang) === cancellation),
             tap((compiled: InterpolatableTranslationObject) => {
-                // Preserve translations added while the loader was pending.
-                this.store.setTranslations(lang, compiled, true);
+                this.store.setTranslations(lang, compiled, false);
                 // Clear synchronously on success — this `tap` runs before
                 // `shareReplay` forwards `next` to subscribers, so subscribers
                 // receiving `next` observe `isLoading()` reflecting that this
