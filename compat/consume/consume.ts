@@ -2,13 +2,13 @@
 // packed v22/TS6-built packages so `tsc` must resolve their emitted .d.ts.
 // Type-checked under each older TypeScript with skipLibCheck:false — see run.sh.
 import {
-  ITranslateService,
-  provideTranslateService,
-  TranslateDirective,
-  TranslatePipe,
-  TranslateService,
-  TranslateSlotsComponent,
-  TranslateSlotDirective,
+    ITranslateService,
+    provideTranslateService,
+    TranslateDirective,
+    TranslatePipe,
+    TranslateService,
+    TranslateSlotDirective,
+    TranslateSlotsComponent,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
@@ -19,6 +19,14 @@ export type _Dir = TranslateDirective;
 export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
+
+export const reportingLoader = provideTranslateHttpLoader({
+    onLoadError: ({ lang, resource, url, error }) => {
+        const requestUrl: string | undefined = url;
+        const prefix: string = typeof resource === "string" ? resource : resource.prefix;
+        console.warn(lang, prefix, requestUrl, error);
+    },
+});
 
 // Checks that implementations without the new methods still satisfy ITranslateService.
 export function legacyService(
