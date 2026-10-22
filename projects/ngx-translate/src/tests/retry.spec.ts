@@ -214,6 +214,59 @@ describe("retry", () => {
         expect(shouldRetry).toHaveBeenCalledTimes(4);
     }));
 
+    it("honors a class policy's inherited error predicate", fakeAsync(() => {
+        const loader = new FlakyLoader(1);
+        const predicate = jasmine.createSpy("predicate");
+        class RetryPolicy implements TranslateRetryConfig {
+            count = 1;
+            private readonly permanentError = loader.error;
+
+            shouldRetry(error: unknown): boolean {
+                predicate(error);
+                return error !== this.permanentError;
+            }
+        }
+        const svc = buildService(loader, { retry: new RetryPolicy() });
+        const error = jasmine.createSpy("error");
+        svc.use("en").subscribe({ error });
+
+        expect(predicate).toHaveBeenCalledOnceWith(loader.error);
+        expect(error).toHaveBeenCalledOnceWith(loader.error);
+        expect(svc.isLoading()).toBeFalse();
+        tick(1000);
+        expect(loader.getCalls("en")).toBe(1);
+        expect(svc.getCurrentLang()).toBeNull();
+    }));
+
+    it("uses a class policy's inherited count getter and delay method", fakeAsync(() => {
+        const loader = new FlakyLoader(1);
+        const delay = jasmine.createSpy("delay");
+        class RetryPolicy implements TranslateRetryConfig {
+            private readonly retryCount = 1;
+            private readonly delayMs = 250;
+
+            get count(): number {
+                return this.retryCount;
+            }
+
+            delay(error: unknown, retryAttempt: number): number {
+                delay(error, retryAttempt);
+                return this.delayMs * retryAttempt;
+            }
+        }
+        const svc = buildService(loader, { retry: new RetryPolicy() });
+        svc.use("en").subscribe({ error: fail });
+
+        expect(delay).toHaveBeenCalledOnceWith(loader.error, 1);
+        tick(249);
+        expect(loader.getCalls("en")).toBe(1);
+        expect(svc.isLoading()).toBeTrue();
+        tick(1);
+        expect(loader.getCalls("en")).toBe(2);
+        expect(svc.instant("TEST")).toBe("translation en");
+        expect(svc.isLoading()).toBeFalse();
+    }));
+
     it("shares backoff across callers and numbers retries from one for each load", fakeAsync(() => {
         const loader = new FlakyLoader(2, { status: 503 });
         const delay = jasmine
