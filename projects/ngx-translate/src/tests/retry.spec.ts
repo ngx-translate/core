@@ -255,6 +255,30 @@ describe("retry", () => {
         expect(svc.isLoading()).toBeFalse();
     }));
 
+    it("applies the retry policy to every language in a fallback chain", fakeAsync(() => {
+        const loader = new FlakyLoader(1);
+        const svc = buildService(loader, { retry: { count: 1, delay: 250 } });
+        const next = jasmine.createSpy("next");
+        svc.setFallbackLangs(["fr", "en"]).subscribe({ next, error: fail });
+
+        tick(249);
+        expect(loader.getCalls("fr")).toBe(1);
+        expect(loader.getCalls("en")).toBe(1);
+        expect(next).not.toHaveBeenCalled();
+        expect(svc.isLoading()).toBeTrue();
+        tick(1);
+
+        expect(loader.getCalls("fr")).toBe(2);
+        expect(loader.getCalls("en")).toBe(2);
+        expect(next).toHaveBeenCalledOnceWith([
+            { TEST: "translation fr" },
+            { TEST: "translation en" },
+        ]);
+        expect(svc.getFallbackLangs()).toEqual(["fr", "en"]);
+        expect(svc.instant("TEST")).toBe("translation fr");
+        expect(svc.isLoading()).toBeFalse();
+    }));
+
     it("propagates a rejected error immediately to all subscribers without retrying", fakeAsync(() => {
         const loader = new FlakyLoader(99, { status: 404 });
         const shouldRetry = jasmine.createSpy("shouldRetry").and.returnValue(false);
@@ -585,4 +609,80 @@ describe("retry", () => {
         (child as EnvironmentInjector).destroy();
         (parent as EnvironmentInjector).destroy();
     }));
+
+    [2, { count: 2, delay: 100 }].forEach((retry) => {
+        describe(`cancellation with a ${typeof retry === "number" ? "numeric retry count" : "retry policy"}`, () => {
+            it("cancels a scheduled retry and completes subscribers without an error", fakeAsync(() => {
+                const loader = new FlakyLoader(99);
+                const svc = buildService(loader, { retry });
+                const next = jasmine.createSpy("next");
+                const error = jasmine.createSpy("error");
+                const complete = jasmine.createSpy("complete");
+                const load = svc.use("fr");
+                load.subscribe({ next, error, complete });
+                tick(50);
+
+                svc.deleteLanguage("fr");
+                expect(svc.isLoading()).toBeFalse();
+                expect(complete).toHaveBeenCalledTimes(1);
+                load.subscribe({ next, error, complete });
+                tick(1000);
+
+                expect(loader.getCalls("fr")).toBe(1);
+                expect(complete).toHaveBeenCalledTimes(2);
+                expect(next).not.toHaveBeenCalled();
+                expect(error).not.toHaveBeenCalled();
+                expect(svc.getTranslations("fr")).toBeUndefined();
+                expect(svc.getLangs()).not.toContain("fr");
+                expect(console.warn).not.toHaveBeenCalled();
+            }));
+
+            it("allows a fresh load with its own retries after cancellation", fakeAsync(() => {
+                const loader = new FlakyLoader(2);
+                const svc = buildService(loader, { retry });
+                svc.use("fr");
+                tick(50);
+                svc.deleteLanguage("fr");
+
+                svc.use("fr");
+                tick(50);
+                expect(loader.getCalls("fr")).toBe(2);
+                expect(svc.isLoading()).toBeTrue();
+                tick(50);
+
+                expect(loader.getCalls("fr")).toBe(3);
+                expect(svc.instant("TEST")).toBe("translation fr");
+                expect(svc.isLoading()).toBeFalse();
+            }));
+
+            it("cancels a retry that would otherwise restore the deleted language", fakeAsync(() => {
+                const loader = new FlakyLoader(1);
+                const svc = buildService(loader, { retry });
+                svc.use("fr");
+
+                svc.deleteLanguage("fr");
+                tick(100);
+
+                expect(loader.getCalls("fr")).toBe(1);
+                expect(svc.getLangs()).not.toContain("fr");
+                expect(svc.instant("TEST")).toBe("TEST");
+            }));
+
+            it("keeps another language's retries running", fakeAsync(() => {
+                const loader = new FlakyLoader(1);
+                const svc = buildService(loader, { retry });
+                svc.reloadLang("en");
+                svc.reloadLang("fr");
+
+                svc.deleteLanguage("fr");
+                expect(svc.isLoading()).toBeTrue();
+                tick(100);
+
+                expect(loader.getCalls("fr")).toBe(1);
+                expect(loader.getCalls("en")).toBe(2);
+                expect(svc.instant("TEST", undefined, "en")).toBe("translation en");
+                expect(svc.isLoading()).toBeFalse();
+            }));
+        });
+    });
 });

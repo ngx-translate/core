@@ -14,6 +14,8 @@ import {
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
+export const fallbackChain = provideTranslateService({ fallbackLangs: ["fr", "en"] as const });
+
 export const _p: typeof provideTranslateService = provideTranslateService;
 export type _S = TranslateService;
 export type _Pipe = TranslatePipe;
@@ -57,13 +59,25 @@ export const reportingLoader = provideTranslateHttpLoader({
 
 // Checks that implementations without the new methods still satisfy ITranslateService.
 export function legacyService(
-    service: Omit<ITranslateService, "getAsync" | "hasTranslationKey" | "deleteLanguage">,
+    service: Omit<
+        ITranslateService,
+        | "getAsync"
+        | "hasTranslationKey"
+        | "deleteLanguage"
+        | "setFallbackLangs"
+        | "getFallbackLangs"
+        | "fallbackLangs"
+    >,
 ): ITranslateService {
     return service;
 }
 
 // Checks that the new methods are callable through ITranslateService with these arguments.
 export function serviceCapabilities(service: ITranslateService) {
+    service.setFallbackLangs?.(["fr", "en"]);
+    const fallbacks: readonly string[] | undefined = service.getFallbackLangs?.();
+    const reactiveFallbacks: readonly string[] | undefined = service.fallbackLangs?.();
+    void [fallbacks, reactiveFallbacks];
     const result = service.getAsync?.(["HELLO"], { name: "Ada" }, "en");
     const exists = service.hasTranslationKey?.("HELLO", "en");
     service.deleteLanguage?.("en");

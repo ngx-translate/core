@@ -39,6 +39,8 @@ export type ChildTranslateServiceConfig = Partial<TranslateProviders> & {
 
 export interface RootTranslateServiceConfig extends ChildTranslateServiceConfig {
     fallbackLang?: Language;
+    /** Ordered fallback chain. Takes precedence over fallbackLang, including when empty. */
+    fallbackLangs?: readonly Language[];
     lang?: Language;
     langs?: Language[];
 }
@@ -178,6 +180,7 @@ function defaultProviders(config: InternalProvidersConfig): Provider[] {
 
     const serviceConfig: TranslateServiceConfig = {
         fallbackLang: config.fallbackLang ?? null,
+        ...(config.fallbackLangs !== undefined && { fallbackLangs: config.fallbackLangs }),
         lang: config.lang,
         retry: config.retry,
         langs: config.langs,
