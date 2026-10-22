@@ -7,8 +7,8 @@ import {
     TranslateDirective,
     TranslatePipe,
     TranslateService,
-    TranslateSlotsComponent,
     TranslateSlotDirective,
+    TranslateSlotsComponent,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
