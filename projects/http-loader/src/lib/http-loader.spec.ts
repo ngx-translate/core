@@ -1,7 +1,13 @@
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
+import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { TranslateService, Translation } from "@ngx-translate/core";
+import {
+    TranslateDirective,
+    TranslatePipe,
+    TranslateService,
+    Translation,
+} from "@ngx-translate/core";
 import {
     provideTranslateHttpLoader,
     provideTranslateMultiHttpLoader,
@@ -14,6 +20,15 @@ import {
     provideTestableTranslateService,
     TestableTranslateService,
 } from "../test-helper/testable-translate-service";
+
+@Component({
+    standalone: true,
+    imports: [TranslatePipe, TranslateDirective],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `<span id="pipe">{{ "FEATURE.DYNAMIC" | translate }}</span>
+        <span id="directive" translate="FEATURE.DYNAMIC"></span>`,
+})
+class DynamicTranslationsComponent {}
 
 describe("TranslateHttpLoader (HttpClient)", () => {
     let translate: TestableTranslateService;
@@ -132,6 +147,86 @@ describe("TranslateHttpLoader (HttpClient)", () => {
         translate.get("TEST2").subscribe((res: Translation) => {
             expect(res as string).toEqual("This is another test");
         });
+    });
+
+    it("preserves translations added while the HTTP load is pending (#842)", () => {
+        prepareSingle();
+        translate.use("en");
+        const fixture = TestBed.createComponent(DynamicTranslationsComponent);
+        const element: HTMLElement = fixture.nativeElement;
+        fixture.detectChanges();
+
+        translate.setTranslation(
+            "en",
+            { FEATURE: { DYNAMIC: "Dynamic component", SHARED: "Manual value" } },
+            true,
+        );
+        fixture.detectChanges();
+        expect(element.querySelector("#pipe")?.textContent).toBe("Dynamic component");
+        expect(element.querySelector("#directive")?.textContent).toBe("Dynamic component");
+
+        const dynamic = translate.translate("FEATURE.DYNAMIC");
+        expect(dynamic()).toBe("Dynamic component");
+        const values: Translation[] = [];
+        translate.get("FEATURE.DYNAMIC").subscribe((value) => values.push(value));
+        const changed = jasmine.createSpy("translation change");
+        translate.onTranslationChange.subscribe(changed);
+
+        http.expectOne("/assets/i18n/en.json").flush({
+            FEATURE: { APPLICATION: "Application", SHARED: "Loaded value" },
+        });
+        fixture.detectChanges();
+
+        expect(values).toEqual(["Dynamic component"]);
+        expect(dynamic()).toBe("Dynamic component");
+        expect(element.querySelector("#pipe")?.textContent).toBe("Dynamic component");
+        expect(element.querySelector("#directive")?.textContent).toBe("Dynamic component");
+        expect(translate.instant("FEATURE.APPLICATION")).toBe("Application");
+        expect(translate.instant("FEATURE.SHARED")).toBe("Loaded value");
+        expect(changed).toHaveBeenCalledOnceWith({
+            lang: "en",
+            translations: {
+                FEATURE: {
+                    DYNAMIC: "Dynamic component",
+                    APPLICATION: "Application",
+                    SHARED: "Loaded value",
+                },
+            },
+        });
+    });
+
+    for (const failOnError of [false, true]) {
+        it(`preserves pending additions when HTTP fails with failOnError=${failOnError}`, () => {
+            prepareSingle({ failOnError });
+            spyOn(console, "warn");
+            const error = jasmine.createSpy("load error");
+            translate.use("en").subscribe({ error });
+            translate.setTranslation("en", { DYNAMIC: "Dynamic component" }, true);
+
+            http.expectOne("/assets/i18n/en.json").flush(null, {
+                status: 500,
+                statusText: "Server Error",
+            });
+
+            expect(translate.instant("DYNAMIC", undefined, "en")).toBe("Dynamic component");
+            expect(translate.isLoading()).toBeFalse();
+            expect(error).toHaveBeenCalledTimes(failOnError ? 1 : 0);
+        });
+    }
+
+    it("clears old translations on reload but preserves additions made during the reload", () => {
+        prepareSingle();
+        translate.setTranslation("en", { OLD: "Old translation" });
+        translate.use("en");
+        translate.reloadLang("en");
+        expect(translate.instant("OLD")).toBe("OLD");
+        translate.setTranslation("en", { DYNAMIC: "Dynamic component" }, true);
+
+        http.expectOne("/assets/i18n/en.json").flush({ TEST: "Reloaded" });
+
+        expect(translate.instant("OLD")).toBe("OLD");
+        expect(translate.instant("DYNAMIC")).toBe("Dynamic component");
+        expect(translate.instant("TEST")).toBe("Reloaded");
     });
 
     it("should be able to get translations from multipleHttpLoader", () => {
