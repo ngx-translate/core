@@ -306,8 +306,16 @@ export class TranslateService implements ITranslateService {
             ? null
             : inject(TranslateService, { optional: true, skipSelf: true });
 
-        this.retry =
-            typeof config.retry === "object" ? { ...config.retry } : Math.max(0, config.retry ?? 0);
+        if (typeof config.retry === "object") {
+            const { count, delay, shouldRetry } = config.retry;
+            this.retry = {
+                count,
+                delay: typeof delay === "function" ? delay.bind(config.retry) : delay,
+                shouldRetry: shouldRetry?.bind(config.retry),
+            };
+        } else {
+            this.retry = Math.max(0, config.retry ?? 0);
+        }
 
         const destroyRef = inject(DestroyRef);
 
