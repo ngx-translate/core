@@ -1,4 +1,4 @@
-import { Injector } from "@angular/core";
+import { EnvironmentInjector, Injector } from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { Observable, of, Subject } from "rxjs";
 import {
@@ -262,7 +262,8 @@ describe("fallback chain loading", () => {
         expect(attempts).toBe(2);
         expect(retried.isLoading()).toBeFalse();
         expect(retried.instant("SAVE")).toBe("Save");
-        injector.destroy();
+        // Angular <20 types Injector.create() as Injector, without destroy().
+        (injector as EnvironmentInjector).destroy();
     }));
 });
 
@@ -280,12 +281,12 @@ describe("fallback chain configuration and hierarchy", () => {
         });
         expect(injector.get(TranslateService).getFallbackLangs()).toEqual(["fr", "en"]);
         expect(loader.calls.allArgs()).toEqual([["fr"], ["en"]]);
-        injector.destroy();
+        (injector as EnvironmentInjector).destroy();
         const empty = Injector.create({
             providers: [provideTranslateService({ fallbackLang: "de", fallbackLangs: [] })],
         });
         expect(empty.get(TranslateService).getFallbackLang()).toBeNull();
-        empty.destroy();
+        (empty as EnvironmentInjector).destroy();
     });
 
     it("loads every fallback in connected children, delegates changes, and isolates subtrees", () => {
@@ -325,9 +326,9 @@ describe("fallback chain configuration and hierarchy", () => {
         expect(isolated.instant("PARENT")).toBe("PARENT");
         child.setFallbackLangs([]);
         expect(loader).not.toHaveBeenCalledWith("");
-        isolatedInjector.destroy();
-        childInjector.destroy();
-        root.destroy();
+        (isolatedInjector as EnvironmentInjector).destroy();
+        (childInjector as EnvironmentInjector).destroy();
+        (root as EnvironmentInjector).destroy();
     });
 
     it("waits for child fallbacks started by a parent event", async () => {
@@ -383,7 +384,7 @@ describe("fallback chain configuration and hierarchy", () => {
         loads.get("fr")!.next({});
         loads.get("fr")!.complete();
         expect(await translated).toBe("Child English");
-        childInjector.destroy();
-        root.destroy();
+        (childInjector as EnvironmentInjector).destroy();
+        (root as EnvironmentInjector).destroy();
     });
 });
