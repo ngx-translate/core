@@ -1,0 +1,4 @@
+interface:
+    display_name: "Sync documentation"
+    short_description: "Sync branch changes to ngx-translate.org and open a PR"
+    default_prompt: "Use $sync-doc to update ngx-translate.org for my current core branch and open the documentation PR."

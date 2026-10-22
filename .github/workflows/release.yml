@@ -1,0 +1,54 @@
+# Publishes @ngx-translate/core and @ngx-translate/http-loader to npm when a version tag is pushed.
+# Authentication uses npm trusted publishing (OIDC) — no npm token is stored on GitHub.
+# Both packages are configured on npmjs.com to trust this exact workflow file and the
+# "npm-publish" environment, so renaming either breaks publishing.
+
+name: Release
+
+on:
+    push:
+        tags: ["v*"]
+
+permissions:
+    contents: read
+    id-token: write
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        environment: npm-publish
+
+        steps:
+            - uses: actions/checkout@v7
+            - name: Install pnpm
+              uses: pnpm/action-setup@v6
+            - name: Use Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24.x
+                  cache: "pnpm"
+                  registry-url: "https://registry.npmjs.org"
+            - run: pnpm install --frozen-lockfile
+
+            - name: Check tag matches package versions
+              run: |
+                  tag_version="${GITHUB_REF_NAME#v}"
+                  for package in ngx-translate http-loader; do
+                      package_version=$(node -p "require('./projects/$package/package.json').version")
+                      if [ "$package_version" != "$tag_version" ]; then
+                          echo "::error::projects/$package is $package_version, tag is $GITHUB_REF_NAME"
+                          exit 1
+                      fi
+                  done
+
+            - run: pnpm run lint
+            - run: pnpm run build-all
+            - run: pnpm run test-ci
+
+            # Prereleases (e.g. 18.1.0-rc.0) must not become "latest" for users running a plain install.
+            - name: Publish to npm
+              run: |
+                  dist_tag=latest
+                  case "$GITHUB_REF_NAME" in *-*) dist_tag=next ;; esac
+                  npm publish ./dist/ngx-translate --access public --tag "$dist_tag"
+                  npm publish ./dist/http-loader --access public --tag "$dist_tag"

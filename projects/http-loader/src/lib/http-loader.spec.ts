@@ -426,6 +426,48 @@ describe("TranslateHttpLoader (HttpClient)", () => {
             });
         });
 
+        ["\uD800", "\uDC00"].forEach((lang) => {
+            it(`returns empty translations for malformed Unicode ${JSON.stringify(lang)} by default`, () => {
+                prepareMulti({
+                    resources: ["/assets/i18n/", { prefix: "/custom/", suffix: ".lang.json" }],
+                });
+                const next = jasmine.createSpy("next");
+                const complete = jasmine.createSpy("complete");
+
+                translate.use(lang).subscribe({ next, complete, error: fail });
+
+                expect(next).toHaveBeenCalledOnceWith({});
+                expect(complete).toHaveBeenCalledTimes(1);
+                expect(console.warn).toHaveBeenCalledTimes(2);
+                expect(console.warn).toHaveBeenCalledWith(
+                    `@ngx-translate/http-loader: error loading translation for ${lang}:`,
+                    jasmine.any(URIError),
+                );
+                expect(translate.isLoading()).toBeFalse();
+                http.expectNone(() => true);
+            });
+
+            it(`forwards malformed Unicode ${JSON.stringify(lang)} errors and rolls back the initial language with failOnError`, () => {
+                prepareSingle({ failOnError: true });
+                const error = jasmine.createSpy("error");
+
+                translate.use(lang).subscribe({
+                    next: () => fail("Expected an encoding error, got translations"),
+                    error,
+                });
+
+                expect(error).toHaveBeenCalledOnceWith(jasmine.any(URIError));
+                expect(translate.getCurrentLang()).toBeNull();
+                expect(translate.isLoading()).toBeFalse();
+                http.expectNone(() => true);
+
+                translate.use("en").subscribe({ error: fail });
+                http.expectOne("/assets/i18n/en.json").flush({ TEST: "A" });
+                expect(translate.getCurrentLang()).toBe("en");
+                expect(translate.instant("TEST")).toBe("A");
+            });
+        });
+
         it("encodes a slash in the language id", () => {
             prepareSingle({ prefix: "/assets/i18n/", suffix: ".json" });
 
