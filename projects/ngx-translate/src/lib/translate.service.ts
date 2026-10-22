@@ -21,11 +21,23 @@ import {
     merge,
     Observable,
     of,
+    ReplaySubject,
     retry,
     Subject,
     tap,
+    throwError,
 } from "rxjs";
-import { concatMap, filter, map, shareReplay, switchMap, take } from "rxjs/operators";
+import {
+    catchError,
+    concatMap,
+    defaultIfEmpty,
+    filter,
+    map,
+    shareReplay,
+    switchMap,
+    take,
+    takeUntil,
+} from "rxjs/operators";
 import { LoadingTranslationsRegistry } from "./loading-translations-registry";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
@@ -89,6 +101,11 @@ const RETRY_DELAY_MS = 100;
 @Injectable()
 export class TranslateService implements ITranslateService {
     protected readonly loadingTranslations = new LoadingTranslationsRegistry();
+    // Retain cancellation across registry clears so reset/reload cannot hide older loads.
+    private readonly loadCancellation = new Map<Language, ReplaySubject<void>>();
+    private languageRequestSequence = 0;
+    private readonly languageRequestIds = new WeakMap<LangChangeEvent, number>();
+    private readonly deletedLanguageRequests = new Map<Language, number>();
     protected lastUseLanguage: Language | null = null;
     private readonly retry: number;
 
@@ -316,7 +333,7 @@ export class TranslateService implements ITranslateService {
 
         // Child services should load translations when the language changes on the root
         this.onLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
-            if (!this.isRoot) {
+            if (!this.isRoot && this.shouldLoadLanguage(event)) {
                 this.loadOrExtendLanguage(event.lang)
                     ?.pipe(takeUntilDestroyed(destroyRef))
                     .subscribe({
@@ -331,7 +348,7 @@ export class TranslateService implements ITranslateService {
         });
 
         this.onFallbackLangChange.pipe(takeUntilDestroyed(destroyRef)).subscribe((event) => {
-            if (!this.isRoot) {
+            if (!this.isRoot && this.shouldLoadLanguage(event)) {
                 this.loadOrExtendLanguage(event.lang)
                     ?.pipe(takeUntilDestroyed(destroyRef))
                     .subscribe({
@@ -354,6 +371,12 @@ export class TranslateService implements ITranslateService {
         });
     }
 
+    private shouldLoadLanguage(event: LangChangeEvent): boolean {
+        const deletedAt = this.deletedLanguageRequests.get(event.lang);
+        const requestId = this.getRoot().languageRequestIds.get(event);
+        return deletedAt === undefined || requestId === undefined || requestId > deletedAt;
+    }
+
     /**
      * Sets the fallback language to use if a translation is not found in the
      * current language
@@ -368,6 +391,7 @@ export class TranslateService implements ITranslateService {
         // not leak into a caller's reactive context (issue #1633). Async loader
         // callbacks fire outside this scope and need no guard.
         return untracked(() => {
+            const requestId = ++this.languageRequestSequence;
             if (!this._fallbackLang()) {
                 // on init set the fallbackLang immediately, but do not emit a change yet
                 this._fallbackLang.set(lang);
@@ -378,10 +402,12 @@ export class TranslateService implements ITranslateService {
                 pending.pipe(take(1)).subscribe({
                     next: () => {
                         this._fallbackLang.set(lang);
-                        this._onFallbackLangChange.next({
+                        const event = {
                             lang: lang,
                             translations: this.store.getTranslations(lang),
-                        });
+                        };
+                        this.languageRequestIds.set(event, requestId);
+                        this._onFallbackLangChange.next(event);
                     },
                     error: (err) => {
                         console.warn(
@@ -394,10 +420,12 @@ export class TranslateService implements ITranslateService {
             }
 
             this._fallbackLang.set(lang);
-            this._onFallbackLangChange.next({
+            const event = {
                 lang: lang,
                 translations: this.store.getTranslations(lang),
-            });
+            };
+            this.languageRequestIds.set(event, requestId);
+            this._onFallbackLangChange.next(event);
             return of(this.store.getTranslations(lang));
         });
     }
@@ -437,6 +465,7 @@ export class TranslateService implements ITranslateService {
         // #1633). Async loader callbacks fire outside this scope and outside any
         // reactive consumer, so they need no guard.
         return untracked(() => {
+            const requestId = ++this.languageRequestSequence;
             // Snapshot prior state so we can roll back if the loader fails.
             const prevLang = this._currentLang();
             const prevLastUseLang = this.lastUseLanguage;
@@ -454,13 +483,13 @@ export class TranslateService implements ITranslateService {
             if (!isObservable(pending)) {
                 // Defensive: loadOrExtendLanguage is typed `Observable | undefined`.
                 // The undefined branch means "nothing to load" — synchronously activate.
-                this.changeLang(lang);
+                this.changeLang(lang, requestId);
                 return of(this.store.getTranslations(lang));
             }
 
             pending.pipe(take(1)).subscribe({
                 next: () => {
-                    this.changeLang(lang);
+                    this.changeLang(lang, requestId);
                 },
                 error: (err) => {
                     // Only roll back if THIS call is still the most-recent one.
@@ -506,7 +535,7 @@ export class TranslateService implements ITranslateService {
     /**
      * Changes the current lang
      */
-    protected changeLang(lang: Language): void {
+    protected changeLang(lang: Language, requestId?: number): void {
         if (lang !== this.lastUseLanguage) {
             // received new language data,
             // but this was not the one requested last
@@ -514,7 +543,11 @@ export class TranslateService implements ITranslateService {
         }
 
         this._currentLang.set(lang);
-        this._onLangChange.next({ lang: lang, translations: this.store.getTranslations(lang) });
+        const event = { lang: lang, translations: this.store.getTranslations(lang) };
+        if (requestId !== undefined) {
+            this.languageRequestIds.set(event, requestId);
+        }
+        this._onLangChange.next(event);
     }
 
     public getCurrentLang(): Language | null {
@@ -539,20 +572,30 @@ export class TranslateService implements ITranslateService {
             return existing;
         }
 
+        let cancellation = this.loadCancellation.get(lang);
+        if (!cancellation) {
+            cancellation = new ReplaySubject<void>(1);
+            this.loadCancellation.set(lang, cancellation);
+        }
+
         /*
          * Only the loader source is resubscribed: intermediate failures never
          * reach the map/tap/finalize chain below, so the registry entry stays
          * in-flight (isLoading stays true) until the terminal outcome.
          */
-        const source$ =
-            this.retry > 0
-                ? this.currentLoader
-                      .getTranslation(lang)
-                      .pipe(retry({ count: this.retry, delay: RETRY_DELAY_MS }))
-                : this.currentLoader.getTranslation(lang);
+        // Register before invoking custom loader code, which may delete the language.
+        const source$ = defer(() => {
+            const source = this.currentLoader.getTranslation(lang);
+            return this.retry > 0
+                ? source.pipe(retry({ count: this.retry, delay: RETRY_DELAY_MS }))
+                : source;
+        });
 
-        const translations$ = source$.pipe(
+        let completed = false;
+        const shared$ = source$.pipe(
             map((res: TranslationObject) => this.compiler.compileTranslations(res, lang)),
+            // Invalidate writes before deletion events can invoke user code.
+            filter(() => this.loadCancellation.get(lang) === cancellation),
             tap((compiled: InterpolatableTranslationObject) => {
                 this.store.setTranslations(lang, compiled, false);
                 // Clear synchronously on success — this `tap` runs before
@@ -564,12 +607,26 @@ export class TranslateService implements ITranslateService {
                 // Invariant: `tap` MUST stay before `shareReplay` in the pipe.
                 this.loadingTranslations.clearIfOwner(lang, translations$);
             }),
+            // Deletion events can trigger a source error before cancellation is notified.
+            catchError((error: unknown) =>
+                this.loadCancellation.get(lang) === cancellation ? throwError(() => error) : EMPTY,
+            ),
+            tap({
+                complete: () => {
+                    completed = this.loadCancellation.get(lang) === cancellation;
+                },
+            }),
+            takeUntil(cancellation),
             // Token-aware clear: if `resetLang` + `reloadLang` raced between
             // set() and finalize(), this load's finalize must NOT clobber the
             // newer load's entry. clearIfOwner compares by reference identity.
             finalize(() => this.loadingTranslations.clearIfOwner(lang, translations$)),
             // cache the single result & share it across all subscribers
             shareReplay({ bufferSize: 1, refCount: true }),
+        );
+        // Preserve completed snapshots, but never replay or restart a cancelled load.
+        const translations$ = defer(() =>
+            completed || this.loadCancellation.get(lang) === cancellation ? shared$ : EMPTY,
         );
 
         this.loadingTranslations.set(lang, translations$);
@@ -807,6 +864,7 @@ export class TranslateService implements ITranslateService {
         const pending = effectiveLang ? this.loadingTranslations.get(effectiveLang) : undefined;
         if (pending) {
             return pending.pipe(
+                defaultIfEmpty(undefined),
                 concatMap(() => {
                     return makeObservable(this.getParsedResult(key, interpolateParams, lang));
                 }),
@@ -1090,15 +1148,28 @@ export class TranslateService implements ITranslateService {
      * `onTranslationChange` with an empty translation object so subscribers
      * refresh through the usual parent, fallback, or missing-translation lookup.
      *
-     * Like `resetLang`, this does not cancel an underlying in-flight loader
-     * request: a load completing afterwards re-adds the language to the store
-     * and to `getLangs()`.
+     * All earlier loads and retries for this language owned by this service
+     * are unsubscribed. Late responses cannot restore it
+     * or apply a delayed current/fallback language change. Other services are
+     * unaffected, and a subsequent `use()` or `reloadLang()` can load it again.
+     * A child also ignores automatic loads from ancestor language requests
+     * started before deletion; later explicit requests can load it again.
+     * Subscribers to a cancelled load complete without another value or error.
+     * Completed load results remain readable. Pending lookups resolve through
+     * the usual parent, fallback, or missing-translation handling. Current and
+     * fallback language pointers are kept.
      */
     public deleteLanguage(lang: Language): void {
         untracked(() => {
+            this.deletedLanguageRequests.set(lang, this.getRoot().languageRequestSequence);
+            const cancellation = this.loadCancellation.get(lang);
+            this.loadCancellation.delete(lang);
             this.loadingTranslations.clear(lang);
             this.store.removeLanguages([lang]);
             this.store.deleteTranslations(lang);
+            // Notify after deletion so completion callbacks can safely start a fresh load.
+            cancellation?.next();
+            cancellation?.complete();
         });
     }
 
