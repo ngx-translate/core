@@ -49,14 +49,6 @@ export interface TranslateHttpLoaderError {
     error: unknown;
 }
 
-export interface TranslateHttpLoaderError {
-    lang: string;
-    resource: string | TranslateHttpLoaderResource;
-    /** The request URL, or undefined if language encoding failed before URL construction. */
-    url: string | undefined;
-    error: unknown;
-}
-
 export interface TranslateMultiHttpLoaderConfig {
     resources: (string | TranslateHttpLoaderResource)[];
     enforceLoading: boolean;
@@ -131,7 +123,10 @@ export class TranslateHttpLoader implements TranslateLoader {
             map((response) =>
                 response.reduce(
                     (acc, curr) =>
-                        mergeDeep(acc, this.config.flatten ? flattenTranslations(curr) : curr),
+                        mergeDeep(
+                            acc,
+                            this.config.flatten ? flattenTranslations(curr ?? {}) : curr,
+                        ),
                     {},
                 ),
             ),

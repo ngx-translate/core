@@ -124,6 +124,29 @@ describe("HTTP loader resource flattening", () => {
         expect(next).toHaveBeenCalledOnceWith({ "menu.title": "Later", "footer.title": "Later" });
     });
 
+    [false, true].forEach((failOnError) => {
+        it(`keeps successful resources when another returns HTTP 204 with failOnError=${failOnError}`, () => {
+            const onLoadError = jasmine.createSpy("onLoadError");
+            const translate = prepare({
+                resources: ["/library/", "/application/"],
+                flatten: true,
+                failOnError,
+                onLoadError,
+            });
+            const next = jasmine.createSpy("next");
+            translate.use("en").subscribe({ next, error: fail });
+            http.expectOne("/library/en.json").flush({ menu: { title: "Library" } });
+            http.expectOne("/application/en.json").flush(null, {
+                status: 204,
+                statusText: "No Content",
+            });
+
+            expect(next).toHaveBeenCalledOnceWith({ "menu.title": "Library" });
+            expect(translate.instant("menu.title")).toBe("Library");
+            expect(onLoadError).not.toHaveBeenCalled();
+        });
+    });
+
     it("keeps successful resources when another resource fails", () => {
         spyOn(console, "warn");
         const translate = prepare({ resources: ["/library/", "/application/"], flatten: true });
