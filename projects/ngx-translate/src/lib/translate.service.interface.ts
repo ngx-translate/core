@@ -37,8 +37,11 @@ export interface LangChangeEvent {
 }
 
 export interface FallbackLangChangeEvent {
+    /** First fallback language, or an empty string when the chain is cleared. */
     lang: string;
     translations: InterpolatableTranslationObject;
+    /** Ordered chain when multiple fallbacks are configured, or [] when cleared. */
+    langs?: readonly Language[];
 }
 
 /**
@@ -47,6 +50,9 @@ export interface FallbackLangChangeEvent {
  */
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface ITranslateService {
+    setFallbackLangs?(langs: readonly Language[]): Observable<InterpolatableTranslationObject[]>;
+    getFallbackLangs?(): readonly Language[];
+    readonly fallbackLangs?: Signal<readonly Language[]>;
     deleteLanguage?(lang: Language): void;
     getAsync?(
         key: string | string[],
