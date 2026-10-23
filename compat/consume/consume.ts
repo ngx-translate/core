@@ -24,6 +24,10 @@ export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
+export function directiveAlias(directive: TranslateDirective) {
+    directive.ngxTranslate = "HELLO";
+}
+
 export const retryPolicy: TranslateRetryConfig = {
     count: 2,
     delay: (_error, retryAttempt) => 250 * 2 ** (retryAttempt - 1),

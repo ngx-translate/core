@@ -28,6 +28,9 @@ import {
         <div #withOtherElements translate>TEST1 <span>Hey</span> TEST2</div>
         <div #withParams [translate]="'TEST'" [translateParams]="value">Some init content</div>
         <div #withParamsNoKey translate [translateParams]="value">TEST</div>
+        <div #aliasWithKey ngxTranslate="TEST">Some init content</div>
+        <div #aliasNoKey ngxTranslate>TEST</div>
+        <div #aliasWithParams [ngxTranslate]="key" [translateParams]="value"></div>
         <!-- prettier-ignore -->
         <div #leadingSpaceNoKeyNoParams translate> TEST</div>
         <!-- prettier-ignore -->
@@ -46,11 +49,15 @@ class AppComponent {
     @ViewChild("withParams", { static: true }) withParams!: ElementRef;
     @ViewChild("withParamsNoKey", { static: true }) withParamsNoKey!: ElementRef;
     @ViewChild("noContent", { static: true }) noContent!: ElementRef;
+    @ViewChild("aliasWithKey", { static: true }) aliasWithKey!: ElementRef;
+    @ViewChild("aliasNoKey", { static: true }) aliasNoKey!: ElementRef;
+    @ViewChild("aliasWithParams", { static: true }) aliasWithParams!: ElementRef;
     @ViewChild("leadingSpaceNoKeyNoParams") leadingSpaceNoKeyNoParams!: ElementRef;
     @ViewChild("trailingSpaceNoKeyNoParams") trailingSpaceNoKeyNoParams!: ElementRef;
     @ViewChild("withSpaceAndLineBreakNoKeyNoParams")
     withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
     @Input() value: InterpolationParameters = { value: "ok" };
+    @Input() key = "TEST";
 }
 
 describe("TranslateDirective (standalone)", () => {
@@ -98,6 +105,47 @@ describe("TranslateDirective (standalone)", () => {
         translate.use("en");
 
         expect(fixture.componentInstance.withKey.nativeElement.innerHTML).toEqual("This is a test");
+    });
+
+    it("should translate a static key using ngxTranslate", () => {
+        expect(fixture.componentInstance.aliasWithKey.nativeElement.textContent).toBe("TEST");
+
+        translate.setTranslation("en", { TEST: "This is a test" });
+        translate.use("en");
+
+        expect(fixture.componentInstance.aliasWithKey.nativeElement.textContent).toBe(
+            "This is a test",
+        );
+    });
+
+    it("should translate the container value using ngxTranslate", () => {
+        translate.setTranslation("en", { TEST: "This is a test" });
+        translate.use("en");
+
+        expect(fixture.componentInstance.aliasNoKey.nativeElement.textContent).toBe(
+            "This is a test",
+        );
+    });
+
+    it("should update ngxTranslate when the key, params, or language changes", () => {
+        const element = fixture.componentInstance.aliasWithParams.nativeElement;
+        expect(element.textContent).toBe("TEST");
+
+        translate.setTranslation("en", { TEST: "It is {{value}}", OTHER: "Now {{value}}" });
+        translate.setTranslation("fr", { OTHER: "Maintenant {{value}}" });
+        translate.use("en");
+        expect(element.textContent).toBe("It is ok");
+
+        fixture.componentRef.setInput("key", "OTHER");
+        fixture.detectChanges();
+        expect(element.textContent).toBe("Now ok");
+
+        fixture.componentRef.setInput("value", { value: "changed" });
+        fixture.detectChanges();
+        expect(element.textContent).toBe("Now changed");
+
+        translate.use("fr");
+        expect(element.textContent).toBe("Maintenant changed");
     });
 
     it("should translate first child strings with elements in the middle", () => {

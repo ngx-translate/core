@@ -24,7 +24,7 @@ import { ContentKeyHandler } from "./translate-content-key";
 
 @Directive({
     // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: "[translate],[ngx-translate]",
+    selector: "[translate],[ngx-translate],[ngxTranslate]",
     standalone: true,
 })
 export class TranslateDirective implements AfterViewChecked {
@@ -62,6 +62,10 @@ export class TranslateDirective implements AfterViewChecked {
                 this.keySignal.set(key);
             }
         }
+    }
+
+    @Input() set ngxTranslate(key: string) {
+        this.translate = key;
     }
 
     @Input() set translateParams(params: InterpolationParameters) {
