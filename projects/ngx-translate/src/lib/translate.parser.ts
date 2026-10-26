@@ -1,8 +1,25 @@
 import { Injectable } from "@angular/core";
 import { getValue, isArray, isFunction, isObject, isString } from "./util";
-import { InterpolationParameters } from "./translate.service.interface";
+import type { InterpolationParameters } from "./translate.service.interface";
 
-export type InterpolateFunction = (params?: InterpolationParameters) => string;
+/**
+ * Context for custom parsers and compiled translation functions.
+ */
+export interface InterpolationContext {
+    /** The translation key requested from TranslateService. */
+    key?: string;
+
+    /**
+     * The language that supplied the translation being interpolated.
+     * Undefined when a custom lookup does not report context for its returned value.
+     */
+    lang?: string;
+}
+
+export type InterpolateFunction = (
+    params?: InterpolationParameters,
+    context?: InterpolationContext,
+) => string;
 
 export abstract class TranslateParser {
     /**
@@ -10,10 +27,12 @@ export abstract class TranslateParser {
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
      * @param expr
      * @param params
+     * @param context
      */
     abstract interpolate(
         expr: InterpolateFunction | string,
         params?: InterpolationParameters,
+        context?: InterpolationContext,
     ): string | undefined;
 }
 
@@ -24,11 +43,12 @@ export class TranslateDefaultParser extends TranslateParser {
     public interpolate(
         expr: InterpolateFunction | string,
         params?: InterpolationParameters,
+        context?: InterpolationContext,
     ): string | undefined {
         if (isString(expr)) {
-            return this.interpolateString(expr as string, params);
+            return this.interpolateString(expr as string, params, context);
         } else if (isFunction(expr)) {
-            return this.interpolateFunction(expr as InterpolateFunction, params);
+            return this.interpolateFunction(expr as InterpolateFunction, params, context);
         }
         return undefined;
     }
@@ -36,17 +56,22 @@ export class TranslateDefaultParser extends TranslateParser {
     protected interpolateFunction(
         fn: InterpolateFunction,
         params?: InterpolationParameters,
+        context?: InterpolationContext,
     ): string {
-        return fn(params);
+        return fn(params, context);
     }
 
-    protected interpolateString(expr: string, params?: InterpolationParameters): string {
+    protected interpolateString(
+        expr: string,
+        params?: InterpolationParameters,
+        context?: InterpolationContext,
+    ): string {
         if (!params) {
             return expr;
         }
 
         return expr.replace(this.templateMatcher, (substring: string, key: string) => {
-            const replacement = this.getInterpolationReplacement(params, key);
+            const replacement = this.getInterpolationReplacement(params, key, context);
             return replacement !== undefined ? replacement : substring;
         });
     }
@@ -58,8 +83,9 @@ export class TranslateDefaultParser extends TranslateParser {
     protected getInterpolationReplacement(
         params: InterpolationParameters,
         key: string,
+        context?: InterpolationContext,
     ): string | undefined {
-        return this.formatValue(getValue(params, key));
+        return this.formatValue(getValue(params, key), context);
     }
 
     /**
@@ -67,7 +93,8 @@ export class TranslateDefaultParser extends TranslateParser {
      * @param value The value to format.
      * @returns A string representation of the value.
      */
-    protected formatValue(value: unknown): string | undefined {
+    protected formatValue(value: unknown, context?: InterpolationContext): string | undefined {
+        void context;
         if (isString(value)) {
             return value;
         }

@@ -43,7 +43,7 @@ import { LoadingTranslationsRegistry } from "./loading-translations-registry";
 import { MissingTranslationHandler } from "./missing-translation-handler";
 import { TranslateCompiler } from "./translate.compiler";
 import { TranslateLoader } from "./translate.loader";
-import { TranslateParser } from "./translate.parser";
+import { TranslateParser, type InterpolationContext } from "./translate.parser";
 import {
     FallbackLangChangeEvent,
     InterpolatableTranslation,
@@ -117,6 +117,11 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 
 const RETRY_DELAY_MS = 100;
 const MAX_RETRY_DELAY_MS = 2 ** 31 - 1;
+
+interface TranslationLookupResult {
+    translation: InterpolatableTranslation;
+    context: InterpolationContext;
+}
 
 @Injectable()
 export class TranslateService implements ITranslateService {
@@ -790,10 +795,15 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        const textToInterpolate = this.getTextToInterpolate(key, lang);
+        let lookup: TranslationLookupResult | undefined;
+        const translation = this.getTextToInterpolate(key, lang, (result) => {
+            lookup = result;
+        });
 
-        if (isDefinedAndNotNull(textToInterpolate)) {
-            return this.runInterpolation(textToInterpolate, interpolateParams);
+        if (isDefinedAndNotNull(translation)) {
+            // An override must report context for the value it returns.
+            const context = lookup?.translation === translation ? lookup.context : { key };
+            return this.runInterpolation(translation, interpolateParams, context);
         }
 
         const handler = this.getMissingTranslationHandler();
@@ -822,24 +832,29 @@ export class TranslateService implements ITranslateService {
         return this.fallbackLangs();
     }
 
+    /** Forward onLookup when overriding this method to preserve parser language context. */
     protected getTextToInterpolate(
         key: string,
         lang?: Language,
+        onLookup?: (lookup: TranslationLookupResult) => void,
     ): InterpolatableTranslation | undefined {
         if (lang) {
             const res = this.store.getTranslationValue(lang, key);
             if (res !== undefined) {
+                onLookup?.({ translation: res, context: { key, lang } });
                 return res;
             }
-            return this.parent?.getTextToInterpolate(key, lang);
+            return this.parent?.getTextToInterpolate(key, lang, onLookup);
         }
 
         const currentLang = this.getCurrentLang();
 
         // 1. Try own store (currentLang)
         let res: InterpolatableTranslation | undefined;
+        let resLang: Language | undefined;
         if (currentLang) {
             res = this.store.getTranslationValue(currentLang, key);
+            resLang = currentLang;
         }
 
         // 2. Try each fallback in order; null values also trigger fallback.
@@ -847,52 +862,59 @@ export class TranslateService implements ITranslateService {
             if (isDefinedAndNotNull(res)) break;
             if (fallbackLang !== currentLang) {
                 res = this.store.getTranslationValue(fallbackLang, key);
+                resLang = fallbackLang;
             }
         }
 
         if (res !== undefined) {
+            onLookup?.({
+                translation: res,
+                context: resLang === undefined ? { key } : { key, lang: resLang },
+            });
             return res;
         }
 
-        // 3. Try parent
-        return this.parent?.getTextToInterpolate(key);
+        return this.parent?.getTextToInterpolate(key, lang, onLookup);
     }
 
     protected runInterpolation(
         translations: InterpolatableTranslation,
         interpolateParams?: InterpolationParameters,
+        context?: InterpolationContext,
     ): StrictTranslation {
         if (!isDefinedAndNotNull(translations)) {
             return;
         }
 
         if (isArray(translations)) {
-            return this.runInterpolationOnArray(translations, interpolateParams);
+            return this.runInterpolationOnArray(translations, interpolateParams, context);
         }
 
         if (isDict(translations)) {
-            return this.runInterpolationOnDict(translations, interpolateParams);
+            return this.runInterpolationOnDict(translations, interpolateParams, context);
         }
 
-        return this.parser.interpolate(translations, interpolateParams);
+        return this.parser.interpolate(translations, interpolateParams, context);
     }
 
     protected runInterpolationOnArray(
         translations: InterpolatableTranslation,
         interpolateParams: InterpolationParameters | undefined,
+        context?: InterpolationContext,
     ) {
         return (translations as StrictTranslation[]).map((translation) =>
-            this.runInterpolation(translation, interpolateParams),
+            this.runInterpolation(translation, interpolateParams, context),
         );
     }
 
     protected runInterpolationOnDict(
         translations: InterpolatableTranslationObject,
         interpolateParams: InterpolationParameters | undefined,
+        context?: InterpolationContext,
     ) {
         const result: TranslationObject = {};
         for (const key in translations) {
-            const res = this.runInterpolation(translations[key], interpolateParams);
+            const res = this.runInterpolation(translations[key], interpolateParams, context);
             if (res !== undefined) {
                 result[key] = res;
             }

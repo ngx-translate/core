@@ -2,6 +2,8 @@
 // packed v22/TS6-built packages so `tsc` must resolve their emitted .d.ts.
 // Type-checked under each older TypeScript with skipLibCheck:false — see run.sh.
 import {
+    InterpolatableTranslation,
+    InterpolationContext,
     ITranslateService,
     provideChildTranslateService,
     provideTranslateService,
@@ -23,6 +25,27 @@ export type _Dir = TranslateDirective;
 export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
+
+// Existing two-argument lookup overrides remain assignable to the emitted service type.
+export class LegacyLookupTranslateService extends TranslateService {
+    protected override getTextToInterpolate(key: string, lang?: string): InterpolatableTranslation {
+        return key === "CUSTOM" ? "Custom value" : super.getTextToInterpolate(key, lang);
+    }
+}
+
+// New overrides can forward context reporting without importing internal lookup types.
+export class ContextLookupTranslateService extends TranslateService {
+    protected override getTextToInterpolate(
+        key: string,
+        lang?: string,
+        onLookup?: (lookup: {
+            translation: InterpolatableTranslation;
+            context: InterpolationContext;
+        }) => void,
+    ): InterpolatableTranslation {
+        return super.getTextToInterpolate(key, lang, onLookup);
+    }
+}
 
 export function directiveAlias(directive: TranslateDirective) {
     directive.ngxTranslate = "HELLO";
