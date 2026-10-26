@@ -795,10 +795,15 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        const lookup = this.getTextToInterpolateWithContext(key, lang);
+        let lookup: TranslationLookupResult | undefined;
+        const translation = this.getTextToInterpolate(key, lang, (result) => {
+            lookup = result;
+        });
 
-        if (lookup && isDefinedAndNotNull(lookup.translation)) {
-            return this.runInterpolation(lookup.translation, interpolateParams, lookup.context);
+        if (isDefinedAndNotNull(translation)) {
+            // An override must report context for the value it returns.
+            const context = lookup?.translation === translation ? lookup.context : { key };
+            return this.runInterpolation(translation, interpolateParams, context);
         }
 
         const handler = this.getMissingTranslationHandler();
@@ -827,70 +832,19 @@ export class TranslateService implements ITranslateService {
         return this.fallbackLangs();
     }
 
+    /** Forward onLookup when overriding this method to preserve parser language context. */
     protected getTextToInterpolate(
         key: string,
         lang?: Language,
         onLookup?: (lookup: TranslationLookupResult) => void,
     ): InterpolatableTranslation | undefined {
-        const lookup = this.lookupOwnTranslation(key, lang);
-        if (lookup) {
-            onLookup?.(lookup);
-            return lookup.translation;
-        }
-        return this.parent?.getTextToInterpolate(key, lang, onLookup);
-    }
-
-    protected getTextToInterpolateWithContext(
-        key: string,
-        lang?: Language,
-    ): TranslationLookupResult | undefined {
-        let reportedLookup: TranslationLookupResult | undefined;
-        // Keep legacy overrides authoritative, including those returning a missing value.
-        const translation = this.getTextToInterpolate(key, lang, (lookup) => {
-            reportedLookup = lookup;
-        });
-        if (translation === undefined) {
-            return undefined;
-        }
-
-        // Only legacy or value-replacing overrides need a separate metadata lookup.
-        const lookup =
-            reportedLookup?.translation === translation
-                ? reportedLookup
-                : this.lookupTranslationWithContext(key, lang);
-        return {
-            translation,
-            // Reuse store context only when its value matches the hook's result.
-            context:
-                lookup?.translation === translation
-                    ? lookup.context
-                    : lang
-                      ? { key, lang }
-                      : { key },
-        };
-    }
-
-    private lookupTranslationWithContext(
-        key: string,
-        lang?: Language,
-    ): TranslationLookupResult | undefined {
-        // Metadata lookup must not invoke hooks again while walking the parent chain.
-        return (
-            this.lookupOwnTranslation(key, lang) ??
-            this.parent?.lookupTranslationWithContext(key, lang)
-        );
-    }
-
-    private lookupOwnTranslation(
-        key: string,
-        lang?: Language,
-    ): TranslationLookupResult | undefined {
         if (lang) {
             const res = this.store.getTranslationValue(lang, key);
             if (res !== undefined) {
-                return { translation: res, context: { key, lang } };
+                onLookup?.({ translation: res, context: { key, lang } });
+                return res;
             }
-            return undefined;
+            return this.parent?.getTextToInterpolate(key, lang, onLookup);
         }
 
         const currentLang = this.getCurrentLang();
@@ -913,13 +867,14 @@ export class TranslateService implements ITranslateService {
         }
 
         if (res !== undefined) {
-            return {
+            onLookup?.({
                 translation: res,
                 context: resLang === undefined ? { key } : { key, lang: resLang },
-            };
+            });
+            return res;
         }
 
-        return undefined;
+        return this.parent?.getTextToInterpolate(key, lang, onLookup);
     }
 
     protected runInterpolation(
