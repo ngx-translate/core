@@ -830,22 +830,34 @@ export class TranslateService implements ITranslateService {
     protected getTextToInterpolate(
         key: string,
         lang?: Language,
+        onLookup?: (lookup: TranslationLookupResult) => void,
     ): InterpolatableTranslation | undefined {
         const lookup = this.lookupOwnTranslation(key, lang);
-        return lookup ? lookup.translation : this.parent?.getTextToInterpolate(key, lang);
+        if (lookup) {
+            onLookup?.(lookup);
+            return lookup.translation;
+        }
+        return this.parent?.getTextToInterpolate(key, lang, onLookup);
     }
 
     protected getTextToInterpolateWithContext(
         key: string,
         lang?: Language,
     ): TranslationLookupResult | undefined {
+        let reportedLookup: TranslationLookupResult | undefined;
         // Keep legacy overrides authoritative, including those returning a missing value.
-        const translation = this.getTextToInterpolate(key, lang);
+        const translation = this.getTextToInterpolate(key, lang, (lookup) => {
+            reportedLookup = lookup;
+        });
         if (translation === undefined) {
             return undefined;
         }
 
-        const lookup = this.lookupTranslationWithContext(key, lang);
+        // Only legacy or value-replacing overrides need a separate metadata lookup.
+        const lookup =
+            reportedLookup?.translation === translation
+                ? reportedLookup
+                : this.lookupTranslationWithContext(key, lang);
         return {
             translation,
             // Reuse store context only when its value matches the hook's result.
