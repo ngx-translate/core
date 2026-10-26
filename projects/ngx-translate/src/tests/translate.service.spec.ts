@@ -1,4 +1,12 @@
-import { Component, Injectable, Injector, computed, inject, signal } from "@angular/core";
+import {
+    Component,
+    EnvironmentInjector,
+    Injectable,
+    Injector,
+    computed,
+    inject,
+    signal,
+} from "@angular/core";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
@@ -298,7 +306,8 @@ describe("TranslateService interpolation context", () => {
             expect(child.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
             expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "en" });
         } finally {
-            injector.destroy();
+            // Angular <20 types Injector.create() as Injector, without destroy().
+            (injector as EnvironmentInjector).destroy();
         }
     });
 
@@ -347,8 +356,8 @@ describe("TranslateService interpolation context", () => {
                 }
             }
         } finally {
-            grandchildInjector.destroy();
-            childInjector.destroy();
+            (grandchildInjector as EnvironmentInjector).destroy();
+            (childInjector as EnvironmentInjector).destroy();
         }
     });
 });
@@ -478,7 +487,7 @@ describe("TranslateService legacy lookup overrides", () => {
                 }
             }
         } finally {
-            childInjector.destroy();
+            (childInjector as EnvironmentInjector).destroy();
         }
     });
 
@@ -523,8 +532,8 @@ describe("TranslateService legacy lookup overrides", () => {
             expect(child.instant("HIDDEN")).toEqual("HIDDEN");
             expect(isolatedInjector.get(TranslateService).instant("CUSTOM")).toEqual("CUSTOM");
         } finally {
-            childInjector.destroy();
-            isolatedInjector.destroy();
+            (childInjector as EnvironmentInjector).destroy();
+            (isolatedInjector as EnvironmentInjector).destroy();
         }
     });
 
@@ -571,8 +580,8 @@ describe("TranslateService legacy lookup overrides", () => {
                 );
             }
         } finally {
-            grandchildInjector.destroy();
-            childInjector.destroy();
+            (grandchildInjector as EnvironmentInjector).destroy();
+            (childInjector as EnvironmentInjector).destroy();
         }
     });
 });
