@@ -34,7 +34,7 @@
         "@commitlint/cli": "21.2.4",
         "@commitlint/config-conventional": "21.2.4",
         "@eslint/js": "10.0.1",
-        "@types/jasmine": "6.0.0",
+        "@types/jasmine": "7.0.0",
         "angular-eslint": "^22.6.0",
         "eslint": "10.13.0",
         "eslint-config-prettier": "10.1.8",
