@@ -9,7 +9,10 @@ export interface InterpolationContext {
     /** The translation key requested from TranslateService. */
     key?: string;
 
-    /** The language that supplied the translation being interpolated. */
+    /**
+     * The language that supplied the translation being interpolated.
+     * Undefined when a custom lookup does not report context for its returned value.
+     */
     lang?: string;
 }
 

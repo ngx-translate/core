@@ -375,6 +375,9 @@ describe("TranslateService legacy lookup overrides", () => {
             if (key === "EMPTY") {
                 return "";
             }
+            if (key === "BRITISH") {
+                return super.getTextToInterpolate(key, "en-GB");
+            }
             return super.getTextToInterpolate(key, lang);
         }
     }
@@ -423,7 +426,7 @@ describe("TranslateService legacy lookup overrides", () => {
         expect(translate.instant("EMPTY")).toEqual("");
     });
 
-    it("uses context lookup only for metadata, not to replace custom values", () => {
+    it("keeps legacy values without inventing language context", () => {
         const interpolate = spyOn(TestBed.inject(TranslateParser), "interpolate").and.callThrough();
         translate.setTranslation("en", { CUSTOM: "Stored value" }, true);
 
@@ -438,7 +441,7 @@ describe("TranslateService legacy lookup overrides", () => {
         expect(interpolate).toHaveBeenCalledWith(
             "Custom {{ name }}",
             { name: "Ada" },
-            { key: "CUSTOM", lang: "en" },
+            { key: "CUSTOM" },
         );
     });
 
@@ -447,7 +450,39 @@ describe("TranslateService legacy lookup overrides", () => {
         expect(translate.instant("MISSING")).toEqual("MISSING");
     });
 
-    it("retains fallback language context when an override delegates to super", () => {
+    it("does not infer a legacy override's language from identical translation text", () => {
+        translate.setTranslation("en-US", { BRITISH: "{{ date }}" });
+        translate.setTranslation("en-GB", { BRITISH: "{{ date }}" });
+        translate.use("en-US");
+        const childInjector = Injector.create({
+            providers: [provideChildTranslateService()],
+            parent: TestBed.inject(Injector),
+        });
+
+        try {
+            for (const injector of [TestBed.inject(Injector), childInjector]) {
+                const service = injector.get(TranslateService);
+                const interpolate = spyOn(
+                    injector.get(TranslateParser),
+                    "interpolate",
+                ).and.callThrough();
+                for (const lang of [undefined, "en-US"]) {
+                    expect(service.instant("BRITISH", { date: "example" }, lang)).toEqual(
+                        "example",
+                    );
+                    expect(interpolate.calls.mostRecent().args).toEqual([
+                        "{{ date }}",
+                        { date: "example" },
+                        { key: "BRITISH" },
+                    ]);
+                }
+            }
+        } finally {
+            childInjector.destroy();
+        }
+    });
+
+    it("leaves language unknown when a legacy override does not forward context", () => {
         const interpolate = spyOn(TestBed.inject(TranslateParser), "interpolate").and.callThrough();
         translate.setTranslation("de", {});
         translate.setFallbackLang("en");
@@ -461,12 +496,9 @@ describe("TranslateService legacy lookup overrides", () => {
         expect(interpolate).toHaveBeenCalledWith(
             "Hello {{ name }}",
             { name: "Ada" },
-            { key: "TEST", lang: "en" },
+            { key: "TEST" },
         );
-        // This legacy override does not forward the new callback, so metadata is resolved separately.
         expect(lookup.calls.allArgs()).toEqual([
-            ["de", "TEST"],
-            ["en", "TEST"],
             ["de", "TEST"],
             ["en", "TEST"],
         ]);
@@ -535,7 +567,7 @@ describe("TranslateService legacy lookup overrides", () => {
                 expect(interpolate).toHaveBeenCalledWith(
                     "Hello {{ name }}",
                     { name: "Ada" },
-                    { key: "TEST", lang: "en" },
+                    { key: "TEST" },
                 );
             }
         } finally {
@@ -560,6 +592,9 @@ describe("TranslateService lookup context callbacks", () => {
                 const translation = "Custom {{ name }}";
                 onLookup?.({ translation, context: { key, lang: "fr" } });
                 return translation;
+            }
+            if (key === "BRITISH") {
+                return super.getTextToInterpolate(key, "en-GB", onLookup);
             }
 
             const translation = super.getTextToInterpolate(key, lang, onLookup);
@@ -615,6 +650,21 @@ describe("TranslateService lookup context callbacks", () => {
         );
     });
 
+    it("uses reported language even when another language has identical text", () => {
+        translate.setTranslation("en-US", { BRITISH: "{{ date }}" });
+        translate.setTranslation("en-GB", { BRITISH: "{{ date }}" });
+        translate.use("en-US");
+        lookup.calls.reset();
+
+        expect(translate.instant("BRITISH", { date: "example" }, "en-US")).toEqual("example");
+        expect(lookup.calls.allArgs()).toEqual([["en-GB", "BRITISH"]]);
+        expect(interpolate.calls.mostRecent().args).toEqual([
+            "{{ date }}",
+            { date: "example" },
+            { key: "BRITISH", lang: "en-GB" },
+        ]);
+    });
+
     it("preserves fallback context without repeating lookups in a forwarding override", () => {
         expect(translate.instant("INNER")).toEqual("Inner value");
         expect(lookup.calls.allArgs()).toEqual([
@@ -639,10 +689,7 @@ describe("TranslateService lookup context callbacks", () => {
 
     it("does not reuse reported context when the override replaces the translation", () => {
         expect(translate.instant("REPLACED", { name: "Ada" })).toEqual("Custom Ada");
-        expect(lookup.calls.allArgs()).toEqual([
-            ["de", "REPLACED"],
-            ["de", "REPLACED"],
-        ]);
+        expect(lookup.calls.allArgs()).toEqual([["de", "REPLACED"]]);
         expect(interpolate).toHaveBeenCalledWith(
             "Custom {{ name }}",
             { name: "Ada" },
