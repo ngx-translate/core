@@ -4,6 +4,7 @@ import { defer, EMPTY, Observable, of, throwError, timer, zip } from "rxjs";
 import { first, map, take, toArray } from "rxjs/operators";
 import {
     InterpolatableTranslationObject,
+    InterpolatableTranslation,
     InterpolationParameters,
     InterpolationContext,
     InterpolateFunction,
@@ -208,7 +209,7 @@ describe("TranslateService interpolation context", () => {
 
     @Injectable()
     class ContextCapturingParser extends TranslateDefaultParser {
-        readonly contexts: Array<InterpolationContext | undefined> = [];
+        readonly contexts: (InterpolationContext | undefined)[] = [];
 
         public override interpolate(
             expr: InterpolateFunction | string,
@@ -248,6 +249,219 @@ describe("TranslateService interpolation context", () => {
 
         expect(translate.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
         expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "en" });
+    });
+
+    it("passes an explicitly requested language to the parser", () => {
+        translate.setTranslation("de", { TEST: "Hallo {{ name }}" });
+        translate.setTranslation("en", { TEST: "Hello {{ name }}" });
+        translate.use("de");
+
+        expect(translate.instant("TEST", { name: "Ada" }, "en")).toEqual("Hello Ada");
+        expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "en" });
+    });
+
+    it("passes the language supplied by a parent service", () => {
+        translate.setTranslation("de", {});
+        translate.setTranslation("en", { TEST: "Hello {{ name }}" });
+        translate.setFallbackLang("en");
+        translate.use("de");
+        const injector = Injector.create({
+            providers: [
+                provideChildTranslateService({
+                    parser: { provide: TranslateParser, useValue: parser },
+                }),
+            ],
+            parent: TestBed.inject(Injector),
+        });
+
+        try {
+            const child = injector.get(TranslateService);
+            expect(child.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
+            expect(parser.contexts.at(-1)).toEqual({ key: "TEST", lang: "en" });
+        } finally {
+            injector.destroy();
+        }
+    });
+});
+
+describe("TranslateService legacy lookup overrides", () => {
+    @Injectable()
+    class CustomTranslateService extends TranslateService {
+        readonly lookups: string[] = [];
+
+        protected override getTextToInterpolate(
+            key: string,
+            lang?: string,
+        ): InterpolatableTranslation | undefined {
+            this.lookups.push(key);
+            if (key === "CUSTOM") {
+                return "Custom {{ name }}";
+            }
+            if (key === "HIDDEN") {
+                return undefined;
+            }
+            if (key === "NULL") {
+                return null;
+            }
+            if (key === "EMPTY") {
+                return "";
+            }
+            return super.getTextToInterpolate(key, lang);
+        }
+    }
+
+    let translate: CustomTranslateService;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService(),
+                { provide: TranslateService, useClass: CustomTranslateService },
+            ],
+        });
+        translate = TestBed.inject(TranslateService) as CustomTranslateService;
+        translate.setTranslation("en", { HIDDEN: "Hidden", TEST: "Hello {{ name }}" });
+        translate.use("en");
+    });
+
+    it("uses custom lookup values consistently for existence checks, instant() and get()", () => {
+        expect(translate.hasTranslationKey("CUSTOM")).toBeTrue();
+        expect(translate.instant("CUSTOM", { name: "Ada" })).toEqual("Custom Ada");
+        translate.get("CUSTOM", { name: "Ada" }).subscribe((value) => {
+            expect(value).toEqual("Custom Ada");
+        });
+        expect(translate.instant("CUSTOM", { name: "Ada" }, "en")).toEqual("Custom Ada");
+    });
+
+    it("does not replace missing override results with store values", () => {
+        expect(translate.hasTranslationKey("HIDDEN")).toBeFalse();
+        expect(translate.instant("HIDDEN")).toEqual("HIDDEN");
+    });
+
+    it("does not replace null override results with store or fallback values", () => {
+        translate.setTranslation("en", { NULL: "Stored value" }, true);
+        translate.setTranslation("de", { NULL: "Fallback value" });
+        translate.setFallbackLang("de");
+
+        expect(translate.hasTranslationKey("NULL")).toBeFalse();
+        expect(translate.instant("NULL")).toEqual("NULL");
+    });
+
+    it("preserves empty override results", () => {
+        translate.setTranslation("en", { EMPTY: "Stored value" }, true);
+
+        expect(translate.hasTranslationKey("EMPTY")).toBeTrue();
+        expect(translate.instant("EMPTY")).toEqual("");
+    });
+
+    it("uses context lookup only for metadata, not to replace custom values", () => {
+        const interpolate = spyOn(TestBed.inject(TranslateParser), "interpolate").and.callThrough();
+        translate.setTranslation("en", { CUSTOM: "Stored value" }, true);
+
+        expect(translate.instant("CUSTOM", { name: "Ada" })).toEqual("Custom Ada");
+        expect(interpolate).toHaveBeenCalledWith(
+            "Custom {{ name }}",
+            { name: "Ada" },
+            { key: "CUSTOM" },
+        );
+
+        expect(translate.instant("CUSTOM", { name: "Ada" }, "en")).toEqual("Custom Ada");
+        expect(interpolate).toHaveBeenCalledWith(
+            "Custom {{ name }}",
+            { name: "Ada" },
+            { key: "CUSTOM", lang: "en" },
+        );
+    });
+
+    it("supports overrides that delegate to the default lookup", () => {
+        expect(translate.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
+        expect(translate.instant("MISSING")).toEqual("MISSING");
+    });
+
+    it("retains fallback language context when an override delegates to super", () => {
+        const interpolate = spyOn(TestBed.inject(TranslateParser), "interpolate").and.callThrough();
+        translate.setTranslation("de", {});
+        translate.setFallbackLang("en");
+        translate.use("de");
+
+        expect(translate.instant("TEST", { name: "Ada" })).toEqual("Hello Ada");
+        expect(interpolate).toHaveBeenCalledWith(
+            "Hello {{ name }}",
+            { name: "Ada" },
+            { key: "TEST", lang: "en" },
+        );
+    });
+
+    it("honors parent lookup overrides from connected children but not isolated services", () => {
+        const childInjector = Injector.create({
+            providers: [provideChildTranslateService()],
+            parent: TestBed.inject(Injector),
+        });
+        const isolatedInjector = Injector.create({
+            providers: [provideTranslateService()],
+            parent: TestBed.inject(Injector),
+        });
+
+        try {
+            const child = childInjector.get(TranslateService);
+            expect(child.hasTranslationKey("CUSTOM")).toBeTrue();
+            expect(child.instant("CUSTOM", { name: "Ada" })).toEqual("Custom Ada");
+            expect(child.instant("CUSTOM", { name: "Ada" }, "en")).toEqual("Custom Ada");
+            expect(child.hasTranslationKey("HIDDEN")).toBeFalse();
+            expect(child.instant("HIDDEN")).toEqual("HIDDEN");
+            expect(isolatedInjector.get(TranslateService).instant("CUSTOM")).toEqual("CUSTOM");
+        } finally {
+            childInjector.destroy();
+            isolatedInjector.destroy();
+        }
+    });
+
+    it("calls each hook once when resolving through multiple delegating overrides", () => {
+        translate.setTranslation("de", {});
+        translate.setFallbackLang("en");
+        translate.use("de");
+        const childInjector = Injector.create({
+            providers: [
+                provideChildTranslateService(),
+                { provide: TranslateService, useClass: CustomTranslateService },
+            ],
+            parent: TestBed.inject(Injector),
+        });
+        const grandchildInjector = Injector.create({
+            providers: [
+                provideChildTranslateService(),
+                { provide: TranslateService, useClass: CustomTranslateService },
+            ],
+            parent: childInjector,
+        });
+
+        try {
+            const child = childInjector.get(TranslateService) as CustomTranslateService;
+            const grandchild = grandchildInjector.get(TranslateService) as CustomTranslateService;
+            const interpolate = spyOn(
+                grandchildInjector.get(TranslateParser),
+                "interpolate",
+            ).and.callThrough();
+
+            for (const lang of [undefined, "en"]) {
+                translate.lookups.length = 0;
+                child.lookups.length = 0;
+                grandchild.lookups.length = 0;
+
+                expect(grandchild.instant("TEST", { name: "Ada" }, lang)).toEqual("Hello Ada");
+                expect(translate.lookups).toEqual(["TEST"]);
+                expect(child.lookups).toEqual(["TEST"]);
+                expect(grandchild.lookups).toEqual(["TEST"]);
+                expect(interpolate).toHaveBeenCalledWith(
+                    "Hello {{ name }}",
+                    { name: "Ada" },
+                    { key: "TEST", lang: "en" },
+                );
+            }
+        } finally {
+            grandchildInjector.destroy();
+            childInjector.destroy();
+        }
     });
 });
 

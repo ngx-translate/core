@@ -2,6 +2,9 @@ import { Injectable } from "@angular/core";
 import { getValue, isArray, isFunction, isObject, isString } from "./util";
 import type { InterpolationParameters } from "./translate.service.interface";
 
+/**
+ * Context for custom parsers and compiled translation functions.
+ */
 export interface InterpolationContext {
     /** The translation key requested from TranslateService. */
     key?: string;
@@ -21,6 +24,7 @@ export abstract class TranslateParser {
      * "This is a {{ key }}" ==> "This is a value", with params = { key: "value" }
      * @param expr
      * @param params
+     * @param context
      */
     abstract interpolate(
         expr: InterpolateFunction | string,

@@ -676,10 +676,45 @@ export class TranslateService implements ITranslateService {
         key: string,
         lang?: Language,
     ): InterpolatableTranslation | undefined {
-        return this.getTextToInterpolateWithContext(key, lang)?.translation;
+        const lookup = this.lookupOwnTranslation(key, lang);
+        return lookup ? lookup.translation : this.parent?.getTextToInterpolate(key, lang);
     }
 
     protected getTextToInterpolateWithContext(
+        key: string,
+        lang?: Language,
+    ): TranslationLookupResult | undefined {
+        // Keep legacy overrides authoritative, including those returning a missing value.
+        const translation = this.getTextToInterpolate(key, lang);
+        if (translation === undefined) {
+            return undefined;
+        }
+
+        const lookup = this.lookupTranslationWithContext(key, lang);
+        return {
+            translation,
+            // Reuse store context only when its value matches the hook's result.
+            context:
+                lookup?.translation === translation
+                    ? lookup.context
+                    : lang
+                      ? { key, lang }
+                      : { key },
+        };
+    }
+
+    private lookupTranslationWithContext(
+        key: string,
+        lang?: Language,
+    ): TranslationLookupResult | undefined {
+        // Metadata lookup must not invoke hooks again while walking the parent chain.
+        return (
+            this.lookupOwnTranslation(key, lang) ??
+            this.parent?.lookupTranslationWithContext(key, lang)
+        );
+    }
+
+    private lookupOwnTranslation(
         key: string,
         lang?: Language,
     ): TranslationLookupResult | undefined {
@@ -688,7 +723,7 @@ export class TranslateService implements ITranslateService {
             if (res !== undefined) {
                 return { translation: res, context: { key, lang } };
             }
-            return this.parent?.getTextToInterpolateWithContext(key, lang);
+            return undefined;
         }
 
         const currentLang = this.getCurrentLang();
@@ -715,8 +750,7 @@ export class TranslateService implements ITranslateService {
             };
         }
 
-        // 3. Try parent
-        return this.parent?.getTextToInterpolateWithContext(key);
+        return undefined;
     }
 
     protected runInterpolation(
