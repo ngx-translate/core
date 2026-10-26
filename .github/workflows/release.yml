@@ -1,4 +1,4 @@
-# Publishes @ngx-translate/core and @ngx-translate/http-loader to npm when a version tag is pushed.
+# Publishes both npm packages, then creates a GitHub Release when a version tag is pushed.
 # Authentication uses npm trusted publishing (OIDC) — no npm token is stored on GitHub.
 # Both packages are configured on npmjs.com to trust this exact workflow file and the
 # "npm-publish" environment, so renaming either breaks publishing.
@@ -52,3 +52,27 @@ jobs:
                   case "$GITHUB_REF_NAME" in *-*) dist_tag=next ;; esac
                   npm publish ./dist/ngx-translate --access public --tag "$dist_tag"
                   npm publish ./dist/http-loader --access public --tag "$dist_tag"
+
+    github-release:
+        needs: publish
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Create GitHub Release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+              shell: bash
+              run: |
+                  if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+                      echo "GitHub Release $GITHUB_REF_NAME already exists."
+                      exit 0
+                  fi
+
+                  flags=(--verify-tag --title "$GITHUB_REF_NAME" --generate-notes)
+                  case "$GITHUB_REF_NAME" in
+                      *-*) flags+=(--prerelease --latest=false) ;;
+                  esac
+                  gh release create "$GITHUB_REF_NAME" "${flags[@]}"

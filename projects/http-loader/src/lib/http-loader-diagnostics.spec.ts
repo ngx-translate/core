@@ -1,7 +1,12 @@
-import { provideHttpClient } from "@angular/common/http";
+import { HttpErrorResponse, provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
-import { provideTranslateService, TranslateLoader, TranslateService } from "@ngx-translate/core";
+import {
+    provideTranslateService,
+    TranslateLoader,
+    TranslateService,
+    TranslateServiceConfig,
+} from "@ngx-translate/core";
 import {
     provideTranslateHttpLoader,
     provideTranslateMultiHttpLoader,
@@ -13,7 +18,7 @@ describe("HTTP loader diagnostics", () => {
 
     function prepare(
         config: Partial<TranslateMultiHttpLoaderConfig> = {},
-        retry = 0,
+        retry: TranslateServiceConfig["retry"] = 0,
     ): TranslateLoader {
         TestBed.configureTestingModule({
             providers: [
@@ -175,6 +180,57 @@ describe("HTTP loader diagnostics", () => {
         expect(translate.instant("TITLE")).toBe("Recovered");
         expect(translate.isLoading()).toBeFalse();
         expect(onLoadError).toHaveBeenCalledTimes(1);
+    }));
+
+    it("retries transient HTTP errors but rejects a missing catalog immediately", fakeAsync(() => {
+        const onLoadError = jasmine.createSpy("onLoadError");
+        spyOn(console, "warn");
+        prepare(
+            { onLoadError, failOnError: true },
+            {
+                count: 2,
+                delay: 250,
+                shouldRetry: (error) => error instanceof HttpErrorResponse && error.status >= 500,
+            },
+        );
+        const translate = TestBed.inject(TranslateService);
+        const error = jasmine.createSpy("error");
+        translate.use("en").subscribe({ error });
+        http.expectOne("/assets/i18n/en.json").flush(null, {
+            status: 503,
+            statusText: "Unavailable",
+        });
+        tick(249);
+        http.expectNone("/assets/i18n/en.json");
+        expect(translate.isLoading()).toBeTrue();
+        tick(1);
+        http.expectOne("/assets/i18n/en.json").flush(null, {
+            status: 404,
+            statusText: "Not Found",
+        });
+        expect(error).toHaveBeenCalledOnceWith(onLoadError.calls.mostRecent().args[0].error);
+        expect(translate.isLoading()).toBeFalse();
+        tick(1000);
+        http.expectNone("/assets/i18n/en.json");
+        expect(onLoadError).toHaveBeenCalledTimes(2);
+    }));
+
+    it("does not apply a retry policy to permissive HTTP loader failures", fakeAsync(() => {
+        spyOn(console, "warn");
+        const shouldRetry = jasmine.createSpy("shouldRetry").and.returnValue(true);
+        prepare({}, { count: 2, delay: 250, shouldRetry });
+        const translate = TestBed.inject(TranslateService);
+        const next = jasmine.createSpy("next");
+        translate.use("en").subscribe({ next, error: fail });
+        http.expectOne("/assets/i18n/en.json").flush(null, {
+            status: 503,
+            statusText: "Unavailable",
+        });
+        tick(1000);
+        expect(shouldRetry).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledOnceWith({});
+        expect(translate.isLoading()).toBeFalse();
+        http.expectNone("/assets/i18n/en.json");
     }));
 
     it("keeps the default warning when no callback is supplied", () => {
