@@ -1244,6 +1244,42 @@ describe("TranslateService", () => {
             });
         });
 
+        it("instantArray returns translations in key order for destructuring", () => {
+            translate.setTranslation("en", {
+                "general.error": "Bad luck",
+                "general.denied": "No access",
+            });
+            translate.use("en");
+
+            const [title, body] = translate.instantArray(["general.error", "general.denied"]);
+            expect(title).toEqual("Bad luck");
+            expect(body).toEqual("No access");
+
+            expect(translate.instant(["general.error", "general.denied"]) as object).toEqual({
+                "general.error": "Bad luck",
+                "general.denied": "No access",
+            });
+        });
+
+        it("instantArray supports interpolation, lang override, and missing keys", () => {
+            translate.setTranslation("en", {
+                TEST: "Hello {{value}} 1!",
+                TEST2: "Hello {{value}} 2!",
+            });
+            translate.setTranslation("de", { TEST: "Hallo {{value}} 1!" });
+            translate.use("en");
+
+            expect(translate.instantArray(["TEST", "TEST2"], { value: "world" })).toEqual([
+                "Hello world 1!",
+                "Hello world 2!",
+            ]);
+            expect(translate.instantArray(["TEST", "MISSING"], { value: "Welt" }, "de")).toEqual([
+                "Hallo Welt 1!",
+                "MISSING",
+            ]);
+            expect(translate.instantArray([])).toEqual([]);
+        });
+
         it("should be able to return sub-trees", () => {
             const tr = { a: { b: { x: "X", y: "Y" } } };
             translate.setTranslation("en", tr);
