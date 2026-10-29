@@ -26,6 +26,33 @@ export type _Slots = TranslateSlotsComponent;
 export type _Slot = TranslateSlotDirective;
 export const _h: typeof provideTranslateHttpLoader = provideTranslateHttpLoader;
 
+export function pipeLanguage(pipe: TranslatePipe, params: unknown, service: TranslateService) {
+    pipe.transform("HELLO");
+    pipe.transform("HELLO", { name: "Ada" }, "fr");
+    pipe.transform("HELLO", "{name: 'Ada'}", "fr");
+    pipe.transform("HELLO", undefined, "fr");
+    pipe.transform("HELLO", null, "fr");
+    pipe.transform("HELLO", params, "fr");
+    pipe.transform("HELLO", false, "fr");
+    pipe.transform("HELLO", undefined, null);
+    pipe.transform("HELLO", undefined, service.currentLang());
+    pipe.transform("HELLO", { name: "Ada" }, "fr", "ignored", 123);
+    const args: Parameters<TranslatePipe["transform"]> = [
+        "HELLO",
+        { name: "Ada" },
+        "fr",
+        { legacy: true },
+    ];
+    const name: string = args[1].name;
+    const legacy: boolean = args[3].legacy;
+    void [name, legacy];
+    pipe.transform(...args);
+    // @ts-expect-error Language overrides must be strings, null, or undefined.
+    pipe.transform("HELLO", undefined, 123);
+    // @ts-expect-error Extra arguments must not weaken the language parameter type.
+    pipe.transform("HELLO", undefined, 123, "ignored");
+}
+
 // Existing two-argument lookup overrides remain assignable to the emitted service type.
 export class LegacyLookupTranslateService extends TranslateService {
     protected override getTextToInterpolate(key: string, lang?: string): InterpolatableTranslation {
