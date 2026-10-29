@@ -689,7 +689,10 @@ export class TranslateService implements ITranslateService {
             filter(() => this.loadCancellation.get(lang) === cancellation),
             tap({
                 next: (compiled: InterpolatableTranslationObject) => {
-                    this.store.setTranslations(lang, compiled, false);
+                    // Merge when manual writes landed while this load was in flight (issue #842).
+                    // A plain reload still replaces: resetLang clears the store first.
+                    const extend = this.store.hasTranslationFor(lang);
+                    this.store.setTranslations(lang, compiled, extend);
                     // Clear before notifying subscribers so isLoading reflects the completed load.
                     this.loadingTranslations.clearIfOwner(lang, translations$);
                 },
