@@ -39,6 +39,7 @@ import {
         <div #withSpaceAndLineBreakNoKeyNoParams translate>
           TEST
         </div>
+        <div #interpolatedContentKey translate>{{ weekdayKey }}</div>
     `,
 })
 class AppComponent {
@@ -56,8 +57,11 @@ class AppComponent {
     @ViewChild("trailingSpaceNoKeyNoParams") trailingSpaceNoKeyNoParams!: ElementRef;
     @ViewChild("withSpaceAndLineBreakNoKeyNoParams")
     withSpaceAndLineBreakNoKeyNoParams!: ElementRef;
+    @ViewChild("interpolatedContentKey", { static: true })
+    interpolatedContentKey!: ElementRef;
     @Input() value: InterpolationParameters = { value: "ok" };
     @Input() key = "TEST";
+    weekdayKey = "KEY_ONE";
 }
 
 describe("TranslateDirective (standalone)", () => {
@@ -95,6 +99,34 @@ describe("TranslateDirective (standalone)", () => {
         expect(fixture.componentInstance.contentAsKey.nativeElement.innerHTML).toEqual(
             "This is a test",
         );
+    });
+
+    it("should re-translate when interpolated content-as-key changes", () => {
+        const element = fixture.componentInstance.interpolatedContentKey.nativeElement;
+
+        translate.setTranslation("en", { KEY_ONE: "First day", KEY_TWO: "Second day" });
+        translate.use("en");
+        expect(element.textContent).toBe("First day");
+
+        fixture.componentInstance.weekdayKey = "KEY_TWO";
+        fixture.detectChanges();
+        expect(element.textContent).toBe("Second day");
+    });
+
+    it("should re-translate interpolated content-as-key when the language changes", () => {
+        const element = fixture.componentInstance.interpolatedContentKey.nativeElement;
+
+        translate.setTranslation("en", { KEY_ONE: "First day", KEY_TWO: "Second day" });
+        translate.setTranslation("fr", { KEY_ONE: "Premier jour", KEY_TWO: "Deuxième jour" });
+        translate.use("en");
+        expect(element.textContent).toBe("First day");
+
+        fixture.componentInstance.weekdayKey = "KEY_TWO";
+        fixture.detectChanges();
+        expect(element.textContent).toBe("Second day");
+
+        translate.use("fr");
+        expect(element.textContent).toBe("Deuxième jour");
     });
 
     it("should translate a string using the key value", () => {
