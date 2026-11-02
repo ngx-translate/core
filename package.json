@@ -52,7 +52,7 @@
         "prettier": "3.9.10",
         "ts-mocks": "3.0.1",
         "typescript": "~6.0.0",
-        "typescript-eslint": "^8.72.0"
+        "typescript-eslint": "^8.72.1"
     },
     "packageManager": "pnpm@12.14.0",
     "lint-staged": {
