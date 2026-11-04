@@ -6,7 +6,6 @@ import { isDefinedAndNotNull, isString } from "./util";
 interface ExtendedNode extends Text {
     originalContent: string;
     currentValue: string;
-    lookupKey: string;
     lastKey: string | null;
     data: string;
 }
@@ -50,19 +49,16 @@ export class ContentKeyHandler {
                 if (forceUpdate) {
                     node.lastKey = null;
                 }
-                if (isDefinedAndNotNull(node.lookupKey)) {
-                    key = node.lookupKey;
-                } else {
-                    const content = this.getContent(node);
-                    const trimmedContent = content.trim();
-                    if (trimmedContent.length) {
-                        node.lookupKey = trimmedContent;
-                        if (content !== node.currentValue) {
-                            key = trimmedContent;
-                            node.originalContent = content || node.originalContent;
-                        } else if (node.originalContent) {
-                            key = node.originalContent.trim();
-                        }
+                const content = this.getContent(node);
+                const trimmedContent = content.trim();
+                if (trimmedContent.length) {
+                    if (node.originalContent && forceUpdate) {
+                        // DOM shows the last translation; reuse the stored key reference.
+                        key = node.originalContent.trim();
+                    } else if (content !== node.currentValue) {
+                        // Fresh key from template content or interpolation.
+                        key = trimmedContent;
+                        node.originalContent = content;
                     }
                 }
                 this.updateValue(key, node, currentParams);
