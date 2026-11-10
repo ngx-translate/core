@@ -24,7 +24,7 @@
         "@angular/platform-browser": "^22.2.4",
         "@angular/router": "^22.2.4",
         "rxjs": "7.8.2",
-        "tslib": "2.8.1",
+        "tslib": "2.9.1",
         "zone.js": "~0.16.3"
     },
     "devDependencies": {
@@ -36,7 +36,7 @@
         "@eslint/js": "10.0.1",
         "@types/jasmine": "6.0.0",
         "angular-eslint": "^22.6.0",
-        "eslint": "10.13.0",
+        "eslint": "10.14.0",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
