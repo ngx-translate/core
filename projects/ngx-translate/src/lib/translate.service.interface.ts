@@ -4,6 +4,14 @@ import { Observable } from "rxjs";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpolationParameters = Record<string, any>;
+/**
+ * Parameters accepted by `TranslatePipe`: an object, or a string holding a serialized object
+ * (e.g. `"{n:1}"`).
+ *
+ * Based on `Record<string, any>` rather than `Record<string, unknown>`: objects typed with an
+ * interface have no index signature and would no longer be accepted.
+ */
+export type TranslatePipeParams = InterpolationParameters | string;
 export type StrictTranslation = string | StrictTranslation[] | TranslationObject | undefined | null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Translation = StrictTranslation | any;
