@@ -17,6 +17,13 @@ export const routes: Routes = [
             import("./pages/extended/extended.component").then((m) => m.ExtendedComponent),
     },
     {
+        path: "lookup-context",
+        loadComponent: () =>
+            import("./pages/lookup-context/lookup-context.component").then(
+                (m) => m.LookupContextComponent,
+            ),
+    },
+    {
         path: "**",
         pathMatch: "full",
         redirectTo: "global",

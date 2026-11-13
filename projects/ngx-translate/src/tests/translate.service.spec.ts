@@ -31,6 +31,7 @@ import {
     TranslateStore,
     Translation,
     TranslationChangeEvent,
+    TranslationLookupResult,
     TranslationObject,
 } from "../public-api";
 import { provideTestableTranslateService, TestableTranslateService } from "./test-helpers";
@@ -725,6 +726,77 @@ describe("TranslateService lookup context callbacks", () => {
             ["Inner value", undefined, { key: "INNER", lang: "en" }],
             ["Outer value", undefined, { key: "OUTER", lang: "de" }],
         ]);
+    });
+});
+
+describe("TranslateService lookupTranslation overrides", () => {
+    @Injectable()
+    class StructuredLookupTranslateService extends TranslateService {
+        protected override lookupTranslation(
+            key: string,
+            lang?: string,
+        ): TranslationLookupResult | undefined {
+            if (key === "SAME_TEXT") {
+                // Same text exists in "de", but the value is taken from "en".
+                const translation = this.store.getTranslationValue("en", key);
+                return translation === undefined
+                    ? undefined
+                    : { translation, context: { key, lang: "en" } };
+            }
+            if (key === "HIDDEN") {
+                return undefined;
+            }
+            return super.lookupTranslation(key, lang);
+        }
+    }
+
+    let translate: TranslateService;
+    let interpolate: jasmine.Spy<TranslateParser["interpolate"]>;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideTranslateService(),
+                { provide: TranslateService, useClass: StructuredLookupTranslateService },
+            ],
+        });
+        translate = TestBed.inject(TranslateService);
+        translate.setTranslation("de", { SAME_TEXT: "OK", HIDDEN: "Stored", TEST: "Hallo" });
+        translate.setTranslation("en", { SAME_TEXT: "OK", FALLBACK: "Fallback" });
+        translate.setFallbackLang("en");
+        translate.use("de");
+        interpolate = spyOn(TestBed.inject(TranslateParser), "interpolate").and.callThrough();
+    });
+
+    it("uses the context returned with the translation even when texts are identical", () => {
+        expect(translate.instant("SAME_TEXT")).toEqual("OK");
+        expect(interpolate).toHaveBeenCalledWith("OK", undefined, {
+            key: "SAME_TEXT",
+            lang: "en",
+        });
+    });
+
+    it("reports current and fallback languages from the default lookup", () => {
+        translate.instant("TEST");
+        translate.instant("FALLBACK");
+        expect(interpolate.calls.allArgs()).toEqual([
+            ["Hallo", undefined, { key: "TEST", lang: "de" }],
+            ["Fallback", undefined, { key: "FALLBACK", lang: "en" }],
+        ]);
+    });
+
+    it("treats an undefined result as missing for instant and hasTranslationKey", () => {
+        expect(translate.instant("HIDDEN")).toEqual("HIDDEN");
+        expect(translate.hasTranslationKey("HIDDEN")).toBeFalse();
+        expect(translate.hasTranslationKey("TEST")).toBeTrue();
+    });
+
+    it("still answers the deprecated getTextToInterpolate through lookupTranslation", () => {
+        const service = translate as unknown as {
+            getTextToInterpolate(key: string): unknown;
+        };
+        expect(service.getTextToInterpolate("HIDDEN")).toBeUndefined();
+        expect(service.getTextToInterpolate("TEST")).toEqual("Hallo");
     });
 });
 
