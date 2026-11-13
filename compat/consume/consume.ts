@@ -13,6 +13,7 @@ import {
     TranslateService,
     TranslateSlotDirective,
     TranslateSlotsComponent,
+    TranslationLookupResult,
 } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
@@ -44,6 +45,17 @@ export class ContextLookupTranslateService extends TranslateService {
         }) => void,
     ): InterpolatableTranslation {
         return super.getTextToInterpolate(key, lang, onLookup);
+    }
+}
+
+export class StructuredLookupTranslateService extends TranslateService {
+    protected override lookupTranslation(
+        key: string,
+        lang?: string,
+    ): TranslationLookupResult | undefined {
+        return key === "CUSTOM"
+            ? { translation: "Custom value", context: { key, lang: "en" } }
+            : super.lookupTranslation(key, lang);
     }
 }
 
