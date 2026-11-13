@@ -1,7 +1,9 @@
 import { fakeAsync, TestBed, tick } from "@angular/core/testing";
 import {
+    MissingTranslationHandler,
     provideTranslateLoader,
     provideTranslateService,
+    TranslateLoader,
     TranslatePipe,
     TranslateService,
 } from "../public-api";
@@ -204,6 +206,112 @@ describe("TranslatePipe (unit)", () => {
             expect(fixture.debugElement.nativeElement.innerHTML).toEqual("This is some default text");
         });
          */
+    });
+
+    describe("explicit language", () => {
+        beforeEach(() => {
+            translate.setTranslation("en", { TEST: "Hello", FALLBACK_ONLY: "English fallback" });
+            translate.setTranslation("fr", { TEST: "Bonjour" });
+            translate.setTranslation("de", { TEST: "Hallo" });
+            translate.setFallbackLang("en");
+            translate.use("en");
+        });
+
+        it("should accept a language after omitted interpolation parameters", () => {
+            const onLangChange = jasmine.createSpy("onLangChange");
+            const subscription = translate.onLangChange.subscribe(onLangChange);
+
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Bonjour");
+            expect(translatePipe.transform("TEST", null, "de")).toBe("Hallo");
+            expect(translate.getCurrentLang()).toBe("en");
+            expect(onLangChange).not.toHaveBeenCalled();
+            subscription.unsubscribe();
+        });
+
+        it("should preserve object and string interpolation parameters", () => {
+            translate.setTranslation("fr", { TEST: "Bonjour {{name}}" });
+
+            expect(translatePipe.transform("TEST", { name: "Ada" }, "fr")).toBe("Bonjour Ada");
+            expect(translatePipe.transform("TEST", "{name: 'Bob'}", "fr")).toBe("Bonjour Bob");
+        });
+
+        it("should ignore trailing arguments while preserving the language and parameters", () => {
+            translate.setTranslation("fr", { TEST: "Bonjour {{name}}" });
+
+            expect(translatePipe.transform("TEST", { name: "Ada" }, "fr", "ignored", 123)).toBe(
+                "Bonjour Ada",
+            );
+            expect(translatePipe.transform("TEST", undefined, undefined, "ignored")).toBe("Hello");
+        });
+
+        it("should update when only the language changes or the override is removed", () => {
+            expect(translatePipe.transform("TEST")).toBe("Hello");
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Bonjour");
+            expect(translatePipe.transform("TEST", undefined, "de")).toBe("Hallo");
+            expect(translatePipe.transform("TEST")).toBe("Hello");
+
+            translate.use("fr");
+            expect(translatePipe.transform("TEST")).toBe("Bonjour");
+        });
+
+        it("should keep the selected language across current and fallback language changes", () => {
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Bonjour");
+
+            translate.use("de");
+            translate.setFallbackLang("de");
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Bonjour");
+
+            translate.setTranslation("fr", { TEST: "Salut" });
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Salut");
+        });
+
+        it("should remove the language override with null and reuse the default-language signal", () => {
+            expect(translatePipe.transform("TEST", undefined, "fr")).toBe("Bonjour");
+            const createSignal = spyOn(translate, "translate").and.callThrough();
+
+            expect(translatePipe.transform("TEST", undefined, null)).toBe("Hello");
+            expect(translatePipe.transform("TEST")).toBe("Hello");
+            expect(createSignal).toHaveBeenCalledOnceWith("TEST", undefined, undefined);
+
+            translate.use("de");
+            expect(translatePipe.transform("TEST", undefined, null)).toBe("Hallo");
+        });
+
+        it("should reuse the signal while the key, parameters and language are unchanged", () => {
+            const createSignal = spyOn(translate, "translate").and.callThrough();
+
+            expect(translatePipe.transform("TEST", { name: "Ada" }, "fr")).toBe("Bonjour");
+            expect(translatePipe.transform("TEST", { name: "Ada" }, "fr")).toBe("Bonjour");
+            expect(createSignal).toHaveBeenCalledTimes(1);
+        });
+
+        it("should use the missing handler instead of the current or fallback language", () => {
+            expect(translatePipe.transform("FALLBACK_ONLY", undefined, "fr")).toBe("FALLBACK_ONLY");
+
+            const handle = spyOn(
+                TestBed.inject(MissingTranslationHandler),
+                "handle",
+            ).and.returnValue("Missing translation");
+            expect(translatePipe.transform("FALLBACK_ONLY", { name: "Ada" }, "fr")).toBe(
+                "Missing translation",
+            );
+            expect(handle).toHaveBeenCalledWith({
+                key: "FALLBACK_ONLY",
+                translateService: translate,
+                interpolateParams: { name: "Ada" },
+            });
+        });
+
+        it("should update when an unloaded language is registered without fetching it", () => {
+            const load = spyOn(TestBed.inject(TranslateLoader), "getTranslation").and.callThrough();
+            spyOn(console, "warn");
+
+            expect(translatePipe.transform("TEST", undefined, "es")).toBe("TEST");
+            expect(load).not.toHaveBeenCalled();
+
+            translate.setTranslation("es", { TEST: "Hola" });
+            expect(translatePipe.transform("TEST", undefined, "es")).toBe("Hola");
+        });
     });
 
     describe("updates - sync", () => {
