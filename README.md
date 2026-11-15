@@ -33,19 +33,3 @@ When using an EOL (End Of Lifetime) version, you have a few options:
 ## Recommended tools
 
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for ngx-translate files
-
-## Agent skill
-
-The [ngx-translate skill](skills/ngx-translate/SKILL.md) provides guidance for setup, migrations,
-and translation audits. Copy the complete `skills/ngx-translate` folder into your agent's skills
-directory. The bundled checker requires Node.js 22+ and runs without installation or a build step.
-
-You can also run the checker directly from this checkout:
-
-```bash
-node skills/ngx-translate/scripts/check.mjs audit --root /path/to/app/public/i18n --source en.json --target fr.json
-```
-
-It prints a JSON report. Exit codes are `0` for no differences, `1` for reported differences, and
-`2` for invalid input or an incomplete audit. Use `--help` for listing files and comparing multiple
-languages. Run its regression tests with `node --test .github/tests/translation-*.test.mjs`.
