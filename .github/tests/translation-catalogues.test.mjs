@@ -4,10 +4,14 @@ import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from "node:fs/promis
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { auditTranslations, listTranslationFiles, readCatalogue } from "../dist/catalogues.js";
+import {
+    auditTranslations,
+    listTranslationFiles,
+    readCatalogue,
+} from "../../skills/ngx-translate/scripts/catalogues.mjs";
 
 async function fixture(t) {
-    const temporary = await mkdtemp(join(tmpdir(), "ngx-translate-mcp-"));
+    const temporary = await mkdtemp(join(tmpdir(), "ngx-translate-skill-"));
     // Canonical paths also exercise confinement on macOS, where /var is a symlink.
     const root = join(await realpath(temporary), "locales");
     await mkdir(root);

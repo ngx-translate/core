@@ -1,6 +1,5 @@
 packages:
   - .
-  - projects/mcp
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

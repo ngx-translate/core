@@ -5,8 +5,8 @@ import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_ENTRIES = 10_000;
 
-async function resolveWithinRoot(root: string, path: string): Promise<string> {
-    const isOutside = (candidate: string): boolean => {
+async function resolveWithinRoot(root, path) {
+    const isOutside = (candidate) => {
         const location = relative(root, candidate);
         return location === ".." || location.startsWith(`..${sep}`) || isAbsolute(location);
     };
@@ -20,7 +20,7 @@ async function resolveWithinRoot(root: string, path: string): Promise<string> {
     return resolved;
 }
 
-export async function listTranslationFiles(root: string, directory: string) {
+export async function listTranslationFiles(root, directory) {
     const entries = await readdir(await resolveWithinRoot(root, directory), {
         withFileTypes: true,
     });
@@ -34,7 +34,7 @@ export async function listTranslationFiles(root: string, directory: string) {
     return { files };
 }
 
-export async function readCatalogue(root: string, path: string): Promise<Map<string, unknown>> {
+export async function readCatalogue(root, path) {
     if (extname(path).toLowerCase() !== ".json") {
         throw new Error("Translation catalogues must be JSON files.");
     }
@@ -43,7 +43,7 @@ export async function readCatalogue(root: string, path: string): Promise<Map<str
         await resolveWithinRoot(root, path),
         constants.O_RDONLY | constants.O_NONBLOCK,
     );
-    let contents: string;
+    let contents;
     try {
         const info = await file.stat();
         if (!info.isFile() || info.size > MAX_FILE_BYTES) {
@@ -65,7 +65,7 @@ export async function readCatalogue(root: string, path: string): Promise<Map<str
         await file.close();
     }
 
-    let catalogue: unknown;
+    let catalogue;
     try {
         catalogue = JSON.parse(contents);
     } catch {
@@ -75,9 +75,9 @@ export async function readCatalogue(root: string, path: string): Promise<Map<str
         throw new Error(`Catalogue must contain a JSON object: ${path}`);
     }
 
-    const translations = new Map<string, unknown>();
+    const translations = new Map();
     let count = 0;
-    const visit = (value: unknown, segments: string[]): void => {
+    const visit = (value, segments) => {
         if (++count > MAX_ENTRIES || segments.length > 100) {
             throw new Error("Catalogue exceeds 10,000 entries or 100 nesting levels.");
         }
@@ -99,16 +99,16 @@ export async function readCatalogue(root: string, path: string): Promise<Map<str
     return translations;
 }
 
-function placeholders(value: string): Set<string> {
+function placeholders(value) {
     // Match TranslateDefaultParser; custom parser/compiler syntax is outside this audit.
-    return new Set(Array.from(value.matchAll(/{{\s?([^{}\s]*)\s?}}/g), (match) => match[1]!));
+    return new Set(Array.from(value.matchAll(/{{\s?([^{}\s]*)\s?}}/g), (match) => match[1]));
 }
 
-function valueType(value: unknown): string {
+function valueType(value) {
     return value === null ? "null" : Array.isArray(value) ? "array" : typeof value;
 }
 
-export async function auditTranslations(root: string, sourceFile: string, targetFiles: string[]) {
+export async function auditTranslations(root, sourceFile, targetFiles) {
     const source = await readCatalogue(root, sourceFile);
     const sourceKeys = [...source.keys()].sort();
     const results = [];
