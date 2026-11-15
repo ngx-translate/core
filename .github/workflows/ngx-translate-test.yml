@@ -32,6 +32,8 @@ jobs:
             - run: pnpm run lint
             - run: pnpm run build-all
             - run: pnpm run test-ci
+            - run: node --test .github/tests/translation-*.test.mjs
+            - run: pnpm exec prettier --check --ignore-path /dev/null skills/ngx-translate .github/tests/translation-*.test.mjs
 
     compat:
         runs-on: ubuntu-latest
