@@ -32,6 +32,9 @@ jobs:
             - run: pnpm run lint
             - run: pnpm run build-all
             - run: pnpm run test-ci
+            - run: pnpm --filter @ngx-translate/mcp run lint
+            - run: pnpm --filter @ngx-translate/mcp test
+            - run: pnpm --filter @ngx-translate/mcp exec npm pack --dry-run
 
     compat:
         runs-on: ubuntu-latest

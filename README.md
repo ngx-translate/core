@@ -33,3 +33,5 @@ When using an EOL (End Of Lifetime) version, you have a few options:
 ## Recommended tools
 
 - [BabelEdit](https://www.codeandweb.com/babeledit) — translation editor for ngx-translate files
+- [@ngx-translate/mcp](projects/mcp/README.md) — read-only MCP tools to compare JSON translation
+  catalogues for missing keys and mismatched interpolation parameters
