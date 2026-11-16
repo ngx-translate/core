@@ -49,10 +49,10 @@
         "karma-mocha-reporter": "2.2.5",
         "lint-staged": "16.4.0",
         "ng-packagr": "^22.2.5",
-        "prettier": "3.9.10",
+        "prettier": "3.10.1",
         "ts-mocks": "3.0.1",
         "typescript": "~6.0.0",
-        "typescript-eslint": "^8.72.1"
+        "typescript-eslint": "^8.72.2"
     },
     "packageManager": "pnpm@12.14.0",
     "lint-staged": {
