@@ -60,6 +60,11 @@ export interface ITranslateService {
         lang?: Language,
     ): Promise<Translation>;
     hasTranslationKey?(key: string, lang?: Language): boolean;
+    instantArray?(
+        keys: readonly string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Translation[];
 }
 
 // Optional interface members add no runtime fields or abstract obligations.
