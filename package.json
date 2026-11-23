@@ -35,8 +35,8 @@
         "@commitlint/config-conventional": "21.2.4",
         "@eslint/js": "10.0.1",
         "@types/jasmine": "6.0.0",
-        "angular-eslint": "^22.6.0",
-        "eslint": "10.14.0",
+        "angular-eslint": "^22.8.0",
+        "eslint": "10.15.0",
         "eslint-config-prettier": "10.1.8",
         "husky": "9.1.7",
         "istanbul-lib-instrument": "^6.0.3",
@@ -49,10 +49,10 @@
         "karma-mocha-reporter": "2.2.5",
         "lint-staged": "16.4.0",
         "ng-packagr": "^22.2.5",
-        "prettier": "3.9.10",
+        "prettier": "3.10.1",
         "ts-mocks": "3.0.1",
         "typescript": "~6.0.0",
-        "typescript-eslint": "^8.72.1"
+        "typescript-eslint": "^8.73.0"
     },
     "packageManager": "pnpm@12.14.0",
     "lint-staged": {
