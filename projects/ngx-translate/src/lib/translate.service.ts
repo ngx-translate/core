@@ -118,7 +118,8 @@ const makeObservable = <T>(value: T | Observable<T>): Observable<T> => {
 const RETRY_DELAY_MS = 100;
 const MAX_RETRY_DELAY_MS = 2 ** 31 - 1;
 
-interface TranslationLookupResult {
+/** A translation together with the context of the source that supplied it. */
+export interface TranslationLookupResult {
     translation: InterpolatableTranslation;
     context: InterpolationContext;
 }
@@ -795,15 +796,10 @@ export class TranslateService implements ITranslateService {
         interpolateParams?: InterpolationParameters,
         lang?: Language,
     ): StrictTranslation | Observable<StrictTranslation> {
-        let lookup: TranslationLookupResult | undefined;
-        const translation = this.getTextToInterpolate(key, lang, (result) => {
-            lookup = result;
-        });
+        const lookup = this.resolveTranslation(key, lang);
 
-        if (isDefinedAndNotNull(translation)) {
-            // An override must report context for the value it returns.
-            const context = lookup?.translation === translation ? lookup.context : { key };
-            return this.runInterpolation(translation, interpolateParams, context);
+        if (isDefinedAndNotNull(lookup?.translation)) {
+            return this.runInterpolation(lookup.translation, interpolateParams, lookup.context);
         }
 
         const handler = this.getMissingTranslationHandler();
@@ -832,19 +828,21 @@ export class TranslateService implements ITranslateService {
         return this.fallbackLangs();
     }
 
-    /** Forward onLookup when overriding this method to preserve parser language context. */
-    protected getTextToInterpolate(
-        key: string,
-        lang?: Language,
-        onLookup?: (lookup: TranslationLookupResult) => void,
-    ): InterpolatableTranslation | undefined {
+    /**
+     * Looks up a translation and the context of the language that supplied it.
+     *
+     * Searches `lang` when given; otherwise the current language followed by the
+     * fallback chain. Delegates to the parent service when nothing is found.
+     * Override this method to customize lookup; the returned context is passed to
+     * the parser and compiled translation functions.
+     */
+    protected lookupTranslation(key: string, lang?: Language): TranslationLookupResult | undefined {
         if (lang) {
             const res = this.store.getTranslationValue(lang, key);
             if (res !== undefined) {
-                onLookup?.({ translation: res, context: { key, lang } });
-                return res;
+                return { translation: res, context: { key, lang } };
             }
-            return this.parent?.getTextToInterpolate(key, lang, onLookup);
+            return this.parent?.resolveTranslation(key, lang);
         }
 
         const currentLang = this.getCurrentLang();
@@ -867,14 +865,53 @@ export class TranslateService implements ITranslateService {
         }
 
         if (res !== undefined) {
-            onLookup?.({
+            return {
                 translation: res,
                 context: resLang === undefined ? { key } : { key, lang: resLang },
-            });
-            return res;
+            };
         }
 
-        return this.parent?.getTextToInterpolate(key, lang, onLookup);
+        return this.parent?.resolveTranslation(key, lang);
+    }
+
+    /**
+     * Returns the translation for a key without its lookup context.
+     *
+     * @deprecated Override `lookupTranslation()` instead, which returns the
+     * translation and its context together. Existing overrides of this method
+     * are still honored; forward `onLookup` to preserve parser language context.
+     */
+    protected getTextToInterpolate(
+        key: string,
+        lang?: Language,
+        onLookup?: (lookup: TranslationLookupResult) => void,
+    ): InterpolatableTranslation | undefined {
+        const result = this.lookupTranslation(key, lang);
+        if (result !== undefined) {
+            onLookup?.(result);
+        }
+        return result?.translation;
+    }
+
+    /**
+     * Single entry point for lookups: uses `lookupTranslation()` unless a subclass
+     * still overrides the deprecated `getTextToInterpolate()`.
+     */
+    private resolveTranslation(key: string, lang?: Language): TranslationLookupResult | undefined {
+        if (this.getTextToInterpolate === TranslateService.prototype.getTextToInterpolate) {
+            return this.lookupTranslation(key, lang);
+        }
+
+        let lookup: TranslationLookupResult | undefined;
+        const translation = this.getTextToInterpolate(key, lang, (result) => {
+            lookup = result;
+        });
+        if (translation === undefined) {
+            return undefined;
+        }
+        // A legacy override must report context for the value it returns.
+        const context = lookup?.translation === translation ? lookup.context : { key };
+        return { translation, context };
     }
 
     protected runInterpolation(
@@ -1157,7 +1194,7 @@ export class TranslateService implements ITranslateService {
             return false;
         }
 
-        return isDefinedAndNotNull(this.getTextToInterpolate(key, lang));
+        return isDefinedAndNotNull(this.resolveTranslation(key, lang)?.translation);
     }
 
     /**
