@@ -37,3 +37,4 @@ export type { TranslationObject } from "./lib/translate.service.interface";
 export type { Translation } from "./lib/translate.service.interface";
 export type { StrictTranslation } from "./lib/translate.service.interface";
 export type { InterpolationParameters } from "./lib/translate.service.interface";
+export type { TranslatePipeParams } from "./lib/translate.service.interface";
