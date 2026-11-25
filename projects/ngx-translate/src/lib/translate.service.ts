@@ -1113,6 +1113,31 @@ export class TranslateService implements ITranslateService {
         return isObservable(result) ? this.keyToObject(key) : result;
     }
 
+    /**
+     * Like {@link instant} with an array of keys, but returns translations in
+     * the same order as `keys` (for array destructuring). {@link instant}
+     * with an array of keys still returns an object keyed by translation id.
+     */
+    public instantArray(
+        keys: readonly string[],
+        interpolateParams?: InterpolationParameters,
+        lang?: Language,
+    ): Translation[] {
+        if (!isDefinedAndNotNull(keys) || keys.length === 0) {
+            return [];
+        }
+
+        if (lang && !this.hasTranslationInChain(lang)) {
+            this.warnUnloadedInstantLang(lang);
+        }
+
+        const parsed = keys.map((k) => this.getParsedResultForKey(k, interpolateParams, lang));
+        if (parsed.some((value) => isObservable(value))) {
+            return keys.slice();
+        }
+        return parsed as Translation[];
+    }
+
     private warnedUnloadedInstantLangs = new Set<Language>();
     private warnUnloadedInstantLang(lang: Language): void {
         // Delegate to the root so the warn budget is shared across the isolated
